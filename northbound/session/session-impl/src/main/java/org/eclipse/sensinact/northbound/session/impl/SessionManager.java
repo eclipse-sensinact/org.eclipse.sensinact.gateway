@@ -72,12 +72,13 @@ public class SessionManager
 
     public @interface Config {
         int expiry() default 600;
+
         DefaultAuthPolicy auth_policy() default DefaultAuthPolicy.DENY_ALL;
     }
 
     @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
     void setAuthorization(AuthorizationEngine auth) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Setting an external Authorization Engine. Existing sessions will be invalidated");
         }
         List<SensiNactSessionImpl> toInvalidate;
@@ -88,19 +89,19 @@ public class SessionManager
             sessionsByUser.clear();
             userDefaultSessionIds.clear();
         }
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("{} sessions will be invalidated", toInvalidate.size());
         }
         toInvalidate.forEach(SensiNactSession::expire);
     }
 
     void unsetAuthorization(AuthorizationEngine auth) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Removing an external Authorization Engine. Existing sessions will be invalidated");
         }
         List<SensiNactSessionImpl> toInvalidate;
         synchronized (lock) {
-            if(authEngine == auth) {
+            if (authEngine == auth) {
                 authEngine = null;
                 toInvalidate = new ArrayList<>(sessions.values());
                 sessions.clear();
@@ -110,7 +111,7 @@ public class SessionManager
                 toInvalidate = List.of();
             }
         }
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("{} sessions will be invalidated", toInvalidate.size());
         }
         toInvalidate.forEach(SensiNactSession::expire);
@@ -118,7 +119,7 @@ public class SessionManager
 
     @Activate
     void start(Config config) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Starting the Session Manager with session lifetime {} and default authorization policy {}",
                     config.expiry(), config.auth_policy());
         }
@@ -130,7 +131,7 @@ public class SessionManager
 
     @Deactivate
     void stop() {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Shutting down the session manager");
         }
         List<SensiNactSessionImpl> toInvalidate;
@@ -155,7 +156,7 @@ public class SessionManager
      * Only call when synchronized on lock
      */
     private void doCheck() {
-        if(!active) {
+        if (!active) {
             throw new IllegalStateException("The session manager is closed");
         }
     }
@@ -167,7 +168,7 @@ public class SessionManager
         String userId = user.getUserId();
         String sessionId;
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Getting the default session for user {}", userId);
         }
 
@@ -183,7 +184,7 @@ public class SessionManager
         // Outside of lock to check/create the session
         if (session == null) {
             if (sessionId != null) {
-                if(LOG.isDebugEnabled()) {
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("No default session {} for user {}. Creating a new session", sessionId, userId);
                 }
                 removeSession(userId, sessionId);
@@ -197,8 +198,9 @@ public class SessionManager
             }
 
             if (sessionId != null) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Another default session {} was created for user {}. That session will be used instead", sessionId, userId);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Another default session {} was created for user {}. That session will be used instead",
+                            sessionId, userId);
                 }
                 // Someone beat us to the punch
                 removeSession(userId, session.getSessionId());
@@ -206,14 +208,14 @@ public class SessionManager
                 return getDefaultSession(user);
             }
         } else if (session.isExpired()) {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("The default session {} for user {} has expired. Creating a new session", sessionId, userId);
             }
             removeSession(userId, sessionId);
             session = getDefaultSession(user);
         }
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Located default session {} for user {}", sessionId, userId);
         }
         return session;
@@ -230,7 +232,8 @@ public class SessionManager
     }
 
     /**
-     * Removes and expires the session with the given ID for the given user ID
+     * Removes the session with the given ID for the given user ID. Expires it if
+     * requested.
      *
      * @param userId        User ID
      * @param sessionId     Session ID
@@ -263,7 +266,7 @@ public class SessionManager
         SensiNactSessionImpl session = null;
         String userId = user.getUserId();
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Getting session {} for user {}", sessionId, userId);
         }
 
@@ -275,14 +278,14 @@ public class SessionManager
         }
 
         if (session != null && session.isExpired()) {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Session {} for user {} has expired", sessionId, userId);
             }
             removeSession(userId, sessionId);
             session = null;
         }
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Returning session {} for user {}", session == null ? null : sessionId, userId);
         }
         return session;
@@ -293,7 +296,7 @@ public class SessionManager
         Objects.requireNonNull(user);
         String userId = user.getUserId();
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Retrieving active session ids for user {}", userId);
         }
 
@@ -317,7 +320,7 @@ public class SessionManager
             }
         }
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("User {} has sessions {}", userId, ids);
         }
 
@@ -328,7 +331,7 @@ public class SessionManager
     public SensiNactSession createNewSession(UserInfo user) {
         Objects.requireNonNull(user);
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Creating a new session for user {}", user.getUserId());
         }
 
@@ -369,9 +372,12 @@ public class SessionManager
         final SensiNactSessionImpl session = new SensiNactSessionImpl(user, preAuthorizer, authorizer, thread, expiry);
         String sessionId = session.getSessionId();
 
+        // Add an expiration listener to clean up session when explicitly expired
+        session.addExpirationListener(this::handleExplicitSessionExpiration);
+
         boolean authChanged;
         synchronized (lock) {
-            if(auth == authEngine) {
+            if (auth == authEngine) {
                 authChanged = false;
                 sessionsByUser.merge(user.getUserId(), Set.of(sessionId),
                         (a, b) -> Stream.concat(b.stream(), a.stream()).collect(toCollection(LinkedHashSet::new)));
@@ -381,22 +387,31 @@ public class SessionManager
             }
         }
 
-        if(authChanged) {
-            if(LOG.isDebugEnabled()) {
+        if (authChanged) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("The Authorization Engine changed. Recreating the new session");
             }
             return createNewSession(user);
         } else {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Created a new session {} for user {}", sessionId, user.getUserId());
             }
             return session;
         }
     }
 
+    /**
+     * Removes the session from the manager
+     *
+     * @param session Explicitly closed session
+     */
+    private void handleExplicitSessionExpiration(final SensiNactSession session) {
+        removeSession(session.getUserInfo().getUserId(), session.getSessionId(), false);
+    }
+
     @Override
     public void notify(String topic, ResourceNotification event) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Session Manager received a notification on topic {}", topic);
         }
         List<SensiNactSessionImpl> sessions;

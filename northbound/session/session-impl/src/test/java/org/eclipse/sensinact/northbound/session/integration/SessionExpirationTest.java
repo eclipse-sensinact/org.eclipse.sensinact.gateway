@@ -71,6 +71,9 @@ public class SessionExpirationTest {
         session.expire();
         expiredSession = expirationNotification.poll(500, TimeUnit.MILLISECONDS);
         assertNull(expiredSession, "Session expiration listener was notified multiple times");
+
+        // Ensure the session manager forgot about this session
+        assertNull(sessionManager.getSession(BOB, session.getSessionId()));
     }
 
     @Test
@@ -93,6 +96,12 @@ public class SessionExpirationTest {
         assertNotNull(expiredSession, "Session expiration listener was not notified");
         assertEquals(session2, expiredSession, "Notified session does not match the expired session");
 
+        // Ensure the session manager forgot about this session
+        assertNull(sessionManager.getSession(BOB, session2.getSessionId()));
+
+        // Ensure the other session is still known
+        assertEquals(session1, sessionManager.getSession(BOB, session1.getSessionId()));
+
         // Wait for expiration
         Duration toWait = Duration.between(Instant.now(), session1.getExpiry());
         assertTrue(toWait.toSeconds() < 5, "Session expiry time is too long");
@@ -105,5 +114,6 @@ public class SessionExpirationTest {
         expiredSession = expirationNotification1.poll(500, TimeUnit.MILLISECONDS);
         assertNotNull(expiredSession, "Session expiration listener was not notified");
         assertEquals(session1, expiredSession, "Notified session does not match the expired session");
+        assertNull(sessionManager.getSession(BOB, session1.getSessionId()));
     }
 }
