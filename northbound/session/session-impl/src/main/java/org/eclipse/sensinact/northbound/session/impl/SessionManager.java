@@ -220,19 +220,40 @@ public class SessionManager
     }
 
     /**
-     * @param userToken
-     * @param sessionId
+     * Removes and expires the session with the given ID for the given user ID
+     *
+     * @param userId    User ID
+     * @param sessionId Session ID
      */
     private void removeSession(String userId, String sessionId) {
-        if(LOG.isDebugEnabled()) {
+        removeSession(userId, sessionId, true);
+    }
+
+    /**
+     * Removes and expires the session with the given ID for the given user ID
+     *
+     * @param userId        User ID
+     * @param sessionId     Session ID
+     * @param expireSession Flag to expire the session upon removal
+     */
+    private void removeSession(String userId, String sessionId, boolean expireSession) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Clearing session {} for user {}", sessionId, userId);
         }
+
         synchronized (lock) {
             doCheck();
+
+            // Remove references to the session
             userDefaultSessionIds.remove(userId, sessionId);
             sessionsByUser.computeIfPresent(userId,
                     (k, v) -> v.stream().filter(s -> !s.equals(sessionId)).collect(toCollection(LinkedHashSet::new)));
-            sessions.remove(sessionId);
+            SensiNactSession session = sessions.remove(sessionId);
+
+            if (session != null && expireSession) {
+                // Expire the session
+                session.expire();
+            }
         }
     }
 

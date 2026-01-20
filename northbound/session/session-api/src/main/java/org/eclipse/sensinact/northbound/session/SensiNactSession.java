@@ -61,6 +61,20 @@ public interface SensiNactSession {
     void expire();
 
     /**
+     * Add a listener to be notified when this session expires
+     *
+     * @param listener Session expiration listener
+     */
+    void addExpirationListener(SensiNactSessionExpirationListener listener);
+
+    /**
+     * Remove a session expiration listener
+     *
+     * @param listener Session expiration listener
+     */
+    void removeExpirationListener(SensiNactSessionExpirationListener listener);
+
+    /**
      * Get the active listener registrations
      *
      * @return a Map of subscription identifier to list of listened topics
