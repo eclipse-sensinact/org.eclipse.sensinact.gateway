@@ -181,8 +181,7 @@ public class ObservationTest extends AbstractIntegrationTest {
         // then
         ServiceSnapshot service = serviceUseCase.read(session, DtoMapperSimple.extractFirstIdSegment(idObservation),
                 "datastream");
-        ExpandedObservation obs = DtoMapperSimple.getResourceField(service, "lastObservation",
-                ExpandedObservation.class);
+        ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(), service);
         assertNotNull(obs);
         assertNotNull(obs.featureOfInterest());
 

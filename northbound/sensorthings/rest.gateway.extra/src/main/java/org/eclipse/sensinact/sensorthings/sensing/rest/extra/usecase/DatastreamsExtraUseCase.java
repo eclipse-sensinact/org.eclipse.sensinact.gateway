@@ -118,12 +118,13 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
 
         if (datastream.observations() != null && datastream.observations().size() > 0) {
             listUpdates.addAll(datastream.observations().stream()
-                    .map(obs -> DtoToModelMapper.toDatastreamUpdate(datastreamId, observedArea, thingId, datastream,
-                            sensor, observedProperty, unit, obs, getCachedFeatureOfInterest(obs.featureOfInterest())))
+                    .map(obs -> DtoToModelMapper.toDatastreamUpdate(request.mapper(), datastreamId, observedArea,
+                            thingId, datastream, sensor, observedProperty, unit, obs,
+                            getCachedFeatureOfInterest(obs.featureOfInterest())))
                     .toList());
         } else {
-            listUpdates.add(DtoToModelMapper.toDatastreamUpdate(datastreamId, observedArea, thingId, datastream, sensor,
-                    observedProperty, unit, null, null));
+            listUpdates.add(DtoToModelMapper.toDatastreamUpdate(request.mapper(), datastreamId, observedArea, thingId,
+                    datastream, sensor, observedProperty, unit, null, null));
         }
         return listUpdates;
 

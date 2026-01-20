@@ -14,7 +14,11 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.ParameterizedType;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -37,6 +41,22 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
 
     public static Class<?> getUseCaseTypeParameter(Class<? extends AbstractExtraUseCase<?, ?>> c) {
         return internalGetUseCaseTypeParameter(c);
+    }
+
+    protected ExpandedObservation getExpandedObservationFromService(ExtraUseCaseRequest<?> request,
+            ServiceSnapshot serviceDatastream) {
+        String obsStr = DtoMapperSimple.getResourceField(serviceDatastream, "lastObservation", String.class);
+        return parseObservation(request, obsStr);
+    }
+
+    protected ExpandedObservation parseObservation(ExtraUseCaseRequest<?> request, String obsStr) {
+        ExpandedObservation existingObservation;
+        try {
+            existingObservation = request.mapper().readValue(obsStr, ExpandedObservation.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return existingObservation;
     }
 
     /**

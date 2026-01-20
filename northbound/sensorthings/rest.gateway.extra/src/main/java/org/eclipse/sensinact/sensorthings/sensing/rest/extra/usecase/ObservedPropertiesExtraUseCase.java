@@ -88,8 +88,8 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Obse
         checkRequireField(request);
         ObservedProperty opToUpdate = new ObservedProperty(null, sensorId, receivedOp.name(), receivedOp.description(),
                 receivedOp.definition(), receivedOp.properties(), null);
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, getObservedArea(request.session(), providerId),
-                null, null, opToUpdate, null, null, null, null));
+        return List.of(DtoToModelMapper.toDatastreamUpdate(request.mapper(), providerId,
+                getObservedArea(request.session(), providerId), null, null, null, opToUpdate, null, null, null));
 
     }
 

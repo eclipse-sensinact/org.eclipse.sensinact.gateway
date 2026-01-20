@@ -267,8 +267,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
                 String.format("Observations(%s)/FeatureOfInterest/$ref", idObservation), 204);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        ExpandedObservation obs = DtoMapperSimple.getResourceField(service, "lastObservation",
-                ExpandedObservation.class);
+        ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(), service);
         assertEquals(idFoiUpdate, obs.featureOfInterest().id());
 
     }

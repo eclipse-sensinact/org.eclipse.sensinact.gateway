@@ -19,16 +19,24 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class AbstractPathHandler {
 
     protected final ProviderSnapshot provider;
     protected final SensiNactSession session;
+    private ObjectMapper mapper;
 
     public AbstractPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
         this.provider = provider;
         this.session = session;
+        mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
     }
 
     public ProviderSnapshot getThingProviderFromDatastream(ProviderSnapshot datastremaProvider) {
@@ -44,6 +52,19 @@ public class AbstractPathHandler {
 
         return datastreamIds.stream()
                 .map(id -> session.providerSnapshot((String) id, EnumSet.noneOf(SnapshotOption.class))).toList();
+    }
+
+    protected ExpandedObservation
+
+            getObservationFromService(final ServiceSnapshot service) {
+        String obsStr = DtoMapperSimple.getResourceField(service, "lastObservation", String.class);
+        ExpandedObservation obs;
+        try {
+            obs = mapper.readValue(obsStr, ExpandedObservation.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return obs;
     }
 
     public List<ProviderSnapshot> getLocationsProviderFromThing(ProviderSnapshot thingProvider) {

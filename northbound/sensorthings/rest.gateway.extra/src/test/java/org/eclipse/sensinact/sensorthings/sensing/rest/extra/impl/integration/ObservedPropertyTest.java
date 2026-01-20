@@ -21,7 +21,6 @@ import java.util.Map;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
@@ -213,7 +212,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals(name + "2", DtoMapperSimple.getResourceField(service, "observedPropertyName", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", ExpandedObservation.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", String.class));
     }
 
     /**
@@ -277,7 +276,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals("test", DtoMapperSimple.getResourceField(service, "observedPropertyDefinition", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", ExpandedObservation.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", String.class));
 
     }
 }

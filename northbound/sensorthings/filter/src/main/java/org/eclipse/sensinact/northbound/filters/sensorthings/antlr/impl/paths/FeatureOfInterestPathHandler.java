@@ -23,9 +23,12 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class FeatureOfInterestPathHandler extends AbstractPathHandler {
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("observations", this::subObservations);
+    ObjectMapper mapper = new ObjectMapper();
 
     public FeatureOfInterestPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
         super(provider, session);
@@ -53,8 +56,8 @@ public class FeatureOfInterestPathHandler extends AbstractPathHandler {
     public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
             final String path) {
 
-        ExpandedObservation obs = DtoMapperSimple.getResourceField(service, "lastObservation",
-                ExpandedObservation.class);
+        ExpandedObservation obs = getObservationFromService(service);
+
         FeatureOfInterest foi = obs.featureOfInterest();
         if (foi == null) {
             return null;

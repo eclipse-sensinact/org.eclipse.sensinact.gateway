@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
@@ -83,8 +84,11 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         FeatureOfInterest foiToUpdate = new FeatureOfInterest(null, foiId, receiveFoi.name(), receiveFoi.description(),
                 receiveFoi.encodingType(), receiveFoi.feature(), null);
         GeoJsonObject observedArea = getObservedArea(request.session(), providerId);
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, observedArea, (String) null, null, null, null,
-                null, null, foiToUpdate));
+
+        ExpandedObservation lastObservation = getExpandedObservationFromService(request,
+                serviceUseCase.read(request.session(), providerId, DtoMapperSimple.SERVICE_DATASTREAM));
+        return List.of(DtoToModelMapper.toDatastreamUpdate(request.mapper(), providerId, observedArea, null, null, null,
+                null, null, lastObservation, foiToUpdate));
 
     }
 

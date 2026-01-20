@@ -44,6 +44,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 public class OGCParserTest {
 
     private void assertQuery(final boolean expected, final String query,
@@ -84,6 +88,13 @@ public class OGCParserTest {
     private ResourceSnapshot makeLocatedResource(double[] lonlat, ProviderSnapshot provider) {
         Point location = new Point(new Coordinates(lonlat[0], lonlat[1]), null, null);
         return makeLocatedResource(location, provider);
+    }
+
+    private ObjectMapper getMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        return mapper;
     }
 
     @Test
@@ -320,11 +331,16 @@ public class OGCParserTest {
         assertQueries(expectations, holder);
     }
 
-    public ExpandedObservation getExpandedObservation(Instant resultTime, Object value) {
-        FeatureOfInterest foi = new FeatureOfInterest(null, "test", "test", null, null, null, null);
-        return new ExpandedObservation("test", "test", resultTime, resultTime, value, "test", null, null, null, null,
-                null, null, foi);
+    public String getExpandedObservation(Instant resultTime, Object value) {
 
+        FeatureOfInterest foi = new FeatureOfInterest(null, "test", "test", null, null, null, null);
+        ExpandedObservation obs = new ExpandedObservation("test", "test", resultTime, resultTime, value, "test", null,
+                null, null, null, null, null, foi);
+        try {
+            return getMapper().writeValueAsString(obs);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
