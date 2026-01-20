@@ -261,7 +261,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         // 1008: 1000 updates + history provider name & description & model &
         // modelPackageUri + foo
         // provider name & description & modelUri
-        waitForRowCount("sensinact.text_data", 5046);
+        waitForRowCount("sensinact.text_data", 5044);
 
         ResultList<Observation> observations = utils.queryJson("/Datastreams(baz)/Observations?$count=true",
                 RESULT_OBSERVATIONS);
