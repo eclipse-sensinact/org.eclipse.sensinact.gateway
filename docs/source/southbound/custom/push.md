@@ -8,7 +8,7 @@ The `DataUpdate` service is obtained from the OSGi service registry.
 
 ```java
 @Component
-MyConnector {
+class MyConnector {
     @Reference
     DataUpdate dataUpdate;
     ...
