@@ -82,6 +82,7 @@ import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionExpirationListener;
 import org.eclipse.sensinact.northbound.session.ServiceDescription;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableLinkedProviderSnapshot;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableProviderSnapshot;
@@ -107,6 +108,11 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private boolean expired;
 
+    /**
+     * Session expiration listeners
+     */
+    private final List<SensiNactSessionExpirationListener> expirationListeners = new ArrayList<>();
+
     private final GatewayThread thread;
 
     private final UserInfo user;
@@ -115,12 +121,20 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private final PreAuthorizer preAuthorizer;
 
-    public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer preAuthorizer, final Authorizer authorizer, final GatewayThread thread) {
+    public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer preAuthorizer, final Authorizer authorizer,
+            final GatewayThread thread, final Duration expiry) {
         this.user = user;
         this.preAuthorizer = Objects.requireNonNull(preAuthorizer, "No PreAuthorizer given");
         this.authorizer = Objects.requireNonNull(authorizer, "No Authorizer given");
         this.thread = thread;
-        expiry = Instant.now().plusSeconds(600);
+
+        Objects.requireNonNull(expiry, "No session duration given");
+        if(expiry.isZero() || expiry.isNegative()) {
+            // Infinite session
+            this.expiry = Instant.MAX;
+        } else {
+            this.expiry = Instant.now().plus(expiry);
+        }
     }
 
     @Override
@@ -246,6 +260,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     private <T> T safeExecute(AbstractTwinCommand<T> command) {
+
+        // Check session validity before calling the gateway thread
+        checkWithException();
+
         return safeGetValue(thread.execute(command));
     }
 
@@ -796,7 +814,8 @@ public class SensiNactSessionImpl implements SensiNactSession {
     public boolean isExpired() {
         synchronized (lock) {
             if (!expired && !expiry.isAfter(Instant.now())) {
-                expired = true;
+                LOG.debug("Detected session {} of user {} expiration.", sessionId, user.getUserId());
+                expire();
             }
             return expired;
         }
@@ -822,12 +841,61 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public void expire() {
+        final List<SensiNactSessionExpirationListener> listenersToNotify;
         synchronized (lock) {
+            if (expired) {
+                // Nothing to do
+                return;
+            }
+
+            listenersToNotify = new ArrayList<>(expirationListeners);
             expired = true;
+            LOG.debug("Session {} of user {} expires. {} expiration listeners to notify", sessionId, user.getUserId(),
+                    listenersToNotify.size());
+        }
+
+        // Notify listeners outside of the synchronized block
+        for (SensiNactSessionExpirationListener listener : listenersToNotify) {
+            try {
+                listener.sessionExpired(this);
+            } catch (Exception e) {
+                LOG.error("Exception while notifying session expiration listener", e);
+            }
         }
     }
 
-    private void checkWithException() {
+    @Override
+    public void addExpirationListener(SensiNactSessionExpirationListener listener) {
+        Objects.requireNonNull(listener, "Null listener provided");
+
+        synchronized (lock) {
+            if (!isExpired()) {
+                expirationListeners.add(listener);
+                return;
+            }
+        }
+
+        try {
+            // If we're already expired, notify the listener immediately
+            listener.sessionExpired(this);
+        } catch (Exception e) {
+            LOG.error("Exception while notifying session expiration listener", e);
+        }
+    }
+
+    @Override
+    public void removeExpirationListener(SensiNactSessionExpirationListener listener) {
+        synchronized (lock) {
+            expirationListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Checks whether the session is expired and throws an IllegalStateException if so
+     *
+     * @throws IllegalStateException if the session is expired
+     */
+    private void checkWithException() throws IllegalStateException {
         if (isExpired()) {
             throw new IllegalStateException("Session is expired");
         }

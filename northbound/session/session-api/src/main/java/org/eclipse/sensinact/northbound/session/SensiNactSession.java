@@ -34,28 +34,24 @@ import org.eclipse.sensinact.northbound.security.api.UserInfo;
 public interface SensiNactSession {
 
     /**
-     * The id of this session
-     *
-     * @return
+     * {@return The id of this session}
      */
     String getSessionId();
 
     /**
-     * Get the time at which this session will expire
-     *
-     * @return
+     * {@return the time at which this session will expire}
      */
     Instant getExpiry();
 
     /**
      * Extend this session to expire after the given time period
+     *
+     * @param duration the duration to add to the session expiration time
      */
     void extend(Duration duration);
 
     /**
-     * true if this session is expired
-     *
-     * @return
+     * {@return true if this session is expired}
      */
     boolean isExpired();
 
@@ -63,6 +59,20 @@ public interface SensiNactSession {
      * Expire this session immediately
      */
     void expire();
+
+    /**
+     * Add a listener to be notified when this session expires
+     *
+     * @param listener Session expiration listener
+     */
+    void addExpirationListener(SensiNactSessionExpirationListener listener);
+
+    /**
+     * Remove a session expiration listener
+     *
+     * @param listener Session expiration listener
+     */
+    void removeExpirationListener(SensiNactSessionExpirationListener listener);
 
     /**
      * Get the active listener registrations
@@ -73,7 +83,7 @@ public interface SensiNactSession {
 
     /**
      *
-     * @param topics - topic strings, omitting the initial segment (e.g. LIFECYCLE)
+     * @param topics topic strings, omitting the initial segment (e.g. LIFECYCLE)
      * @param cdl    a listener, or null if data events are ignored
      * @param cml    a listener, or null if metadata events are ignored
      * @param cll    a listener, or null if lifecycle events are ignored
@@ -116,14 +126,16 @@ public interface SensiNactSession {
      * @param service  Service name
      * @param resource Resource name
      * @param clazz    Resource value type class
-     * @param getLevel The level of get operation. Only concerns resources with an external getter.
+     * @param getLevel The level of get operation. Only concerns resources with an
+     *                 external getter.
      * @return The resource value, can be null
      * @throws ClassCastException       if the value cannot be cast to the relevant
      *                                  type
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
-    default <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz, GetLevel getLevel) {
+    default <T> T getResourceValue(String provider, String service, String resource, Class<T> clazz,
+            GetLevel getLevel) {
         final TimedValue<T> tv = getResourceTimedValue(provider, service, resource, clazz, getLevel);
         if (tv != null) {
             return tv.getValue();
@@ -168,6 +180,7 @@ public interface SensiNactSession {
      */
     <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz,
             GetLevel getLevel);
+
     /**
      * Get the value of a resource with with a {@link GetLevel#NORMAL} operation.
      *
@@ -194,14 +207,16 @@ public interface SensiNactSession {
      * @param service  Service name
      * @param resource Resource name
      * @param clazz    Resource value type class
-     * @param getLevel The level of get operation. Only concerns resources with an external getter.
+     * @param getLevel The level of get operation. Only concerns resources with an
+     *                 external getter.
      * @return The resource value, can be null
      * @throws ClassCastException       if the value cannot be cast to the relevant
      *                                  type
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
-    default <T> List<T> getResourceMultiValue(String provider, String service, String resource, Class<T> clazz, GetLevel getLevel) {
+    default <T> List<T> getResourceMultiValue(String provider, String service, String resource, Class<T> clazz,
+            GetLevel getLevel) {
         final TimedValue<List<T>> tv = getResourceTimedMultiValue(provider, service, resource, clazz, getLevel);
         if (tv != null) {
             return tv.getValue();
@@ -224,7 +239,8 @@ public interface SensiNactSession {
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
-    default <T> TimedValue<List<T>> getResourceTimedMultiValue(String provider, String service, String resource, Class<T> clazz) {
+    default <T> TimedValue<List<T>> getResourceTimedMultiValue(String provider, String service, String resource,
+            Class<T> clazz) {
         return getResourceTimedMultiValue(provider, service, resource, clazz, GetLevel.NORMAL);
     }
 
@@ -250,11 +266,10 @@ public interface SensiNactSession {
     /**
      * Set the value of a resource with the current time
      *
-     * @param provider
-     * @param service
-     * @param resource
-     * @param o
-     * @return
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param o        New resource value
      * @throws ClassCastException       if the value cannot be cast to the relevant
      *                                  type for the resource
      * @throws IllegalArgumentException if there is no resource at the given
@@ -265,11 +280,10 @@ public interface SensiNactSession {
     /**
      * Set the value of a resource with the supplied time
      *
-     * @param provider
-     * @param service
-     * @param resource
-     * @param o
-     * @return
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param o        New resource value
      * @throws ClassCastException       if the value cannot be cast to the relevant
      *                                  type for the resource
      * @throws IllegalArgumentException if there is no resource at the given
@@ -282,10 +296,10 @@ public interface SensiNactSession {
     /**
      * Get the metadata for a resource
      *
-     * @param provider
-     * @param service
-     * @param resource
-     * @return
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @return Resource metadata
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
@@ -294,11 +308,10 @@ public interface SensiNactSession {
     /**
      * Set the metadata for a resource
      *
-     * @param provider
-     * @param service
-     * @param resource
-     * @param metadata
-     * @return
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param metadata Resource metadata
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
@@ -307,12 +320,11 @@ public interface SensiNactSession {
     /**
      * Get a metadata value for a resource
      *
-     * @param <T>
-     * @param provider
-     * @param service
-     * @param resource
-     * @param metadata
-     * @return
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param metadata Resource metadata key
+     * @return Metadata value
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
@@ -321,13 +333,11 @@ public interface SensiNactSession {
     /**
      * Set a metadata value for a resource
      *
-     * @param <T>
-     * @param provider
-     * @param service
-     * @param resource
-     * @param metadata
-     * @param value
-     * @return
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @param metadata Resource metadata key
+     * @param value    Resource metadata value
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
@@ -336,11 +346,11 @@ public interface SensiNactSession {
     /**
      * Perform an action on a resource
      *
-     * @param provider
-     * @param service
-     * @param resource
-     * @param parameters
-     * @return
+     * @param provider   Provider name
+     * @param service    Service name
+     * @param resource   Action resource name
+     * @param parameters Action parameters
+     * @return Action result
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
@@ -349,34 +359,44 @@ public interface SensiNactSession {
     /**
      * Get the description of a resource
      *
-     * @param provider
-     * @param service
-     * @param resource
-     * @return
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @return A description of the resource
      * @throws IllegalArgumentException if there is no resource at the given
      *                                  location
      */
     // FIXME: should be renamed getResource
     ResourceDescription describeResource(String provider, String service, String resource);
 
+    /**
+     * Get the short description of a resource
+     *
+     * @param provider Provider name
+     * @param service  Service name
+     * @param resource Resource name
+     * @return A short description of the resource
+     * @throws IllegalArgumentException if there is no resource at the given
+     *                                  location
+     */
     // FIXME: should replace describeResource
     ResourceShortDescription describeResourceShort(String provider, String service, String resource);
 
     /**
-     * Get the description of a resource
+     * Get the description of a service
      *
-     * @param provider
-     * @param service
-     * @return
+     * @param provider Provider name
+     * @param service  Service name
+     * @return The description of the service
      * @throws IllegalArgumentException if there is no service at the given location
      */
     ServiceDescription describeService(String provider, String service);
 
     /**
-     * Get the description of a resource
+     * Get the description of a provider
      *
-     * @param provider
-     * @return
+     * @param provider Provider name
+     * @return The description of the provider
      * @throws IllegalArgumentException if there is no provider at the given
      *                                  location
      */
@@ -385,9 +405,9 @@ public interface SensiNactSession {
     /**
      * Create a Provider Link
      *
-     * @param parent
-     * @param child
-     * @return
+     * @param parent Link source provider
+     * @param child  Link target provider
+     * @return The updated description of the parent provider
      * @throws IllegalArgumentException if there is no provider at the given
      *                                  location
      */
@@ -396,18 +416,16 @@ public interface SensiNactSession {
     /**
      * Remove a Provider Link
      *
-     * @param parent
-     * @param child
-     * @return
+     * @param parent Link source provider
+     * @param child  Link target provider
+     * @return The updated description of the parent provider
      * @throws IllegalArgumentException if there is no provider at the given
      *                                  location
      */
     ProviderDescription unlinkProviders(String parent, String child);
 
     /**
-     * Get the list of providers
-     *
-     * @return
+     * {@return the list of providers}
      */
     List<ProviderDescription> listProviders();
 
@@ -439,7 +457,7 @@ public interface SensiNactSession {
      * Returns a snapshot of a service
      *
      * @param provider the provider name
-     * @param service the service name
+     * @param service  the service name
      * @return A snapshot of a service
      */
     ServiceSnapshot serviceSnapshot(String provider, String service);
@@ -448,16 +466,14 @@ public interface SensiNactSession {
      * Returns a snapshot of a resource
      *
      * @param provider the provider name
-     * @param service the service name
+     * @param service  the service name
      * @param resource the resource name
-     * @return A snapshot of the model
+     * @return A snapshot of the resource
      */
     ResourceSnapshot resourceSnapshot(String provider, String service, String resource);
 
     /**
-     * Return the user that owns this session
-     *
-     * @return
+     * {@return the user that owns this session}
      */
     UserInfo getUserInfo();
 }
