@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
+
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
@@ -56,7 +57,10 @@ import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.core.Application;
 
@@ -169,6 +173,13 @@ public class AbstractIntegrationTest {
         createDatastream(provider, thingId, value, null);
     }
 
+    protected void createObservation(String provider, String thingId, Object value, Instant valueInstant) {
+
+        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation",
+                getObservation("test", value, getFeatureOfInterest("test"), valueInstant), valueInstant);
+
+    }
+
     protected void createDatastream(String provider, String thingId, Object value, Instant valueInstant) {
         createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "thingId", thingId, valueInstant);
         createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "id", provider, valueInstant);
@@ -185,29 +196,41 @@ public class AbstractIntegrationTest {
         createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "unitSymbol", "test", valueInstant);
         createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "unitDefinition", "test", valueInstant);
 
-        createResource(provider, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation",
-                getObservation("test", value, getFeatureOfInterest("test"), valueInstant), valueInstant);
-
+        createObservation(provider, thingId, value, valueInstant);
     }
 
-    public static ExpandedObservation getObservation(String name, Object result, FeatureOfInterest foi) {
+    public static String getObservation(String name, Object result, FeatureOfInterest foi) {
         return getObservation(name, result, foi, null);
     }
 
-    public static ExpandedObservation getObservation(String name, Object result, FeatureOfInterest foi,
-            Instant instant) {
+    public static String toString(ExpandedObservation obs) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
 
-        return new ExpandedObservation(name, name,
-                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
-                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
-                null, null, null, null, foi);
+        try {
+            return mapper.writeValueAsString(obs);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
+    public static String getObservation(String name, Object result, FeatureOfInterest foi, Instant instant) {
+
+        ExpandedObservation obs = new ExpandedObservation(name, name,
+                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
+                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
+                null, null, null, null, foi);
+        return toString(obs);
+    }
+
     protected void createLocation(String provider) {
-        createResource(provider, DtoMapperSimple.SERVICE_LOCATON, "id", provider, null);
-        createResource(provider, DtoMapperSimple.SERVICE_LOCATON, "location", new Point(Coordinates.EMPTY, null, null),
-                null);
+        createLocation(provider, new Point(Coordinates.EMPTY, null, null), Instant.now());
+    }
+
+    protected void createLocation(String provider, GeoJsonObject location, Instant instant) {
+        createResource(provider, DtoMapperSimple.SERVICE_LOCATON, "id", provider, instant);
+        createResource(provider, DtoMapperSimple.SERVICE_LOCATON, "location", location, instant);
 
     }
 

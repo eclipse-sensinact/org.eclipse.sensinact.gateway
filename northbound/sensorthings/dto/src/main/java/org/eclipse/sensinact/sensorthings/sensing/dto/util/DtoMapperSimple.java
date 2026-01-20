@@ -487,8 +487,8 @@ public class DtoMapperSimple {
         return thing;
     }
 
-    public static Observation toObservation(ResourceSnapshot resource, UriInfo uriInfo) {
-        return toObservation(resource.getService().getProvider().getName(), null, uriInfo);
+    public static Observation toObservation(ObjectMapper mapper, ResourceSnapshot resource, UriInfo uriInfo) {
+        return toObservation(mapper, resource.getService().getProvider().getName(), null, uriInfo);
     }
 
     public static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
@@ -570,16 +570,16 @@ public class DtoMapperSimple {
         return location;
     }
 
-    public static Observation toObservation(String providerId, TimedValue<?> timeValue, UriInfo uriInfo) {
+    public static Observation toObservation(ObjectMapper mapper, String providerId, TimedValue<?> timeValue,
+            UriInfo uriInfo) {
 
         TimedValue<?> t = timeValue;
 
         final Instant timestamp = t.getTimestamp();
-        Object obs = t.getValue();
-        if (obs != null && obs instanceof ExpandedObservation) {
-            ExpandedObservation readObs = (ExpandedObservation) obs;
-            String id = String.format("%s~%s~%s", providerId, readObs.id(),
-                    Long.toString(timestamp.toEpochMilli(), 16));
+        Object val = t.getValue();
+        if (val != null && val instanceof String) {
+            ExpandedObservation obs = parseExpandObservation(mapper, val);
+            String id = String.format("%s~%s~%s", providerId, obs.id(), Long.toString(timestamp.toEpochMilli(), 16));
             String selfLink = null;
             String datastreamLink = null;
             String featureOfInterestLink = null;
@@ -592,17 +592,32 @@ public class DtoMapperSimple {
                         .toString();
             }
 
-            Observation observation = new Observation(selfLink, id, readObs.phenomenonTime(), readObs.resultTime(),
-                    readObs.result(), readObs.resultQuality(), readObs.validTime(), readObs.parameters(),
-                    datastreamLink, featureOfInterestLink);
+            Observation observation = new Observation(selfLink, id, obs.phenomenonTime(), obs.resultTime(),
+                    obs.result(), obs.resultQuality(), obs.validTime(), obs.parameters(), datastreamLink,
+                    featureOfInterestLink);
             if (uriInfo != null) {
                 DtoMapperSimple.checkRequireField(observation);
-                DtoMapperSimple.checkRequireLink(readObs.featureOfInterest());
+                DtoMapperSimple.checkRequireLink(obs.featureOfInterest());
             }
             return observation;
 
         }
         return null;
+    }
+
+    public static ExpandedObservation getObservationFromService(ObjectMapper mapper, ServiceSnapshot service) {
+        String obsStr = getResourceField(service, "lastObservation", String.class);
+        return parseExpandObservation(mapper, obsStr);
+    }
+
+    private static ExpandedObservation parseExpandObservation(ObjectMapper mapper, Object val) {
+        ExpandedObservation obs;
+        try {
+            obs = mapper.readValue((String) val, ExpandedObservation.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return obs;
     }
 
     private static Polygon getObservedArea(GeoJsonObject object) {
