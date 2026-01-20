@@ -29,6 +29,7 @@ import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
@@ -218,7 +219,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
                 }
             } else {
                 sensor = datastream.sensor();
-                DtoMapperSimple.checkRequireField(sensor);
+                checkRequireField(sensor);
+
             }
         }
         return sensor;
@@ -287,10 +289,18 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
                 }
             } else {
                 observedProperty = datastream.observedProperty();
-                DtoMapperSimple.checkRequireField(observedProperty);
+                checkRequireField(observedProperty);
             }
         }
         return observedProperty;
+    }
+
+    private void checkRequireField(Id observedProperty) {
+        try {
+            DtoMapperSimple.checkRequireField(observedProperty);
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 
     /**
