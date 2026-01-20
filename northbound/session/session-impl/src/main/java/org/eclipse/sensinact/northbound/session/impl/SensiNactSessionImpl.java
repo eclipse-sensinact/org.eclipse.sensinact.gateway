@@ -254,6 +254,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     private <T> T safeExecute(AbstractTwinCommand<T> command) {
+
+        // Check session validity before calling the gateway thread
+        checkWithException();
+
         return safeGetValue(thread.execute(command));
     }
 
