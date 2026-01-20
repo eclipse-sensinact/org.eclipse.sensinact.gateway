@@ -384,7 +384,7 @@ public class SessionManager
                 try {
                     session.notify(topic, event);
                 } catch (Exception e) {
-                    LOG.error("Error notifiying session {} on topic {}", session.getSessionId(), topic);
+                    LOG.error("Error notifying session {} on topic {}", session.getSessionId(), topic);
                 }
             } else {
                 removeSession(session.getUserInfo().getUserId(), session.getSessionId());
