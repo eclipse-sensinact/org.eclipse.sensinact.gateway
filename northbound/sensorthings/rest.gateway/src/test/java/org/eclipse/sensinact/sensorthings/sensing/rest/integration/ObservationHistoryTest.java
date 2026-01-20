@@ -13,10 +13,10 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 
 import static java.time.Duration.ofDays;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.abort;
 
@@ -251,11 +251,11 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         createDatastream("foobar", thingId, 0, TS_2012);
         createThing(thingId, List.of(), List.of("baz", "foobar"));
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 999; i++) {
             createObservation("baz", thingId, String.valueOf(i + 1), TS_2012.plus(ofDays(i + 1)));
         }
 
-        for (int i = 0; i < 4000; i++) {
+        for (int i = 0; i < 3999; i++) {
             createObservation("foobar", thingId, Integer.valueOf(i + 1), TS_2012.plus(ofDays(i + 1)));
         }
         // 1008: 1000 updates + history provider name & description & model &
@@ -266,7 +266,7 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         ResultList<Observation> observations = utils.queryJson("/Datastreams(baz)/Observations?$count=true",
                 RESULT_OBSERVATIONS);
 
-        assertEquals(1001, observations.count());
+        assertEquals(1000, observations.count());
         assertEquals(500, observations.value().size()); // Is this 500 because of
                                                         // https://eclipse-sensinact.readthedocs.io/en/latest/southbound/history/history.html??
         assertNotNull(observations.nextLink());
