@@ -53,9 +53,7 @@ public class ObservationPathHandler extends AbstractPathHandler {
     public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
             final String path) {
 
-        ExpandedObservation obs = DtoMapperSimple.getResourceField(service, "lastObservation",
-                ExpandedObservation.class);
-
+        ExpandedObservation obs = getObservationFromService(service);
         if (obs == null) {
             return null;
         }

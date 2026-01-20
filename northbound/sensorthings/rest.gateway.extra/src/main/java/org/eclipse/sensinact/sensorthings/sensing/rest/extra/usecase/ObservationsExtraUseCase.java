@@ -94,11 +94,10 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         String serviceId = "datastream";
         ServiceSnapshot serviceDatastream = serviceUseCase.read(request.session(), providerId, serviceId);
         checkRequireLink(serviceDatastream);
-        ExpandedObservation existingObservation = DtoMapperSimple.getResourceField(serviceDatastream, "lastObservation",
-                ExpandedObservation.class);
-
-        return List.of(DtoToModelMapper.toDatastreamUpdate(providerId, getObservedArea(request.session(), providerId),
-                null, null, null, null, existingObservation, observation, foi));
+        ExpandedObservation existingObservation = getExpandedObservationFromService(request, serviceDatastream);
+        return List.of(DtoToModelMapper.toDatastreamUpdate(request.mapper(), providerId,
+                getObservedArea(request.session(), providerId), null, null, null, null, null, existingObservation,
+                observation, foi));
     }
 
     private FeatureOfInterest getFeatureOfInterest(ExpandedObservation observation) {
@@ -152,21 +151,23 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedObservation> request) {
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(request.id());
         // get resource observation
-        ResourceCommand<TimedValue<ExpandedObservation>> parentCommand = new ResourceCommand<TimedValue<ExpandedObservation>>(
-                datastreamId, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation") {
+        ResourceCommand<TimedValue<String>> parentCommand = new ResourceCommand<TimedValue<String>>(datastreamId,
+                DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation") {
             @Override
-            protected Promise<TimedValue<ExpandedObservation>> call(SensinactResource resource, PromiseFactory pf) {
-                return resource.getValue(ExpandedObservation.class);
+            protected Promise<TimedValue<String>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getValue(String.class);
+
             }
         };
-        return new DependentCommand<TimedValue<ExpandedObservation>, Void>(parentCommand) {
+        return new DependentCommand<TimedValue<String>, Void>(parentCommand) {
 
             @Override
-            protected Promise<Void> call(Promise<TimedValue<ExpandedObservation>> parentResult,
-                    SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
+            protected Promise<Void> call(Promise<TimedValue<String>> parentResult, SensinactDigitalTwin twin,
+                    SensinactModelManager modelMgr, PromiseFactory pf) {
                 try {
                     if (parentResult.getFailure() == null) {
-                        ExpandedObservation obs = parentResult.getValue().getValue();
+                        String obsStr = parentResult.getValue().getValue();
+                        ExpandedObservation obs = parseObservation(request, obsStr);
                         String observationId = DtoMapperSimple.extractSecondIdSegment(request.id());
 
                         if (observationId == null || !observationId.equals(obs.id())) {

@@ -223,11 +223,8 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         String idDatastream = DtoMapperSimple.extractFirstIdSegment(request.parentId());
         ServiceSnapshot service = serviceUseCase.read(request.session(), idDatastream,
                 DtoMapperSimple.SERVICE_DATASTREAM);
-        ExpandedObservation obs = DtoMapperSimple.getResourceField(service, "lastObservation",
-                ExpandedObservation.class);
-        if (obs == null) {
-            throw new NotFoundException();
-        }
+        ExpandedObservation obs = getExpandedObservationFromService(request, service);
+
         FeatureOfInterest foi = obs.featureOfInterest();
         if (foi == null) {
             throw new NotFoundException();

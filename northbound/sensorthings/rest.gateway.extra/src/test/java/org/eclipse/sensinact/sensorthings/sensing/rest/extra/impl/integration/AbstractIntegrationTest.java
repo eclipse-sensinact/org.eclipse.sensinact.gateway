@@ -79,7 +79,16 @@ import jakarta.ws.rs.ext.Providers;
 public class AbstractIntegrationTest {
 
     static final HttpClient client = HttpClient.newHttpClient();
-    protected static final ObjectMapper mapper = new ObjectMapper();
+    protected static ObjectMapper mapper = null;
+
+    public static ObjectMapper getMapper() {
+        if (mapper == null) {
+            mapper = new ObjectMapper();
+            getMapper().registerModule(new JavaTimeModule());
+        }
+        return mapper;
+
+    }
 
     @Path("test")
     public static class TestTypeExfiltrator {
@@ -145,7 +154,7 @@ public class AbstractIntegrationTest {
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
-            return mapper.readTree(response.body());
+            return getMapper().readTree(response.body());
 
         }
         return null;
@@ -157,7 +166,7 @@ public class AbstractIntegrationTest {
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
-            return mapper.readTree(response.body());
+            return getMapper().readTree(response.body());
 
         }
         return null;
@@ -169,7 +178,7 @@ public class AbstractIntegrationTest {
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
-            return mapper.readTree(response.body());
+            return getMapper().readTree(response.body());
 
         }
         return null;
@@ -181,7 +190,7 @@ public class AbstractIntegrationTest {
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
-            return mapper.readTree(response.body());
+            return getMapper().readTree(response.body());
 
         }
         return null;
@@ -193,7 +202,7 @@ public class AbstractIntegrationTest {
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
         if (response.statusCode() < 400) {
-            return mapper.readTree(response.body());
+            return getMapper().readTree(response.body());
 
         }
         return null;
@@ -250,10 +259,8 @@ public class AbstractIntegrationTest {
     }
 
     private String getRequestBody(Object dto) throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
 
-        String body = mapper.writeValueAsString(dto);
+        String body = getMapper().writeValueAsString(dto);
         return body;
     }
 

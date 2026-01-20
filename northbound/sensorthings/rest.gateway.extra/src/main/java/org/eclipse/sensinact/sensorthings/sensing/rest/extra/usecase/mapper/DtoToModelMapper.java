@@ -54,7 +54,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCa
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.ws.rs.BadRequestException;
 
 /**
@@ -211,28 +210,6 @@ public class DtoToModelMapper {
     }
 
     /**
-     * get datastream update instance for dataUpdater
-     *
-     * @param providerId
-     * @param observedArea
-     * @param ds
-     * @param sensor
-     * @param observedProperty
-     * @param unit
-     * @param lastObservation
-     * @param lastObservationReceived
-     * @param featureOfInterest
-     * @return
-     */
-    public static SensorThingsUpdate toDatastreamUpdate(String providerId, GeoJsonObject observedArea,
-            ExpandedDataStream ds, Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
-            ExpandedObservation lastObservation, ExpandedObservation lastObservationReceived,
-            FeatureOfInterest featureOfInterest) {
-        return toDatastreamUpdate(providerId, null, observedArea, ds, sensor, observedProperty, unit, lastObservation,
-                lastObservationReceived, featureOfInterest);
-    }
-
-    /**
      * get the datastream update instance for dataUpdater
      *
      * @param providerId
@@ -245,11 +222,13 @@ public class DtoToModelMapper {
      * @param lastObservation
      * @param featureOfInterest
      * @return
+     * @throws JsonProcessingException
      */
-    public static SensorThingsUpdate toDatastreamUpdate(String providerId, GeoJsonObject observedArea, String thingId,
-            ExpandedDataStream ds, Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
-            ExpandedObservation lastObservation, FeatureOfInterest featureOfInterest) {
-        return toDatastreamUpdate(providerId, thingId, observedArea, ds, sensor, observedProperty, unit,
+    public static SensorThingsUpdate toDatastreamUpdate(ObjectMapper mapper, String providerId,
+            GeoJsonObject observedArea, String thingId, ExpandedDataStream ds, Sensor sensor,
+            ObservedProperty observedProperty, UnitOfMeasurement unit, ExpandedObservation lastObservation,
+            FeatureOfInterest featureOfInterest) {
+        return toDatastreamUpdate(mapper, providerId, observedArea, thingId, ds, sensor, observedProperty, unit,
                 lastObservation, lastObservation, featureOfInterest);
     }
 
@@ -311,11 +290,12 @@ public class DtoToModelMapper {
      * @param lastObservationReceived
      * @param featureOfInterest
      * @return
+     * @throws JsonProcessingException
      */
-    public static SensorThingsUpdate toDatastreamUpdate(String providerId, String thingId, GeoJsonObject observedArea,
-            ExpandedDataStream ds, Sensor sensor, ObservedProperty observedProperty, UnitOfMeasurement unit,
-            ExpandedObservation lastObservation, ExpandedObservation lastObservationReceived,
-            FeatureOfInterest featureOfInterest) {
+    public static SensorThingsUpdate toDatastreamUpdate(ObjectMapper mapper, String providerId,
+            GeoJsonObject observedArea, String thingId, ExpandedDataStream ds, Sensor sensor,
+            ObservedProperty observedProperty, UnitOfMeasurement unit, ExpandedObservation lastObservation,
+            ExpandedObservation lastObservationReceived, FeatureOfInterest featureOfInterest) {
 
         Instant timestamp = lastObservationReceived != null && lastObservationReceived.phenomenonTime() != null
                 ? lastObservationReceived.phenomenonTime()
@@ -383,14 +363,24 @@ public class DtoToModelMapper {
             }
 
         }
-
+        String obsStr = serializeObservation(mapper, obs);
         // --- Build DatastreamUpdate ---
         DatastreamUpdate datastreamUpdate = new DatastreamUpdate(providerId, providerId, name, description, timestamp,
                 observedAreaToUpdate, thingId, sensorId, sensorName, sensorDescription, sensorEncodingType,
                 sensorMetadata, sensorProperties, observedPropertyId, observedPropertyName, observedPropertyDescription,
-                observedPropertyDefinition, observedPropertyProperties, unitName, unitSymbol, unitDefinition, obs);
+                observedPropertyDefinition, observedPropertyProperties, unitName, unitSymbol, unitDefinition, obsStr);
 
         return datastreamUpdate;
+    }
+
+    private static String serializeObservation(ObjectMapper mapper, ExpandedObservation obs) {
+        String obsStr;
+        try {
+            obsStr = mapper.writeValueAsString(obs);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return obsStr;
     }
 
     public static String toString(Object o) {
@@ -542,12 +532,13 @@ public class DtoToModelMapper {
                 existingDatastreamIds.add(idDatastream);
                 if (ds.observations() != null && ds.observations().size() > 0) {
                     listUpdate.addAll(ds.observations().stream().map(obs -> {
-                        return toDatastreamUpdate(idDatastream, null, providerIdThing, ds, ds.sensor(),
-                                ds.observedProperty(), ds.unitOfMeasurement(), obs, obs.featureOfInterest());
+                        return toDatastreamUpdate(request.mapper(), idDatastream, null, providerIdThing, ds,
+                                ds.sensor(), ds.observedProperty(), ds.unitOfMeasurement(), obs,
+                                obs.featureOfInterest());
                     }).toList());
                 } else {
-                    listUpdate.add(toDatastreamUpdate(idDatastream, null, providerIdThing, ds, ds.sensor(),
-                            ds.observedProperty(), ds.unitOfMeasurement(), null, null));
+                    listUpdate.add(toDatastreamUpdate(request.mapper(), idDatastream, null, providerIdThing, ds,
+                            ds.sensor(), ds.observedProperty(), ds.unitOfMeasurement(), null, null, null));
                 }
             }
 

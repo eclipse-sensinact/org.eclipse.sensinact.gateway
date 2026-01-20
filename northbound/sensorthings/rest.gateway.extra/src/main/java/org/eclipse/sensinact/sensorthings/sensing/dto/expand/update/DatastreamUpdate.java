@@ -25,7 +25,6 @@ import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Service;
 import org.eclipse.sensinact.core.annotation.dto.Timestamp;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
 /**
@@ -57,7 +56,7 @@ public record DatastreamUpdate(@Model EClass model, @Provider String providerId,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitSymbol,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String unitDefinition,
 // observation
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) ExpandedObservation lastObservation
+        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String lastObservation
 
 ) implements SensorThingsUpdate {
 
@@ -79,7 +78,7 @@ public record DatastreamUpdate(@Model EClass model, @Provider String providerId,
             String observedPropertyId, String observedPropertyName, String observedPropertyDescription,
             String observedPropertyDefinition, Map<String, Object> observedPropertyProperties,
             // unit
-            String unitName, String unitSymbol, String unitDefinition, ExpandedObservation lastObservsation) {
+            String unitName, String unitSymbol, String unitDefinition, String lastObservsation) {
         this(SENSOR_THING_DATASTREAM, providerId, id, name, description, timestamp, observedArea, thingId, sensorId,
                 sensorName, sensorDescription, sensorEncodingType, sensorMetadata, sensorProperties, observedPropertyId,
                 observedPropertyName, observedPropertyDescription, observedPropertyDefinition,

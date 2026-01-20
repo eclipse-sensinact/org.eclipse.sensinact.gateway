@@ -20,7 +20,6 @@ import java.util.Map;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
@@ -125,7 +124,7 @@ public class SensorTest extends AbstractIntegrationTest {
         assertNotNull(DtoMapperSimple.getResourceField(service, "sensorEncodingType", String.class));
         assertNotNull(DtoMapperSimple.getResourceField(service, "sensorMetadata", Object.class));
         assertNotNull(DtoMapperSimple.getResourceField(service, "sensorProperties", Map.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", ExpandedObservation.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", String.class));
 
     }
 
@@ -218,7 +217,7 @@ public class SensorTest extends AbstractIntegrationTest {
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals(name + "2", DtoMapperSimple.getResourceField(service, "sensorName", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", ExpandedObservation.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", String.class));
 
     }
 
@@ -282,7 +281,7 @@ public class SensorTest extends AbstractIntegrationTest {
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals(name + "2", DtoMapperSimple.getResourceField(service, "sensorName", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", ExpandedObservation.class));
+        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", String.class));
 
     }
 }
