@@ -1,8 +1,8 @@
 -includeresource: \
-    @postgresql-1.21.0.jar, \
-    @jdbc-1.21.0.jar, \
-    @database-commons-1.21.0.jar, \
-    @testcontainers-1.21.0.jar, \
+    @postgresql-1.21.4.jar, \
+    @jdbc-1.21.4.jar, \
+    @database-commons-1.21.4.jar, \
+    @testcontainers-1.21.4.jar, \
     @docker-java-api-3.4.2.jar, \
     @docker-java-transport-zerodep-3.4.2.jar, \
     @docker-java-transport-3.4.2.jar,\
