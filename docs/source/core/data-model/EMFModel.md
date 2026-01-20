@@ -22,6 +22,10 @@ The provider model class uses `EReference`s of type `Service` for each of the se
 
 Each `Service` uses `EAttribute`s for each data resource in the model. The type of the `EAttribute` is the type of the resource. Action resources are represented using an `EOperation` where the parameter types of the operation represent the parameters to the action, and the return type of the `EOperation` provides the type of the action resource.
 
+#### Multiple Resources
+
+Multiple resources are represented in the EMF model using the `upperBound` of the `EAtrribute`. Typically this will be set to 1 (representing a single-valued resource) or -1 (representing an unlimited multi-valued resource). It is valid to use other values for the `upperBound`, as well as using the `lowerBound` for the `EAttribute`. If these constraints are set then they will be enforced by the model, for example it is possible to require that a resource has exactly two values set and to reject any update that does not contain exactly two values.
+
 ### Variable metadata
 
 Every resource in sensiNact has associated metadata. This metadata is stored in a `Metadata` object at the `Service` level. The `Service` uses an `EMap` where the key is the `ETypedElement` representing the `EAttribute` or `EOperation` for the resource, and the value is the `Metadata` object. The `Metadata` object has a `timestamp` which represents the most recent update time for the resource (i.e. the most recent update to the resource value or resource metadata). The `Metadata` also provides a list of `FeatureCustomMetadata` representing the individual metadata values for the resource. Each `FeatureCustomMetadata` has a name, value and timestamp representing the metadata value and when it was last updated.
