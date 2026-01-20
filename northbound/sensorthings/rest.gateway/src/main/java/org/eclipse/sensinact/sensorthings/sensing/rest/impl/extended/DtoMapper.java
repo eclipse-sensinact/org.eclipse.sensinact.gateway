@@ -247,11 +247,10 @@ public class DtoMapper {
             }
         }
         Object obs = t.getValue();
+        if (obs != null) {
 
-        if (obs != null && obs instanceof ExpandedObservation) {
-
-            Observation observation = DtoMapperSimple.toObservation(resource.getService().getProvider().getName(), t,
-                    uriInfo);
+            Observation observation = DtoMapperSimple.toObservation(mapper,
+                    resource.getService().getProvider().getName(), t, uriInfo);
             if (expansions.shouldExpand("Datastream", observation)) {
                 expansions.addExpansion("Datastream", observation,
                         toDatastream(userSession, application, mapper, uriInfo,
@@ -404,8 +403,7 @@ public class DtoMapper {
             ProviderSnapshot provider) {
         ServiceSnapshot serviceSnapshot = DtoMapperSimple.getDatastreamService(provider);
 
-        ExpandedObservation lastObservation = DtoMapperSimple.getResourceField(serviceSnapshot, "lastObservation",
-                ExpandedObservation.class);
+        ExpandedObservation lastObservation = DtoMapperSimple.getObservationFromService(mapper, serviceSnapshot);
         if (lastObservation != null && lastObservation.featureOfInterest() != null) {
 
             return DtoMapperSimple.toFeatureOfInterest(provider, lastObservation, uriInfo);

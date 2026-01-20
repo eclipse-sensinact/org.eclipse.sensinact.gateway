@@ -35,6 +35,7 @@ import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -253,16 +254,21 @@ public class HistoricalLocationTest extends AbstractIntegrationTest {
 
     @Test
     void getThingLocationHistoricalLocationsTest() throws Exception {
+        createThing("thing", List.of("fizz"), List.of(), TS_2012);
+        createLocation("fizz");
+
         for (int i = 0; i < 10; i++) {
-            createResource("fizz", "admin", "location", new Point(i, i), TS_2012.plus(ofDays(i)));
+            // simulate also the update of location due to update of location
+            createResource("thing", DtoMapperSimple.SERVICE_ADMIN, "location", new Point(i, i),
+                    TS_2012.plus(ofDays(i)));
         }
         // 10 updates
-        waitForRowCount("sensinact.geo_data", 10);
+        waitForRowCount("sensinact.geo_data", 12);
 
         ResultList<HistoricalLocation> o = utils.queryJson("/Locations(fizz)/HistoricalLocations?$count=true",
                 new TypeReference<ResultList<HistoricalLocation>>() {
                 });
-        assertEquals(o.count(), 10);
+        assertEquals(11, o.count());
     }
 
     @Test
@@ -274,7 +280,7 @@ public class HistoricalLocationTest extends AbstractIntegrationTest {
         // 10 updates
         waitForRowCount("sensinact.geo_data", 10);
 
-        String id = String.format("%s~%s~%s", "fizz", "buzz", "fizzbuzz");
+        String id = "fizzbuzz";
 
         ResultList<HistoricalLocation> o = utils.queryJson(
                 "/Datastreams(" + id + ")/Thing/HistoricalLocations?$count=true",

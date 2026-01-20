@@ -167,8 +167,7 @@ public class ObservationsAccessImpl extends AbstractAccess
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
         ServiceSnapshot serviceDatastream = DtoMapperSimple.getDatastreamService(providerSnapshot);
-        ExpandedObservation obs = DtoMapperSimple.getResourceField(serviceDatastream, "lastObservation",
-                ExpandedObservation.class);
+        ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(), serviceDatastream);
         if (obs == null || obs.featureOfInterest() == null) {
             throw new NotFoundException();
         }

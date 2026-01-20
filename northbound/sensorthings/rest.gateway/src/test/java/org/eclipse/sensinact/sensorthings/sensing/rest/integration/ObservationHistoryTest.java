@@ -247,23 +247,26 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
     @Test
     void getDataStreamObservations() throws Exception {
         String thingId = "getDataStreamObservations";
-        for (int i = 0; i < 1000; i++) {
-            createDatastream("baz", thingId, String.valueOf(i), TS_2012.plus(ofDays(i)));
-        }
-        for (int i = 0; i < 4000; i++) {
-            createDatastream("foobar", thingId, Integer.valueOf(i), TS_2012.plus(ofDays(i)));
-        }
+        createDatastream("baz", thingId, String.valueOf(0), TS_2012);
+        createDatastream("foobar", thingId, 0, TS_2012);
         createThing(thingId, List.of(), List.of("baz", "foobar"));
+
+        for (int i = 0; i < 1000; i++) {
+            createObservation("baz", thingId, String.valueOf(i + 1), TS_2012.plus(ofDays(i + 1)));
+        }
+
+        for (int i = 0; i < 4000; i++) {
+            createObservation("foobar", thingId, Integer.valueOf(i + 1), TS_2012.plus(ofDays(i + 1)));
+        }
         // 1008: 1000 updates + history provider name & description & model &
         // modelPackageUri + foo
         // provider name & description & modelUri
-        waitForRowCount("sensinact.text_data", 1008);
-        waitForRowCount("sensinact.numeric_data", 4000);
+        waitForRowCount("sensinact.text_data", 5046);
 
         ResultList<Observation> observations = utils.queryJson("/Datastreams(baz)/Observations?$count=true",
                 RESULT_OBSERVATIONS);
 
-        assertEquals(1000, observations.count());
+        assertEquals(1001, observations.count());
         assertEquals(500, observations.value().size()); // Is this 500 because of
                                                         // https://eclipse-sensinact.readthedocs.io/en/latest/southbound/history/history.html??
         assertNotNull(observations.nextLink());
@@ -302,13 +305,16 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
     void getHistoricObservationTest() throws Exception {
         String thingId = "navigateToObservationTest";
         String datastreamId = thingId + "_datastream";
+        createDatastream(datastreamId, thingId, 0, TS_2012);
+
         for (int i = 0; i < 10; i++) {
-            createDatastream(datastreamId, thingId, i, TS_2012);
+            createObservation(datastreamId, thingId, Integer.valueOf(i), TS_2012.plus(ofDays(i)));
+
         }
-        createThing(thingId, List.of(), List.of(datastreamId));
+        createThing(thingId, List.of(), List.of(datastreamId), TS_2012);
         // 16: 10 updates + history provider name & model & modelPackageUri + fizz
         // provider name & modelUri
-        waitForRowCount("sensinact.text_data", 18);
+        waitForRowCount("sensinact.text_data", 39);
 
         String id = String.format("%s~%s~%s", datastreamId, "test",
                 Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
@@ -317,18 +323,21 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         });
         assertEquals(id, o.id());
         assertEquals(TS_2012.plus(ofDays(3)), o.resultTime());
-        assertEquals("3", o.result());
+        assertEquals(3, o.result());
     }
 
     @Test
     void navigateToObservationTest() throws Exception {
         String thingId = "navigateToObservationTest";
         String datastreamId = thingId + "_datastream";
+        createDatastream(datastreamId, thingId, 0, TS_2012);
+
         for (int i = 0; i < 10; i++) {
-            createDatastream(datastreamId, thingId, i, TS_2012);
+            createObservation(datastreamId, thingId, i, TS_2012.plus(ofDays(i)));
+
         }
         createThing(thingId, List.of(), List.of(datastreamId));
-        waitForRowCount("sensinact.text_data", 18);
+        waitForRowCount("sensinact.text_data", 39);
 
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
         });
@@ -340,13 +349,13 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
                 new TypeReference<ResultList<Observation>>() {
                 });
 
-        assertEquals(10, observations.value().size());
-        Observation observation = observations.value().get(1);
+        assertEquals(11, observations.value().size());
+        Observation observation = observations.value().get(2);
         String id = String.format("%s~%s~%s", datastreamId, "test",
                 Long.toString(TS_2012.plus(ofDays(1)).toEpochMilli(), 16));
         assertEquals(id, observation.id());
         assertEquals(TS_2012.plus(ofDays(1)), observation.resultTime());
-        assertEquals("1", observation.result());
+        assertEquals(1, observation.result());
     }
 
     @Test
@@ -367,7 +376,8 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
         createDatastream(testProvider, testProviderThing, 25.5, earlierTime);
         createDatastream(testProvider, testProviderThing, 30.2, laterTime);
         createLocation(testProviderLocation);
-        createThing(testProviderThing, List.of(testProviderLocation), List.of(testProvider));
+        createThing(testProviderThing, List.of(), List.of(testProvider));
+
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils.queryJson(
                 String.format("/Datastreams(" + testProvider + ")/Observations?$filter=%s",
@@ -397,11 +407,13 @@ public class ObservationHistoryTest extends AbstractIntegrationTest {
     @Test
     void testFilterLargerThanBlocksize() throws Exception {
         String thingId = "testFilterLargerThanBlocksize";
+        createDatastream("foobar", thingId, 0, TS_2012);
+        createThing(thingId, List.of(), List.of("foobar"));
+
         for (int i = 0; i < 1000; i++) {
-            createDatastream("foobar", thingId, Integer.valueOf(i), TS_2012.plus(ofDays(i)));
+            createObservation("foobar", thingId, Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        createThing(thingId, List.of(), List.of(thingId));
-        waitForRowCount("sensinact.numeric_data", 1000);
+        waitForRowCount("sensinact.text_data", 1029);
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils
                 .queryJson(String.format("/Datastreams(foobar)/Observations?$filter=%s",
