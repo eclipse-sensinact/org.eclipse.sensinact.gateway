@@ -87,7 +87,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
 
         FeatureOfInterest foi = getFeatureOfInterest(observation);
         if (foi != null) {
-            DtoMapperSimple.checkRequireField(foi);
+            checkRequireField(foi);
         }
         String id = request.parentId() != null ? request.parentId() : request.id();
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
@@ -98,6 +98,14 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         return List.of(DtoToModelMapper.toDatastreamUpdate(request.mapper(), providerId,
                 getObservedArea(request.session(), providerId), null, null, null, null, null, existingObservation,
                 observation, foi));
+    }
+
+    private void checkRequireField(FeatureOfInterest foi) {
+        try {
+            DtoMapperSimple.checkRequireField(foi);
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 
     private FeatureOfInterest getFeatureOfInterest(ExpandedObservation observation) {
