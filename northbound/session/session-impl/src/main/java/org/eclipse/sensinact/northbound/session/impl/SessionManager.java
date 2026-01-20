@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -312,10 +313,12 @@ public class SessionManager
 
         final AuthorizationEngine auth;
         final DefaultAuthPolicy policy;
+        final Duration expiry;
         synchronized (lock) {
             doCheck();
             auth = authEngine;
             policy = config.auth_policy();
+            expiry = Duration.ofSeconds(config.expiry());
         }
 
         final AuthorizationEngine defaultAuthEngine = new DefaultSessionAuthorizationEngine(policy);
@@ -342,7 +345,7 @@ public class SessionManager
             }
         }
 
-        final SensiNactSessionImpl session = new SensiNactSessionImpl(user, preAuthorizer, authorizer, thread);
+        final SensiNactSessionImpl session = new SensiNactSessionImpl(user, preAuthorizer, authorizer, thread, expiry);
         String sessionId = session.getSessionId();
 
         boolean authChanged;

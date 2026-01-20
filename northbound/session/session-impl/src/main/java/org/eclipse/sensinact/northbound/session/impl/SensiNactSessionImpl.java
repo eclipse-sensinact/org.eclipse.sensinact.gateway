@@ -115,12 +115,20 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private final PreAuthorizer preAuthorizer;
 
-    public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer preAuthorizer, final Authorizer authorizer, final GatewayThread thread) {
+    public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer preAuthorizer, final Authorizer authorizer,
+            final GatewayThread thread, final Duration expiry) {
         this.user = user;
         this.preAuthorizer = Objects.requireNonNull(preAuthorizer, "No PreAuthorizer given");
         this.authorizer = Objects.requireNonNull(authorizer, "No Authorizer given");
         this.thread = thread;
-        expiry = Instant.now().plusSeconds(600);
+
+        Objects.requireNonNull(expiry, "No session duration given");
+        if(expiry.isZero() || expiry.isNegative()) {
+            // Infinite session
+            this.expiry = Instant.MAX;
+        } else {
+            this.expiry = Instant.now().plus(expiry);
+        }
     }
 
     @Override
