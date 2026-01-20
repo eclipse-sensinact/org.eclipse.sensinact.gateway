@@ -441,8 +441,8 @@ public class DtoMapper {
         String thingLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Thing").build().toString();
         String locationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Locations").build().toString();
 
-        HistoricalLocation historicalLocation = DtoMapperSimple.toHistoricalLocation(provider, t, id, selfLink,
-                thingLink, locationsLink);
+        HistoricalLocation historicalLocation = DtoMapperSimple.toHistoricalLocation(provider, t, selfLink,
+                locationsLink, thingLink);
         if (expansions.shouldExpand("Thing", historicalLocation)) {
             expansions.addExpansion("Thing", historicalLocation, toThing(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Thing"), filter, provider));

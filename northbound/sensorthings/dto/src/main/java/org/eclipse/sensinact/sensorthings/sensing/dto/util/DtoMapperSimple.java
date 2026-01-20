@@ -359,8 +359,9 @@ public class DtoMapperSimple {
     }
 
     public static HistoricalLocation toHistoricalLocation(ProviderSnapshot provider, Optional<TimedValue<?>> t,
-            String selfLink, String id, String locationsLink, String thingLink) {
+            String selfLink, String locationsLink, String thingLink) {
         final Instant time = t.map(TimedValue::getTimestamp).orElse(Instant.EPOCH);
+        String id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
 
         return new HistoricalLocation(selfLink, id, time, locationsLink, thingLink);
 
