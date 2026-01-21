@@ -41,6 +41,7 @@ import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionExpirationListener;
 import org.eclipse.sensinact.northbound.session.ServiceDescription;
 
 /**
@@ -240,6 +241,18 @@ public class RcUtils {
         public UserInfo getUserInfo() {
             // TODO Auto-generated method stub
             return null;
+        }
+
+        @Override
+        public void addExpirationListener(SensiNactSessionExpirationListener listener) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void removeExpirationListener(SensiNactSessionExpirationListener listener) {
+            // TODO Auto-generated method stub
+
         }
 
     }
