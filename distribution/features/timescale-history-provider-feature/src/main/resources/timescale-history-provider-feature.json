@@ -7,7 +7,7 @@
     { "id": "org.eclipse.sensinact.gateway.filters:resource.selector:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.filters:resource.selector.impl:${gateway.version}" },
     { "id": "org.osgi:org.osgi.service.jdbc:1.0.0" },
-    { "id": "org.postgresql:postgresql:42.5.1" },
+    { "id": "org.postgresql:postgresql:42.7.9" },
     { "id": "org.apache.aries.tx-control:tx-control-service-local:1.0.1" },
     { "id": "org.apache.aries.tx-control:tx-control-provider-jdbc-local:1.0.1" }
   ],
