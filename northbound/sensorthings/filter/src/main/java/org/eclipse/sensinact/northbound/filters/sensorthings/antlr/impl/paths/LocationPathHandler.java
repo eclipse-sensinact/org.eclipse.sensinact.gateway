@@ -15,59 +15,36 @@ package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
-public class LocationPathHandler extends AbstractPathHandler {
+public class LocationPathHandler {
+
+    private final ProviderSnapshot provider;
+    private final List<? extends ResourceSnapshot> resources;
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("things", this::subThings,
             "historicallocations", this::subHistoricalLocations);
 
-    public LocationPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
-
+    public LocationPathHandler(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
+        this.provider = provider;
+        this.resources = resources;
     }
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = DtoMapperSimple.getLocationService(provider);
-        ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
-
-        if (service == null) {
-            return null;
-        }
         if (parts.length == 1) {
-            switch (path) {
+            switch (parts[0]) {
             case "id":
-            case "@iot.id":
-
+                // Provider
                 return provider.getName();
-            case "name":
-                return DtoMapperSimple.getResourceField(serviceAdmin, "name", String.class);
-
-            case "description":
-                return DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class);
-
-            case "location":
-                return DtoMapperSimple.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
-            case "encodingType":
-                return DtoMapperSimple.getResourceField(service, "encodingType", String.class);
-
-            case "properties":
-                return DtoMapperSimple.getResourceField(service, "properties", Map.class);
 
             default:
-                throw new UnsupportedRuleException("Unexpected resource level field: " + path);
+                return PathUtils.getProviderLevelField(provider, resources, parts[0]);
             }
-
         } else {
             final Function<String, Object> handler = subPartHandlers.get(parts[0]);
             if (handler == null) {
@@ -78,20 +55,10 @@ public class LocationPathHandler extends AbstractPathHandler {
     }
 
     private Object subThings(final String path) {
-        List<ProviderSnapshot> thingProviders = session.filteredSnapshot(null).stream()
-                .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
-                        .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
-                .map(s -> s.getProvider()).toList();
-        return new AnyMatch(thingProviders.stream().map(p -> new ThingPathHandler(p, session).handle(path)).toList());
+        return new ThingPathHandler(provider, resources).handle(path);
     }
 
     private Object subHistoricalLocations(final String path) {
-        List<ProviderSnapshot> thingProviders = session.filteredSnapshot(null).stream()
-                .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
-                        .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
-                .map(s -> s.getProvider()).toList();
-        return new AnyMatch(
-                thingProviders.stream().map(p -> new HistoricalLocationPathHandler(p, session).handle(path)).toList());
-
+        return new HistoricalLocationPathHandler(provider, resources).handle(path);
     }
 }

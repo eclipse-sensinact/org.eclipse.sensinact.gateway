@@ -1,0 +1,310 @@
+/*********************************************************************
+* Copyright (c) 2023 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
+package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import static java.time.temporal.ChronoUnit.DAYS;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
+import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.filters.api.FilterParserException;
+import org.eclipse.sensinact.gateway.geojson.Point;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
+
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
+import org.eclipse.sensinact.northbound.filters.sensorthings.impl.SensorthingsFilterComponent;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.HistoryResourceHelperSensorthings;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
+import org.mockito.Mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
+
+@ExtendWith(MockitoExtension.class)
+class HistoryResourceHelperSensorthingsTest {
+
+    @Mock
+    private SensiNactSession userSession;
+
+    @Mock
+    private Application application;
+
+    private static ObjectMapper mapper;
+
+    @Mock
+    private UriInfo uriInfo;
+
+    @Mock
+    private ExpansionSettings expansions;
+
+    @Mock
+    private ResourceSnapshot resourceSnapshot;
+
+    @Mock
+    private ServiceSnapshot serviceSnapshot;
+
+    @Mock
+    private ProviderSnapshot providerSnapshot;
+
+    @Mock
+    private UriBuilder uriBuilder;
+
+    // Helper method to verify parameter maps contain expected basic parameters
+    private Map<String, Object> hasBasicParams() {
+        return argThat(params -> params != null && "testProvider".equals(params.get("provider"))
+                && "lastObservation".equals(params.get("resource")));
+    }
+
+    private ObjectMapper getMapper() {
+        if (mapper == null) {
+            mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+        }
+        return mapper;
+    }
+
+    private String getObservation(String name, Object result, Instant instant) {
+
+        ExpandedObservation obs = new ExpandedObservation(name, name,
+                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
+                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
+                null, null, null, null,
+                new FeatureOfInterest(null, "test", "test", "test", "test", new Point(0, 0), null));
+        try {
+            return mapper.writeValueAsString(obs);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void setupResourceSnapshotMocks() {
+        when(resourceSnapshot.getService()).thenReturn(serviceSnapshot);
+        when(serviceSnapshot.getProvider()).thenReturn(providerSnapshot);
+        when(providerSnapshot.getName()).thenReturn("testProvider");
+        when(serviceSnapshot.getName()).thenReturn("datastream");
+        when(resourceSnapshot.getName()).thenReturn("lastObservation");
+    }
+
+    @Nested
+    @DisplayName("History Provider Configuration")
+    class HistoryProviderConfiguration {
+
+        private void setupUriBuilder() {
+            when(uriInfo.getBaseUriBuilder()).thenReturn(uriBuilder);
+            when(uriBuilder.path(anyString())).thenReturn(uriBuilder);
+            when(uriBuilder.uri(anyString())).thenReturn(uriBuilder);
+            when(uriBuilder.resolveTemplate(eq("id"), startsWith("testProvider~testResource~"))).thenReturn(uriBuilder);
+            when(uriBuilder.build(any(Object[].class))).thenReturn(java.net.URI.create("http://test.com/test"));
+            when(uriBuilder.build()).thenReturn(java.net.URI.create("http://test.com/test"));
+        }
+
+        @Test
+        @DisplayName("Should return empty result when no history provider is configured")
+        void noHistoryProvider() {
+            when(application.getProperties()).thenReturn(Map.of());
+
+            ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
+                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+
+            assertNotNull(result);
+            assertTrue(result.value().isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should process historical data when history provider is configured")
+        void withHistoryProvider() {
+            Instant now = Instant.now();
+            setupResourceSnapshotMocks();
+            setupUriBuilder();
+            String historyProvider = "test-history-provider";
+            Integer maxResults = 1000;
+            Long count = 5L;
+
+            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
+                    "sensinact.history.result.limit", maxResults);
+            when(application.getProperties()).thenReturn(appProperties);
+
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
+                    .thenReturn(count);
+
+            List<TimedValue<?>> timedValues = Arrays.asList(
+                    new DefaultTimedValue<>(getObservation("testResource", "value1", now), now),
+                    new DefaultTimedValue<>(getObservation("testResource", "value2", now), now));
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
+                    .thenReturn(timedValues);
+
+            ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
+                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+
+            assertNotNull(result);
+            assertEquals(count.intValue(), result.count().intValue());
+            verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams());
+            verify(userSession, times(3)).actOnResource(eq(historyProvider), eq("history"), eq("range"),
+                    hasBasicParams());
+        }
+
+        @Test
+        @DisplayName("Should apply local result limit when provided")
+        void withLocalResultLimit() {
+            setupResourceSnapshotMocks();
+            String historyProvider = "test-history-provider";
+            Integer maxResults = 1000;
+            int localResultLimit = 100;
+
+            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
+                    "sensinact.history.result.limit", maxResults);
+            when(application.getProperties()).thenReturn(appProperties);
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
+                    .thenReturn(50L);
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
+                    .thenReturn(Arrays.asList());
+
+            HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession, application, getMapper(), uriInfo,
+                    expansions, resourceSnapshot, null, localResultLimit);
+
+            verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams());
+        }
+
+        @Test
+        @DisplayName("Should apply SensorThings filter to the history")
+        void withFilter() throws FilterParserException {
+            Instant now = Instant.now();
+            setupResourceSnapshotMocks();
+            setupUriBuilder();
+            String historyProvider = "test-history-provider";
+            Integer maxResults = 1000;
+            Long count = 6L;
+            when(providerSnapshot.getModelPackageUri()).thenReturn(eNS_URI);
+
+            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
+                    "sensinact.history.result.limit", maxResults);
+            when(application.getProperties()).thenReturn(appProperties);
+
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
+                    .thenReturn(count);
+            SensorthingsFilterComponent filterComponent = new SensorthingsFilterComponent();
+            filterComponent.setSession(userSession);
+            ICriterion filter = filterComponent.parseFilter(
+                    String.format("result eq 'value1' or phenomenonTime lt %s", now.minus(1, DAYS)), OBSERVATIONS);
+
+            List<TimedValue<?>> timedValues = Arrays.asList(
+                    new DefaultTimedValue<>(getObservation("testResource", "value1", now), now),
+                    new DefaultTimedValue<>(getObservation("testResource", "value2", now), now));
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
+                    .thenReturn(timedValues, timedValues, List.of(
+                            new DefaultTimedValue<>(getObservation("testResource", "value1", now.minus(3, DAYS)),
+                                    now.minus(3, DAYS)),
+                            new DefaultTimedValue<>(getObservation("testResource", "value3", now.minus(3, DAYS)),
+                                    now.minus(3, DAYS))),
+                            List.of());
+
+            ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
+                    application, getMapper(), uriInfo, expansions, resourceSnapshot, filter, 0);
+
+            assertNotNull(result);
+            assertEquals(4, result.value().size(), "resource size " + result.value().size());
+            // Result batches come in reverse order
+            assertEquals("value1", result.value().get(0).result());
+            assertEquals("value3", result.value().get(1).result());
+            assertEquals("value1", result.value().get(2).result());
+            assertEquals("value1", result.value().get(3).result());
+            assertEquals(4, result.count().intValue());
+            verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams());
+            verify(userSession, times(3)).actOnResource(eq(historyProvider), eq("history"), eq("range"),
+                    hasBasicParams());
+        }
+    }
+
+    @Nested
+    @DisplayName("Edge Cases")
+    class EdgeCases {
+
+        @Test
+        @DisplayName("Should handle count exceeding Integer.MAX_VALUE")
+        void countExceedsIntegerMax() {
+            setupResourceSnapshotMocks();
+            String historyProvider = "test-history-provider";
+            Long largeCount = (long) Integer.MAX_VALUE + 1;
+
+            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
+                    "sensinact.history.result.limit", 1000);
+            when(application.getProperties()).thenReturn(appProperties);
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
+                    .thenReturn(largeCount);
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
+                    .thenReturn(Arrays.asList());
+
+            ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
+                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+
+            assertNotNull(result);
+            assertEquals(Integer.MAX_VALUE, result.count().intValue());
+        }
+
+        @Test
+        @DisplayName("Should handle null count from history provider")
+        void nullCount() {
+            setupResourceSnapshotMocks();
+            String historyProvider = "test-history-provider";
+
+            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
+                    "sensinact.history.result.limit", 1000);
+            when(application.getProperties()).thenReturn(appProperties);
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
+                    .thenReturn(null);
+            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
+                    .thenReturn(Arrays.asList());
+
+            ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
+                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+
+            assertNotNull(result);
+            assertEquals(null, result.count());
+        }
+    }
+}

@@ -13,82 +13,59 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
-public class ThingPathHandler extends AbstractPathHandler {
+public class ThingPathHandler {
+
+    private final ProviderSnapshot provider;
+    private final List<? extends ResourceSnapshot> resources;
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams,
             "locations", this::subLocations);
 
-    public ThingPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
-
+    public ThingPathHandler(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
+        this.provider = provider;
+        this.resources = resources;
     }
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = DtoMapperSimple.getThingService(provider);
-        ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
-
-        if (service == null) {
-            return null;
-        }
         if (parts.length == 1) {
-            switch (path) {
+            switch (parts[0]) {
             case "id":
-            case "@iot.id":
-
+                // Provider
                 return provider.getName();
-            case "name":
-                return DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class);
-
-            case "description":
-                return DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class);
-
-            case "properties":
-                return DtoMapperSimple.getResourceField(service, "properties", Map.class);
-
-            case "location":
-                return DtoMapperSimple.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
 
             default:
-                throw new UnsupportedRuleException("Unexpected resource level field: " + path);
+                return PathUtils.getProviderLevelField(provider, resources, parts[0]);
             }
-
         } else {
-            if (parts[0].equalsIgnoreCase("Locations") && parts[1].equalsIgnoreCase("location")) {
-                return DtoMapperSimple.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
-            } else {
-                final Function<String, Object> handler = subPartHandlers.get(parts[0]);
-                if (handler == null) {
-                    throw new UnsupportedRuleException("Unsupported path: " + path);
-                }
-                return handler.apply(String.join("/", Arrays.copyOfRange(parts, 1, parts.length)));
+            final Function<String, Object> handler = subPartHandlers.get(parts[0]);
+            if (handler == null) {
+                throw new UnsupportedRuleException("Unsupported path: " + path);
             }
-
+            return handler.apply(String.join("/", Arrays.copyOfRange(parts, 1, parts.length)));
         }
     }
 
     private Object subDatastreams(final String path) {
-
-        return new AnyMatch(getDatastreamsProviderFromThing(provider).stream()
-                .map(p -> new DatastreamPathHandler(p, session).handle(path)).collect(Collectors.toList()));
-
+        if (resources.size() == 1) {
+            return new DatastreamPathHandler(provider, resources.get(0)).handle(path);
+        } else {
+            return new AnyMatch(resources.stream().map(r -> new DatastreamPathHandler(provider, r).handle(path))
+                    .collect(Collectors.toList()));
+        }
     }
 
     private Object subLocations(final String path) {
-
-        return new AnyMatch(getLocationsProviderFromThing(provider).stream()
-                .map(p -> new LocationPathHandler(p, session).handle(path)).collect(Collectors.toList()));
+        return new LocationPathHandler(provider, resources).handle(path);
     }
 }

@@ -13,34 +13,39 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
-public class ObservationPathHandler extends AbstractPathHandler {
+public class ObservationPathHandler {
+
+    private final ProviderSnapshot provider;
+    private final ResourceSnapshot resource;
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastream", this::subDatastream,
             "featureofinterest", this::subFeatureOfInterest);
 
-    public ObservationPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
+    public ObservationPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
+        this.provider = provider;
+        this.resource = resource;
     }
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
-        if (service == null) {
-            return null;
-        }
         if (parts.length == 1) {
-            return getResourceLevelField(provider, service, parts[0]);
+            switch (parts[0]) {
+            case "id":
+                // Provider~Service~Resource~Timestamp
+                return String.join("~", provider.getName(), resource.getService().getName(), resource.getName(),
+                        PathUtils.timestampToString(resource.getValue().getTimestamp()));
 
+            default:
+                return PathUtils.getResourceLevelField(provider, resource, parts[0]);
+            }
         } else {
             final Function<String, Object> handler = subPartHandlers.get(parts[0]);
             if (handler == null) {
@@ -50,49 +55,11 @@ public class ObservationPathHandler extends AbstractPathHandler {
         }
     }
 
-    public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
-            final String path) {
-
-        ExpandedObservation obs = getObservationFromService(service);
-        if (obs == null) {
-            return null;
-        }
-        switch (path) {
-        case "id":
-        case "@iot.id":
-
-            return obs.id();
-
-        case "result":
-            return obs.result();
-
-        case "resulttime":
-            return obs.resultTime();
-
-        case "phenomenontime":
-
-            return obs.phenomenonTime();
-
-        case "validtime":
-            return obs.validTime();
-
-        case "resultquality":
-            return obs.resultQuality();
-
-        case "properties":
-            return obs.properties();
-
-        default:
-            throw new UnsupportedRuleException("Unexpected resource level field: " + path);
-        }
-
-    }
-
     private Object subDatastream(final String path) {
-        return new DatastreamPathHandler(provider, session).handle(path);
+        return new DatastreamPathHandler(provider, resource).handle(path);
     }
 
     private Object subFeatureOfInterest(final String path) {
-        return new FeatureOfInterestPathHandler(provider, session).handle(path);
+        return new FeatureOfInterestPathHandler(provider, List.of(resource)).handle(path);
     }
 }

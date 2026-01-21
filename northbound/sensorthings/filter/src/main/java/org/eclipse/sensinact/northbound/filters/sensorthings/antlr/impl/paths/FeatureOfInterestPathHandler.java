@@ -13,37 +13,39 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+public class FeatureOfInterestPathHandler {
 
-public class FeatureOfInterestPathHandler extends AbstractPathHandler {
+    private final ProviderSnapshot provider;
+    private final List<? extends ResourceSnapshot> resources;
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("observations", this::subObservations);
-    ObjectMapper mapper = new ObjectMapper();
 
-    public FeatureOfInterestPathHandler(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
-
+    public FeatureOfInterestPathHandler(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
+        this.provider = provider;
+        this.resources = resources;
     }
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
-        if (service == null) {
-            return null;
-        }
         if (parts.length == 1) {
-            return getResourceLevelField(provider, service, parts[0]);
+            switch (parts[0]) {
+            case "id":
+                // Provider
+                return provider.getName();
 
+            default:
+                return PathUtils.getProviderLevelField(provider, resources, parts[0]);
+            }
         } else {
             final Function<String, Object> handler = subPartHandlers.get(parts[0]);
             if (handler == null) {
@@ -53,34 +55,12 @@ public class FeatureOfInterestPathHandler extends AbstractPathHandler {
         }
     }
 
-    public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
-            final String path) {
-
-        ExpandedObservation obs = getObservationFromService(service);
-
-        FeatureOfInterest foi = obs.featureOfInterest();
-        if (foi == null) {
-            return null;
-        }
-        switch (path) {
-        case "id":
-        case "@iot.id":
-
-            return String.join("~", provider.getName(), (String) obs.id(), (String) foi.id());
-        case "name":
-            return foi.name();
-        case "description":
-            return foi.description();
-        case "encodingType":
-            return foi.encodingType();
-        case "feature":
-            return foi.feature();
-        default:
-            throw new UnsupportedRuleException("Unexpected resource level field: " + path);
-        }
-    }
-
     private Object subObservations(final String path) {
-        return new ObservationPathHandler(provider, session).handle(path);
+        if (resources.size() == 1) {
+            return new ObservationPathHandler(provider, resources.get(0)).handle(path);
+        } else {
+            return new AnyMatch(resources.stream().map(r -> new ObservationPathHandler(provider, r).handle(path))
+                    .collect(Collectors.toList()));
+        }
     }
 }

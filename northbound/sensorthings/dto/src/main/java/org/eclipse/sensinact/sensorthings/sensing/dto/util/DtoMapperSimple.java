@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto.util;
 
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
+
 import java.lang.reflect.RecordComponent;
 import java.time.Instant;
 import java.util.Arrays;
@@ -74,6 +76,10 @@ public class DtoMapperSimple {
             throw new RuntimeException("encodingType not found in  Sensor");
         }
 
+    }
+
+    public static boolean isSensorthingModel(ProviderSnapshot provider) {
+        return eNS_URI.equals(provider.getModelPackageUri());
     }
 
     public static void checkRequireField(ObservedProperty dto) {

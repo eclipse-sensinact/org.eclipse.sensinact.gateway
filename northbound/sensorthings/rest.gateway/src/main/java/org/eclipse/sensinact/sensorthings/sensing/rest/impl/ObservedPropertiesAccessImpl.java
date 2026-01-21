@@ -12,15 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.DATASTREAMS;
-import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
-import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
-import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
-import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-
-import java.util.List;
-
 import jakarta.ws.rs.core.Response;
+
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
@@ -29,108 +23,135 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservedPropertiesAccess;
-import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.ObservedPropertiesDelete;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.ObservedPropertiesDelegateSensinact;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.ObservedPropertiesDelegateSensorthings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.ObservedPropertiesUpdate;
-
-import jakarta.ws.rs.NotFoundException;
 
 public class ObservedPropertiesAccessImpl extends AbstractAccess
         implements ObservedPropertiesDelete, ObservedPropertiesAccess, ObservedPropertiesUpdate {
+    private ObservedPropertiesDelegateSensinact sensinactHandler;
+    private ObservedPropertiesDelegateSensorthings sensorthigHandler;
 
-    @Override
-    public ObservedProperty getObservedProperty(String id) {
-        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
-        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetProvider(datastreamId));
+    public ObservedPropertiesDelegateSensinact getSensinactHandler() {
+        if (sensinactHandler == null)
+            sensinactHandler = new ObservedPropertiesDelegateSensinact(uriInfo, providers, application, requestContext);
+        return sensinactHandler;
 
-        if (!id.equals(o.id())) {
-            throw new NotFoundException();
-        }
-
-        return o;
     }
 
-    @Override
-    public ResultList<Datastream> getObservedPropertyDatastreams(String id) {
-        return new ResultList<>(null, null, List.of(getObservedPropertyDatastream(id, id)));
-    }
+    public ObservedPropertiesDelegateSensorthings getSensorthingsHandler() {
+        if (sensorthigHandler == null)
+            sensorthigHandler = new ObservedPropertiesDelegateSensorthings(uriInfo, providers, application,
+                    requestContext);
+        return sensorthigHandler;
 
-    @Override
-    public Datastream getObservedPropertyDatastream(String id, String id2) {
-        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
-        String datastreamId2 = DtoMapperSimple.extractFirstIdSegment(id2);
-
-        if (!datastreamId.equals(datastreamId2)) {
-            throw new NotFoundException();
-        }
-
-        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), validateAndGetProvider(datastreamId));
-    }
-
-    @PaginationLimit(500)
-    @Override
-    public ResultList<Observation> getObservedPropertyDatastreamObservations(String id, String id2) {
-        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
-        String datastreamId2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!datastreamId.equals(datastreamId2)) {
-            throw new NotFoundException();
-        }
-        return RootResourceAccessImpl.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), getObservationResourceSnapshot(datastreamId2), parseFilter(OBSERVATIONS), 0);
-    }
-
-    @Override
-    public ObservedProperty getObservedPropertyDatastreamObservedProperty(String id, String id2) {
-        String providerDatastream2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        String providerDatastream = DtoMapperSimple.extractFirstIdSegment(id);
-
-        if (!providerDatastream.equals(providerDatastream2)) {
-            throw new NotFoundException();
-        }
-        return getObservedProperty(id);
-    }
-
-    @Override
-    public Sensor getObservedPropertyDatastreamSensor(String id, String id2) {
-        if (!id.equals(id2)) {
-            throw new NotFoundException();
-        }
-
-        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(SENSORS), validateAndGetProvider(id2));
-    }
-
-    @Override
-    public Thing getObservedPropertyDatastreamThing(String id, String id2) {
-        String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!provider.equals(provider2)) {
-            throw new NotFoundException();
-        }
-        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
-                validateAndGetProvider(provider));
     }
 
     @Override
     public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, observedProperty);
+        return getSensorthingsHandler().updateObservedProperties(id, observedProperty);
 
-        return Response.noContent().build();
     }
 
     @Override
     public Response patchObservedProperties(String id, ObservedProperty observedProperty) {
-        return updateObservedProperties(id, observedProperty);
+        return getSensorthingsHandler().patchObservedProperties(id, observedProperty);
+
+    }
+
+    @Override
+    public ObservedProperty getObservedProperty(String id) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getObservedProperty(id);
+        } else {
+            return getSensorthingsHandler().getObservedProperty(id);
+
+        }
+    }
+
+    @Override
+    public ResultList<Datastream> getObservedPropertyDatastreams(String id) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getObservedPropertyDatastreams(id);
+        } else {
+            return getSensorthingsHandler().getObservedPropertyDatastreams(id);
+
+        }
+    }
+
+    @Override
+    public Datastream getObservedPropertyDatastream(String id, String id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getObservedPropertyDatastream(id, id2);
+        } else {
+            return getSensorthingsHandler().getObservedPropertyDatastream(id, id2);
+
+        }
+    }
+
+    @Override
+    public ResultList<Observation> getObservedPropertyDatastreamObservations(String id, String id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getObservedPropertyDatastreamObservations(id, id2);
+        } else {
+            return getSensorthingsHandler().getObservedPropertyDatastreamObservations(id, id2);
+
+        }
+    }
+
+    @Override
+    public ObservedProperty getObservedPropertyDatastreamObservedProperty(String id, String id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getObservedPropertyDatastreamObservedProperty(id, id2);
+        } else {
+            return getSensorthingsHandler().getObservedPropertyDatastreamObservedProperty(id, id2);
+
+        }
+    }
+
+    @Override
+    public Sensor getObservedPropertyDatastreamSensor(String id, String id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getObservedPropertyDatastreamSensor(id, id2);
+        } else {
+            return getSensorthingsHandler().getObservedPropertyDatastreamSensor(id, id2);
+
+        }
+    }
+
+    @Override
+    public Thing getObservedPropertyDatastreamThing(String id, String id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getObservedPropertyDatastreamThing(id, id2);
+        } else {
+            return getSensorthingsHandler().getObservedPropertyDatastreamThing(id, id2);
+
+        }
+    }
+
+    private boolean isSensorthingModel(ProviderSnapshot provider) {
+        return DtoMapperSimple.isSensorthingModel(provider);
     }
 
     @Override
     public Response deleteObservedProperty(String id) {
-        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ObservedProperty.class);
+        return getSensorthingsHandler().deleteObservedProperty(id);
 
-        return Response.noContent().build();
     }
 
 }

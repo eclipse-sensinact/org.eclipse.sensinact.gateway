@@ -12,138 +12,107 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
-
-import java.util.List;
-import java.util.Optional;
-
-import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.FeaturesOfInterestAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.FeaturesOfInterestDelete;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.FeaturesOfInterestDeletegateSensinact;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.FeaturesOfInterestDelegateSensorthings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.FeaturesOfInterestUpdate;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 
 public class FeaturesOfInterestAccessImpl extends AbstractAccess
         implements FeaturesOfInterestDelete, FeaturesOfInterestAccess, FeaturesOfInterestUpdate {
+    private FeaturesOfInterestDeletegateSensinact sensinact;
+    private FeaturesOfInterestDelegateSensorthings sensorthings;
 
-    @Override
-    public FeatureOfInterest getFeatureOfInterest(String id) {
-        String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-
-        FeatureOfInterest foi;
-        try {
-            foi = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(FEATURES_OF_INTEREST), providerSnapshot);
-        } catch (IllegalArgumentException iae) {
-            throw new NotFoundException("No feature of interest with id");
-        }
-        if (!foi.id().equals(id)) {
-            throw new NotFoundException();
-        }
-        return foi;
-    }
-
-    // No history as it is *live* observation data not a data stream
-    @Override
-    public ResultList<Observation> getFeatureOfInterestObservations(String id) {
-        String provider = DtoMapperSimple.extractFirstIdSegment(id);
-
-        return getLiveObservations(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(EFilterContext.OBSERVATIONS), validateAndGetProvider(provider));
-    }
-
-    static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot provider) {
-        ServiceSnapshot datastreamService = DtoMapperSimple.getDatastreamService(provider);
-
-        return new ResultList<>(null, null, DtoMapper.toObservation(userSession, application, mapper, uriInfo,
-                expansions, filter, datastreamService.getResource("lastObservation")).map(List::of).orElse(List.of()));
+    public FeaturesOfInterestDeletegateSensinact getSensinactHandler() {
+        if (sensinact == null)
+            sensinact = new FeaturesOfInterestDeletegateSensinact(uriInfo, providers, application, requestContext);
+        return sensinact;
 
     }
 
-    @Override
-    public Observation getFeatureOfInterestObservation(String id, String id2) {
-        String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!provider.equals(provider2)) {
-            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
-        }
-
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider2);
-        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
-        Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), parseFilter(EFilterContext.FEATURES_OF_INTEREST),
-                service.getResource("lastObservation"));
-
-        if (o.isEmpty() || !id2.equals(o.get().id())) {
-            throw new NotFoundException();
-        }
-
-        return o.get();
-    }
-
-    @Override
-    public Datastream getFeatureOfInterestObservationDatastream(String id, String id2) {
-        String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!provider.equals(provider2)) {
-            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
-        }
-
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(id2);
-
-        Datastream d;
-        try {
-            d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(EFilterContext.DATASTREAMS), providerSnapshot);
-        } catch (Exception e) {
-            throw new NotFoundException();
-        }
-
-        if (!id2.startsWith(String.valueOf(d.id()))) {
-            throw new NotFoundException();
-        }
-        return d;
+    public FeaturesOfInterestDelegateSensorthings getSensorthingsHandler() {
+        if (sensorthings == null)
+            sensorthings = new FeaturesOfInterestDelegateSensorthings(uriInfo, providers, application, requestContext);
+        return sensorthings;
 
     }
 
     @Override
     public Response updateFeaturesOfInterest(String id, FeatureOfInterest foi) {
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, foi);
 
-        return Response.noContent().build();
+        return getSensorthingsHandler().updateFeaturesOfInterest(id, foi);
+
     }
 
     @Override
     public Response patchFeaturesOfInterest(String id, FeatureOfInterest foi) {
-        return updateFeaturesOfInterest(id, foi);
+        return getSensorthingsHandler().patchFeaturesOfInterest(id, foi);
+
+    }
+
+    @Override
+    public FeatureOfInterest getFeatureOfInterest(String id) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getFeatureOfInterest(id);
+        } else {
+            return getSensorthingsHandler().getFeatureOfInterest(id);
+
+        }
+    }
+
+    @Override
+    public ResultList<Observation> getFeatureOfInterestObservations(String id) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getFeatureOfInterestObservations(id);
+        } else {
+            return getSensorthingsHandler().getFeatureOfInterestObservations(id);
+
+        }
+    }
+
+    @Override
+    public Observation getFeatureOfInterestObservation(String id, String id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getFeatureOfInterestObservation(id, id2);
+        } else {
+            return getSensorthingsHandler().getFeatureOfInterestObservation(id, id2);
+
+        }
+    }
+
+    @Override
+    public Datastream getFeatureOfInterestObservationDatastream(String id, String id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+       if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getFeatureOfInterestObservationDatastream(id, id2);
+        } else {
+            return getSensorthingsHandler().getFeatureOfInterestObservationDatastream(id, id2);
+
+        }
+    }
+
+    private boolean isSensorthingModel(ProviderSnapshot provider) {
+        return DtoMapperSimple.isSensorthingModel(provider);
     }
 
     @Override
     public Response deleteFeatureOfInterest(String id) {
-        getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, FeatureOfInterest.class);
+        return getSensorthingsHandler().deleteFeatureOfInterest(id);
 
-        return Response.noContent().build();
     }
 
 }
