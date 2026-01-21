@@ -62,7 +62,11 @@
       <groupId>jakarta.ws.rs</groupId>
       <artifactId>jakarta.ws.rs-api</artifactId>
     </dependency>
-
+   <dependency>
+      <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
+      <artifactId>extended</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

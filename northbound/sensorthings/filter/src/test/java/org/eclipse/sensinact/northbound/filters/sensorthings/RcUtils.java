@@ -288,11 +288,14 @@ public class RcUtils {
     private static final class TestProviderSnapshot implements ProviderSnapshot {
         private final String providerName;
         private final String modelName;
+        private final String modelPackageUri;
+
         final List<ServiceSnapshot> services = new ArrayList<>();
 
-        private TestProviderSnapshot(String providerName, String modelName) {
+        private TestProviderSnapshot(String providerName, String modelName, String modelPackageUri) {
             this.providerName = providerName;
             this.modelName = modelName;
+            this.modelPackageUri = modelPackageUri;
         }
 
         @Override
@@ -302,7 +305,7 @@ public class RcUtils {
 
         @Override
         public String getModelPackageUri() {
-            return "https://eclipse.org/sensinact/test/";
+            return modelPackageUri;
         }
 
         @Override
@@ -352,12 +355,15 @@ public class RcUtils {
     }
 
     static ProviderSnapshot makeProvider(final String providerName) {
-        ProviderSnapshot p = makeProvider(providerName, providerName);
+        ProviderSnapshot p = new TestProviderSnapshot(providerName, providerName,
+                "https://eclipse.org/sensinact/test/");
+        RcUtils.getSession().addProvider(providerName, p);
+
         return p;
     }
 
-    static ProviderSnapshot makeProvider(String modelName, final String providerName) {
-        ProviderSnapshot p = new TestProviderSnapshot(providerName, modelName);
+    static ProviderSnapshot makeProvider(String modelName, String modelPackageUri, final String providerName) {
+        ProviderSnapshot p = new TestProviderSnapshot(providerName, modelName, modelPackageUri);
         RcUtils.getSession().addProvider(providerName, p);
 
         return p;

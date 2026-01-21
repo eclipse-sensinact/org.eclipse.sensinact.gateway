@@ -12,10 +12,22 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
+import java.util.List;
+
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing.DatastreamPathHandlerSensorthings;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing.FeatureOfInterestPathHandlerSensorthings;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing.HistoricalLocationPathHandlerSensorthings;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing.LocationPathHandlerSensorthings;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing.ObservationPathHandlerSensorthings;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing.ObservedPropertyPathHandlerSensorthings;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing.SensorPathHandlerSensorthings;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing.ThingPathHandlerSensorthings;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
 
 public class PathHandler {
 
@@ -27,29 +39,53 @@ public class PathHandler {
 
     public Object handle(final ResourceValueFilterInputHolder holder) {
         final ProviderSnapshot provider = holder.getProvider();
+        final List<? extends ResourceSnapshot> resources = holder.getResources();
+        final ResourceSnapshot resource = holder.getResource();
         final SensiNactSession session = holder.getSession();
+        if (!isSensorthingModel(provider)) {
+            switch (holder.getContext()) {
+            case THINGS:
+                return new ThingPathHandler(provider, resources).handle(path);
+            case FEATURES_OF_INTEREST:
+                return new FeatureOfInterestPathHandler(provider, resources).handle(path);
+            case HISTORICAL_LOCATIONS:
+                return new HistoricalLocationPathHandler(provider, resources).handle(path);
+            case LOCATIONS:
+                return new LocationPathHandler(provider, resources).handle(path);
+            case OBSERVATIONS:
+                return new ObservationPathHandler(provider, resource).handle(path);
+            case DATASTREAMS:
+                return new DatastreamPathHandler(provider, resource).handle(path);
+            case OBSERVED_PROPERTIES:
+                return new ObservedPropertyPathHandler(provider, resource).handle(path);
+            case SENSORS:
+                return new SensorPathHandler(provider, resource).handle(path);
+            }
+        } else {
+            switch (holder.getContext()) {
+            case THINGS:
+                return new ThingPathHandlerSensorthings(provider, session).handle(path);
+            case FEATURES_OF_INTEREST:
+                return new FeatureOfInterestPathHandlerSensorthings(provider, session).handle(path);
+            case HISTORICAL_LOCATIONS:
+                return new HistoricalLocationPathHandlerSensorthings(provider, session).handle(path);
+            case LOCATIONS:
+                return new LocationPathHandlerSensorthings(provider, session).handle(path);
 
-        switch (holder.getContext()) {
-        case THINGS:
-            return new ThingPathHandler(provider, session).handle(path);
-        case FEATURES_OF_INTEREST:
-            return new FeatureOfInterestPathHandler(provider, session).handle(path);
-        case HISTORICAL_LOCATIONS:
-            return new HistoricalLocationPathHandler(provider, session).handle(path);
-        case LOCATIONS:
-            return new LocationPathHandler(provider, session).handle(path);
-
-        case OBSERVATIONS:
-            return new ObservationPathHandler(provider, session).handle(path);
-        case DATASTREAMS:
-            return new DatastreamPathHandler(provider, session).handle(path);
-        case OBSERVED_PROPERTIES:
-            return new ObservedPropertyPathHandler(provider, session).handle(path);
-        case SENSORS:
-            return new SensorPathHandler(provider, session).handle(path);
-
-        default:
-            throw new UnsupportedRuleException("Path of " + holder.getContext() + " is not yet supported");
+            case OBSERVATIONS:
+                return new ObservationPathHandlerSensorthings(provider, session).handle(path);
+            case DATASTREAMS:
+                return new DatastreamPathHandlerSensorthings(provider, session).handle(path);
+            case OBSERVED_PROPERTIES:
+                return new ObservedPropertyPathHandlerSensorthings(provider, session).handle(path);
+            case SENSORS:
+                return new SensorPathHandlerSensorthings(provider, session).handle(path);
+            }
         }
+        throw new UnsupportedRuleException("Path of " + holder.getContext() + " is not yet supported");
+    }
+
+    private boolean isSensorthingModel(final ProviderSnapshot provider) {
+        return eNS_URI.equals(provider.getModelPackageUri());
     }
 }

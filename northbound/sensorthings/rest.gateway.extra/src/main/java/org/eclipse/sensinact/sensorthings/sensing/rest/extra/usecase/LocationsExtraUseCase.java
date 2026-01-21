@@ -132,7 +132,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedLocation> request) {
         // delete location with link between location and thing
         String locationId = request.id();
-        ;
+
         AbstractSensinactCommand<Void> deleteLocationCommand = new AbstractSensinactCommand<Void>() {
 
             @Override
