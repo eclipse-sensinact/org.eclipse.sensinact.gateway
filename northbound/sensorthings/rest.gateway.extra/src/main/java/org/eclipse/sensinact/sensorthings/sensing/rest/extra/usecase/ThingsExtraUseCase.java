@@ -74,8 +74,8 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
         String id = request.id();
         ProviderSnapshot provider = providerUseCase.read(request.session(), id);
         if (provider != null) {
-            locationIds = getLocationIds(provider);
-            datastreamIds = getDatastreamIds(provider);
+            locationIds.addAll(getLocationIds(provider));
+            datastreamIds.addAll(getDatastreamIds(provider));
         }
 
         return DtoToModelMapper.toThingUpdates(request, id, locationIds, datastreamIds);

@@ -596,7 +596,7 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
                     .map(s -> s.substring(0, s.lastIndexOf('~'))).collect(Collectors.toList());
             assertTrue(allIds.size() >= nbRc, "Not enough observations returned");
             for (String below : below40PRefix) {
-                assertFalse(allIds.contains(below), below + " in result");
+                assertFalse(allIds.contains(below + "~test"), below + " in result");
             }
             for (String above : above40Prefix) {
                 assertTrue(allIds.contains(above + "~test"), above + " not in result");

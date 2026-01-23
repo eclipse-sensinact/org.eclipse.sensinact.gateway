@@ -282,27 +282,35 @@ public class ThingTest extends AbstractIntegrationTest {
         // Given
         String name = "testUpdateThing";
 
-        ExpandedLocation location1 = DtoFactory.getLocation(name + "1");
-        ExpandedLocation location2 = DtoFactory.getLocation(name + "2");
-        List<ExpandedLocation> locations = List.of(location1, location2);
-        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithLocations(name,
-                "testThing With Location and Datastream",
-                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), locations);
+        List<ExpandedLocation> locations = List.of(DtoFactory.getLocation(name + "1"));
 
-        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Locations", 201);
+        List<ExpandedDataStream> datastreams = List.of(DtoFactory.getDatastreamMinimal(name + "2"));
+
+        ExpandedThing dtoThing = DtoFactory.getExpandedThingWithDatastreamsLocations(name,
+                "testThing With Location and Datastream",
+                Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"), datastreams, locations);
+        JsonNode json = getJsonResponseFromPost(dtoThing, "/Things?$expand=Locations,Datastreams", 201);
         String idJson = getIdFromJson(json);
+        ServiceSnapshot service = serviceUseCase.read(session, idJson, DtoMapperSimple.SERVICE_THING);
+
+        assertTrue(DtoMapperSimple.getResourceField(service, "datastreamIds", List.class).size() > 0);
+        assertTrue(DtoMapperSimple.getResourceField(service, "locationIds", List.class).size() > 0);
 
         UtilsAssert.assertThing(dtoThing, json, true);
         // When
-        ExpandedThing dtoThingToUpdate = DtoFactory.getExpandedThingWithLocations(name,
+        ExpandedThing dtoThingToUpdate = DtoFactory.getExpandedThing(name,
                 "testThing With Location and Datastream update",
-                Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"), null);
+                Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"));
         getJsonResponseFromPut(dtoThingToUpdate, String.format("/Things(%s)", idJson), 204);
         // then
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idJson, "admin");
+        service = serviceUseCase.read(session, idJson, DtoMapperSimple.SERVICE_THING);
 
         assertEquals("testThing With Location and Datastream update",
                 DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class));
+        assertTrue(DtoMapperSimple.getResourceField(service, "datastreamIds", List.class).size() > 0);
+        assertTrue(DtoMapperSimple.getResourceField(service, "locationIds", List.class).size() > 0);
+
     }
 
     /**

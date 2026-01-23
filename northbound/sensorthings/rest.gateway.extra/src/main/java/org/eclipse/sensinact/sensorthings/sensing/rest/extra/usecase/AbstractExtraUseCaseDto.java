@@ -28,6 +28,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseC
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -44,6 +45,19 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
     protected final IAccessProviderUseCase providerUseCase;
     protected final IAccessServiceUseCase serviceUseCase;
     protected final GatewayThread gatewayThread;
+
+    public static String getLink(UriInfo uriInfo, String baseUri, String path) {
+        String sensorLink = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).build().toString();
+        return sensorLink;
+    }
+
+    public static String getLink(UriInfo uriInfo, String baseUri, String path, String id) {
+        if (id == null) {
+            id = "null";
+        }
+        String link = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).resolveTemplate("id", id).build().toString();
+        return link;
+    }
 
     protected void checkRequireField(ExtraUseCaseRequest<M> request) {
         try {

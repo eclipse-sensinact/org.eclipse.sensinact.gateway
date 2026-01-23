@@ -122,7 +122,7 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
         List<ProviderSnapshot> providers = listProvidersSeninact(criterion);
         return new ResultList<>(null, null,
-                providers.stream().map(
+                providers.stream().filter(p -> !"sensiNact".equals(p.getName())).map(
                         p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                         .toList());
     }
@@ -200,8 +200,8 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
             ICriterion filter, int localResultLimit) {
 
-        ResultList<Observation> list = HistoryResourceHelperSensinact.loadHistoricalObservations(userSession, application,
-                mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
+        ResultList<Observation> list = HistoryResourceHelperSensinact.loadHistoricalObservations(userSession,
+                application, mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
 
         if (list.value().isEmpty() && resourceSnapshot.isSet()) {
             list = new ResultList<Observation>(null, null, DtoMapper

@@ -45,11 +45,14 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Obse
     private ObservedProperty updateInMemoryObservedProperty(ExtraUseCaseRequest<ObservedProperty> request,
             ObservedProperty property) {
         ObservedProperty updateProp = request.model();
-        ObservedProperty createdProp = new ObservedProperty(null, request.id(),
+        String observedPropertyLink = getLink(request.uriInfo(), DtoMapperSimple.VERSION, "/ObservedProperties({id})",
+                request.id());
+        String datastreamLink = getLink(request.uriInfo(), observedPropertyLink, "Datastreams");
+        ObservedProperty createdProp = new ObservedProperty(observedPropertyLink, request.id(),
                 updateProp.name() != null ? updateProp.name() : property.name(),
                 updateProp.description() != null ? updateProp.description() : property.description(),
                 updateProp.definition() != null ? updateProp.definition() : property.definition(),
-                updateProp.properties() != null ? updateProp.properties() : property.properties(), null);
+                updateProp.properties() != null ? updateProp.properties() : property.properties(), datastreamLink);
         cacheObservedProperty.addDto(request.id(), createdProp);
         return createdProp;
     }

@@ -161,8 +161,8 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
             ICriterion filter, int localResultLimit) {
 
-        ResultList<Observation> list = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession, application,
-                mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
+        ResultList<Observation> list = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
+                application, mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
 
         if (list.value().isEmpty()) {
             list = new ResultList<Observation>(null, null, DtoMapper
@@ -242,6 +242,15 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
 
         return Response.created(createdUri).entity(createDto).build();
+    }
+
+    public ResultList<Thing> getThingsRef() {
+        ICriterion criterion = parseFilter(EFilterContext.THINGS);
+        List<ProviderSnapshot> providers = listProviders(criterion);
+        return new ResultList<>(null, null,
+                providers.stream().filter(p -> DtoMapperSimple.getThingService(p) != null).map(
+                        p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
+                        .toList());
     }
 
 }

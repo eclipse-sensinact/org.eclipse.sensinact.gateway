@@ -19,6 +19,7 @@ import java.util.function.Function;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
@@ -30,7 +31,6 @@ public class HistoricalLocationPathHandlerSensorthings extends AbstractPathHandl
 
     public HistoricalLocationPathHandlerSensorthings(final ProviderSnapshot provider, SensiNactSession session) {
         super(provider, session);
-
     }
 
     public Object handle(final String path) {
@@ -86,7 +86,8 @@ public class HistoricalLocationPathHandlerSensorthings extends AbstractPathHandl
 
     private Object subLocations(final String path) {
         // todo need to call from location provider with reviewed path
+        return new AnyMatch(getLocationsProviderFromThing(provider).stream()
+                .map(p -> new LocationPathHandlerSensorthings(p, session).handle(path)).toList());
 
-        return new LocationPathHandlerSensorthings(provider, session).handle(path);
     }
 }

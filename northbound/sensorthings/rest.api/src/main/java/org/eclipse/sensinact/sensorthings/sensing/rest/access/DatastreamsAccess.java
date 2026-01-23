@@ -17,6 +17,7 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
@@ -60,7 +61,7 @@ public interface DatastreamsAccess {
     @Path("Observations/$ref")
     @GET
     @RefFilter
-    default public ResultList<Self> getDatastreamObservationsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getDatastreamObservationsRef(@PathParam("id") String id) {
         ResultList<Observation> datastreamObservations = getDatastreamObservations(id);
         return new ResultList<>(datastreamObservations.count(), datastreamObservations.nextLink(),
                 datastreamObservations.value());
@@ -83,7 +84,8 @@ public interface DatastreamsAccess {
 
     @Path("Observations({id2})/FeatureOfInterest")
     @GET
-    public FeatureOfInterest getDatastreamObservationFeatureOfInterest(@PathParam("id") String id, @PathParam("id2") String id2);
+    public FeatureOfInterest getDatastreamObservationFeatureOfInterest(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("ObservedProperty")
     @GET

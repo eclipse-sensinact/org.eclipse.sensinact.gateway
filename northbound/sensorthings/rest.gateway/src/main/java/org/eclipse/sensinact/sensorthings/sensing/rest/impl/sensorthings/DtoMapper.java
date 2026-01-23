@@ -298,30 +298,32 @@ public class DtoMapper {
         Object val = t.getValue();
         if (val != null && val instanceof String) {
             ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(mapper, val);
-            String id = String.format("%s~%s~%s", resource.getService().getProvider().getName(), obs.id(),
-                    Long.toString(timestamp.toEpochMilli(), 16));
+            if (obs != null) {
+                String id = String.format("%s~%s", obs.id(), Long.toString(timestamp.toEpochMilli(), 16));
 
-            String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})")
-                    .resolveTemplate("id", id).build().toString();
-            String datastreamLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastream").build().toString();
-            String featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("FeatureOfInterest").build()
-                    .toString();
-            Observation observation = DtoMapperSimple.toObservation(mapper, id, t, selfLink, datastreamLink,
-                    featureOfInterestLink);
-            if (expansions.shouldExpand("Datastream", observation)) {
-                expansions.addExpansion("Datastream", observation,
-                        toDatastream(userSession, application, mapper, uriInfo,
-                                expansions.getExpansionSettings("Datastream"), filter,
-                                resource.getService().getProvider()));
-            }
+                String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})")
+                        .resolveTemplate("id", id).build().toString();
+                String datastreamLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Datastream").build().toString();
+                String featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("FeatureOfInterest")
+                        .build().toString();
+                Observation observation = DtoMapperSimple.toObservation(mapper, id, t, selfLink, datastreamLink,
+                        featureOfInterestLink);
 
-            if (expansions.shouldExpand("FeatureOfInterest", observation)) {
-                expansions.addExpansion("FeatureOfInterest", observation,
-                        toFeatureOfInterest(userSession, application, mapper, uriInfo,
-                                expansions.getExpansionSettings("FeatureOfInterest"), filter,
-                                resource.getService().getProvider()));
+                if (expansions.shouldExpand("Datastream", observation)) {
+                    expansions.addExpansion("Datastream", observation,
+                            toDatastream(userSession, application, mapper, uriInfo,
+                                    expansions.getExpansionSettings("Datastream"), filter,
+                                    resource.getService().getProvider()));
+                }
+
+                if (expansions.shouldExpand("FeatureOfInterest", observation)) {
+                    expansions.addExpansion("FeatureOfInterest", observation,
+                            toFeatureOfInterest(userSession, application, mapper, uriInfo,
+                                    expansions.getExpansionSettings("FeatureOfInterest"), filter,
+                                    resource.getService().getProvider()));
+                }
+                return Optional.of(observation);
             }
-            return Optional.of(observation);
         }
         return Optional.empty();
     }

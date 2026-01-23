@@ -66,7 +66,7 @@ public class FeatureOfInterestPathHandlerSensorthings extends AbstractPathHandle
         case "id":
         case "@iot.id":
 
-            return String.join("~", provider.getName(), (String) obs.id(), (String) foi.id());
+            return foi.id();
         case "name":
             return foi.name();
         case "description":

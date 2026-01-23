@@ -39,23 +39,21 @@ public class RefFilterImpl implements WriterInterceptor {
     public void aroundWriteTo(WriterInterceptorContext context) throws IOException, WebApplicationException {
         Object entity = context.getEntity();
 
-        if(entity instanceof ResultList) {
+        if (entity instanceof ResultList) {
             ResultList<? extends Self> resultList = (ResultList<?>) entity;
-            ResultList<Self> newEntity = new ResultList<>(resultList.count(),
-                    resultList.nextLink(), resultList.value().stream()
-                    .map(r -> new SelfOnly(r.selfLink()))
-                    .collect(toList()));
+            ResultList<Self> newEntity = new ResultList<>(resultList.count(), resultList.nextLink(),
+                    resultList.value().stream().map(r -> new SelfOnly(r.selfLink())).collect(toList()));
             context.setEntity(newEntity);
         } else if (entity instanceof Self) {
             Self self = (Self) entity;
             context.setEntity(new SelfOnly(self.selfLink()));
-        } else if(entity instanceof ObjectNode) {
+        } else if (entity instanceof ObjectNode) {
             ObjectNode node = (ObjectNode) entity;
-            if(!node.isArray()) {
+            if (!node.isArray()) {
                 node.retain("@iot.selfLink");
             } else {
                 ArrayNode array = (ArrayNode) entity;
-                for(int i = 0 ; i < array.size() ; i++) {
+                for (int i = 0; i < array.size(); i++) {
                     final JsonNode jsonNode = array.get(i);
                     array.set(i, ((ObjectNode) jsonNode).get("@iot.selfLink"));
                 }
@@ -67,5 +65,6 @@ public class RefFilterImpl implements WriterInterceptor {
         context.proceed();
     }
 
-    private record SelfOnly(String selfLink) implements Self {}
+    private record SelfOnly(String selfLink) implements Self {
+    }
 }

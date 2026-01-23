@@ -176,9 +176,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
                     if (parentResult.getFailure() == null) {
                         String obsStr = parentResult.getValue().getValue();
                         ExpandedObservation obs = parseObservation(request, obsStr);
-                        String observationId = DtoMapperSimple.extractSecondIdSegment(request.id());
-
-                        if (observationId == null || !observationId.equals(obs.id())) {
+                        if (request.id() == null || !request.id().startsWith((String) obs.id())) {
                             return pf.failed(new BadRequestException());
 
                         }

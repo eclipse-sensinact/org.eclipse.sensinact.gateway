@@ -212,7 +212,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         if (datastream.sensor() != null) {
             if (DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
                 String idSensor = DtoToModelMapper.getIdFromRecord(datastream.sensor());
-
+                if (idSensor == null) {
+                    throw new BadRequestException(String.format("sensor id is null"));
+                }
                 sensor = sensorCache.getDto(idSensor);
                 if (sensor == null) {
                     throw new BadRequestException(String.format("sensor id %s doesn't exists", idSensor));
@@ -240,7 +242,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
             if (DtoToModelMapper.isRecordOnlyField(foi, "id")) {
 
                 String idFoi = DtoToModelMapper.getIdFromRecord(foi);
-
+                if (idFoi == null) {
+                    throw new BadRequestException(String.format("foi id is null"));
+                }
                 featureOfInterest = foiCache.getDto(idFoi);
                 if (featureOfInterest == null) {
                     throw new BadRequestException(String.format("Feature of interest id %s doesn't exists", idFoi));
@@ -282,6 +286,9 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         if (datastream.observedProperty() != null) {
             if (DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
                 String idObservedProperty = DtoToModelMapper.getIdFromRecord(datastream.observedProperty());
+                if (idObservedProperty == null) {
+                    throw new BadRequestException(String.format("observedProperty id is null"));
+                }
                 observedProperty = observedPropertyCache.getDto(idObservedProperty);
                 if (observedProperty == null) {
                     throw new BadRequestException(

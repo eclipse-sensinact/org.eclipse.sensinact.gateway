@@ -228,7 +228,6 @@ class HistoryResourceHelperSensorthingsTest {
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
                     .thenReturn(count);
             SensorthingsFilterComponent filterComponent = new SensorthingsFilterComponent();
-            filterComponent.setSession(userSession);
             ICriterion filter = filterComponent.parseFilter(
                     String.format("result eq 'value1' or phenomenonTime lt %s", now.minus(1, DAYS)), OBSERVATIONS);
 
