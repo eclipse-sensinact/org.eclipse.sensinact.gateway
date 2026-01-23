@@ -5,7 +5,7 @@
     { "id": "org.eclipse.sensinact.gateway.filters:filters.core:${gateway.version}" },
     { "id": "org.antlr:antlr4-runtime:4.12.0" },
     { "id": "org.locationtech.spatial4j:spatial4j:0.8" },
-    { "id": "org.eclipse.sensinact.gateway.sensorthings:dto:${gateway.version}" },
+    { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:dto:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.sensorthings:extended:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:filter:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:rest.api:${gateway.version}" },
