@@ -108,9 +108,9 @@ class HistoryResourceHelperSensorthingsTest {
         return mapper;
     }
 
-    private String getObservation(String name, Object result, Instant instant) {
+    private String getObservation(String id, Object result, Instant instant) {
 
-        ExpandedObservation obs = new ExpandedObservation(name, name,
+        ExpandedObservation obs = new ExpandedObservation(null, id,
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
                 null, null, null, null,
@@ -173,8 +173,8 @@ class HistoryResourceHelperSensorthingsTest {
                     .thenReturn(count);
 
             List<TimedValue<?>> timedValues = Arrays.asList(
-                    new DefaultTimedValue<>(getObservation("testResource", "value1", now), now),
-                    new DefaultTimedValue<>(getObservation("testResource", "value2", now), now));
+                    new DefaultTimedValue<>(getObservation("testProvider~testResource", "value1", now), now),
+                    new DefaultTimedValue<>(getObservation("testProvider~testResource", "value2", now), now));
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(timedValues);
 
@@ -228,18 +228,21 @@ class HistoryResourceHelperSensorthingsTest {
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
                     .thenReturn(count);
             SensorthingsFilterComponent filterComponent = new SensorthingsFilterComponent();
+            filterComponent.setSession(userSession);
             ICriterion filter = filterComponent.parseFilter(
                     String.format("result eq 'value1' or phenomenonTime lt %s", now.minus(1, DAYS)), OBSERVATIONS);
 
             List<TimedValue<?>> timedValues = Arrays.asList(
-                    new DefaultTimedValue<>(getObservation("testResource", "value1", now), now),
-                    new DefaultTimedValue<>(getObservation("testResource", "value2", now), now));
+                    new DefaultTimedValue<>(getObservation("testProvider~testResource", "value1", now), now),
+                    new DefaultTimedValue<>(getObservation("testProvider~testResource", "value2", now), now));
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
-                    .thenReturn(timedValues, timedValues, List.of(
-                            new DefaultTimedValue<>(getObservation("testResource", "value1", now.minus(3, DAYS)),
+                    .thenReturn(timedValues, timedValues,
+                            List.of(new DefaultTimedValue<>(
+                                    getObservation("testProvider~testResource", "value1", now.minus(3, DAYS)),
                                     now.minus(3, DAYS)),
-                            new DefaultTimedValue<>(getObservation("testResource", "value3", now.minus(3, DAYS)),
-                                    now.minus(3, DAYS))),
+                                    new DefaultTimedValue<>(
+                                            getObservation("testProvider~testResource", "value3", now.minus(3, DAYS)),
+                                            now.minus(3, DAYS))),
                             List.of());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
