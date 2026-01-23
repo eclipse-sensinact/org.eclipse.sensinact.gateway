@@ -123,14 +123,13 @@ public class DtoMapper {
         Thing thing = new Thing(selfLink, id, name, description, null, datastreamsLink, historicalLocationsLink,
                 locationsLink);
         if (expansions.shouldExpand("Datastreams", thing)) {
-            expansions.addExpansion("Datastreams", thing, DatastreamsDelegateSensinact.getDataStreams(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, provider));
+            expansions.addExpansion("Datastreams", thing, DatastreamsDelegateSensinact.getDataStreams(userSession,
+                    application, mapper, uriInfo, expansions.getExpansionSettings("Datastreams"), filter, provider));
         }
 
         if (expansions.shouldExpand("HistoricalLocations", thing)) {
-            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession,
-                    application, mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter,
-                    provider);
+            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession, application,
+                    mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
             if (historicalLocation.isPresent()) {
                 ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", thing, list);
@@ -172,9 +171,8 @@ public class DtoMapper {
             expansions.addExpansion("Things", location, list);
         }
         if (expansions.shouldExpand("HistoricalLocations", location)) {
-            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession,
-                    application, mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter,
-                    provider);
+            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession, application,
+                    mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
             if (historicalLocation.isPresent()) {
                 ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", location, list);

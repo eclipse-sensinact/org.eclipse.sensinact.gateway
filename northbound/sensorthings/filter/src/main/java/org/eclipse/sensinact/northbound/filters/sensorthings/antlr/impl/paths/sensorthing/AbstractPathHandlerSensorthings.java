@@ -41,6 +41,9 @@ public class AbstractPathHandlerSensorthings {
 
     public ProviderSnapshot getThingProviderFromDatastream(ProviderSnapshot datastremaProvider) {
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(datastremaProvider);
+        if (service == null) {
+            return null;
+        }
         String thingId = DtoMapperSimple.getResourceField(service, "thingId", String.class);
 
         return session.providerSnapshot(thingId, EnumSet.noneOf(SnapshotOption.class));
@@ -48,15 +51,16 @@ public class AbstractPathHandlerSensorthings {
 
     public List<ProviderSnapshot> getDatastreamsProviderFromThing(ProviderSnapshot thingProvider) {
         ServiceSnapshot service = DtoMapperSimple.getThingService(thingProvider);
+        if (service == null) {
+            return List.of();
+        }
         List<?> datastreamIds = DtoMapperSimple.getResourceField(service, "datastreamIds", List.class);
 
         return datastreamIds.stream()
                 .map(id -> session.providerSnapshot((String) id, EnumSet.noneOf(SnapshotOption.class))).toList();
     }
 
-    protected ExpandedObservation
-
-            getObservationFromService(final ServiceSnapshot service) {
+    protected ExpandedObservation getObservationFromService(final ServiceSnapshot service) {
         String obsStr = DtoMapperSimple.getResourceField(service, "lastObservation", String.class);
         ExpandedObservation obs;
         try {
@@ -69,6 +73,9 @@ public class AbstractPathHandlerSensorthings {
 
     public List<ProviderSnapshot> getLocationsProviderFromThing(ProviderSnapshot thingProvider) {
         ServiceSnapshot service = DtoMapperSimple.getThingService(thingProvider);
+        if (service == null) {
+            return List.of();
+        }
         List<?> locationIds = DtoMapperSimple.getResourceField(service, "locationIds", List.class);
         return locationIds.stream()
                 .map(id -> session.providerSnapshot((String) id, EnumSet.noneOf(SnapshotOption.class))).toList();

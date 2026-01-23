@@ -44,8 +44,10 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<Sensor, Object>
         Sensor sensor = request.model();
         checkRequireField(request);
         String sensorId = request.id();
-        Sensor createdSensor = new Sensor(null, sensorId, sensor.name(), sensor.description(), sensor.encodingType(),
-                sensor.metadata(), sensor.properties(), null);
+        String sensorLink = getLink(request.uriInfo(), DtoMapperSimple.VERSION, "/Sensors({id})", sensorId);
+        String datastreamLink = getLink(request.uriInfo(), sensorLink, "Datastreams");
+        Sensor createdSensor = new Sensor(sensorLink, sensorId, sensor.name(), sensor.description(),
+                sensor.encodingType(), sensor.metadata(), sensor.properties(), datastreamLink);
         cacheSensor.addDto(sensorId, createdSensor);
         return new ExtraUseCaseResponse<Object>(sensorId, createdSensor);
 

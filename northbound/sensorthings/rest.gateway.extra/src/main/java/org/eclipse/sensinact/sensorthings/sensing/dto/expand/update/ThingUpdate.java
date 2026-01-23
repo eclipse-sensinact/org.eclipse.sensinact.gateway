@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
+import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_ALWAYS;
+
 import static org.eclipse.sensinact.core.annotation.dto.MapAction.USE_KEYS_AS_FIELDS;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
 
@@ -41,8 +43,8 @@ public record ThingUpdate(@Model EClass model, @Provider String providerId,
         @Service("thing") @Resource("id") @Metadata(onMap = {
                 USE_KEYS_AS_FIELDS }) Map<String, Object> properties,
         // link to thing
-        @Service("thing") @Resource("locationIds") @Data(onDuplicate = UPDATE_IF_DIFFERENT) List<String> locationIds,
-        @Service("thing") @Resource("datastreamIds") @Data(onDuplicate = UPDATE_IF_DIFFERENT) List<String> datastreamIds)
+        @Service("thing") @Resource("locationIds") @Data(onDuplicate = UPDATE_ALWAYS) List<String> locationIds,
+        @Service("thing") @Resource("datastreamIds") @Data(onDuplicate = UPDATE_ALWAYS) List<String> datastreamIds)
         implements SensorThingsUpdate{
 
     public ThingUpdate {

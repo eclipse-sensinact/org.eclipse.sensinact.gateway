@@ -618,6 +618,7 @@ public class DtoMapperSimple {
         if (resource != null && resource.getValue() != null) {
             return expectedType.cast(resource.getValue().getValue());
         }
+
         if (List.class.isAssignableFrom(expectedType)) {
             return expectedType.cast(List.of());
         }

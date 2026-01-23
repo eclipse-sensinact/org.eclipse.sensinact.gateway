@@ -82,7 +82,8 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
                 .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
                         .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
                 .map(s -> s.getProvider()).toList();
-        return new AnyMatch(thingProviders.stream().map(p -> new ThingPathHandlerSensorthings(p, session).handle(path)).toList());
+        return new AnyMatch(
+                thingProviders.stream().map(p -> new ThingPathHandlerSensorthings(p, session).handle(path)).toList());
     }
 
     private Object subHistoricalLocations(final String path) {
@@ -90,8 +91,8 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
                 .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
                         .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
                 .map(s -> s.getProvider()).toList();
-        return new AnyMatch(
-                thingProviders.stream().map(p -> new HistoricalLocationPathHandlerSensorthings(p, session).handle(path)).toList());
+        return new AnyMatch(thingProviders.stream()
+                .map(p -> new HistoricalLocationPathHandlerSensorthings(p, session).handle(path)).toList());
 
     }
 }

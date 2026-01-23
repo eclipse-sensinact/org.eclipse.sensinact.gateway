@@ -163,7 +163,7 @@ public class DtoFactory {
     public static ExpandedObservation getObservationLinkDatastream(String name, RefId datastreamRefId,
             FeatureOfInterest featureOfInterest) {
 
-        return new ExpandedObservation(null, "obs2", Instant.now(), Instant.now(), 5.0, "test", null, null, null, null,
+        return new ExpandedObservation(null, null, Instant.now(), Instant.now(), 5.0, "test", null, null, null, null,
                 null, datastreamRefId, featureOfInterest);
 
     }

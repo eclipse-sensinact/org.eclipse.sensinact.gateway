@@ -60,8 +60,8 @@ public class TopFilter implements ContainerRequestFilter, ContainerResponseFilte
             Integer nextSkip = (skip == null) ? top : top + skip;
             String nextLink = null;
             if (top < size) {
-                nextLink = requestContext.getUriInfo().getRequestUriBuilder()
-                        .replaceQueryParam("$skip", nextSkip).build().toString();
+                nextLink = requestContext.getUriInfo().getRequestUriBuilder().replaceQueryParam("$skip", nextSkip)
+                        .build().toString();
             }
             responseContext.setEntity(new ResultList<>(resultList.count(), nextLink, value));
         }

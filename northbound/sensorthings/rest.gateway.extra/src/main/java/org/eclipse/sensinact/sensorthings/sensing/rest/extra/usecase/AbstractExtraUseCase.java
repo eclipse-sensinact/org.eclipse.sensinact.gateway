@@ -56,6 +56,10 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+        if (existingObservation == null) {
+            existingObservation = new ExpandedObservation(null, request.id(), null, null, null, null, null, null, null,
+                    null, null, null, null);
+        }
         return existingObservation;
     }
 

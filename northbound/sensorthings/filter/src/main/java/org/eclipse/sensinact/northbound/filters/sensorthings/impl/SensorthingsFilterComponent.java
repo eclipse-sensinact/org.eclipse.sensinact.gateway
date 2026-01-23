@@ -49,9 +49,8 @@ public class SensorthingsFilterComponent implements IFilterParser, ISensorthings
     SensiNactSession session;
 
     public SensiNactSession getSession() {
-        if (session == null) {
+        if (session == null || session.isExpired())
             session = sessionManager.getDefaultSession(UserInfo.ANONYMOUS);
-        }
         return session;
     }
 

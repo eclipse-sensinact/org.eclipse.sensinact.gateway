@@ -243,6 +243,8 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         createDatastream(providerDatastream, provider);
         createLocation(providerLocation);
         // Get the new things
+        ResultList<Thing> refIds = utils.queryJson("/Things/$ref", RESULT_THINGS);
+        assertNotNull(refIds);
         ResultList<Thing> things = utils.queryJson("/Things", RESULT_THINGS);
         assertNotNull(things);
         assertFalse(things.value().isEmpty(), "No thing found");
@@ -326,6 +328,8 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         createLocation(providerLocation);
 
         // Get the new locations
+        ResultList<Location> refIds = utils.queryJson("/Locations/$ref", RESULT_LOCATIONS);
+        assertNotNull(refIds);
         ResultList<Location> locations = utils.queryJson("/Locations", RESULT_LOCATIONS);
         assertNotNull(locations);
         assertFalse(locations.value().isEmpty(), "No location found");
@@ -364,6 +368,9 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
                 "{\"coordinates\": [5.7685,45.192],\"type\": \"Point\"}");
 
         // Get the new locations
+        ResultList<HistoricalLocation> refIds = utils.queryJson("/Locations/$ref", RESULT_HISTORICAL_LOCATIONS);
+        assertNotNull(refIds);
+
         ResultList<HistoricalLocation> historicalLocations = utils.queryJson("/HistoricalLocations",
                 RESULT_HISTORICAL_LOCATIONS);
         assertNotNull(historicalLocations);
@@ -400,6 +407,9 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         createLocation(providerLocation);
 
         // Get the new locations
+        ResultList<Datastream> refIds = utils.queryJson("/Datastreams/$ref", RESULT_DATASTREAMS);
+        assertNotNull(refIds);
+
         ResultList<Datastream> datastreams = utils.queryJson("/Datastreams", RESULT_DATASTREAMS);
         assertNotNull(datastreams);
         assertFalse(datastreams.value().isEmpty(), "No datastream found");
@@ -456,6 +466,8 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         createDatastream(providerDatastream, provider);
 
         // Get the new locations
+        ResultList<Sensor> refIds = utils.queryJson("/Sensors/$ref", RESULT_SENSORS);
+        assertNotNull(refIds);
         ResultList<Sensor> sensors = utils.queryJson("/Sensors", RESULT_SENSORS);
         assertNotNull(sensors);
         assertFalse(sensors.value().isEmpty(), "No sensor found");
@@ -495,6 +507,8 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         createLocation(providerLocation);
 
         // Get the new locations
+        ResultList<Observation> refIds = utils.queryJson("/Observations/$ref", RESULT_OBSERVATIONS);
+        assertNotNull(refIds);
         ResultList<Observation> observations = utils.queryJson("/Observations", RESULT_OBSERVATIONS);
         assertNotNull(observations);
         assertFalse(observations.value().isEmpty(), "No observation found");
@@ -531,6 +545,10 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         createLocation(providerLocation);
 
         // Get the new locations
+        ResultList<ObservedProperty> refIds = utils.queryJson("/ObservedProperties/$ref",
+                new TypeReference<ResultList<ObservedProperty>>() {
+                });
+        assertNotNull(refIds);
         ResultList<ObservedProperty> observedProperties = utils.queryJson("/ObservedProperties",
                 new TypeReference<ResultList<ObservedProperty>>() {
                 });
@@ -571,6 +589,10 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         createThing(provider, List.of(), List.of(providerDatastream));
         createDatastream(providerDatastream, provider);
         // Get the new locations
+        ResultList<FeatureOfInterest> refIds = utils.queryJson("/FeaturesOfInterest/$ref",
+                new TypeReference<ResultList<FeatureOfInterest>>() {
+                });
+        assertNotNull(refIds);
         ResultList<FeatureOfInterest> features = utils.queryJson("/FeaturesOfInterest",
                 new TypeReference<ResultList<FeatureOfInterest>>() {
                 });

@@ -16,9 +16,9 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.RefFilter;
 
@@ -55,9 +55,9 @@ public interface FeaturesOfInterestAccess {
     @Path("Observations/$ref")
     @GET
     @RefFilter
-    default public ResultList<Self> getFeatureOfInterestObservationsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getFeatureOfInterestObservationsRef(@PathParam("id") String id) {
         ResultList<Observation> featureOfInterestObservations = getFeatureOfInterestObservations(id);
-        return new ResultList<Self>(featureOfInterestObservations.count(), featureOfInterestObservations.nextLink(),
+        return new ResultList<Id>(featureOfInterestObservations.count(), featureOfInterestObservations.nextLink(),
                 featureOfInterestObservations.value());
     }
 
@@ -68,17 +68,20 @@ public interface FeaturesOfInterestAccess {
     @Path("Observations({id2})/{prop}")
     @GET
     @PropFilter
-    default public Observation getFeatureOfInterestObservationsProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+    default public Observation getFeatureOfInterestObservationsProp(@PathParam("id") String id,
+            @PathParam("id2") String id2) {
         return getFeatureOfInterestObservation(id, id2);
     }
 
     @Path("Observations({id2})/Datastream")
     @GET
-    public Datastream getFeatureOfInterestObservationDatastream(@PathParam("id") String id, @PathParam("id2") String id2);
+    public Datastream getFeatureOfInterestObservationDatastream(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Observations({id2})/FeatureOfInterest")
     @GET
-    default public FeatureOfInterest getFeatureOfInterestObservationFeatureOfInterest(@PathParam("id") String id, @PathParam("id2") String id2) {
+    default public FeatureOfInterest getFeatureOfInterestObservationFeatureOfInterest(@PathParam("id") String id,
+            @PathParam("id2") String id2) {
         return getFeatureOfInterest(id);
     }
 

@@ -183,7 +183,8 @@ public class AbstractIntegrationTest {
     protected void createObservation(String provider, String thingId, Object value, Instant valueInstant) {
 
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation",
-                getObservation("test", value, getFeatureOfInterest("test"), valueInstant), valueInstant);
+                getObservation(provider + "~test", value, getFeatureOfInterest(provider + "~test~test"), valueInstant),
+                valueInstant);
 
     }
 
@@ -233,9 +234,9 @@ public class AbstractIntegrationTest {
 
     }
 
-    public static String getObservation(String name, Object result, FeatureOfInterest foi, Instant instant) {
+    public static String getObservation(String id, Object result, FeatureOfInterest foi, Instant instant) {
 
-        ExpandedObservation obs = new ExpandedObservation(name, name,
+        ExpandedObservation obs = new ExpandedObservation(null, id,
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
                 null, null, null, null, foi);

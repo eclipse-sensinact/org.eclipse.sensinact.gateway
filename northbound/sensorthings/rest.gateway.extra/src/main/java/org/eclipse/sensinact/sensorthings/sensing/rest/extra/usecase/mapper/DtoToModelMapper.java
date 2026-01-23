@@ -79,10 +79,9 @@ public class DtoToModelMapper {
      * @return
      */
     public static String getIdFromRecord(Object record) {
-        Object field = DtoToModelMapper.getRecordField(record, "id");
-        Object id = null;
-        if (field instanceof Map) {
-            id = ((Map<?, ?>) field).values().stream().findFirst().get();
+        Object id = DtoToModelMapper.getRecordField(record, "id");
+        if (id instanceof Map) {
+            id = ((Map<?, ?>) id).values().stream().findFirst().get();
         }
         return id instanceof String ? (String) id : null;
 
@@ -304,9 +303,7 @@ public class DtoToModelMapper {
         String description = ds != null ? ds.description() : null;
 
         // --- Sensor ---
-        String sensorId = sensor != null && !isRecordOnlyField(sensor, "id")
-                ? sanitizeId(sensor.id() != null ? sensor.id() : sensor.name())
-                : null;
+        String sensorId = sensor != null && !isRecordOnlyField(sensor, "id") ? DtoToModelMapper.getNewId(sensor) : null;
         String sensorName = sensor != null ? sensor.name() : null;
         String sensorDescription = sensor != null ? sensor.description() : null;
         String sensorEncodingType = sensor != null ? sensor.encodingType() : null;
@@ -315,7 +312,7 @@ public class DtoToModelMapper {
 
         // --- ObservedProperty ---
         String observedPropertyId = observedProperty != null && !isRecordOnlyField(observedProperty, "id")
-                ? sanitizeId(observedProperty.id() != null ? observedProperty.id() : observedProperty.name())
+                ? DtoToModelMapper.getNewId(observedProperty)
                 : null;
         String observedPropertyName = observedProperty != null ? observedProperty.name() : null;
         String observedPropertyDescription = observedProperty != null ? observedProperty.description() : null;
@@ -334,8 +331,7 @@ public class DtoToModelMapper {
         if (lastObservationReceived != null && lastObservation != null) {
 
             String observationId = lastObservationReceived.id() != null ? (String) lastObservationReceived.id()
-                    : String.format("%s-%d", lastObservationReceived.result().toString(),
-                            String.valueOf(Instant.now().toEpochMilli()));
+                    : String.format("%s~%s", providerId, getNewId(obs));
             Instant phenomenonTime = lastObservationReceived.phenomenonTime() != null
                     ? lastObservationReceived.phenomenonTime()
                     : lastObservation.phenomenonTime();

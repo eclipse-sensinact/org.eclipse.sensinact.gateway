@@ -16,6 +16,7 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
@@ -56,7 +57,7 @@ public interface HistoricalLocationsAccess {
     @Path("Locations/$ref")
     @GET
     @RefFilter
-    default public ResultList<Self> getHistoricalLocationLocationsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getHistoricalLocationLocationsRef(@PathParam("id") String id) {
         ResultList<Location> historicalLocationLocations = getHistoricalLocationLocations(id);
         return new ResultList<>(historicalLocationLocations.count(), historicalLocationLocations.nextLink(),
                 historicalLocationLocations.value());
@@ -69,17 +70,20 @@ public interface HistoricalLocationsAccess {
     @Path("Locations({id2})/{prop}")
     @GET
     @PropFilter
-    default public Location getHistoricalLocationLocationProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+    default public Location getHistoricalLocationLocationProp(@PathParam("id") String id,
+            @PathParam("id2") String id2) {
         return getHistoricalLocationLocation(id, id2);
     }
 
     @Path("Locations({id2})/Things")
     @GET
-    public ResultList<Thing> getHistoricalLocationLocationThings(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ResultList<Thing> getHistoricalLocationLocationThings(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Locations({id2})/HistoricalLocations")
     @GET
-    public ResultList<HistoricalLocation> getHistoricalLocationLocationHistoricalLocations(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ResultList<HistoricalLocation> getHistoricalLocationLocationHistoricalLocations(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Thing")
     @GET
