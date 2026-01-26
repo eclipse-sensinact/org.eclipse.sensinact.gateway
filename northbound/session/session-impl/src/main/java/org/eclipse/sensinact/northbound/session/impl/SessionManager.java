@@ -134,8 +134,10 @@ public class SessionManager
         int activity_check_interval() default 60;
 
         /**
-         * Minimal interval in seconds between session expiration and activity check (defaults to 65 seconds).
-         * The activity check will not be scheduled if the expiry is greater than this threshold.
+         * Minimal interval in seconds between session expiration and activity check
+         * (defaults to 65 seconds).
+         * The activity check will not be scheduled if the expiry is greater than this
+         * threshold.
          */
         int activity_check_threshold() default 65;
 
@@ -217,10 +219,20 @@ public class SessionManager
                     activityCheckPeriod, TimeUnit.SECONDS);
 
             sessionActivityThreshold = Duration.ofSeconds(
-                    config.activity_check_threshold() > 0 ? config.activity_check_threshold() : 10);
+                    Math.max(config.activity_check_threshold(), activityCheckPeriod + 1));
 
-            sessionActivityExtension = Duration.ofSeconds(
-                    config.activity_check_extension() > 0 ? config.activity_check_extension() : expiry);
+            long activityExtension = config.activity_check_extension();
+            if (activityExtension <= 0) {
+                LOG.debug("Using expiry time {}s as session activity extension", expiry);
+                activityExtension = expiry;
+            } else if (activityExtension < activityCheckPeriod) {
+                LOG.warn(
+                        "Session activity extension {}s is lower than activity check interval {}s. Using the latter as extension",
+                        activityExtension, activityCheckPeriod);
+                activityExtension = activityCheckPeriod;
+            }
+
+            sessionActivityExtension = Duration.ofSeconds(activityExtension);
             LOG.debug(
                     "Setting up activity check to run every {} seconds. Check threshold set to {}. Session extension set to {}",
                     activityCheckPeriod, sessionActivityThreshold, sessionActivityExtension);
