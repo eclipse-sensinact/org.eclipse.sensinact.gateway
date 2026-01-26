@@ -245,7 +245,11 @@ public class SessionManager
         }
 
         synchronized (lock) {
-            doCheck();
+            if (!active) {
+                // Silent check as this method can be called by session upon component
+                // invalidation
+                return;
+            }
 
             // Remove references to the session
             userDefaultSessionIds.remove(userId, sessionId);
