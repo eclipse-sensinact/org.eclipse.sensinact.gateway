@@ -18,6 +18,7 @@ import static org.osgi.service.component.annotations.ReferenceCardinality.OPTION
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.authorization.Authorizer;
@@ -36,6 +40,7 @@ import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionActivityChecker;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -58,26 +63,91 @@ public class SessionManager
 
     private static final Logger LOG = LoggerFactory.getLogger(SessionManager.class);
 
+    /**
+     * Gateway Thread
+     */
     @Reference
     GatewayThread thread;
 
+    /**
+     * Lock object for synchronizing access to the session maps
+     */
     private final Object lock = new Object();
 
+    /**
+     * Maps session ID to its session implementation
+     */
     private final Map<String, SensiNactSessionImpl> sessions = new HashMap<>();
 
+    /**
+     * Maps user ID to a set of session IDs
+     */
     private final Map<String, Set<String>> sessionsByUser = new HashMap<>();
 
+    /**
+     * Maps user ID to its default session ID
+     */
     private final Map<String, String> userDefaultSessionIds = new HashMap<>();
 
+    /**
+     * Authorization Engine
+     */
     private AuthorizationEngine authEngine;
 
+    /**
+     * Component activation flag
+     */
     private boolean active;
 
+    /**
+     * Component configuration
+     */
     private Config config;
 
+    /**
+     * Scheduler for session expiration checks
+     */
+    private ScheduledExecutorService activityCheckScheduler;
+
+    /**
+     * Session lifespan extension upon positive activity check
+     */
+    private Duration sessionActivityExtension;
+
+    /**
+     * Threshold to trigger to the activity check
+     */
+    private Duration sessionActivityThreshold;
+
+    /**
+     * Definition of the component configuration properties
+     */
     public @interface Config {
+        /**
+         * Session expiry time in seconds (defaults to 10 minutes)
+         */
         int expiry() default 600;
 
+        /**
+         * Interval in seconds between two activity checks (defaults to 60 seconds)
+         */
+        int activity_check_interval() default 60;
+
+        /**
+         * Minimal interval in seconds between session expiration and activity check (defaults to 10 seconds).
+         * The activity check will not be scheduled if the expiry is greater than this threshold.
+         */
+        int activity_check_threshold() default 10;
+
+        /**
+         * Session lifespan extension in seconds upon positive activity check (defaults
+         * to expiry time)
+         */
+        int activity_check_extension() default -1;
+
+        /**
+         * Default authorization policy (defaults to {@link DefaultAuthPolicy#DENY_ALL})
+         */
         DefaultAuthPolicy auth_policy() default DefaultAuthPolicy.DENY_ALL;
     }
 
@@ -124,10 +194,38 @@ public class SessionManager
 
     @Activate
     void start(Config config) {
+        final int expiry = config.expiry();
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Starting the Session Manager with session lifetime {} and default authorization policy {}",
-                    config.expiry(), config.auth_policy());
+            LOG.debug("Starting the Session Manager with session lifetime {}s and default authorization policy {}",
+                    expiry, config.auth_policy());
         }
+
+        // Start the scheduler for session expiration checks
+        sessionActivityExtension = null;
+        sessionActivityThreshold = null;
+        final long activityCheckPeriod = config.activity_check_interval();
+        if (expiry <= 0 || activityCheckPeriod <= 0) {
+            LOG.debug("Activity checker disabled");
+        } else if (activityCheckPeriod > expiry - 1) {
+            LOG.warn("Activity check interval too long ({}) compared to expiry ({}). Disabling it.",
+                    activityCheckPeriod, expiry);
+        } else {
+            // Initialize the activity checker
+            this.activityCheckScheduler = Executors.newSingleThreadScheduledExecutor(
+                    r -> new Thread(r, "sensinact-session-activity-checker"));
+            this.activityCheckScheduler.scheduleAtFixedRate(this::checkSessionsLiveness, activityCheckPeriod,
+                    activityCheckPeriod, TimeUnit.SECONDS);
+
+            sessionActivityThreshold = Duration.ofSeconds(
+                    config.activity_check_threshold() > 0 ? config.activity_check_threshold() : 10);
+
+            sessionActivityExtension = Duration.ofSeconds(
+                    config.activity_check_extension() > 0 ? config.activity_check_extension() : expiry);
+            LOG.debug(
+                    "Setting up activity check to run every {} seconds. Check threshold set to {}. Session extension set to {}",
+                    activityCheckPeriod, sessionActivityThreshold, sessionActivityExtension);
+        }
+
         synchronized (lock) {
             active = true;
             this.config = config;
@@ -139,6 +237,13 @@ public class SessionManager
         if (LOG.isDebugEnabled()) {
             LOG.debug("Shutting down the session manager");
         }
+
+        // Stop the scheduler for session expiration checks
+        if (this.activityCheckScheduler != null) {
+            this.activityCheckScheduler.shutdownNow();
+            this.activityCheckScheduler = null;
+        }
+
         List<SensiNactSessionImpl> toInvalidate;
         synchronized (lock) {
             active = false;
@@ -146,6 +251,8 @@ public class SessionManager
             sessions.clear();
             sessionsByUser.clear();
             userDefaultSessionIds.clear();
+            sessionActivityExtension = null;
+            sessionActivityThreshold = null;
         }
         toInvalidate.forEach(SensiNactSession::expire);
     }
@@ -164,6 +271,67 @@ public class SessionManager
         if (!active) {
             throw new IllegalStateException("The session manager is closed");
         }
+    }
+
+    /**
+     * Checks the liveness of all sessions with an activity checker
+     */
+    private void checkSessionsLiveness() {
+        final Duration extension = this.sessionActivityExtension;
+        if (extension == null) {
+            // Nothing to do
+            return;
+        }
+
+        final List<SensiNactSessionImpl> sessionsToCheck = new ArrayList<>();
+        synchronized (lock) {
+            doCheck();
+
+            try {
+                final Instant checkTime = Instant.now();
+
+                for (SensiNactSessionImpl session : List.copyOf(sessions.values())) {
+                    // Expiration checks update the sessions maps (removing expired sessions),
+                    // hence the use of an intermediate copy instead of a view
+                    Instant expiry = session.getExpiry();
+                    if (expiry != null
+                            && session.hasActivityChecker()
+                            && expiry.minus(sessionActivityThreshold).isBefore(checkTime)) {
+                        sessionsToCheck.add(session);
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Error collecting sessions to check", e);
+                return;
+            }
+        }
+
+        if (sessionsToCheck.isEmpty()) {
+            return;
+        }
+
+        sessionsToCheck.forEach(s -> s.checkActivity(isActive -> {
+            if (!active) {
+                // Session manager is stopped, do nothing
+                return;
+            }
+
+            if (s.isExpired()) {
+                // Session already expired, do "nothing" (the call might have triggered the
+                // expiration call chain)
+                return;
+            }
+
+            if (isActive) {
+                try {
+                    // Session is active and not expired, extend it
+                    s.extend(extension);
+                } catch (Exception e) {
+                    // Extension can fail if we were nanoseconds away from expiration
+                    LOG.error("Error extending session {} expiry", s.getSessionId(), e);
+                }
+            }
+        }));
     }
 
     @Override
@@ -337,7 +505,7 @@ public class SessionManager
     }
 
     @Override
-    public SensiNactSession createNewSession(UserInfo user) {
+    public SensiNactSession createNewSession(UserInfo user, SensiNactSessionActivityChecker activityChecker) {
         Objects.requireNonNull(user);
 
         if (LOG.isDebugEnabled()) {
@@ -378,7 +546,8 @@ public class SessionManager
             }
         }
 
-        final SensiNactSessionImpl session = new SensiNactSessionImpl(user, preAuthorizer, authorizer, thread, expiry);
+        final SensiNactSessionImpl session = new SensiNactSessionImpl(user, preAuthorizer, authorizer, thread, expiry,
+                activityChecker);
         String sessionId = session.getSessionId();
 
         // Add an expiration listener to clean up session when explicitly expired
@@ -456,7 +625,7 @@ public class SessionManager
     }
 
     @Override
-    public SensiNactSession createNewAnonymousSession() {
-        return createNewSession(UserInfo.ANONYMOUS);
+    public SensiNactSession createNewAnonymousSession(SensiNactSessionActivityChecker activityChecker) {
+        return createNewSession(UserInfo.ANONYMOUS, activityChecker);
     }
 }

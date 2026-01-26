@@ -36,6 +36,7 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -82,6 +83,7 @@ import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionActivityChecker;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionExpirationListener;
 import org.eclipse.sensinact.northbound.session.ServiceDescription;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableLinkedProviderSnapshot;
@@ -113,6 +115,11 @@ public class SensiNactSessionImpl implements SensiNactSession {
      */
     private final List<SensiNactSessionExpirationListener> expirationListeners = new ArrayList<>();
 
+    /**
+     * Session activity checker
+     */
+    private final SensiNactSessionActivityChecker activityChecker;
+
     private final GatewayThread thread;
 
     private final UserInfo user;
@@ -122,12 +129,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
     private final PreAuthorizer preAuthorizer;
 
     public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer preAuthorizer, final Authorizer authorizer,
-            final GatewayThread thread, final Duration expiry) {
+            final GatewayThread thread, final Duration expiry, final SensiNactSessionActivityChecker activityChecker) {
         this.user = user;
         this.preAuthorizer = Objects.requireNonNull(preAuthorizer, "No PreAuthorizer given");
         this.authorizer = Objects.requireNonNull(authorizer, "No Authorizer given");
         this.thread = thread;
-
+        this.activityChecker = activityChecker;
         Objects.requireNonNull(expiry, "No session duration given");
         if(expiry.isZero() || expiry.isNegative()) {
             // Infinite session
@@ -893,6 +900,27 @@ public class SensiNactSessionImpl implements SensiNactSession {
     public void removeExpirationListener(SensiNactSessionExpirationListener listener) {
         synchronized (lock) {
             expirationListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Checks whether an activity checker is associated to the session
+     *
+     * @return True if an activity checker is associated to the session
+     */
+    public boolean hasActivityChecker() {
+        return this.activityChecker != null;
+    }
+
+    /**
+     * Triggers an activity check on the session
+     *
+     * @param activityCallback Method the activity checker will call back with
+     *                         activity status
+     */
+    public void checkActivity(Consumer<Boolean> activityCallback) {
+        if (this.activityChecker != null) {
+            this.activityChecker.checkActivity(this, activityCallback);
         }
     }
 
