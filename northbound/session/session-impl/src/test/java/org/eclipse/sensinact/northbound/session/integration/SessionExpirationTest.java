@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.northbound.session.impl.SessionManager;
 import org.eclipse.sensinact.northbound.session.impl.TestUserInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 
-@WithConfiguration(pid = "sensinact.session.manager", properties = {
+@WithConfiguration(pid = SessionManager.CONFIGURATION_PID, properties = {
         @Property(key = "auth.policy", value = "AUTHENTICATED_ONLY"),
         @Property(key = "expiry", value = "5"),
 })

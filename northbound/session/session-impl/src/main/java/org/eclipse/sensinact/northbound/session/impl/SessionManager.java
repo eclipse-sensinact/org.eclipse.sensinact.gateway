@@ -46,10 +46,15 @@ import org.osgi.service.typedevent.propertytypes.EventTopics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(configurationPid = "sensinact.session.manager", property = IMetricsGauge.NAME + "=sensinact.sessions")
+@Component(configurationPid = SessionManager.CONFIGURATION_PID, property = IMetricsGauge.NAME + "=sensinact.sessions")
 @EventTopics({ "LIFECYCLE/*", "METADATA/*", "DATA/*", "ACTION/*" })
 public class SessionManager
         implements SensiNactSessionManager, TypedEventHandler<ResourceNotification>, IMetricsGauge {
+
+    /**
+     * Session Manager OSGi Configuration Admin PID
+     */
+    public static final String CONFIGURATION_PID = "sensinact.session.manager";
 
     private static final Logger LOG = LoggerFactory.getLogger(SessionManager.class);
 
