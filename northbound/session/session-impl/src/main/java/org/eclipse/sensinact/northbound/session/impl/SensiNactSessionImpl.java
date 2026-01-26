@@ -835,7 +835,13 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
         synchronized (lock) {
             checkWithException();
-            expiry = Instant.now().plus(duration);
+            if (Instant.MAX.equals(expiry)) {
+                // Infinite expiry
+                return;
+            }
+
+            // Extend expiry
+            expiry = expiry.plus(duration);
         }
     }
 
