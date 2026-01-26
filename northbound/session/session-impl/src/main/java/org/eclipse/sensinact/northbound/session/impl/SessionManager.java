@@ -337,30 +337,37 @@ public class SessionManager
         }
 
         sessionsToCheck
-                .forEach(s -> Optional.ofNullable(s.checkActivity(promiseFactory)).orElse(Promises.resolved(false)).map(
-                        isActive -> {
-                            if (!active) {
-                                // Session manager is stopped, do nothing
-                                return null;
-                            }
+                .forEach(s -> Optional.ofNullable(s.checkActivity(promiseFactory))
+                        .map(p -> p.recover(f -> {
+                            LOG.error("Failed Promise while checking activity of session {}", s.getSessionId(),
+                                    f.getFailure());
+                            return Boolean.FALSE;
+                        }))
+                        .orElse(Promises.resolved(false))
+                        .map(
+                                isActive -> {
+                                    if (!active) {
+                                        // Session manager is stopped, do nothing
+                                        return null;
+                                    }
 
-                            if (s.isExpired()) {
-                                // Session already expired, do "nothing" (the call might have triggered the
-                                // expiration call chain)
-                                return null;
-                            }
+                                    if (s.isExpired()) {
+                                        // Session already expired, do "nothing" (the call might have triggered the
+                                        // expiration call chain)
+                                        return null;
+                                    }
 
-                            if (isActive) {
-                                try {
-                                    // Session is active and not expired, extend it
-                                    s.extend(extension);
-                                } catch (Exception e) {
-                                    // Extension can fail if we were nanoseconds away from expiration
-                                    LOG.error("Error extending session {} expiry", s.getSessionId(), e);
-                                }
-                            }
-                            return null;
-                        }));
+                                    if (isActive) {
+                                        try {
+                                            // Session is active and not expired, extend it
+                                            s.extend(extension);
+                                        } catch (Exception e) {
+                                            // Extension can fail if we were nanoseconds away from expiration
+                                            LOG.error("Error extending session {} expiry", s.getSessionId(), e);
+                                        }
+                                    }
+                                    return null;
+                                }));
     }
 
     @Override
