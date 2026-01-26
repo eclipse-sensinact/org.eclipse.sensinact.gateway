@@ -26,6 +26,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +49,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.typedevent.TypedEventHandler;
 import org.osgi.service.typedevent.propertytypes.EventTopics;
+import org.osgi.util.promise.PromiseFactory;
+import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,6 +111,11 @@ public class SessionManager
      * Scheduler for session expiration checks
      */
     private ScheduledExecutorService activityCheckScheduler;
+
+    /**
+     * Promise factory for scheduling session expiration checks
+     */
+    private PromiseFactory promiseFactory;
 
     /**
      * Session lifespan extension upon positive activity check
@@ -213,11 +221,6 @@ public class SessionManager
                     activityCheckPeriod, expiry);
         } else {
             // Initialize the activity checker
-            this.activityCheckScheduler = Executors.newSingleThreadScheduledExecutor(
-                    r -> new Thread(r, "sensinact-session-activity-checker"));
-            this.activityCheckScheduler.scheduleAtFixedRate(this::checkSessionsLiveness, activityCheckPeriod,
-                    activityCheckPeriod, TimeUnit.SECONDS);
-
             sessionActivityThreshold = Duration.ofSeconds(
                     Math.max(config.activity_check_threshold(), activityCheckPeriod + 1));
 
@@ -236,6 +239,13 @@ public class SessionManager
             LOG.debug(
                     "Setting up activity check to run every {} seconds. Check threshold set to {}. Session extension set to {}",
                     activityCheckPeriod, sessionActivityThreshold, sessionActivityExtension);
+
+            // Schedule the periodic activity check task
+            this.activityCheckScheduler = Executors.newScheduledThreadPool(4,
+                    r -> new Thread(r, "sensinact-session-activity-checker"));
+            this.promiseFactory = new PromiseFactory(this.activityCheckScheduler);
+            this.activityCheckScheduler.scheduleAtFixedRate(this::checkSessionsLiveness, activityCheckPeriod,
+                    activityCheckPeriod, TimeUnit.SECONDS);
         }
 
         synchronized (lock) {
@@ -251,9 +261,9 @@ public class SessionManager
         }
 
         // Stop the scheduler for session expiration checks
-        if (this.activityCheckScheduler != null) {
-            this.activityCheckScheduler.shutdownNow();
-            this.activityCheckScheduler = null;
+        if (activityCheckScheduler != null) {
+            activityCheckScheduler.shutdownNow();
+            activityCheckScheduler = null;
         }
 
         List<SensiNactSessionImpl> toInvalidate;
@@ -265,6 +275,7 @@ public class SessionManager
             userDefaultSessionIds.clear();
             sessionActivityExtension = null;
             sessionActivityThreshold = null;
+            promiseFactory = null;
         }
         toInvalidate.forEach(SensiNactSession::expire);
     }
@@ -295,6 +306,7 @@ public class SessionManager
             return;
         }
 
+        final PromiseFactory promiseFactory;
         final List<SensiNactSessionImpl> sessionsToCheck = new ArrayList<>();
         synchronized (lock) {
             doCheck();
@@ -316,34 +328,39 @@ public class SessionManager
                 LOG.error("Error collecting sessions to check", e);
                 return;
             }
+
+            promiseFactory = this.promiseFactory;
         }
 
-        if (sessionsToCheck.isEmpty()) {
+        if (sessionsToCheck.isEmpty() || promiseFactory == null) {
             return;
         }
 
-        sessionsToCheck.forEach(s -> s.checkActivity(isActive -> {
-            if (!active) {
-                // Session manager is stopped, do nothing
-                return;
-            }
+        sessionsToCheck
+                .forEach(s -> Optional.ofNullable(s.checkActivity(promiseFactory)).orElse(Promises.resolved(false)).map(
+                        isActive -> {
+                            if (!active) {
+                                // Session manager is stopped, do nothing
+                                return null;
+                            }
 
-            if (s.isExpired()) {
-                // Session already expired, do "nothing" (the call might have triggered the
-                // expiration call chain)
-                return;
-            }
+                            if (s.isExpired()) {
+                                // Session already expired, do "nothing" (the call might have triggered the
+                                // expiration call chain)
+                                return null;
+                            }
 
-            if (isActive) {
-                try {
-                    // Session is active and not expired, extend it
-                    s.extend(extension);
-                } catch (Exception e) {
-                    // Extension can fail if we were nanoseconds away from expiration
-                    LOG.error("Error extending session {} expiry", s.getSessionId(), e);
-                }
-            }
-        }));
+                            if (isActive) {
+                                try {
+                                    // Session is active and not expired, extend it
+                                    s.extend(extension);
+                                } catch (Exception e) {
+                                    // Extension can fail if we were nanoseconds away from expiration
+                                    LOG.error("Error extending session {} expiry", s.getSessionId(), e);
+                                }
+                            }
+                            return null;
+                        }));
     }
 
     @Override

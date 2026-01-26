@@ -13,7 +13,8 @@
 
 package org.eclipse.sensinact.northbound.session;
 
-import java.util.function.Consumer;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 /**
  * Session activity checker, called by the SensiNactSessionManager before
@@ -25,8 +26,10 @@ public interface SensiNactSessionActivityChecker {
     /**
      * Checks <strong>asynchronously</strong> the activity of the given session.
      *
+     * @param pf             PromiseFactory to create Promises
      * @param session        Session to check
-     * @param resultCallback Method to call with the result of the activity check
+     * @return A promise with the activity status: true if the session is active,
+     *         false otherwise
      */
-    void checkActivity(SensiNactSession session, Consumer<Boolean> resultCallback);
+    Promise<Boolean> checkActivity(PromiseFactory pf, SensiNactSession session);
 }

@@ -36,7 +36,6 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -915,13 +914,20 @@ public class SensiNactSessionImpl implements SensiNactSession {
     /**
      * Triggers an activity check on the session
      *
-     * @param activityCallback Method the activity checker will call back with
-     *                         activity status
+     * @param pf Promise factory provided by the session manager
+     * @return A Promise resolving to true if activity is detected, false otherwise,
+     *         or null if no activity checker is set
      */
-    public void checkActivity(Consumer<Boolean> activityCallback) {
+    public Promise<Boolean> checkActivity(PromiseFactory pf) {
         if (this.activityChecker != null) {
-            this.activityChecker.checkActivity(this, activityCallback);
+            try {
+                return this.activityChecker.checkActivity(pf, this);
+            } catch (Exception e) {
+                LOG.error("Exception while checking activity of session {}", sessionId, e);
+                return pf.resolved(false);
+            }
         }
+        return pf.resolved(false);
     }
 
     /**

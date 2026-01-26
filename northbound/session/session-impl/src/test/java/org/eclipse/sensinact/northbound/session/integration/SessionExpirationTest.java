@@ -137,9 +137,9 @@ public class SessionExpirationTest {
         final AtomicReference<Instant> expirationTime = new AtomicReference<>();
         final AtomicBoolean activityCheck = new AtomicBoolean(false);
 
-        SensiNactSession session = sessionManager.createNewSession(BOB, (s, callback) -> {
-            callback.accept(activityCheck.get());
-        });
+        SensiNactSession session = sessionManager.createNewSession(BOB, (pf, s) ->
+            pf.resolved(activityCheck.get())
+        );
         session.addExpirationListener(s -> {
             expirationTime.set(Instant.now());
             expirationLatch.countDown();
