@@ -134,10 +134,10 @@ public class SessionManager
         int activity_check_interval() default 60;
 
         /**
-         * Minimal interval in seconds between session expiration and activity check (defaults to 10 seconds).
+         * Minimal interval in seconds between session expiration and activity check (defaults to 65 seconds).
          * The activity check will not be scheduled if the expiry is greater than this threshold.
          */
-        int activity_check_threshold() default 10;
+        int activity_check_threshold() default 65;
 
         /**
          * Session lifespan extension in seconds upon positive activity check (defaults
