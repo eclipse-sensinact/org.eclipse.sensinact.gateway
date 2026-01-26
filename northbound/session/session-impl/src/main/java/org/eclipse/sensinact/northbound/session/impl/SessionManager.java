@@ -581,7 +581,7 @@ public class SessionManager
             if (LOG.isDebugEnabled()) {
                 LOG.debug("The Authorization Engine changed. Recreating the new session");
             }
-            return createNewSession(user);
+            return createNewSession(user, activityChecker);
         } else {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Created a new session {} for user {}", sessionId, user.getUserId());
