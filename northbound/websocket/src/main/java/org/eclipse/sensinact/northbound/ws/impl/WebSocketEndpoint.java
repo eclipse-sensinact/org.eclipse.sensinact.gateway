@@ -13,10 +13,12 @@
 package org.eclipse.sensinact.northbound.ws.impl;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -24,11 +26,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import org.eclipse.jetty.websocket.api.Frame;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
@@ -58,6 +62,9 @@ import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultSubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultUnsubscribeDTO;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.osgi.util.promise.Deferred;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,6 +114,11 @@ public class WebSocketEndpoint {
     private final Set<String> subscriptions = new HashSet<>();
 
     /**
+     * Activity check in progress flag
+     */
+    private final AtomicReference<Deferred<Boolean>> activityCheckInProgress = new AtomicReference<>();
+
+    /**
      * @param pool             WebSocket connections pool
      * @param sensiNactSession User session manager
      * @param queryHandler     Query handler
@@ -119,6 +131,13 @@ public class WebSocketEndpoint {
     }
 
     /**
+     * {@return the sensiNact session ID}
+     */
+    public String getSessionId() {
+        return this.userSession.getSessionId();
+    }
+
+    /**
      * Explicit WebSocket closure
      */
     public synchronized void close() {
@@ -126,6 +145,9 @@ public class WebSocketEndpoint {
         if (ws == null) {
             return;
         }
+
+        // Disable activity checking
+        activityCheckInProgress.set(null);
 
         // Close subscriptions first
         if (userSession != null) {
@@ -187,17 +209,17 @@ public class WebSocketEndpoint {
         try {
             final AbstractResultDTO result;
             switch (query.operation) {
-            case SUBSCRIBE:
-                handleSubscribe(query.requestId, (QuerySubscribeDTO) query);
-                return;
+                case SUBSCRIBE:
+                    handleSubscribe(query.requestId, (QuerySubscribeDTO) query);
+                    return;
 
-            case UNSUBSCRIBE:
-                result = handleUnsubscribe((QueryUnsubscribeDTO) query);
-                break;
+                case UNSUBSCRIBE:
+                    result = handleUnsubscribe((QueryUnsubscribeDTO) query);
+                    break;
 
-            default:
-                result = queryHandler.handleQuery(userSession, query);
-                break;
+                default:
+                    result = queryHandler.handleQuery(userSession, query);
+                    break;
             }
 
             result.requestId = query.requestId;
@@ -209,6 +231,62 @@ public class WebSocketEndpoint {
         } catch (Throwable t) {
             logger.error("Error handling query {}: {}", query, t.getMessage(), t);
             sendError(wsSession, query.uri, 500, "Error running query: " + t.getMessage());
+        }
+    }
+
+    /**
+     * Sends a ping to the client
+     */
+    public Promise<Boolean> checkActivity(PromiseFactory pf) {
+        Session ws = wsSession.get();
+        if (ws != null && ws.isOpen()) {
+            try {
+                // Cancel any existing ping in progress
+                Optional.ofNullable(activityCheckInProgress.getAndSet(null)).ifPresent(existingPromise ->
+                    // Ping in progress, cancel it
+                    existingPromise.fail(new IllegalStateException("New WebSocket ping sent while previous ping is in progress"))
+                );
+
+                // Send new ping
+                final Deferred<Boolean> deferred = pf.<Boolean>deferred();
+                activityCheckInProgress.set(deferred);
+                ws.getRemote().sendPing(ByteBuffer.wrap("liveness-check".getBytes()));
+                return deferred.getPromise();
+            } catch (IOException e) {
+                // Something went wrong, fail the activity check
+                logger.error("Error sending ping to client: {}", e.getMessage(), e);
+                return pf.failed(e);
+            }
+        } else {
+            // WebSocket is closed, so inactive
+            return pf.resolved(false);
+        }
+    }
+
+    @OnWebSocketFrame
+    public void onFrame(final Session wsSession, final Frame frame) {
+        try {
+            switch (frame.getType()) {
+                case PING:
+                    // Respond to ping with pong
+                    wsSession.getRemote().sendPong(frame.getPayload());
+                    break;
+                case PONG:
+                    // Notify pong received
+                    logger.debug("Pong received from client: {}", wsSession);
+                    Optional.ofNullable(activityCheckInProgress.getAndSet(null)).ifPresent(deferred -> {
+                        // Pong received, complete the activity check successfully
+                        deferred.resolve(true);
+                    });
+                    break;
+
+                default:
+                    // Ignore other frame types
+                    logger.debug("Ignoring WebSocket frame of type {} from client: {}", frame.getType(), wsSession);
+                    break;
+            }
+        } catch (IOException e) {
+            logger.error("Error handling WebSocket frame {}: {}", frame.getType(), e.getMessage(), e);
         }
     }
 
@@ -283,7 +361,7 @@ public class WebSocketEndpoint {
                         && !resourceValueFilter.test(snapshot.provider, List.of(snapshot.resource))) {
                     return false;
                 }
-                if(locationFilter != null && "admin".equals(notif.service()) && "location".equals(notif.resource())) {
+                if (locationFilter != null && "admin".equals(notif.service()) && "location".equals(notif.resource())) {
                     if (notif.getClass() == LifecycleNotification.class) {
                         final LifecycleNotification lifecycleNotif = (LifecycleNotification) notif;
                         if (!locationFilter.test(snapshot.provider, (GeoJsonObject) lifecycleNotif.initialValue())) {
@@ -291,7 +369,7 @@ public class WebSocketEndpoint {
                         }
                     } else if (notif.getClass() == ResourceDataNotification.class) {
                         final ResourceDataNotification dataNotif = (ResourceDataNotification) notif;
-                        if(!locationFilter.test(snapshot.provider, (GeoJsonObject) dataNotif.newValue())) {
+                        if (!locationFilter.test(snapshot.provider, (GeoJsonObject) dataNotif.newValue())) {
                             return false;
                         }
                     }
