@@ -82,6 +82,7 @@ import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionActivityChecker;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionExpirationListener;
 import org.eclipse.sensinact.northbound.session.ServiceDescription;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableLinkedProviderSnapshot;
@@ -113,6 +114,11 @@ public class SensiNactSessionImpl implements SensiNactSession {
      */
     private final List<SensiNactSessionExpirationListener> expirationListeners = new ArrayList<>();
 
+    /**
+     * Session activity checker
+     */
+    private final SensiNactSessionActivityChecker activityChecker;
+
     private final GatewayThread thread;
 
     private final UserInfo user;
@@ -122,12 +128,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
     private final PreAuthorizer preAuthorizer;
 
     public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer preAuthorizer, final Authorizer authorizer,
-            final GatewayThread thread, final Duration expiry) {
+            final GatewayThread thread, final Duration expiry, final SensiNactSessionActivityChecker activityChecker) {
         this.user = user;
         this.preAuthorizer = Objects.requireNonNull(preAuthorizer, "No PreAuthorizer given");
         this.authorizer = Objects.requireNonNull(authorizer, "No Authorizer given");
         this.thread = thread;
-
+        this.activityChecker = activityChecker;
         Objects.requireNonNull(expiry, "No session duration given");
         if(expiry.isZero() || expiry.isNegative()) {
             // Infinite session
@@ -835,7 +841,13 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
         synchronized (lock) {
             checkWithException();
-            expiry = Instant.now().plus(duration);
+            if (Instant.MAX.equals(expiry)) {
+                // Infinite expiry
+                return;
+            }
+
+            // Extend expiry
+            expiry = expiry.plus(duration);
         }
     }
 
@@ -888,6 +900,34 @@ public class SensiNactSessionImpl implements SensiNactSession {
         synchronized (lock) {
             expirationListeners.remove(listener);
         }
+    }
+
+    /**
+     * Checks whether an activity checker is associated to the session
+     *
+     * @return True if an activity checker is associated to the session
+     */
+    public boolean hasActivityChecker() {
+        return this.activityChecker != null;
+    }
+
+    /**
+     * Triggers an activity check on the session
+     *
+     * @param pf Promise factory provided by the session manager
+     * @return A Promise resolving to true if activity is detected, false otherwise,
+     *         or null if no activity checker is set
+     */
+    public Promise<Boolean> checkActivity(PromiseFactory pf) {
+        if (this.activityChecker != null) {
+            try {
+                return this.activityChecker.checkActivity(pf, this);
+            } catch (Exception e) {
+                LOG.error("Exception while checking activity of session {}", sessionId, e);
+                return pf.resolved(false);
+            }
+        }
+        return pf.resolved(false);
     }
 
     /**
