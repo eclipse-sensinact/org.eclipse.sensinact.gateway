@@ -193,8 +193,6 @@ public class WebSocketEndpoint {
 
         if (userSession.isExpired()) {
             wsSession.close(StatusCode.ABNORMAL, "User session expired due to inactivity");
-        } else {
-            userSession.extend(Duration.of(5, ChronoUnit.MINUTES));
         }
 
         final AbstractQueryDTO query;
