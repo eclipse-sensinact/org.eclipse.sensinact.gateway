@@ -14,8 +14,7 @@ package org.eclipse.sensinact.northbound.ws.impl;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -117,6 +116,11 @@ public class WebSocketEndpoint {
      * Activity check in progress flag
      */
     private final AtomicReference<Deferred<Boolean>> activityCheckInProgress = new AtomicReference<>();
+
+    /**
+     * Activity check ping payload
+     */
+    private final byte[] pingPayload = "liveness-check".getBytes();
 
     /**
      * @param pool             WebSocket connections pool
@@ -241,14 +245,14 @@ public class WebSocketEndpoint {
             try {
                 // Cancel any existing ping in progress
                 Optional.ofNullable(activityCheckInProgress.getAndSet(null)).ifPresent(existingPromise ->
-                    // Ping in progress, cancel it
-                    existingPromise.fail(new IllegalStateException("New WebSocket ping sent while previous ping is in progress"))
-                );
+                // Ping in progress, cancel it
+                existingPromise
+                        .fail(new IllegalStateException("New WebSocket ping sent while previous ping is in progress")));
 
                 // Send new ping
                 final Deferred<Boolean> deferred = pf.<Boolean>deferred();
                 activityCheckInProgress.set(deferred);
-                ws.getRemote().sendPing(ByteBuffer.wrap("liveness-check".getBytes()));
+                ws.getRemote().sendPing(ByteBuffer.wrap(pingPayload));
                 return deferred.getPromise();
             } catch (IOException e) {
                 // Something went wrong, fail the activity check
@@ -270,12 +274,16 @@ public class WebSocketEndpoint {
                     wsSession.getRemote().sendPong(frame.getPayload());
                     break;
                 case PONG:
-                    // Notify pong received
-                    logger.debug("Pong received from client: {}", wsSession);
-                    Optional.ofNullable(activityCheckInProgress.getAndSet(null)).ifPresent(deferred -> {
-                        // Pong received, complete the activity check successfully
-                        deferred.resolve(true);
-                    });
+                    // Check content
+                    if (Arrays.equals(frame.getPayload().array(), pingPayload)) {
+                        // Notify pong received
+                        Optional.ofNullable(activityCheckInProgress.getAndSet(null)).ifPresent(deferred -> {
+                            // Pong received, complete the activity check successfully
+                            deferred.resolve(true);
+                        });
+                    } else {
+                        logger.warn("Ignoring unexpected PONG frame payload from client: {}", wsSession);
+                    }
                     break;
 
                 default:
