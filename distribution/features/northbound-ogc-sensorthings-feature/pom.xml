@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.eclipse.sensinact.gateway.distribution.features</groupId>
@@ -28,6 +30,11 @@
       <artifactId>spatial4j</artifactId>
       <version>${spatial4j.version}</version>
     </dependency>
+      <dependency>
+      <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
+      <artifactId>extended</artifactId>
+      <version>${sensorthings.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.filters</groupId>
       <artifactId>filters.core</artifactId>
@@ -51,6 +58,11 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>rest.gateway</artifactId>
+      <version>${sensorthings.version}</version>
+    </dependency>
+      <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
+      <artifactId>rest.gateway.extra</artifactId>
       <version>${sensorthings.version}</version>
     </dependency>
     <dependency>

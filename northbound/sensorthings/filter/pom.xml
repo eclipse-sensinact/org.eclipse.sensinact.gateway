@@ -10,7 +10,9 @@
 * SPDX-License-Identifier: EPL-2.0
 **********************************************************************/
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
@@ -53,6 +55,11 @@
       <artifactId>logback-classic</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
+      <artifactId>extended</artifactId>
+      <version>${project.version}</version>
+    </dependency>
     <!-- OSGi -->
     <dependency>
       <groupId>org.osgi</groupId>
@@ -83,6 +90,20 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>
+        org.eclipse.sensinact.gateway.northbound.sensorthings
+      </groupId>
+      <artifactId>dto</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>
+        org.eclipse.sensinact.gateway.northbound.sensorthings
+      </groupId>
+      <artifactId>rest.api</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

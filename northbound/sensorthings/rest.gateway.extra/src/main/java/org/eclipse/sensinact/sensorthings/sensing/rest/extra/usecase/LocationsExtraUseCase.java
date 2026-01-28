@@ -27,7 +27,6 @@ import org.eclipse.sensinact.core.command.DependentCommand;
 import org.eclipse.sensinact.core.command.IndependentCommands;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.TimedValue;
@@ -35,7 +34,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -47,13 +46,13 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedLocation, ServiceSnapshot> {
+public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedLocation, ProviderSnapshot> {
 
     public LocationsExtraUseCase(Providers providers) {
         super(providers);
     }
 
-    public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
+    public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         try {
@@ -65,9 +64,9 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
                 String locationId = request.id();
-                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, UtilDto.getLocationService(provider));
+                return new ExtraUseCaseResponse<ProviderSnapshot>(locationId, provider);
             }
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "failed to create Location");
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "failed to create Location");
 
         } catch (Exception e) {
             throw new InternalServerErrorException(e);
@@ -100,7 +99,8 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                 String locationId = request.id();
                 if (!ids.contains(locationId)) {
                     ids = Stream.concat(ids.stream(), Stream.of(locationId)).toList();
-                    return new ThingUpdate(providerId, null, null, providerId, null, ids, null);
+                    return new ThingUpdate(providerId, DtoToModelMapper.getAggregateLocation(request, ids), null, null,
+                            providerId, null, ids, null);
                 }
                 return null;
             }).filter(java.util.Objects::nonNull).forEach(listUpdates::add);
@@ -108,7 +108,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
         return listUpdates;
     }
 
-    public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedLocation> request) {
+    public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedLocation> request) {
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         try {
@@ -118,9 +118,9 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());
             if (provider != null) {
                 String locationId = request.id();
-                return new ExtraUseCaseResponse<ServiceSnapshot>(locationId, UtilDto.getLocationService(provider));
+                return new ExtraUseCaseResponse<ProviderSnapshot>(locationId, provider);
             }
-            return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get providerProviderSnapshot");
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get providerProviderSnapshot");
 
         } catch (Exception e) {
             throw new InternalServerErrorException(e);
@@ -132,7 +132,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedLocation> request) {
         // delete location with link between location and thing
         String locationId = request.id();
-        ;
+
         AbstractSensinactCommand<Void> deleteLocationCommand = new AbstractSensinactCommand<Void>() {
 
             @Override
@@ -175,7 +175,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
 
                         List<String> newLocationsList = timedValue.getValue().stream()
                                 .filter(id -> !id.equals(locationId)).toList();
-                        return twin.getResource(es.getKey(), UtilDto.SERVICE_THING, "locationIds")
+                        return twin.getResource(es.getKey(), DtoMapperSimple.SERVICE_THING, "locationIds")
                                 .setValue(newLocationsList);
                     }).toList();
 
@@ -207,8 +207,8 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                         : List.of(twin.getProvider(thingId));
 
                 List<Promise<Map.Entry<String, TimedValue<List<String>>>>> promises = providers.stream()
-                        .map(p -> p.getResource(UtilDto.SERVICE_THING, "locationIds").getMultiValue(String.class)
-                                .map(tv -> Map.entry(p.getName(), tv)))
+                        .map(p -> p.getResource(DtoMapperSimple.SERVICE_THING, "locationIds")
+                                .getMultiValue(String.class).map(tv -> Map.entry(p.getName(), tv)))
                         .toList();
 
                 return pf.all(promises)

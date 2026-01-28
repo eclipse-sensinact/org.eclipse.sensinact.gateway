@@ -16,11 +16,11 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
@@ -59,10 +59,9 @@ public interface ThingsAccess {
     @Path("Datastreams/$ref")
     @GET
     @RefFilter
-    default public ResultList<Self> getThingDatastreamsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getThingDatastreamsRef(@PathParam("id") String id) {
         ResultList<Datastream> thingDatastreams = getThingDatastreams(id);
-        return new ResultList<>(thingDatastreams.count(), thingDatastreams.nextLink(),
-                thingDatastreams.value());
+        return new ResultList<>(thingDatastreams.count(), thingDatastreams.nextLink(), thingDatastreams.value());
     }
 
     @Path("Datastreams({id2})")
@@ -78,11 +77,13 @@ public interface ThingsAccess {
 
     @Path("Datastreams({id2})/Observations")
     @GET
-    public ResultList<Observation> getThingDatastreamObservations(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ResultList<Observation> getThingDatastreamObservations(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Datastreams({id2})/ObservedProperty")
     @GET
-    public ObservedProperty getThingDatastreamObservedProperty(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ObservedProperty getThingDatastreamObservedProperty(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Datastreams({id2})/Sensor")
     @GET
@@ -99,7 +100,7 @@ public interface ThingsAccess {
     @Path("HistoricalLocations/$ref")
     @GET
     @RefFilter
-    default public ResultList<Self> getThingHistoricalLocationsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getThingHistoricalLocationsRef(@PathParam("id") String id) {
         ResultList<HistoricalLocation> thingHistoricalLocations = getThingHistoricalLocations(id);
         return new ResultList<>(thingHistoricalLocations.count(), thingHistoricalLocations.nextLink(),
                 thingHistoricalLocations.value());
@@ -112,7 +113,8 @@ public interface ThingsAccess {
     @Path("HistoricalLocations({id2})/{prop}")
     @GET
     @PropFilter
-    default public HistoricalLocation getThingHistoricalLocationProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+    default public HistoricalLocation getThingHistoricalLocationProp(@PathParam("id") String id,
+            @PathParam("id2") String id2) {
         return getThingHistoricalLocation(id, id2);
     }
 
@@ -122,7 +124,8 @@ public interface ThingsAccess {
 
     @Path("HistoricalLocations({id2})/Locations")
     @GET
-    public ResultList<Location> getThingHistoricalLocationLocations(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ResultList<Location> getThingHistoricalLocationLocations(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Locations")
     @GET
@@ -131,10 +134,9 @@ public interface ThingsAccess {
     @Path("Locations/$ref")
     @GET
     @RefFilter
-    default public ResultList<Self> getThingLocationsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getThingLocationsRef(@PathParam("id") String id) {
         ResultList<Location> thingLocations = getThingLocations(id);
-        return new ResultList<>(thingLocations.count(), thingLocations.nextLink(),
-                thingLocations.value());
+        return new ResultList<>(thingLocations.count(), thingLocations.nextLink(), thingLocations.value());
     }
 
     @Path("Locations({id2})")
@@ -154,6 +156,7 @@ public interface ThingsAccess {
 
     @Path("Locations({id2})/HistoricalLocations")
     @GET
-    public ResultList<HistoricalLocation> getThingLocationHistoricalLocations(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ResultList<HistoricalLocation> getThingLocationHistoricalLocations(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
 }

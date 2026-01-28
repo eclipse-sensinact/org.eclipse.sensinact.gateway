@@ -20,6 +20,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * record that define a link that can be set on creation/update to association 2
  * sensorthing entity
  */
-public record RefId(@JsonProperty("@iot.id") Object id) implements Id {
+public record RefId(@JsonProperty("@iot.id") Object id, @JsonProperty("@iot.selfLink") String selfLink) implements Id {
 
+    public RefId(Object id) {
+        this(id, null);
+    }
 }

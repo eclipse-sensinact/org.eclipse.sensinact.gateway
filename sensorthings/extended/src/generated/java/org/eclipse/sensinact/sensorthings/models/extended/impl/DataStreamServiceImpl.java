@@ -36,8 +36,6 @@ import org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage;
  * </p>
  * <ul>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getId <em>Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getName <em>Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getTimestamp <em>Timestamp</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getSensorName <em>Sensor Name</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getSensorDescription <em>Sensor Description</em>}</li>
@@ -79,46 +77,6 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @ordered
 	 */
 	protected String id = ID_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getName() <em>Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getName()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String NAME_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getName() <em>Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getName()
-	 * @generated
-	 * @ordered
-	 */
-	protected String name = NAME_EDEFAULT;
-
-	/**
-	 * The default value of the '{@link #getDescription() <em>Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getDescription()
-	 * @generated
-	 * @ordered
-	 */
-	protected static final String DESCRIPTION_EDEFAULT = null;
-
-	/**
-	 * The cached value of the '{@link #getDescription() <em>Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #getDescription()
-	 * @generated
-	 * @ordered
-	 */
-	protected String description = DESCRIPTION_EDEFAULT;
 
 	/**
 	 * The default value of the '{@link #getTimestamp() <em>Timestamp</em>}' attribute.
@@ -408,7 +366,7 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @generated
 	 * @ordered
 	 */
-	protected static final Object LAST_OBSERVATION_EDEFAULT = null;
+	protected static final String LAST_OBSERVATION_EDEFAULT = null;
 
 	/**
 	 * The cached value of the '{@link #getLastObservation() <em>Last Observation</em>}' attribute.
@@ -418,7 +376,7 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @generated
 	 * @ordered
 	 */
-	protected Object lastObservation = LAST_OBSERVATION_EDEFAULT;
+	protected String lastObservation = LAST_OBSERVATION_EDEFAULT;
 
 	/**
 	 * The default value of the '{@link #getThingId() <em>Thing Id</em>}' attribute.
@@ -480,52 +438,6 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		id = newId;
 		if (eNotificationRequired())
 			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__ID, oldId, id));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setName(String newName) {
-		String oldName = name;
-		name = newName;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__NAME, oldName, name));
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public String getDescription() {
-		return description;
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	@Override
-	public void setDescription(String newDescription) {
-		String oldDescription = description;
-		description = newDescription;
-		if (eNotificationRequired())
-			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__DESCRIPTION, oldDescription, description));
 	}
 
 	/**
@@ -879,7 +791,7 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @generated
 	 */
 	@Override
-	public Object getLastObservation() {
+	public String getLastObservation() {
 		return lastObservation;
 	}
 
@@ -889,8 +801,8 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @generated
 	 */
 	@Override
-	public void setLastObservation(Object newLastObservation) {
-		Object oldLastObservation = lastObservation;
+	public void setLastObservation(String newLastObservation) {
+		String oldLastObservation = lastObservation;
 		lastObservation = newLastObservation;
 		if (eNotificationRequired())
 			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION, oldLastObservation, lastObservation));
@@ -929,10 +841,6 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		switch (featureID) {
 			case ExtendedPackage.DATA_STREAM_SERVICE__ID:
 				return getId();
-			case ExtendedPackage.DATA_STREAM_SERVICE__NAME:
-				return getName();
-			case ExtendedPackage.DATA_STREAM_SERVICE__DESCRIPTION:
-				return getDescription();
 			case ExtendedPackage.DATA_STREAM_SERVICE__TIMESTAMP:
 				return getTimestamp();
 			case ExtendedPackage.DATA_STREAM_SERVICE__SENSOR_NAME:
@@ -982,12 +890,6 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 			case ExtendedPackage.DATA_STREAM_SERVICE__ID:
 				setId((String)newValue);
 				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__NAME:
-				setName((String)newValue);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__DESCRIPTION:
-				setDescription((String)newValue);
-				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__TIMESTAMP:
 				setTimestamp((Instant)newValue);
 				return;
@@ -1034,7 +936,7 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 				setObservedPropertyProperties((Map<?, ?>)newValue);
 				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
-				setLastObservation(newValue);
+				setLastObservation((String)newValue);
 				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
 				setThingId((String)newValue);
@@ -1053,12 +955,6 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		switch (featureID) {
 			case ExtendedPackage.DATA_STREAM_SERVICE__ID:
 				setId(ID_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__NAME:
-				setName(NAME_EDEFAULT);
-				return;
-			case ExtendedPackage.DATA_STREAM_SERVICE__DESCRIPTION:
-				setDescription(DESCRIPTION_EDEFAULT);
 				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__TIMESTAMP:
 				setTimestamp(TIMESTAMP_EDEFAULT);
@@ -1125,10 +1021,6 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		switch (featureID) {
 			case ExtendedPackage.DATA_STREAM_SERVICE__ID:
 				return ID_EDEFAULT == null ? id != null : !ID_EDEFAULT.equals(id);
-			case ExtendedPackage.DATA_STREAM_SERVICE__NAME:
-				return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
-			case ExtendedPackage.DATA_STREAM_SERVICE__DESCRIPTION:
-				return DESCRIPTION_EDEFAULT == null ? description != null : !DESCRIPTION_EDEFAULT.equals(description);
 			case ExtendedPackage.DATA_STREAM_SERVICE__TIMESTAMP:
 				return TIMESTAMP_EDEFAULT == null ? timestamp != null : !TIMESTAMP_EDEFAULT.equals(timestamp);
 			case ExtendedPackage.DATA_STREAM_SERVICE__SENSOR_NAME:
@@ -1179,10 +1071,6 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		StringBuilder result = new StringBuilder(super.toString());
 		result.append(" (id: ");
 		result.append(id);
-		result.append(", name: ");
-		result.append(name);
-		result.append(", description: ");
-		result.append(description);
 		result.append(", timestamp: ");
 		result.append(timestamp);
 		result.append(", sensorName: ");

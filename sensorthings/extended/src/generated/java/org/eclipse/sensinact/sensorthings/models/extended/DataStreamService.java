@@ -30,8 +30,6 @@ import org.osgi.annotation.versioning.ProviderType;
  * </p>
  * <ul>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getId <em>Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getName <em>Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getTimestamp <em>Timestamp</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorName <em>Sensor Name</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorDescription <em>Sensor Description</em>}</li>
@@ -78,50 +76,6 @@ public interface DataStreamService extends Service {
 	 * @generated
 	 */
 	void setId(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Name</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Name</em>' attribute.
-	 * @see #setName(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_Name()
-	 * @model
-	 * @generated
-	 */
-	String getName();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getName <em>Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Name</em>' attribute.
-	 * @see #getName()
-	 * @generated
-	 */
-	void setName(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Description</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Description</em>' attribute.
-	 * @see #setDescription(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_Description()
-	 * @model
-	 * @generated
-	 */
-	String getDescription();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getDescription <em>Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Description</em>' attribute.
-	 * @see #getDescription()
-	 * @generated
-	 */
-	void setDescription(String value);
 
 	/**
 	 * Returns the value of the '<em><b>Timestamp</b></em>' attribute.
@@ -458,12 +412,12 @@ public interface DataStreamService extends Service {
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @return the value of the '<em>Last Observation</em>' attribute.
-	 * @see #setLastObservation(Object)
+	 * @see #setLastObservation(String)
 	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_LastObservation()
 	 * @model
 	 * @generated
 	 */
-	Object getLastObservation();
+	String getLastObservation();
 
 	/**
 	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getLastObservation <em>Last Observation</em>}' attribute.
@@ -473,7 +427,7 @@ public interface DataStreamService extends Service {
 	 * @see #getLastObservation()
 	 * @generated
 	 */
-	void setLastObservation(Object value);
+	void setLastObservation(String value);
 
 	/**
 	 * Returns the value of the '<em><b>Thing Id</b></em>' attribute.

@@ -15,10 +15,10 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.access;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
@@ -57,9 +57,9 @@ public interface ObservedPropertiesAccess {
     @Path("Datastreams/$ref")
     @GET
     @RefFilter
-    default public ResultList<Self> getObservedPropertyDatastreamsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getObservedPropertyDatastreamsRef(@PathParam("id") String id) {
         ResultList<Datastream> observedPropertyDatastreams = getObservedPropertyDatastreams(id);
-        return new ResultList<Self>(observedPropertyDatastreams.count(), observedPropertyDatastreams.nextLink(),
+        return new ResultList<Id>(observedPropertyDatastreams.count(), observedPropertyDatastreams.nextLink(),
                 observedPropertyDatastreams.value());
     }
 
@@ -70,17 +70,20 @@ public interface ObservedPropertiesAccess {
     @Path("Datastreams({id2})/{prop}")
     @GET
     @PropFilter
-    default public Datastream getObservedPropertyDatastreamProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+    default public Datastream getObservedPropertyDatastreamProp(@PathParam("id") String id,
+            @PathParam("id2") String id2) {
         return getObservedPropertyDatastream(id, id2);
     }
 
     @Path("Datastreams({id2})/Observations")
     @GET
-    public ResultList<Observation> getObservedPropertyDatastreamObservations(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ResultList<Observation> getObservedPropertyDatastreamObservations(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Datastreams({id2})/ObservedProperty")
     @GET
-    public ObservedProperty getObservedPropertyDatastreamObservedProperty(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ObservedProperty getObservedPropertyDatastreamObservedProperty(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Datastreams({id2})/Sensor")
     @GET

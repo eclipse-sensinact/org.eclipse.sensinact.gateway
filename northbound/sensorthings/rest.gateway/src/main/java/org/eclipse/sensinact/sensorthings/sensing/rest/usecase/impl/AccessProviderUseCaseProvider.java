@@ -12,9 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
 
+import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.extended.DtoMapper;
-
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
 
@@ -26,7 +25,7 @@ public class AccessProviderUseCaseProvider implements ContextResolver<IAccessPro
 
     @Override
     public IAccessProviderUseCase getContext(Class<?> type) {
-        return (session, id) -> DtoMapper.getProviderSnapshot(session, id).orElse(null);
+        return (session, id) -> UtilDto.getProviderSnapshot(session, id).orElse(null);
     }
 
 }

@@ -20,6 +20,7 @@ import java.util.Set;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.RootResourceDelegateSensorthings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessServiceUseCaseProvider;
@@ -75,6 +76,7 @@ public class SensinactSensorthingsApplication extends Application {
 
     @Override
     public Map<String, Object> getProperties() {
+
         Map<String, Object> properties = NOT_SET.equals(config.history_provider())
                 ? new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
                         "sensinact.history.result.limit", config.history_results_max()))

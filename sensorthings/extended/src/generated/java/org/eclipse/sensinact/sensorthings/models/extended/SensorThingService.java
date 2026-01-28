@@ -27,8 +27,6 @@ import org.osgi.annotation.versioning.ProviderType;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getName <em>Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getProperties <em>Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getId <em>Id</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getLocationIds <em>Location Ids</em>}</li>
@@ -41,50 +39,6 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public interface SensorThingService extends Service {
-	/**
-	 * Returns the value of the '<em><b>Name</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Name</em>' attribute.
-	 * @see #setName(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingService_Name()
-	 * @model
-	 * @generated
-	 */
-	String getName();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getName <em>Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Name</em>' attribute.
-	 * @see #getName()
-	 * @generated
-	 */
-	void setName(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Description</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Description</em>' attribute.
-	 * @see #setDescription(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingService_Description()
-	 * @model
-	 * @generated
-	 */
-	String getDescription();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService#getDescription <em>Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Description</em>' attribute.
-	 * @see #getDescription()
-	 * @generated
-	 */
-	void setDescription(String value);
-
 	/**
 	 * Returns the value of the '<em><b>Properties</b></em>' attribute.
 	 * <!-- begin-user-doc -->

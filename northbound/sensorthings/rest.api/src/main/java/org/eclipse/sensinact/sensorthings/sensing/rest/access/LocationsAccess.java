@@ -16,9 +16,9 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.RefFilter;
@@ -56,7 +56,7 @@ public interface LocationsAccess {
     @Path("HistoricalLocations/$ref")
     @GET
     @RefFilter
-    default public ResultList<Self> getLocationHistoricalLocationsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getLocationHistoricalLocationsRef(@PathParam("id") String id) {
         ResultList<HistoricalLocation> locationHistoricalLocations = getLocationHistoricalLocations(id);
         return new ResultList<>(locationHistoricalLocations.count(), locationHistoricalLocations.nextLink(),
                 locationHistoricalLocations.value());
@@ -69,7 +69,8 @@ public interface LocationsAccess {
     @Path("HistoricalLocations({id2})/{prop}")
     @GET
     @PropFilter
-    default public HistoricalLocation getLocationHistoricalLocationProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+    default public HistoricalLocation getLocationHistoricalLocationProp(@PathParam("id") String id,
+            @PathParam("id2") String id2) {
         return getLocationHistoricalLocation(id, id2);
     }
 
@@ -79,7 +80,8 @@ public interface LocationsAccess {
 
     @Path("HistoricalLocations({id2})/Locations")
     @GET
-    public ResultList<Location> getLocationHistoricalLocationLocations(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ResultList<Location> getLocationHistoricalLocationLocations(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Things")
     @GET
@@ -88,7 +90,7 @@ public interface LocationsAccess {
     @Path("Things/$ref")
     @GET
     @RefFilter
-    default public ResultList<Self> getLocationThingsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getLocationThingsRef(@PathParam("id") String id) {
         ResultList<Thing> locationThings = getLocationThings(id);
         return new ResultList<>(locationThings.count(), locationThings.nextLink(), locationThings.value());
     }
@@ -110,7 +112,8 @@ public interface LocationsAccess {
 
     @Path("Things({id2})/HistoricalLocations")
     @GET
-    public ResultList<HistoricalLocation> getLocationThingHistoricalLocations(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ResultList<HistoricalLocation> getLocationThingHistoricalLocations(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Things({id2})/Locations")
     @GET

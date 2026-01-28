@@ -18,6 +18,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.http.HttpResponse;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -26,13 +29,20 @@ import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.gateway.geojson.Coordinates;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.IdSelf;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.SensinactSensorthingsApplication;
+import org.eclipse.sensinact.sensorthings.sensing.rest.integration.sensorthings.TestSensorthingsUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -48,9 +58,13 @@ import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.core.Application;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
 
 /**
  * Common setup for the tests
@@ -88,7 +102,7 @@ public class AbstractIntegrationTest {
     protected SensiNactSessionManager sessionManager;
     protected SensiNactSession session;
 
-    protected final TestUtils utils = new TestUtils();
+    protected final TestSensorthingsUtils utils = new TestSensorthingsUtils();
 
     @BeforeEach
     void start(@InjectBundleContext BundleContext bc, TestInfo info) throws Exception {
@@ -145,16 +159,140 @@ public class AbstractIntegrationTest {
         });
     }
 
+    protected void createResourceWithPackageUri(String provider, String modelPackageUri, String service,
+            String resource, Object value) {
+        createResourceWithPackageUri(provider, modelPackageUri, service, resource, value, null);
+    }
+
     protected void createResource(String provider, String service, String resource, Object value) {
-        createResource(provider, service, resource, value, null);
+        createResourceWithPackageUri(provider, "sensinact", service, resource, value, null);
+    }
+
+    protected void createDatastream(String provider, String thingId) {
+        createDatastream(provider, thingId, 42);
+    }
+
+    protected FeatureOfInterest getFeatureOfInterest(String foiRefId) {
+        return new FeatureOfInterest(null, foiRefId, "test", null, "test", new Point(0, 0), null);
+    }
+
+    protected void createDatastream(String provider, String thingId, int value) {
+        createDatastream(provider, thingId, value, null);
+    }
+
+    protected void createObservation(String provider, String thingId, Object value, Instant valueInstant) {
+
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation",
+                getObservation(provider + "~test", value, getFeatureOfInterest(provider + "~test~test"), valueInstant),
+                valueInstant);
+
+    }
+
+    protected void createDatastream(String provider, String thingId, Object value, Instant valueInstant) {
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "thingId", thingId,
+                valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "id", provider,
+                valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "name", "test",
+                valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "sensorId", "test1",
+                valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "sensorName", "test",
+                valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "sensorEncodingType",
+                "test", valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId",
+                "test2", valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyName",
+                "test", valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM,
+                "observedPropertyDefinition", "test", valueInstant);
+
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "unitName", "test",
+                valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "unitSymbol", "test",
+                valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "unitDefinition", "test",
+                valueInstant);
+
+        createObservation(provider, thingId, value, valueInstant);
+    }
+
+    public static String getObservation(String name, Object result, FeatureOfInterest foi) {
+        return getObservation(name, result, foi, null);
+    }
+
+    public static String toString(ExpandedObservation obs) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        try {
+            return mapper.writeValueAsString(obs);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static String getObservation(String id, Object result, FeatureOfInterest foi, Instant instant) {
+
+        ExpandedObservation obs = new ExpandedObservation(null, id,
+                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
+                instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
+                null, null, null, null, foi);
+        return toString(obs);
+    }
+
+    protected void createLocation(String provider) {
+        createLocation(provider, new Point(Coordinates.EMPTY, null, null), Instant.now());
+    }
+
+    protected void createLocation(String provider, GeoJsonObject location, Instant instant) {
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_LOCATON, "id", provider, instant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_LOCATON, "location", location, instant);
+
+    }
+
+    protected void createThing(String provider, List<String> locationIds, List<String> datastreamIds) {
+        createThing(provider, locationIds, datastreamIds, null, null);
+    }
+
+    protected void createThing(String provider, List<String> locationIds, List<String> datastreamIds, Instant instant) {
+        createThing(provider, locationIds, datastreamIds, null, instant);
+    }
+
+    protected void createThing(String provider, List<String> locationIds, List<String> datastreamIds,
+            GeoJsonObject location, Instant instant) {
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_THING, "id", provider, instant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_THING, "name", "test", instant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_ADMIN, "location",
+                location != null ? location : new Point(Coordinates.EMPTY, null, null), instant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_THING, "locationIds", locationIds,
+                instant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_THING, "datastreamIds", datastreamIds,
+                instant);
     }
 
     protected void createResource(String provider, String service, String resource, Object value, Instant instant) {
+        createResourceWithPackageUri(provider, "sensinact", service, resource, value, instant);
+    }
+
+    protected void createResourceWithPackageUri(String provider, String modelPackageUri, String service,
+            String resource, Object value, Instant instant) {
         GenericDto dto = new GenericDto();
+        if (value instanceof Collection<?>) {
+            dto.upperBound = -1;
+        }
+        dto.modelPackageUri = modelPackageUri;
         dto.provider = provider;
         dto.service = service;
         dto.resource = resource;
-        dto.type = value.getClass();
+        if (value instanceof Collection<?>) {
+            dto.type = String.class;
+
+        } else {
+            dto.type = value.getClass();
+        }
         dto.value = value;
         dto.timestamp = instant;
         try {

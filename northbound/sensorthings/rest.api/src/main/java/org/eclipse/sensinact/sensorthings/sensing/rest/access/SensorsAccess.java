@@ -15,10 +15,10 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.access;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
@@ -57,9 +57,9 @@ public interface SensorsAccess {
     @Path("Datastreams/$ref")
     @GET
     @RefFilter
-    default public ResultList<Self> getSensorDatastreamsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getSensorDatastreamsRef(@PathParam("id") String id) {
         ResultList<Datastream> sensorDatastreams = getSensorDatastreams(id);
-        return new ResultList<Self>(sensorDatastreams.count(), sensorDatastreams.nextLink(), sensorDatastreams.value());
+        return new ResultList<Id>(sensorDatastreams.count(), sensorDatastreams.nextLink(), sensorDatastreams.value());
     }
 
     @Path("Datastreams({id2})")
@@ -75,11 +75,13 @@ public interface SensorsAccess {
 
     @Path("Datastreams({id2})/Observations")
     @GET
-    public ResultList<Observation> getSensorDatastreamObservations(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ResultList<Observation> getSensorDatastreamObservations(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Datastreams({id2})/ObservedProperty")
     @GET
-    public ObservedProperty getSensorDatastreamObservedProperty(@PathParam("id") String id, @PathParam("id2") String id2);
+    public ObservedProperty getSensorDatastreamObservedProperty(@PathParam("id") String id,
+            @PathParam("id2") String id2);
 
     @Path("Datastreams({id2})/Sensor")
     @GET

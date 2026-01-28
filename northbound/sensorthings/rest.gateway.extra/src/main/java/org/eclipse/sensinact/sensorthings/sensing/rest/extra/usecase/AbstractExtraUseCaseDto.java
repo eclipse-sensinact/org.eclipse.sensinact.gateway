@@ -18,14 +18,17 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -43,13 +46,42 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
     protected final IAccessServiceUseCase serviceUseCase;
     protected final GatewayThread gatewayThread;
 
+    public static String getLink(UriInfo uriInfo, String baseUri, String path) {
+        String sensorLink = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).build().toString();
+        return sensorLink;
+    }
+
+    public static String getLink(UriInfo uriInfo, String baseUri, String path, String id) {
+        if (id == null) {
+            id = "null";
+        }
+        String link = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).resolveTemplate("id", id).build().toString();
+        return link;
+    }
+
     protected void checkRequireField(ExtraUseCaseRequest<M> request) {
-        if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
-            DtoToModelMapper.checkRequireField(request.model());
+        try {
+            if (HttpMethod.POST.equals(request.method()) || HttpMethod.PUT.equals(request.method())) {
+                DtoMapperSimple.checkRequireField(request.model());
+            }
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 
+    protected GeoJsonObject getObservedArea(SensiNactSession session, String datastreamId) {
+        ProviderSnapshot providerDatastream = providerUseCase.read(session, datastreamId);
+        GeoJsonObject observedArea = null;
+
+        if (providerDatastream != null) {
+            observedArea = DtoMapperSimple.getResourceField(DtoMapperSimple.getAdminService(providerDatastream),
+                    DtoMapperSimple.LOCATION, GeoJsonObject.class);
+        }
+        return observedArea;
+    }
+
     public AbstractExtraUseCaseDto(Providers providers) {
+        super(providers);
         dataUpdate = resolve(providers, DataUpdate.class);
         providerUseCase = resolve(providers, IAccessProviderUseCase.class);
         serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
@@ -58,22 +90,22 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
 
     @SuppressWarnings("unchecked")
     protected List<String> getDatastreamIds(ServiceSnapshot serviceThing) {
-        return UtilDto.getResourceField(serviceThing, "datastreamIds", List.class);
+        return DtoMapperSimple.getResourceField(serviceThing, "datastreamIds", List.class);
 
     }
 
     protected List<String> getLocationIds(ProviderSnapshot provider) {
-        return getLocationIds(UtilDto.getThingService(provider));
+        return getLocationIds(DtoMapperSimple.getThingService(provider));
 
     }
 
     protected List<String> getDatastreamIds(ProviderSnapshot provider) {
-        return getDatastreamIds(UtilDto.getThingService(provider));
+        return getDatastreamIds(DtoMapperSimple.getThingService(provider));
     }
 
     @SuppressWarnings("unchecked")
     protected List<String> getLocationIds(ServiceSnapshot serviceThing) {
-        return UtilDto.getResourceField(serviceThing, "locationIds", List.class);
+        return DtoMapperSimple.getResourceField(serviceThing, "locationIds", List.class);
 
     }
 }

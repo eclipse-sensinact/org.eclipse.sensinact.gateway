@@ -16,9 +16,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
@@ -47,9 +49,13 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         FeatureOfInterest featureOfInterest = request.model();
         checkRequireField(request);
         String featureOfInterestId = request.id();
-        FeatureOfInterest createFoi = new FeatureOfInterest(featureOfInterest.selfLink(), featureOfInterestId,
-                featureOfInterest.name(), featureOfInterest.description(), featureOfInterest.encodingType(),
-                featureOfInterest.feature(), null);
+
+        String selfLink = getLink(request.uriInfo(), DtoMapperSimple.VERSION, "FeaturesOfInterest({id})",
+                featureOfInterestId);
+        String observationLink = getLink(request.uriInfo(), selfLink, "Observations");
+        FeatureOfInterest createFoi = new FeatureOfInterest(selfLink, featureOfInterestId, featureOfInterest.name(),
+                featureOfInterest.description(), featureOfInterest.encodingType(), featureOfInterest.feature(),
+                observationLink);
         cacheFoi.addDto(featureOfInterestId, createFoi);
         return new ExtraUseCaseResponse<Object>(featureOfInterestId, createFoi);
 
@@ -81,9 +87,12 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         checkRequireField(request);
         FeatureOfInterest foiToUpdate = new FeatureOfInterest(null, foiId, receiveFoi.name(), receiveFoi.description(),
                 receiveFoi.encodingType(), receiveFoi.feature(), null);
+        GeoJsonObject observedArea = getObservedArea(request.session(), providerId);
 
-        return List.of(
-                DtoToModelMapper.toDatastreamUpdate(providerId, null, null, null, null, null, null, null, foiToUpdate));
+        ExpandedObservation lastObservation = getExpandedObservationFromService(request,
+                serviceUseCase.read(request.session(), providerId, DtoMapperSimple.SERVICE_DATASTREAM));
+        return List.of(DtoToModelMapper.toDatastreamUpdate(request.mapper(), providerId, observedArea, null, null, null,
+                null, null, lastObservation, foiToUpdate));
 
     }
 
@@ -105,7 +114,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
             FeatureOfInterest createdProperty = updateInMemoryFoi(request, property);
             return new ExtraUseCaseResponse<Object>(request.id(), createdProperty);
         } else {
-            String providerId = UtilDto.extractFirstIdSegment(request.id());
+            String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
 
             List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 

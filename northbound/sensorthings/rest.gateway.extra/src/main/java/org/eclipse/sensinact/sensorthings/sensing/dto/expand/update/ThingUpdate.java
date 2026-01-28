@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
+import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_ALWAYS;
+
 import static org.eclipse.sensinact.core.annotation.dto.MapAction.USE_KEYS_AS_FIELDS;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
 
@@ -26,6 +28,7 @@ import org.eclipse.sensinact.core.annotation.dto.Model;
 import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.annotation.dto.Resource;
 import org.eclipse.sensinact.core.annotation.dto.Service;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 
 /**
@@ -33,14 +36,15 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
  */
 @Service("admin")
 public record ThingUpdate(@Model EClass model, @Provider String providerId,
-        @Service("thing") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String name,
-        @Service("thing") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) GeoJsonObject location,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String friendlyName,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
         @Service("thing") @Resource("id") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object thingId,
         @Service("thing") @Resource("id") @Metadata(onMap = {
                 USE_KEYS_AS_FIELDS }) Map<String, Object> properties,
         // link to thing
-        @Service("thing") @Resource("locationIds") @Data(onDuplicate = UPDATE_IF_DIFFERENT) List<String> locationIds,
-        @Service("thing") @Resource("datastreamIds") @Data(onDuplicate = UPDATE_IF_DIFFERENT) List<String> datastreamIds)
+        @Service("thing") @Resource("locationIds") @Data(onDuplicate = UPDATE_ALWAYS) List<String> locationIds,
+        @Service("thing") @Resource("datastreamIds") @Data(onDuplicate = UPDATE_ALWAYS) List<String> datastreamIds)
         implements SensorThingsUpdate{
 
     public ThingUpdate {
@@ -56,9 +60,9 @@ public record ThingUpdate(@Model EClass model, @Provider String providerId,
 
     }
 
-    public ThingUpdate(String providerId, String friendlyName, String description, Object thingId,
-            Map<String, Object> properties, List<String> locationIds, List<String> datastreamIds) {
-        this(SENSOR_THING_DEVICE, providerId, friendlyName, description, thingId, properties, locationIds,
+    public ThingUpdate(String providerId, GeoJsonObject location, String friendlyName, String description,
+            Object thingId, Map<String, Object> properties, List<String> locationIds, List<String> datastreamIds) {
+        this(SENSOR_THING_DEVICE, providerId, location, friendlyName, description, thingId, properties, locationIds,
                 datastreamIds);
     }
 

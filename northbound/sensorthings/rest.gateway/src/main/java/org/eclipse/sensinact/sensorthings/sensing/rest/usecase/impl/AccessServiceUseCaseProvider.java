@@ -16,7 +16,7 @@ import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -41,7 +41,7 @@ public class AccessServiceUseCaseProvider implements ContextResolver<IAccessServ
     }
 
     public ServiceSnapshot read(SensiNactSession session, String id) {
-        return read(session, UtilDto.extractFirstIdSegment(id), UtilDto.extractSecondIdSegment(id));
+        return read(session, DtoMapperSimple.extractFirstIdSegment(id), DtoMapperSimple.extractSecondIdSegment(id));
     }
 
     public ServiceSnapshot read(SensiNactSession session, String providerId, String serviceId) {
@@ -63,7 +63,7 @@ public class AccessServiceUseCaseProvider implements ContextResolver<IAccessServ
      */
     private ProviderSnapshot validateAndGetProvider(SensiNactSession session, String providerId) {
         ContextResolver<IAccessProviderUseCase> cr = providers.getContextResolver(IAccessProviderUseCase.class,
-            MediaType.WILDCARD_TYPE);
+                MediaType.WILDCARD_TYPE);
         if (cr == null) {
             throw new InternalServerErrorException("Unable to locate the provider access service");
         }

@@ -14,7 +14,11 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.ParameterizedType;
 
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
@@ -30,13 +34,35 @@ import jakarta.ws.rs.ext.Providers;
 public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUseCase<M, S> {
 
     private Class<M> type;
+    protected Providers providers;
 
-    public AbstractExtraUseCase() {
+    public AbstractExtraUseCase(Providers providers) {
         this.type = internalGetUseCaseTypeParameter(getClass());
+        this.providers = providers;
     }
 
     public static Class<?> getUseCaseTypeParameter(Class<? extends AbstractExtraUseCase<?, ?>> c) {
         return internalGetUseCaseTypeParameter(c);
+    }
+
+    protected ExpandedObservation getExpandedObservationFromService(ExtraUseCaseRequest<?> request,
+            ServiceSnapshot serviceDatastream) {
+        String obsStr = DtoMapperSimple.getResourceField(serviceDatastream, "lastObservation", String.class);
+        return parseObservation(request, obsStr);
+    }
+
+    protected ExpandedObservation parseObservation(ExtraUseCaseRequest<?> request, String obsStr) {
+        ExpandedObservation existingObservation;
+        try {
+            existingObservation = request.mapper().readValue(obsStr, ExpandedObservation.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        if (existingObservation == null) {
+            existingObservation = new ExpandedObservation(null, request.id(), null, null, null, null, null, null, null,
+                    null, null, null, null);
+        }
+        return existingObservation;
     }
 
     /**
@@ -81,7 +107,7 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
      * @param contextType
      * @return
      */
-    protected <T> T resolve(Providers providers, Class<T> type, Class<?> contextType) {
+    protected static <T> T resolve(Providers providers, Class<T> type, Class<?> contextType) {
         ContextResolver<T> resolver = providers.getContextResolver(type, MediaType.WILDCARD_TYPE);
         if (resolver == null) {
             throw new WebApplicationException("Unable to resolve a provider for " + type);
@@ -99,7 +125,7 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T extends AbstractExtraUseCase<?, ?>> T resolveUseCase(Providers providers, Class<T> type) {
+    protected static <T extends AbstractExtraUseCase<?, ?>> T resolveUseCase(Providers providers, Class<T> type) {
         return (T) resolve(providers, IExtraUseCase.class, type);
     }
 }

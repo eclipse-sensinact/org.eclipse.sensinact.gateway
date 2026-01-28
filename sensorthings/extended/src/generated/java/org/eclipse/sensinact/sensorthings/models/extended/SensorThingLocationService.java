@@ -12,8 +12,6 @@
  */
 package org.eclipse.sensinact.sensorthings.models.extended;
 
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-
 import org.eclipse.sensinact.model.core.provider.Service;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -27,10 +25,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The following features are supported:
  * </p>
  * <ul>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getName <em>Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getDescription <em>Description</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getEncodingType <em>Encoding Type</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getLocation <em>Location</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getId <em>Id</em>}</li>
  * </ul>
  *
@@ -40,50 +35,6 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public interface SensorThingLocationService extends Service {
-	/**
-	 * Returns the value of the '<em><b>Name</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Name</em>' attribute.
-	 * @see #setName(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocationService_Name()
-	 * @model
-	 * @generated
-	 */
-	String getName();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getName <em>Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Name</em>' attribute.
-	 * @see #getName()
-	 * @generated
-	 */
-	void setName(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Description</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Description</em>' attribute.
-	 * @see #setDescription(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocationService_Description()
-	 * @model
-	 * @generated
-	 */
-	String getDescription();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getDescription <em>Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Description</em>' attribute.
-	 * @see #getDescription()
-	 * @generated
-	 */
-	void setDescription(String value);
-
 	/**
 	 * Returns the value of the '<em><b>Encoding Type</b></em>' attribute.
 	 * <!-- begin-user-doc -->
@@ -105,28 +56,6 @@ public interface SensorThingLocationService extends Service {
 	 * @generated
 	 */
 	void setEncodingType(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Location</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Location</em>' attribute.
-	 * @see #setLocation(GeoJsonObject)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocationService_Location()
-	 * @model dataType="org.eclipse.sensinact.model.core.provider.EGeoJsonObject"
-	 * @generated
-	 */
-	GeoJsonObject getLocation();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getLocation <em>Location</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Location</em>' attribute.
-	 * @see #getLocation()
-	 * @generated
-	 */
-	void setLocation(GeoJsonObject value);
 
 	/**
 	 * Returns the value of the '<em><b>Id</b></em>' attribute.

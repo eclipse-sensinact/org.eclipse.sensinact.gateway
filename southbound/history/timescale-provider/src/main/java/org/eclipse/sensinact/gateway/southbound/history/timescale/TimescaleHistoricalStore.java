@@ -22,10 +22,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
 import org.osgi.framework.BundleContext;
@@ -70,16 +73,15 @@ public class TimescaleHistoricalStore {
         String provider() default "timescale-history";
 
         /**
-         * @return A list of JSON encoded {@link ResourceSelector} instances
-         *         used to select the resources for which history should be
-         *         stored
+         * @return A list of JSON encoded {@link ResourceSelector} instances used to
+         *         select the resources for which history should be stored
          */
         String[] include_resources() default "{}";
 
         /**
-         * @return A list of JSON encoded {@link ResourceSelector} instances
-         *         used to exclude resources from history storage. Applies
-         *         after the <code>include.resources</code> selection.
+         * @return A list of JSON encoded {@link ResourceSelector} instances used to
+         *         exclude resources from history storage. Applies after the
+         *         <code>include.resources</code> selection.
          */
         String[] exclude_resources() default {};
     }
@@ -117,7 +119,7 @@ public class TimescaleHistoricalStore {
         }
 
         String[] resources = config.include_resources();
-        if(resources.length == 0) {
+        if (resources.length == 0) {
             throw new IllegalArgumentException("At least one include resource selector must be set");
         }
 
@@ -125,7 +127,7 @@ public class TimescaleHistoricalStore {
 
         ICriterion excludeFilter;
         resources = config.exclude_resources();
-        if(resources.length == 0) {
+        if (resources.length == 0) {
             excludeFilter = null;
         } else {
             excludeFilter = filterFactory.parseResourceSelector(Arrays.stream(resources).map(this::fromString));
@@ -217,8 +219,20 @@ public class TimescaleHistoricalStore {
         if (logger.isDebugEnabled()) {
             logger.debug("Stopping the TimescaleDB history store");
         }
-        setProvider(null);
         safeUnregister();
+        gatewayThread.execute(new AbstractSensinactCommand<Void>() {
+
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                    PromiseFactory promiseFactory) {
+                SensinactProvider sp = twin.getProvider(config.provider());
+                if (sp != null) {
+                    sp.delete();
+                }
+                return promiseFactory.resolved(null);
+            }
+        });
+        setProvider(null);
     }
 
     private void safeUnregister() {
@@ -260,18 +274,27 @@ public class TimescaleHistoricalStore {
                 s.execute("SELECT create_hypertable('sensinact.geo_data', 'time', if_not_exists => TRUE);");
 
                 // Create indexes for optimal query performance
-                // Composite indexes for (provider, service, resource, time) - most selective columns first
-                s.execute("CREATE INDEX IF NOT EXISTS idx_numeric_data_provider_service_resource_time ON sensinact.numeric_data (provider, service, resource, time DESC);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_text_data_provider_service_resource_time ON sensinact.text_data (provider, service, resource, time DESC);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_geo_data_provider_service_resource_time ON sensinact.geo_data (provider, service, resource, time DESC);");
-                // Time-only indexes for time-range queries (TimescaleDB handles these well but explicit indexes help)
+                // Composite indexes for (provider, service, resource, time) - most selective
+                // columns first
+                s.execute(
+                        "CREATE INDEX IF NOT EXISTS idx_numeric_data_provider_service_resource_time ON sensinact.numeric_data (provider, service, resource, time DESC);");
+                s.execute(
+                        "CREATE INDEX IF NOT EXISTS idx_text_data_provider_service_resource_time ON sensinact.text_data (provider, service, resource, time DESC);");
+                s.execute(
+                        "CREATE INDEX IF NOT EXISTS idx_geo_data_provider_service_resource_time ON sensinact.geo_data (provider, service, resource, time DESC);");
+                // Time-only indexes for time-range queries (TimescaleDB handles these well but
+                // explicit indexes help)
                 s.execute("CREATE INDEX IF NOT EXISTS idx_numeric_data_time ON sensinact.numeric_data (time DESC);");
                 s.execute("CREATE INDEX IF NOT EXISTS idx_text_data_time ON sensinact.text_data (time DESC);");
                 s.execute("CREATE INDEX IF NOT EXISTS idx_geo_data_time ON sensinact.geo_data (time DESC);");
-                // Covering indexes for count queries - includes all columns needed for filtering
-                s.execute("CREATE INDEX IF NOT EXISTS idx_numeric_data_covering ON sensinact.numeric_data (provider, service, resource) INCLUDE (time);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_text_data_covering ON sensinact.text_data (provider, service, resource) INCLUDE (time);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_geo_data_covering ON sensinact.geo_data (provider, service, resource) INCLUDE (time);");
+                // Covering indexes for count queries - includes all columns needed for
+                // filtering
+                s.execute(
+                        "CREATE INDEX IF NOT EXISTS idx_numeric_data_covering ON sensinact.numeric_data (provider, service, resource) INCLUDE (time);");
+                s.execute(
+                        "CREATE INDEX IF NOT EXISTS idx_text_data_covering ON sensinact.text_data (provider, service, resource) INCLUDE (time);");
+                s.execute(
+                        "CREATE INDEX IF NOT EXISTS idx_geo_data_covering ON sensinact.geo_data (provider, service, resource) INCLUDE (time);");
                 return null;
             });
         } catch (ScopedWorkException e) {
@@ -297,9 +320,10 @@ public class TimescaleHistoricalStore {
             if (logger.isDebugEnabled()) {
                 logger.debug("Registering listener for data update events");
             }
-            reg = ctx.registerService(TypedEventHandler.class, new TimescaleDatabaseWorker(txControl, connection::get, include, exclude),
-                    new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, include.dataTopics(), "sensiNact.whiteboard.resource", true,
-                            "sensiNact.provider.name", config.provider())));
+            reg = ctx.registerService(TypedEventHandler.class,
+                    new TimescaleDatabaseWorker(txControl, connection::get, include, exclude),
+                    new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, include.dataTopics(), "sensiNact.whiteboard.resource",
+                            true, "sensiNact.provider.name", config.provider())));
             synchronized (this) {
                 if (this.reg == null) {
                     this.reg = reg;
@@ -312,7 +336,8 @@ public class TimescaleHistoricalStore {
                 @Override
                 protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
                     if (twin.getProvider(config.provider()) == null) {
-                        twin.createProvider("https://eclipse.org/sensinact/sensiNactHistory", "sensiNactHistory", config.provider());
+                        twin.createProvider("https://eclipse.org/sensinact/sensiNactHistory", "sensiNactHistory",
+                                config.provider());
                     }
                     return pf.resolved(null);
                 }
@@ -325,4 +350,3 @@ public class TimescaleHistoricalStore {
         }
     }
 }
-

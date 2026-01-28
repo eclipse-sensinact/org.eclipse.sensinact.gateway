@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapperGet.extractFirstIdSegment;
 
 import java.util.EnumSet;
 import java.util.Optional;
@@ -26,6 +25,7 @@ import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
@@ -114,7 +114,6 @@ public abstract class AbstractAccess {
      * @return
      */
     protected ProviderSnapshot validateAndGetProvider(String id) {
-        DtoMapperGet.validatedProviderId(id);
 
         Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(id);
 
@@ -131,12 +130,12 @@ public abstract class AbstractAccess {
      * @return
      */
     protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
-        String provider = extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
+        String service = DtoMapperSimple.extractSecondIdSegment(id);
+        String resource = DtoMapperSimple.extractThirdIdSegment(id);
 
         ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
 
