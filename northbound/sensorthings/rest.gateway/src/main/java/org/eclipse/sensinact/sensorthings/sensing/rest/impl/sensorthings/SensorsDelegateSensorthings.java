@@ -29,7 +29,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -121,6 +120,14 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
         return t;
+    }
+
+    public ResultList<Datastream> getSensorDatastreamThingDatastreams(String value, String value2) {
+        String ThingId = getThingIdFromDatastream(value2);
+        return new ResultList<Datastream>(null, null,
+                getDatastreamProvidersFromThing(getSession(), ThingId).stream().map(p -> DtoMapper
+                        .toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), null, p))
+                        .toList());
     }
 
     public Response updateSensor(String id, Sensor sensor) {

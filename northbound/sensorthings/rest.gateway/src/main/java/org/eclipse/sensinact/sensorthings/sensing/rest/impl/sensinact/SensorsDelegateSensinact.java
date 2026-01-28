@@ -106,4 +106,8 @@ public class SensorsDelegateSensinact extends AbstractDelegate {
         return t;
     }
 
+    public ResultList<Datastream> getSensorDatastreamThingDatastreams(String value, String value2) {
+        return new ResultList<Datastream>(null, null, List.of(getSensorDatastream(value, value2)));
+    }
+
 }

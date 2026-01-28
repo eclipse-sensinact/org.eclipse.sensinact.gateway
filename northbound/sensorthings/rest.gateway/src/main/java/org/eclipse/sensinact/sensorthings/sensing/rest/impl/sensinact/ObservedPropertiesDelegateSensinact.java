@@ -104,4 +104,8 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate {
                 validateAndGetProvider(provider));
     }
 
+    public ResultList<Datastream> getObservedPropertyDatastreamThingDatastreams(String value, String value2) {
+        return new ResultList<Datastream>(null, null, List.of(getObservedPropertyDatastream(value, value2)));
+    }
+
 }

@@ -49,14 +49,13 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Response updateSensor(ODataId id, Sensor sensor) {
-        
+
         return getSensorthingsHandler().updateSensor(id.value(), sensor);
 
     }
 
     @Override
     public Response patchSensor(ODataId id, Sensor sensor) {
-        
 
         return getSensorthingsHandler().patchSensor(id.value(), sensor);
 
@@ -64,7 +63,6 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Sensor getSensor(ODataId id) {
-
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -79,7 +77,6 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     @Override
     public ResultList<Datastream> getSensorDatastreams(ODataId id) {
 
-
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
         if (!isSensorthingModel(provider)) {
@@ -91,8 +88,20 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     }
 
     @Override
-    public Datastream getSensorDatastream(ODataId id, ODataId id2) {
+    public ResultList<Datastream> getSensorDatastreamThingDatastreams(ODataId id, ODataId id2) {
 
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getSensorDatastreamThingDatastreams(id.value(), id2.value());
+        } else {
+            return getSensorthingsHandler().getSensorDatastreamThingDatastreams(id.value(), id2.value());
+
+        }
+    }
+
+    @Override
+    public Datastream getSensorDatastream(ODataId id, ODataId id2) {
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -107,7 +116,6 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     @Override
     public ResultList<Observation> getSensorDatastreamObservations(ODataId id, ODataId id2) {
 
-
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
         if (!isSensorthingModel(provider)) {
@@ -120,7 +128,6 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public ObservedProperty getSensorDatastreamObservedProperty(ODataId id, ODataId id2) {
-
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -135,7 +142,6 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     @Override
     public Sensor getSensorDatastreamSensor(ODataId id, ODataId id2) {
 
-
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
         if (!isSensorthingModel(provider)) {
@@ -148,7 +154,6 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Thing getSensorDatastreamThing(ODataId id, ODataId id2) {
-
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -166,7 +171,6 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Response deleteSensor(ODataId id) {
-        
 
         validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(id.value()));
         return getSensorthingsHandler().deleteSensor(id.value());

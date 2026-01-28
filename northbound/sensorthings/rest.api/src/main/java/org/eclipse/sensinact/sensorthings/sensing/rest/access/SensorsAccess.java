@@ -92,4 +92,16 @@ public interface SensorsAccess {
     @GET
     public Thing getSensorDatastreamThing(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2);
 
+    @Path("Datastreams({id2})/Thing/Datastreams")
+    @GET
+    public ResultList<Datastream> getSensorDatastreamThingDatastreams(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2);
+
+    @Path("Datastreams({id2})/Thing/Datastreams/$ref")
+    @GET
+    @RefFilter
+    default public ResultList<Datastream> getSensorDatastreamThingDatastreamsRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getSensorDatastreamThingDatastreams(id, id2);
+    }
 }

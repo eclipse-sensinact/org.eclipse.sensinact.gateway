@@ -117,7 +117,7 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
         if (!provider.equals(provider2)) {
             throw new NotFoundException();
         }
-        String thingId = getThingIdFromDatastream(id);
+        String thingId = getThingIdFromDatastream(provider);
 
         return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
                 validateAndGetProvider(thingId));
@@ -140,6 +140,14 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ObservedProperty.class);
 
         return Response.noContent().build();
+    }
+
+    public ResultList<Datastream> getObservedPropertyDatastreamThingDatastreams(String value, String value2) {
+        String ThingId = getThingIdFromDatastream(value2);
+        return new ResultList<Datastream>(null, null,
+                getDatastreamProvidersFromThing(getSession(), ThingId).stream().map(p -> DtoMapper
+                        .toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), null, p))
+                        .toList());
     }
 
 }

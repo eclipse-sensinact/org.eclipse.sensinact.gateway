@@ -134,4 +134,17 @@ public interface ObservedPropertiesAccess {
         return getObservedPropertyDatastreamThing(id, id2);
     }
 
+    @Path("Datastreams({id2})/Thing/Datastreams")
+    @GET
+    public ResultList<Datastream> getObservedPropertyDatastreamThingDatastreams(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2);
+
+    @Path("Datastreams({id2})/Thing/Datastreams/$ref")
+    @GET
+    @RefFilter
+    default public ResultList<Datastream> getObservedPropertyDatastreamThingDatastreamsRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getObservedPropertyDatastreamThingDatastreams(id, id2);
+    }
+
 }

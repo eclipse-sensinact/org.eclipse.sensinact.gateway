@@ -51,7 +51,6 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Response updateObservedProperties(ODataId id, ObservedProperty observedProperty) {
-        
 
         return getSensorthingsHandler().updateObservedProperties(id.value(), observedProperty);
 
@@ -59,7 +58,6 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Response patchObservedProperties(ODataId id, ObservedProperty observedProperty) {
-        
 
         return getSensorthingsHandler().patchObservedProperties(id.value(), observedProperty);
 
@@ -67,7 +65,6 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ObservedProperty getObservedProperty(ODataId id) {
-        
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -81,7 +78,6 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Datastream> getObservedPropertyDatastreams(ODataId id) {
-        
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -95,7 +91,6 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Datastream getObservedPropertyDatastream(ODataId id, ODataId id2) {
-        
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -109,7 +104,6 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ResultList<Observation> getObservedPropertyDatastreamObservations(ODataId id, ODataId id2) {
-        
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -123,7 +117,6 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ObservedProperty getObservedPropertyDatastreamObservedProperty(ODataId id, ODataId id2) {
-        
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -137,7 +130,6 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Sensor getObservedPropertyDatastreamSensor(ODataId id, ODataId id2) {
-        
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -151,7 +143,6 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public Thing getObservedPropertyDatastreamThing(ODataId id, ODataId id2) {
-        
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
@@ -163,13 +154,25 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
         }
     }
 
+    @Override
+    public ResultList<Datastream> getObservedPropertyDatastreamThingDatastreams(ODataId id, ODataId id2) {
+
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getObservedPropertyDatastreamThingDatastreams(id.value(), id2.value());
+        } else {
+            return getSensorthingsHandler().getObservedPropertyDatastreamThingDatastreams(id.value(), id2.value());
+
+        }
+    }
+
     private boolean isSensorthingModel(ProviderSnapshot provider) {
         return DtoMapperSimple.isSensorthingModel(provider);
     }
 
     @Override
     public Response deleteObservedProperty(ODataId id) {
-        
 
         return getSensorthingsHandler().deleteObservedProperty(id.value());
 
