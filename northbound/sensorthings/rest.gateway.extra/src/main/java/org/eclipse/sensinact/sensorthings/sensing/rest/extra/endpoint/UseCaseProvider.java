@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +30,8 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ObservedPro
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.RefIdUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.SensorsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ThingsExtraUseCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.core.Context;
@@ -48,6 +52,7 @@ import jakarta.ws.rs.ext.Providers;
 @SuppressWarnings("rawtypes")
 @Provider
 public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
+    private static final Logger LOG = LoggerFactory.getLogger(SensorThingsExtraFeature.class);
 
     @Context
     Providers providers;
@@ -70,6 +75,8 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
         } else {
             cacheKey = (Class<? extends AbstractExtraUseCase<?, ?>>) type;
         }
+        // check if we have a method ensureDepenednciesUseCase before compute this one
+        createDepedenciesUseCase(cacheKey, providers);
 
         IExtraUseCase<?, ?> useCase = useCases.computeIfAbsent(cacheKey, c -> {
             try {
@@ -79,8 +86,21 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
                 throw new InternalServerErrorException("Failed to make the Extra Use Case provider", e);
             }
         });
-        useCase.ensureDependenciesUseCase();
         return useCase;
+    }
+
+    /**
+     * check if method to ensureDependenciesUseCase are present and call it
+     *
+     * @param cacheKey
+     */
+    private void createDepedenciesUseCase(Class<? extends AbstractExtraUseCase<?, ?>> cacheKey, Providers providers) {
+        DependsOnUseCases depends = cacheKey.getAnnotation(DependsOnUseCases.class);
+        if (depends != null) {
+            for (Class<? extends AbstractExtraUseCase<?, ?>> dep : depends.value()) {
+                getContext(dep); // appel récursif pour créer les dépendances
+            }
+        }
     }
 
 }

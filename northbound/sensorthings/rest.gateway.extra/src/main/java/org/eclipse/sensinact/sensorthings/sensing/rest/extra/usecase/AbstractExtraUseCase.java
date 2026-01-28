@@ -45,9 +45,6 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
         return internalGetUseCaseTypeParameter(c);
     }
 
-    public void ensureDependenciesUseCase() {
-    }
-
     protected ExpandedObservation getExpandedObservationFromService(ExtraUseCaseRequest<?> request,
             ServiceSnapshot serviceDatastream) {
         String obsStr = DtoMapperSimple.getResourceField(serviceDatastream, "lastObservation", String.class);
@@ -110,7 +107,7 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
      * @param contextType
      * @return
      */
-    protected <T> T resolve(Providers providers, Class<T> type, Class<?> contextType) {
+    protected static <T> T resolve(Providers providers, Class<T> type, Class<?> contextType) {
         ContextResolver<T> resolver = providers.getContextResolver(type, MediaType.WILDCARD_TYPE);
         if (resolver == null) {
             throw new WebApplicationException("Unable to resolve a provider for " + type);
@@ -128,7 +125,7 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected <T extends AbstractExtraUseCase<?, ?>> T resolveUseCase(Providers providers, Class<T> type) {
+    protected static <T extends AbstractExtraUseCase<?, ?>> T resolveUseCase(Providers providers, Class<T> type) {
         return (T) resolve(providers, IExtraUseCase.class, type);
     }
 }

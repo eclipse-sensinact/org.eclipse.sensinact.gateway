@@ -37,6 +37,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint.DependsOnUseCases;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -59,13 +60,13 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     private final IDtoMemoryCache<Sensor> sensorCaches;
     private final IDtoMemoryCache<FeatureOfInterest> foiCaches;
     private final IDtoMemoryCache<ObservedProperty> observedPropertyCaches;
-    private LocationsExtraUseCase locationUseCase;
-    private ThingsExtraUseCase thingExtraUseCase;
+    private final LocationsExtraUseCase locationUseCase;
+    private final ThingsExtraUseCase thingExtraUseCase;
 
-    private ObservationsExtraUseCase observationsExtraUseCase;
-    private ObservedPropertiesExtraUseCase observedPropertyExtraUseCase;
-    private SensorsExtraUseCase sensorExtraUseCase;
-    private FeatureOfInterestExtraUseCase foiExtraUseCase;
+    private final ObservationsExtraUseCase observationsExtraUseCase;
+    private final ObservedPropertiesExtraUseCase observedPropertyExtraUseCase;
+    private final SensorsExtraUseCase sensorExtraUseCase;
+    private final FeatureOfInterestExtraUseCase foiExtraUseCase;
     private final GatewayThread gatewayThread;
 
     @FunctionalInterface
@@ -93,6 +94,9 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
             new RefKey(ExpandedThing.class, ExpandedLocation.class), this::updateThingLocationRef);
 
     @SuppressWarnings("unchecked")
+    @DependsOnUseCases({ DatastreamsExtraUseCase.class, FeatureOfInterestExtraUseCase.class,
+            LocationsExtraUseCase.class, ThingsExtraUseCase.class, ObservationsExtraUseCase.class,
+            ObservedPropertiesExtraUseCase.class, SensorsExtraUseCase.class })
     public RefIdUseCase(Providers providers) {
         super(providers);
         observedPropertyCaches = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
@@ -102,10 +106,6 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         sensorCaches = resolve(providers, IDtoMemoryCache.class, Sensor.class);
         foiCaches = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
 
-        initUpdateHandler();
-    }
-
-    public void ensureDependenciesUseCase() {
         datastreamUseCase = resolveUseCase(providers, DatastreamsExtraUseCase.class);
         foiExtraUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
         locationUseCase = resolveUseCase(providers, LocationsExtraUseCase.class);
@@ -113,6 +113,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         observationsExtraUseCase = resolveUseCase(providers, ObservationsExtraUseCase.class);
         observedPropertyExtraUseCase = resolveUseCase(providers, ObservedPropertiesExtraUseCase.class);
         sensorExtraUseCase = resolveUseCase(providers, SensorsExtraUseCase.class);
+        initUpdateHandler();
     }
 
     private void initUpdateHandler() {
