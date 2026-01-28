@@ -33,7 +33,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -118,8 +117,10 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
         if (!provider.equals(provider2)) {
             throw new NotFoundException();
         }
+        String thingId = getThingIdFromDatastream(id);
+
         return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
-                validateAndGetProvider(provider));
+                validateAndGetProvider(thingId));
     }
 
     public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
