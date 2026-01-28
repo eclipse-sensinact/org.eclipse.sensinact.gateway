@@ -54,19 +54,18 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
     private final IAccessProviderUseCase providerUseCase;
     private final IAccessServiceUseCase serviceUseCase;
-    private final DatastreamsExtraUseCase datastreamUseCase;
+    private DatastreamsExtraUseCase datastreamUseCase;
 
     private final IDtoMemoryCache<Sensor> sensorCaches;
     private final IDtoMemoryCache<FeatureOfInterest> foiCaches;
     private final IDtoMemoryCache<ObservedProperty> observedPropertyCaches;
-    private final LocationsExtraUseCase locationUseCase;
-    private final ThingsExtraUseCase thingExtraUseCase;
+    private LocationsExtraUseCase locationUseCase;
+    private ThingsExtraUseCase thingExtraUseCase;
 
-    private final ObservationsExtraUseCase observationsExtraUseCase;
-    private final ObservedPropertiesExtraUseCase observedPropertyExtraUseCase;
-    private final SensorsExtraUseCase sensorExtraUseCase;
-    private final FeatureOfInterestExtraUseCase foiExtraUseCase;
-
+    private ObservationsExtraUseCase observationsExtraUseCase;
+    private ObservedPropertiesExtraUseCase observedPropertyExtraUseCase;
+    private SensorsExtraUseCase sensorExtraUseCase;
+    private FeatureOfInterestExtraUseCase foiExtraUseCase;
     private final GatewayThread gatewayThread;
 
     @FunctionalInterface
@@ -95,22 +94,25 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
     @SuppressWarnings("unchecked")
     public RefIdUseCase(Providers providers) {
+        super(providers);
+        observedPropertyCaches = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
         providerUseCase = resolve(providers, IAccessProviderUseCase.class);
-        datastreamUseCase = resolveUseCase(providers, DatastreamsExtraUseCase.class);
+        gatewayThread = resolve(providers, GatewayThread.class);
         serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
         sensorCaches = resolve(providers, IDtoMemoryCache.class, Sensor.class);
         foiCaches = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
-        foiExtraUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
 
-        observedPropertyCaches = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
+        initUpdateHandler();
+    }
+
+    public void ensureDependenciesUseCase() {
+        datastreamUseCase = resolveUseCase(providers, DatastreamsExtraUseCase.class);
+        foiExtraUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
         locationUseCase = resolveUseCase(providers, LocationsExtraUseCase.class);
         thingExtraUseCase = resolveUseCase(providers, ThingsExtraUseCase.class);
-
         observationsExtraUseCase = resolveUseCase(providers, ObservationsExtraUseCase.class);
         observedPropertyExtraUseCase = resolveUseCase(providers, ObservedPropertiesExtraUseCase.class);
         sensorExtraUseCase = resolveUseCase(providers, SensorsExtraUseCase.class);
-        gatewayThread = resolve(providers, GatewayThread.class);
-        initUpdateHandler();
     }
 
     private void initUpdateHandler() {

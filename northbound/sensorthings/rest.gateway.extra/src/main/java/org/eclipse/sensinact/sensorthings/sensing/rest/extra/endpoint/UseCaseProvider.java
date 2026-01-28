@@ -71,7 +71,7 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
             cacheKey = (Class<? extends AbstractExtraUseCase<?, ?>>) type;
         }
 
-        return useCases.computeIfAbsent(cacheKey, c -> {
+        IExtraUseCase<?, ?> useCase = useCases.computeIfAbsent(cacheKey, c -> {
             try {
                 return c.getConstructor(Providers.class).newInstance(providers);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
@@ -79,6 +79,8 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
                 throw new InternalServerErrorException("Failed to make the Extra Use Case provider", e);
             }
         });
+        useCase.ensureDependenciesUseCase();
+        return useCase;
     }
 
 }

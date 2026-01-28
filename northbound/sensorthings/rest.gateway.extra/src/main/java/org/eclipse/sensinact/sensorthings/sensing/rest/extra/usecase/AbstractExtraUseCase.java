@@ -34,13 +34,18 @@ import jakarta.ws.rs.ext.Providers;
 public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUseCase<M, S> {
 
     private Class<M> type;
+    protected Providers providers;
 
-    public AbstractExtraUseCase() {
+    public AbstractExtraUseCase(Providers providers) {
         this.type = internalGetUseCaseTypeParameter(getClass());
+        this.providers = providers;
     }
 
     public static Class<?> getUseCaseTypeParameter(Class<? extends AbstractExtraUseCase<?, ?>> c) {
         return internalGetUseCaseTypeParameter(c);
+    }
+
+    public void ensureDependenciesUseCase() {
     }
 
     protected ExpandedObservation getExpandedObservationFromService(ExtraUseCaseRequest<?> request,

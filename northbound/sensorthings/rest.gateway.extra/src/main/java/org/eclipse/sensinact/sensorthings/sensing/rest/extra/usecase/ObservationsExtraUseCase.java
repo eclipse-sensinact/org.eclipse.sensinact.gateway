@@ -42,11 +42,16 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedObservation, ServiceSnapshot> {
 
-    private final FeatureOfInterestExtraUseCase featureOfInterestUseCase;
+    private FeatureOfInterestExtraUseCase featureOfInterestUseCase;
 
     public ObservationsExtraUseCase(Providers providers) {
         super(providers);
+    }
+
+    @Override
+    public void ensureDependenciesUseCase() {
         featureOfInterestUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
+
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> create(ExtraUseCaseRequest<ExpandedObservation> request) {

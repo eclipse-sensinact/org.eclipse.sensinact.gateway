@@ -81,6 +81,7 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
     }
 
     public AbstractExtraUseCaseDto(Providers providers) {
+        super(providers);
         dataUpdate = resolve(providers, DataUpdate.class);
         providerUseCase = resolve(providers, IAccessProviderUseCase.class);
         serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
