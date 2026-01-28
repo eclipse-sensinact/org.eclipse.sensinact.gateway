@@ -125,17 +125,15 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
 
     private final Supplier<Connection> connectionSupplier;
 
-    private final JsonFactory factory = JsonFactory.builder()
-            .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
-            .build();
+    private final JsonFactory factory = JsonFactory.builder().enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS).build();
     private final ObjectMapper mapper = new ObjectMapper(factory);
 
     private final Predicate<ResourceDataNotification> include;
 
     private final Predicate<ResourceDataNotification> exclude;
 
-    public TimescaleDatabaseWorker(TransactionControl txControl, Supplier<Connection> connectionSupplier, ICriterion include, ICriterion exclude) {
-        super();
+    public TimescaleDatabaseWorker(TransactionControl txControl, Supplier<Connection> connectionSupplier,
+            ICriterion include, ICriterion exclude) {
         this.txControl = txControl;
         this.connectionSupplier = connectionSupplier;
         this.include = include.dataEventFilter();
@@ -149,8 +147,8 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
             logger.debug("Update received for topic {}", topic);
         }
 
-        if(include.test(event)) {
-            if(exclude.test(event)) {
+        if (include.test(event)) {
+            if (exclude.test(event)) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Excluded data update received on topic {}", topic);
                 }
@@ -163,8 +161,8 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
             return;
         }
 
-        String command;
-        Object value;
+        final String command;
+        final Object value;
 
         if (isGeographic(event)) {
             if (logger.isDebugEnabled()) {
@@ -202,6 +200,10 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
             value = event.newValue() == null ? null : event.newValue().toString();
         }
         Connection conn = connectionSupplier.get();
+        if (conn == null) {
+            logger.warn("JDBC connection unavailable. This update will be skipped");
+            return;
+        }
 
         try {
             txControl.required(() -> {

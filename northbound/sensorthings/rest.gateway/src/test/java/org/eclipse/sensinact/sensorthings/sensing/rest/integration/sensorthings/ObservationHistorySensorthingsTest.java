@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.abort;
 
 import java.net.URLEncoder;
@@ -37,6 +38,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
@@ -46,6 +48,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
@@ -87,16 +90,19 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         }
     }
 
+    private TestInfo testInfo;
+
     private Configuration historyProviderConfig;
 
     @BeforeEach
-    void setupTest(
+    void setupTest(TestInfo testInfo,
             @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.history.timescale", location = "?")) Configuration historyConfig,
             @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "?")) Configuration sensorthingsConfig)
             throws Exception {
 
         assertNotNull(container);
 
+        this.testInfo = testInfo;
         historyProviderConfig = historyConfig;
 
         historyConfig.update(new Hashtable<>(Map.of("url", container.getJdbcUrl(), "user", container.getUsername(),
@@ -119,9 +125,13 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
 
         // Wait for the servlet to be valid
         waitForSensorthingsAPI();
+
+        // Wait for the provider to exist
+        waitForHistory(true);
     }
 
     private void waitForHistoryTables() {
+        System.out.println("Waiting for history tables in test " + testInfo.getDisplayName());
         boolean ready = false;
         final long timeout = System.currentTimeMillis() + 5000;
         Exception lastError = null;
@@ -140,10 +150,11 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
             }
         } while (!ready && System.currentTimeMillis() < timeout);
 
-        assertTrue(ready, "History provider setup timed out: " + lastError);
+        assertTrue(ready, "History provider setup timed out in test " + testInfo.getDisplayName() + " : " + lastError);
     }
 
     private void waitForSensorthingsAPI() {
+        System.out.println("Waiting for sensorthings in test " + testInfo.getDisplayName());
         boolean ready = false;
         final long timeout = System.currentTimeMillis() + 5000;
         Exception lastError = null;
@@ -165,12 +176,40 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         assertTrue(ready, "SensorThings API setup timed out: " + lastError);
     }
 
+    private void waitForHistory(boolean exists) throws InterruptedException {
+        System.out.println("Waiting for history " + exists + " in test " + testInfo.getDisplayName());
+        for (int i = 0; i < 20; i++) {
+            try {
+                ProviderDescription describeProvider = session.describeProvider("timescale-history");
+                if (exists) {
+                    if (describeProvider != null && "timescale-history".equals(describeProvider.provider)) {
+                        return;
+                    }
+                } else if (describeProvider == null) {
+                    return;
+                }
+            } catch (Exception e) {
+                if (!exists) {
+                    return;
+                }
+            }
+            Thread.sleep(250);
+        }
+        if (exists) {
+            fail("No history provider exists in " + testInfo.getDisplayName() + " ");
+        } else {
+            fail("History provider still exists in " + testInfo.getDisplayName() + " ");
+        }
+    }
+
     @AfterEach
     void cleanupTest() throws Exception {
         if (historyProviderConfig != null) {
             historyProviderConfig.delete();
             historyProviderConfig = null;
         }
+        // Wait for the provider to be deleted
+        waitForHistory(false);
 
         try (Connection connection = getDataSource().getConnection()) {
             final Statement stmt = connection.createStatement();
@@ -378,6 +417,8 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         createDatastream(testProvider, testProviderThing, 30.2, laterTime);
         createLocation(testProviderLocation);
         createThing(testProviderThing, List.of(), List.of(testProvider));
+
+        waitForRowCount("sensinact.text_data", 47);
 
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils.queryJson(
