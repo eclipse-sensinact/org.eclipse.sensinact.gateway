@@ -44,7 +44,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -297,5 +296,38 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
     public Response deleteDatastreamObservationsRef(String id) {
 
         return Response.status(409).build();
+    }
+
+    public ResultList<Observation> getDatastreamThingDatastreamObserations(String id, String id2) {
+        String thingId = getDatastreamThingId(id);
+        ProviderSnapshot providerThing = validateAndGetProvider(thingId);
+        ServiceSnapshot serviceThing = DtoMapperSimple.getThingService(providerThing);
+        List<?> datastreamIds = DtoMapperSimple.getResourceField(serviceThing, "datastreamIds", List.class);
+        if (!datastreamIds.contains(id2)) {
+            throw new NotFoundException();
+        }
+        return getDatastreamObservations(id2);
+    }
+
+    private String getDatastreamThingId(String id) {
+        ProviderSnapshot providerDatastream = validateAndGetProvider(id);
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerDatastream);
+        String thingId = DtoMapperSimple.getResourceField(service, "thingId", String.class);
+        return thingId;
+    }
+
+    public ResultList<Thing> getDatastreamThingLocationThings(String id, String id2) {
+        String thingId = getDatastreamThingId(id);
+        ProviderSnapshot providerThing = validateAndGetProvider(thingId);
+        ServiceSnapshot serviceThing = DtoMapperSimple.getThingService(providerThing);
+        List<?> locationIds = DtoMapperSimple.getResourceField(serviceThing, "locationIds", List.class);
+        if (!locationIds.contains(id2)) {
+            throw new NotFoundException();
+        }
+
+        return new ResultList<>(null, null,
+                getLocationThingsProvider(id2).stream().map(p -> DtoMapper.toThing(getSession(), application,
+                        getMapper(), uriInfo, getExpansions(), parseFilter(THINGS), p)).toList());
+
     }
 }

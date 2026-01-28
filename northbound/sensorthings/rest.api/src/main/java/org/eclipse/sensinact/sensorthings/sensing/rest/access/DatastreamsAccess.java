@@ -14,6 +14,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.access;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.util.List;
+
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -25,11 +27,13 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.RefFilter;
 
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -68,9 +72,88 @@ public interface DatastreamsAccess {
                 datastreamObservations.value());
     }
 
+    @Path("Observations({id2})/Datastream/Observations")
+    @GET
+    default public ResultList<Observation> getDatastreamObservationDatastreamObservations(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id2.value());
+        if (!providerId.equals(id.value())) {
+            throw new NotFoundException();
+        }
+        return getDatastreamObservations(id);
+    }
+
+    @Path("Observations({id2})/Datastream/Observations/$ref")
+    @GET
+    @RefFilter
+    default public ResultList<Observation> getDatastreamObservationDatastreamObservationsRef(
+            @PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        return getDatastreamObservationDatastreamObservations(id, id2);
+    }
+
     @Path("Observations({id2})")
     @GET
     public Observation getDatastreamObservation(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2);
+
+    @Path("Observations({id2})/Datastream/Sensor/$ref")
+    @GET
+    @RefFilter
+    default public Sensor getDatastreamObservationDatastreamSensorRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getDatastreamObservationDatastreamSensor(id, id2);
+
+    }
+
+    @Path("Observations({id2})/Datastream/ObservedProperty")
+    @GET
+    default public ObservedProperty getDatastreamObservationDatastreamObservedProperty(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        String idProvider = DtoMapperSimple.extractFirstIdSegment(id2.value());
+        if (!idProvider.equals(id.value())) {
+            throw new NotFoundException();
+        }
+        return getDatastreamObservedProperty(id);
+    }
+
+    @Path("Observations({id2})/Datastream/ObservedProperty/$ref")
+    @GET
+    @RefFilter
+    default public ObservedProperty getDatastreamObservationDatastreamObservedPropertyRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getDatastreamObservationDatastreamObservedProperty(id, id2);
+
+    }
+
+    @Path("Observations({id2})/Datastream/Sensor")
+    @GET
+    default public Sensor getDatastreamObservationDatastreamSensor(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        String idProvider = DtoMapperSimple.extractFirstIdSegment(id2.value());
+        if (!idProvider.equals(id.value())) {
+            throw new NotFoundException();
+        }
+        return getDatastreamSensor(id);
+    }
+
+    @Path("Observations({id2})/Datastream/Thing/$ref")
+    @GET
+    @RefFilter
+    default public Thing getDatastreamObservationDatastreamThingRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getDatastreamObservationDatastreamThing(id, id2);
+
+    }
+
+    @Path("Observations({id2})/Datastream/Thing")
+    @GET
+    default public Thing getDatastreamObservationDatastreamThing(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        String idProvider = DtoMapperSimple.extractFirstIdSegment(id2.value());
+        if (!idProvider.equals(id.value())) {
+            throw new NotFoundException();
+        }
+        return getDatastreamThing(id);
+    }
 
     @Path("Observations({id2})/$ref")
     @GET
@@ -104,6 +187,21 @@ public interface DatastreamsAccess {
     @GET
     public FeatureOfInterest getDatastreamObservationFeatureOfInterest(@PathParam("id") ODataId id,
             @PathParam("id2") ODataId id2);
+
+    @Path("Observations({id2})/FeatureOfInterest/Observations/$ref")
+    @GET
+    @RefFilter
+    default public ResultList<Observation> getDatastreamObservationFeatureOfInterestObservationsRef(
+            @PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        return getDatastreamObservationFeatureOfInterestObservations(id, id2);
+    }
+
+    @Path("Observations({id2})/FeatureOfInterest/Observations")
+    @GET
+    default public ResultList<Observation> getDatastreamObservationFeatureOfInterestObservations(
+            @PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        return new ResultList<Observation>(null, null, List.of(getDatastreamObservation(id, id2)));
+    }
 
     @Path("Observations({id2})/FeatureOfInterest/$ref")
     @GET
@@ -139,7 +237,7 @@ public interface DatastreamsAccess {
     @GET
     @RefFilter
     default public ResultList<Datastream> getDatastreamObservedPropertyDatastreamsRef(@PathParam("id") ODataId id) {
-        return getDatastreamObservedPropertyDatastreamsRef(id);
+        return getDatastreamObservedPropertyDatastreams(id);
     }
 
     @Path("Sensor")
@@ -197,23 +295,59 @@ public interface DatastreamsAccess {
         return getDatastreamThingDatastreamThing(id, id2);
     }
 
-    @Path("Thing/Datastreams({id2})/Obserations")
+    @Path("Thing/Datastreams({id2})/Observations")
     @GET
-    default public ResultList<Observation> getDatastreamThingDatastreamObserations(@PathParam("id") ODataId id,
-            @PathParam("id2") ODataId id2) {
-        // TODO add check
-        return getDatastreamObservations(id2);
-    }
+    public ResultList<Observation> getDatastreamThingDatastreamObservations(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2);
 
-    @Path("Thing/Datastreams({id2})/Obserations/$ref")
+    @Path("Thing/Datastreams({id2})/Observations/$ref")
     @GET
     @RefFilter
-    default public ResultList<Observation> getDatastreamThingDatastreamObserationsRef(@PathParam("id") ODataId id,
+    default public ResultList<Observation> getDatastreamThingDatastreamObservationsRef(@PathParam("id") ODataId id,
             @PathParam("id2") ODataId id2) {
-        return getDatastreamThingDatastreamObserations(id, id2);
+        return getDatastreamThingDatastreamObservations(id, id2);
     }
 
-    @Path("Thing/Datastreams({id2})/Obserations({id3})")
+    @Path("Thing/HistoricalLocations({id2})/Thing")
+    @GET
+    default public Thing getDatastreamThingHistoricalLocationThing(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        Thing thing = getDatastreamThing(id);
+        if (!thing.id().equals(DtoMapperSimple.extractFirstIdSegment(id2.value()))) {
+            throw new NotFoundException();
+        }
+        return thing;
+    }
+
+    @Path("Thing/HistoricalLocations({id2})/Thing/$ref")
+    @GET
+    @RefFilter
+    default public Thing getDatastreamThingHistoricalLocationThingRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getDatastreamThingHistoricalLocationThing(id, id2);
+    }
+
+    @Path("Thing/HistoricalLocations({id2})/Locations")
+    @GET
+    default public ResultList<Location> getDatastreamThingHistoricalLocationLocations(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        Thing thing = getDatastreamThing(id);
+        if (!thing.id().equals(DtoMapperSimple.extractFirstIdSegment(id2.value()))) {
+            throw new NotFoundException();
+        }
+        return getDatastreamThingLocations(id);
+
+    }
+
+    @Path("Thing/HistoricalLocations({id2})/Locations/$ref")
+    @GET
+    @RefFilter
+    default public ResultList<Location> getDatastreamThingHistoricalLocationLocationsRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getDatastreamThingHistoricalLocationLocations(id, id2);
+    }
+
+    @Path("Thing/Datastreams({id2})/Observations({id3})")
     @GET
     default public Observation getDatastreamThingDatastreamObservation(@PathParam("id") ODataId id,
             @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3) {
@@ -221,7 +355,7 @@ public interface DatastreamsAccess {
         return getDatastreamObservation(id, id3);
     }
 
-    @Path("Thing/Datastreams({id2})/Obserations({id3})/$ref")
+    @Path("Thing/Datastreams({id2})/Observations({id3})/$ref")
     @GET
     @RefFilter
     default public Observation getDatastreamThingDatastreamObserationRef(@PathParam("id") ODataId id,
@@ -229,7 +363,7 @@ public interface DatastreamsAccess {
         return getDatastreamThingDatastreamObservation(id, id2, id3);
     }
 
-    @Path("Thing/Datastreams({id2})/Obserations({id3})/FeatureOfInterest")
+    @Path("Thing/Datastreams({id2})/Observations({id3})/FeatureOfInterest")
     @GET
     default public FeatureOfInterest getDatastreamThingDatastreamObservationFeatureOfInterest(
             @PathParam("id") ODataId id, @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3) {
@@ -237,7 +371,7 @@ public interface DatastreamsAccess {
         return getDatastreamObservationFeatureOfInterest(id2, id3);
     }
 
-    @Path("Thing/Datastreams({id2})/Obserations({id3})/FeatureOfInterest/$ref")
+    @Path("Thing/Datastreams({id2})/Observations({id3})/FeatureOfInterest/$ref")
     @GET
     @RefFilter
     default public FeatureOfInterest getDatastreamThingDatastreamObserationFeatureOfInterestRef(
@@ -261,6 +395,190 @@ public interface DatastreamsAccess {
         return getDatastreamThingDatastreamSensor(id, id2);
     }
 
+    @Path("Sensor/Datastreams({id2})/Thing")
+    @GET
+    default public Thing getDatastreamSensorDatastreamThing(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getDatastreamThing(id2);
+    }
+
+    @Path("Sensor/Datastreams({id2})/Thing/$ref")
+    @GET
+    @RefFilter
+    default public Thing getDatastreamSensorDatastreamThingRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getDatastreamSensorDatastreamThing(id, id2);
+    }
+
+    @Path("Sensor/Datastreams({id2})/ObservedProperty")
+    @GET
+    default public ObservedProperty getSensorDatastreamObservedProperty(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getDatastreamObservedProperty(id2);
+    }
+
+    @Path("Sensor/Datastreams({id2})/ObservedProperty/$ref")
+    @GET
+    @RefFilter
+    default public ObservedProperty getSensorDatastreamObservedPropertyRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getSensorDatastreamObservedProperty(id, id2);
+    }
+
+    @Path("Sensor/Datastreams({id2})/Observations")
+    @GET
+    default public ResultList<Observation> getSensorDatastreamObservations(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getDatastreamObservations(id2);
+    }
+
+    @Path("Sensor/Datastreams({id2})/Observations/$ref")
+    @GET
+    @RefFilter
+    default public ResultList<Observation> getSensorDatastreamObservationsRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getSensorDatastreamObservations(id, id2);
+    }
+
+    @Path("Sensor/Datastreams({id2})/Observations({id3})")
+    @GET
+    default public Observation getSensorDatastreamObseration(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2,
+            @PathParam("id3") ODataId id3) {
+        // TODO add check
+        return getDatastreamObservation(id2, id3);
+    }
+
+    @Path("Sensor/Datastreams({id2})/Observations({id3})/$ref")
+    @GET
+    @RefFilter
+    default public Observation getSensorDatastreamObserationRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3) {
+        // TODO add check
+        return getSensorDatastreamObseration(id, id2, id3);
+    }
+
+    @Path("Sensor/Datastreams({id2})/Observations({id3})/FeatureOfInterest")
+    @GET
+    default public FeatureOfInterest getSensorDatastreamObserationFeatureOfInterest(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3) {
+        // TODO add check
+        return getDatastreamObservationFeatureOfInterest(id2, id3);
+    }
+
+    @Path("Sensor/Datastreams({id2})/Observations({id3})/FeatureOfInterest/$ref")
+    @GET
+    @RefFilter
+    default public FeatureOfInterest getSensorDatastreamObserationFeatureOfInterestRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3) {
+        // TODO add check
+        return getSensorDatastreamObserationFeatureOfInterest(id, id2, id3);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/Observations")
+    @GET
+    default public ResultList<Observation> getObservedPropertyDatastreamObservations(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getDatastreamObservations(id2);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/Observations/$ref")
+    @GET
+    @RefFilter
+    default public ResultList<Observation> getObservedPropertyDatastreamObservationsRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getObservedPropertyDatastreamObservations(id, id2);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/Observations({id3})")
+    @GET
+    default public Observation getObservedPropertyDatastreamObseration(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3) {
+        // TODO add check
+        return getDatastreamObservation(id2, id3);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/Observations({id3})/$ref")
+    @GET
+    @RefFilter
+    default public Observation getObservedPropertyDatastreamObserationRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3) {
+        // TODO add check
+        return getObservedPropertyDatastreamObseration(id, id2, id3);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/Observations({id3})/FeatureOfInterest")
+    @GET
+    default public FeatureOfInterest getObservedPropertyDatastreamObserationFeatureOfInterest(
+            @PathParam("id") ODataId id, @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3) {
+        // TODO add check
+        return getDatastreamObservationFeatureOfInterest(id2, id3);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/Observations({id3})/FeatureOfInterest/$ref")
+    @GET
+    @RefFilter
+    default public FeatureOfInterest getObservedPropertyDatastreamObserationFeatureOfInterestRef(
+            @PathParam("id") ODataId id, @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3) {
+        // TODO add check
+        return getObservedPropertyDatastreamObserationFeatureOfInterest(id, id2, id3);
+    }
+
+    @Path("Sensor/Datastreams({id2})/Sensor")
+    @GET
+    default public Sensor getSensorDatastreamSensor(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getDatastreamSensor(id2);
+    }
+
+    @Path("Sensor/Datastreams({id2})/Sensor/$ref")
+    @GET
+    @RefFilter
+    default public Sensor getSensorDatastreamSensorRef(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getSensorDatastreamSensor(id, id2);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/ObservedProperty")
+    @GET
+    default public ObservedProperty getObservedPropertyDatastreamObservedProperty(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getDatastreamObservedProperty(id2);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/ObservedProperty/$ref")
+    @GET
+    @RefFilter
+    default public ObservedProperty getObservedPropertyDatastreamObservedPropertyRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getObservedPropertyDatastreamObservedProperty(id, id2);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/Sensor")
+    @GET
+    default public Sensor getObservedPropertyDatastreamSensor(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getDatastreamSensor(id2);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/Sensor/$ref")
+    @GET
+    @RefFilter
+    default public Sensor getObservedPropertyDatastreamSensorRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getObservedPropertyDatastreamSensor(id, id2);
+    }
+
     @Path("Thing/Datastreams({id2})/ObservedProperty")
     @GET
     default public ObservedProperty getDatastreamThingDatastreamObservedProperty(@PathParam("id") ODataId id,
@@ -275,6 +593,22 @@ public interface DatastreamsAccess {
     default public ObservedProperty getDatastreamThingDatastreamObservedPropertyRef(@PathParam("id") ODataId id,
             @PathParam("id2") ODataId id2) {
         return getDatastreamThingDatastreamObservedProperty(id, id2);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/Thing")
+    @GET
+    default public Thing getDatastreamObservedPropertyDatastreamThing(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        // TODO add check
+        return getDatastreamThing(id2);
+    }
+
+    @Path("ObservedProperty/Datastreams({id2})/Thing/$ref")
+    @GET
+    @RefFilter
+    default public Thing getDatastreamObservedPropertyDatastreamThingRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getDatastreamObservedPropertyDatastreamThing(id, id2);
     }
 
     @Path("Thing/{prop}")
@@ -316,6 +650,34 @@ public interface DatastreamsAccess {
     @RefFilter
     default public ResultList<Location> getDatastreamThingLocationsRef(@PathParam("id") ODataId id) {
         return getDatastreamThingLocations(id);
+    }
+
+    @Path("Thing/Locations({id2})/HistoricalLocations")
+    @GET
+    default public ResultList<HistoricalLocation> getDatastreamThingLocationHistoricalLocations(
+            @PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        return getDatastreamThingHistoricalLocations(id);
+    }
+
+    @Path("Thing/Locations({id2})/HistoricalLocations/$ref")
+    @GET
+    @RefFilter
+    default public ResultList<HistoricalLocation> getDatastreamThingLocationHistoricalLocationsRef(
+            @PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        return getDatastreamThingLocationHistoricalLocations(id, id2);
+    }
+
+    @Path("Thing/Locations({id2})/Things")
+    @GET
+    public ResultList<Thing> getDatastreamThingLocationThings(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2);
+
+    @Path("Thing/Locations({id2})/Things/$ref")
+    @GET
+    @RefFilter
+    default public ResultList<Thing> getDatastreamThingLocationThingsRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getDatastreamThingLocationThings(id, id2);
     }
 
 }

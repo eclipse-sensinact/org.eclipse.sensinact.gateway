@@ -64,8 +64,8 @@ public class DatastreamsDelegateSensinact extends AbstractDelegate {
 
     public ResultList<Observation> getDatastreamObservations(String id) {
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
-        ResultList<Observation> observationList = RootResourceDelegateSensinact.getObservationList(getSession(), application,
-                getMapper(), uriInfo, requestContext, validateAndGetResourceSnapshot(id), filter);
+        ResultList<Observation> observationList = RootResourceDelegateSensinact.getObservationList(getSession(),
+                application, getMapper(), uriInfo, requestContext, validateAndGetResourceSnapshot(id), filter);
         return observationList;
     }
 
@@ -170,6 +170,14 @@ public class DatastreamsDelegateSensinact extends AbstractDelegate {
                 .filter(r -> !r.getMetadata().containsKey(SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA))
                 .map(r -> DtoMapper.toDatastream(userSession, application, mapper, uriInfo, expansions, r, filter))
                 .collect(toList()));
+    }
+
+    public ResultList<Observation> getDatastreamThingDatastreamObserations(String id, String id2) {
+        return getDatastreamObservations(id2);
+    }
+
+    public ResultList<Thing> getDatastreamThingLocationThings(String id, String id2) {
+        return new ResultList<Thing>(null, null, List.of(getDatastreamThing(id2)));
     }
 
 }
