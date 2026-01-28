@@ -33,6 +33,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -47,6 +48,7 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
     }
 
     public ObservedProperty getObservedProperty(String id) {
+
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetProvider(datastreamId));
@@ -59,10 +61,12 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
     }
 
     public ResultList<Datastream> getObservedPropertyDatastreams(String id) {
+
         return new ResultList<>(null, null, List.of(getObservedPropertyDatastream(id, id)));
     }
 
     public Datastream getObservedPropertyDatastream(String id, String id2) {
+
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
         String datastreamId2 = DtoMapperSimple.extractFirstIdSegment(id2);
 
@@ -77,6 +81,7 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
     @PaginationLimit(500)
 
     public ResultList<Observation> getObservedPropertyDatastreamObservations(String id, String id2) {
+
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
         String datastreamId2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!datastreamId.equals(datastreamId2)) {
@@ -87,6 +92,7 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
     }
 
     public ObservedProperty getObservedPropertyDatastreamObservedProperty(String id, String id2) {
+
         String providerDatastream2 = DtoMapperSimple.extractFirstIdSegment(id2);
         String providerDatastream = DtoMapperSimple.extractFirstIdSegment(id);
 
@@ -97,6 +103,7 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
     }
 
     public Sensor getObservedPropertyDatastreamSensor(String id, String id2) {
+
         if (!id.equals(id2)) {
             throw new NotFoundException();
         }
@@ -116,16 +123,19 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
     }
 
     public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
+
         getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, observedProperty);
 
         return Response.noContent().build();
     }
 
     public Response patchObservedProperties(String id, ObservedProperty observedProperty) {
+
         return updateObservedProperties(id, observedProperty);
     }
 
     public Response deleteObservedProperty(String id) {
+
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ObservedProperty.class);
 
         return Response.noContent().build();

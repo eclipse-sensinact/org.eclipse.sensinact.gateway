@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.delete;
 
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
+
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -24,7 +26,7 @@ public interface ObservationsDelete {
      * @param id : id of observation
      */
     @DELETE
-    public Response deleteObservation(@PathParam("id") String id);
+    public Response deleteObservation(@PathParam("id") ODataId id);
 
     /**
      * delete feature of interest observation ref - return 409
@@ -33,5 +35,5 @@ public interface ObservationsDelete {
      */
     @DELETE
     @Path("/FeatureOfInterest/$ref")
-    public Response deleteObservationFeatureOfInterest(@PathParam("id") String id);
+    public Response deleteObservationFeatureOfInterest(@PathParam("id") ODataId id);
 }

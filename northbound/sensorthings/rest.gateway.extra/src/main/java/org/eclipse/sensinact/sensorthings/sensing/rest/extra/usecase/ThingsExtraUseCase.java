@@ -15,6 +15,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.DependentCommand;
 import org.eclipse.sensinact.core.command.ResourceCommand;
@@ -24,9 +26,13 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -39,8 +45,15 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedThing, ProviderSnapshot> {
 
+    private final IDtoMemoryCache<Sensor> sensorCache;
+
+    private final IDtoMemoryCache<ObservedProperty> observedPropertyCache;
+
+    @SuppressWarnings("unchecked")
     public ThingsExtraUseCase(Providers providers) {
         super(providers);
+        sensorCache = resolve(providers, IDtoMemoryCache.class, Sensor.class);
+        observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
@@ -77,8 +90,22 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
             locationIds.addAll(getLocationIds(provider));
             datastreamIds.addAll(getDatastreamIds(provider));
         }
+        List<ExpandedDataStream> listDatastream = Optional.ofNullable(request.model().datastreams()).orElseGet(List::of)
+                .stream().peek(DtoMapperSimple::checkRequireField).map(ds -> {
+                    checkRequireField(ds);
+                    Sensor sensor = DatastreamsExtraUseCase.getCachedExpandedSensor(sensorCache, ds);
+                    ObservedProperty observedProperty = DatastreamsExtraUseCase
+                            .getCachedExpandedObservedProperty(observedPropertyCache, ds);
+                    checkRequireLink(sensor, observedProperty);
 
-        return DtoToModelMapper.toThingUpdates(request, id, locationIds, datastreamIds);
+                    return new ExpandedDataStream(ds.selfLink(), ds.id(), ds.name(), ds.description(),
+                            ds.observationType(), ds.unitOfMeasurement(), ds.observedArea(), ds.phenomenonTime(),
+                            ds.resultTime(), ds.properties(), ds.observationsLink(), ds.observedPropertyLink(),
+                            ds.sensorLink(), ds.thingLink(), ds.observations(), observedProperty, sensor, ds.obsLink(),
+                            ds.thing());
+                }).toList();
+
+        return DtoToModelMapper.toThingUpdates(request, id, locationIds, datastreamIds, listDatastream);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {

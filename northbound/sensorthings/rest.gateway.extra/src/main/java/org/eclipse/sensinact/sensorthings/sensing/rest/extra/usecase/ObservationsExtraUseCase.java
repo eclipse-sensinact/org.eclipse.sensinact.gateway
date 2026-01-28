@@ -24,6 +24,7 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
@@ -91,6 +92,10 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         FeatureOfInterest foi = getFeatureOfInterest(observation);
         if (foi != null) {
             checkRequireField(foi);
+        } else {
+            // create default foi
+            foi = new FeatureOfInterest(null, DtoToModelMapper.getNewId(), "default_foi", "default Foi",
+                    "application/vnd.geo+json", new Point(0, 0), null);
         }
         String id = request.parentId() != null ? request.parentId() : request.id();
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);

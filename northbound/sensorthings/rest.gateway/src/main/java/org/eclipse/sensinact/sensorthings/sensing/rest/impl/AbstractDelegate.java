@@ -35,7 +35,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
@@ -80,9 +79,20 @@ public abstract class AbstractDelegate {
                 .map(s -> s.getProvider()).toList();
     }
 
+    public static List<ProviderSnapshot> getLocationThingsProvider(SensiNactSession session, String id) {
+        return listProviders(session, null).stream().map(DtoMapperSimple::getThingService).filter(Objects::nonNull)
+                .filter(s -> DtoMapperSimple.getResourceField(s, "locationIds", List.class).contains(id))
+                .map(s -> s.getProvider()).toList();
+    }
+
     protected List<ProviderSnapshot> listProviders(final ICriterion criterion) {
         final SensiNactSession userSession = getSession();
-        return userSession.filteredSnapshot(criterion);
+        return listProviders(userSession, criterion);
+
+    }
+
+    protected static List<ProviderSnapshot> listProviders(SensiNactSession session, final ICriterion criterion) {
+        return session.filteredSnapshot(criterion);
 
     }
 
@@ -191,11 +201,13 @@ public abstract class AbstractDelegate {
      * @return
      */
     private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
-        return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
+        return getProviderSnapshot(getSession(), id);
     }
 
     private static Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
-        return Optional.ofNullable(session.providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
+        String idProvider = DtoMapperSimple.extractFirstIdSegment(id);
+
+        return Optional.ofNullable(session.providerSnapshot(idProvider, EnumSet.noneOf(SnapshotOption.class)));
     }
 
     /**

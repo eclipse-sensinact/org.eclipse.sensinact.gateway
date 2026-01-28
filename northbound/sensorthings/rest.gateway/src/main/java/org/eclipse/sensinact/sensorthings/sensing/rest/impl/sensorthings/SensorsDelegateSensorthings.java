@@ -29,6 +29,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -43,17 +44,20 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Sensor getSensor(String id) {
+
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.SENSORS), validateAndGetProvider(providerId));
     }
 
     public ResultList<Datastream> getSensorDatastreams(String id) {
+
         ResultList<Datastream> list = new ResultList<>(null, null, List.of(getSensorDatastream(id, id)));
         return list;
     }
 
     public Datastream getSensorDatastream(String id, String id2) {
+
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
 
@@ -68,6 +72,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     @PaginationLimit(500)
 
     public ResultList<Observation> getSensorDatastreamObservations(String id, String id2) {
+
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!providerId.equals(providerId2)) {
@@ -78,6 +83,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     }
 
     public ObservedProperty getSensorDatastreamObservedProperty(String id, String id2) {
+
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!providerId.equals(providerId2)) {
@@ -95,6 +101,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Sensor getSensorDatastreamSensor(String id, String id2) {
+
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!providerId.equals(providerId2)) {
@@ -117,15 +124,18 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Response updateSensor(String id, Sensor sensor) {
+
         getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, sensor);
         return Response.noContent().build();
     }
 
     public Response patchSensor(String id, Sensor sensor) {
+
         return updateSensor(id, sensor);
     }
 
     public Response deleteSensor(String id) {
+
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, Sensor.class);
 
         return Response.noContent().build();

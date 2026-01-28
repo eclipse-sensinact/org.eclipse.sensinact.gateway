@@ -28,6 +28,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,6 +50,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
     }
 
     public FeatureOfInterest getFeatureOfInterest(String id) {
+
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
@@ -68,6 +70,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
     // No history as it is *live* observation data not a data stream
 
     public ResultList<Observation> getFeatureOfInterestObservations(String id) {
+
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
 
         return getLiveObservations(getSession(), application, getMapper(), uriInfo, getExpansions(),
@@ -77,6 +80,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
     static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider) {
+
         ServiceSnapshot datastreamService = DtoMapperSimple.getDatastreamService(provider);
 
         return new ResultList<>(null, null, DtoMapper.toObservation(userSession, application, mapper, uriInfo,
@@ -85,6 +89,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
     }
 
     public Observation getFeatureOfInterestObservation(String id, String id2) {
+
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!provider.equals(provider2)) {
@@ -105,6 +110,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
     }
 
     public Datastream getFeatureOfInterestObservationDatastream(String id, String id2) {
+
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
         if (!provider.equals(provider2)) {
@@ -129,16 +135,19 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
     }
 
     public Response updateFeaturesOfInterest(String id, FeatureOfInterest foi) {
+
         getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, foi);
 
         return Response.noContent().build();
     }
 
     public Response patchFeaturesOfInterest(String id, FeatureOfInterest foi) {
+
         return updateFeaturesOfInterest(id, foi);
     }
 
     public Response deleteFeatureOfInterest(String id) {
+
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, FeatureOfInterest.class);
 
         return Response.noContent().build();

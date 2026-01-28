@@ -21,6 +21,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.RefFilter;
 
@@ -34,61 +35,61 @@ import jakarta.ws.rs.Produces;
 public interface SensorsAccess {
 
     @GET
-    public Sensor getSensor(@PathParam("id") String id);
+    public Sensor getSensor(@PathParam("id") ODataId id);
 
     @Path("{prop}")
     @GET
     @PropFilter
-    default public Sensor getSensorProp(@PathParam("id") String id) {
+    default public Sensor getSensorProp(@PathParam("id") ODataId id) {
         return getSensor(id);
     }
 
     @Path("{prop}/$value")
     @GET
     @PropFilter
-    default public Sensor getSensorPropValue(@PathParam("id") String id) {
+    default public Sensor getSensorPropValue(@PathParam("id") ODataId id) {
         return getSensor(id);
     }
 
     @Path("Datastreams")
     @GET
-    public ResultList<Datastream> getSensorDatastreams(@PathParam("id") String id);
+    public ResultList<Datastream> getSensorDatastreams(@PathParam("id") ODataId id);
 
     @Path("Datastreams/$ref")
     @GET
     @RefFilter
-    default public ResultList<Id> getSensorDatastreamsRef(@PathParam("id") String id) {
+    default public ResultList<Id> getSensorDatastreamsRef(@PathParam("id") ODataId id) {
         ResultList<Datastream> sensorDatastreams = getSensorDatastreams(id);
         return new ResultList<Id>(sensorDatastreams.count(), sensorDatastreams.nextLink(), sensorDatastreams.value());
     }
 
     @Path("Datastreams({id2})")
     @GET
-    public Datastream getSensorDatastream(@PathParam("id") String id, @PathParam("id2") String id2);
+    public Datastream getSensorDatastream(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2);
 
     @Path("Datastreams({id2})/{prop}")
     @GET
     @PropFilter
-    default public Datastream getSensorDatastreamProp(@PathParam("id") String id, @PathParam("id2") String id2) {
+    default public Datastream getSensorDatastreamProp(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
         return getSensorDatastream(id, id2);
     }
 
     @Path("Datastreams({id2})/Observations")
     @GET
-    public ResultList<Observation> getSensorDatastreamObservations(@PathParam("id") String id,
-            @PathParam("id2") String id2);
+    public ResultList<Observation> getSensorDatastreamObservations(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2);
 
     @Path("Datastreams({id2})/ObservedProperty")
     @GET
-    public ObservedProperty getSensorDatastreamObservedProperty(@PathParam("id") String id,
-            @PathParam("id2") String id2);
+    public ObservedProperty getSensorDatastreamObservedProperty(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2);
 
     @Path("Datastreams({id2})/Sensor")
     @GET
-    public Sensor getSensorDatastreamSensor(@PathParam("id") String id, @PathParam("id2") String id2);
+    public Sensor getSensorDatastreamSensor(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2);
 
     @Path("Datastreams({id2})/Thing")
     @GET
-    public Thing getSensorDatastreamThing(@PathParam("id") String id, @PathParam("id2") String id2);
+    public Thing getSensorDatastreamThing(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2);
 
 }

@@ -47,7 +47,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -66,92 +65,110 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
 
     public ResultList<Thing> getThings() {
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
+
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null,
+        ResultList<Thing> result = new ResultList<>(null, null,
                 providers.stream().filter(p -> DtoMapperSimple.getThingService(p) != null).map(
                         p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                         .toList());
+
+        return result;
     }
 
     public ResultList<Location> getLocations() {
         ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null,
+        ResultList<Location> result = new ResultList<>(null, null,
                 providers.stream().filter(p -> DtoMapperSimple.getLocationService(p) != null).map(
                         p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                         .toList());
+        return result;
     }
 
     public ResultList<HistoricalLocation> getHistoricalLocations() {
         ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
+
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null,
-                providers.stream().filter(p -> DtoMapperSimple.getThingService(p) != null)
-                        .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                criterion, p))
-                        .filter(Optional::isPresent).map(Optional::get).toList());
+        ResultList<HistoricalLocation> result = new ResultList<>(null, null, providers.stream()
+                .filter(p -> DtoMapperSimple.getThingService(p) != null).map(p -> toHistoricalLocation(getSession(),
+                        application, getMapper(), uriInfo, getExpansions(), criterion, p))
+                .filter(Optional::isPresent).map(Optional::get).toList());
+        return result;
 
     }
 
     public ResultList<Datastream> getDatastreams() {
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
+
         List<ProviderSnapshot> providers = listProviders(criterion);
         List<ProviderSnapshot> providersDatastreams = providers.stream()
                 .filter(p -> DtoMapperSimple.getDatastreamService(p) != null).toList();
-        return new ResultList<>(null, null, providersDatastreams.stream()
+        ResultList<Datastream> result = new ResultList<>(null, null, providersDatastreams.stream()
                 .map(p -> toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                 .toList());
+        return result;
+
     }
 
     public ResultList<Sensor> getSensors() {
         ICriterion criterion = parseFilter(EFilterContext.SENSORS);
+
         List<ProviderSnapshot> providers = listProviders(criterion);
         List<ProviderSnapshot> providersDatastreams = providers.stream()
                 .filter(p -> DtoMapperSimple.getDatastreamService(p) != null).toList();
 
-        return new ResultList<>(null, null,
+        ResultList<Sensor> result = new ResultList<>(null, null,
                 providersDatastreams.stream().map(
                         p -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                         .toList());
+        return result;
     }
 
     // No history as it is *live* observation data not a data stream
 
     public ResultList<Observation> getObservations() {
         ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
+
         List<ProviderSnapshot> providers = listProviders(criterion);
         List<ResourceSnapshot> resources = providers.stream().map(p -> DtoMapperSimple.getDatastreamService(p))
                 .filter(Objects::nonNull).map(s -> s.getResource("lastObservation")).toList();
 
-        return new ResultList<>(null, null, resources.stream()
+        ResultList<Observation> result = new ResultList<>(null, null, resources.stream()
                 .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .filter(Optional::isPresent).map(Optional::get).toList());
+        return result;
     }
 
     public ResultList<ObservedProperty> getObservedProperties() {
         ICriterion criterion = parseFilter(EFilterContext.OBSERVED_PROPERTIES);
+
         List<ProviderSnapshot> providers = listProviders(criterion);
         List<ProviderSnapshot> providersDatastreams = providers.stream()
                 .filter(p -> DtoMapperSimple.getDatastreamService(p) != null).toList();
 
-        return new ResultList<>(null, null, providersDatastreams.stream().map(
+        ResultList<ObservedProperty> result = new ResultList<>(null, null, providersDatastreams.stream().map(
                 r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .toList());
+        return result;
     }
 
     public ResultList<FeatureOfInterest> getFeaturesOfInterest() {
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
+
         List<ProviderSnapshot> providers = listProviders(criterion);
         List<ProviderSnapshot> providersDatastreams = providers.stream()
                 .filter(p -> DtoMapperSimple.getDatastreamService(p) != null).toList();
 
-        return new ResultList<>(null, null, providersDatastreams.stream().map(p -> toFeatureOfInterest(getSession(),
-                application, getMapper(), uriInfo, getExpansions(), criterion, p)).toList());
+        ResultList<FeatureOfInterest> result = new ResultList<>(null, null,
+                providersDatastreams.stream().map(p -> toFeatureOfInterest(getSession(), application, getMapper(),
+                        uriInfo, getExpansions(), criterion, p)).filter(Objects::nonNull).toList());
+        return result;
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext,
             ResourceSnapshot resourceSnapshot, ICriterion filter) {
+
         ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
         return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot,
                 filter, 0);
@@ -160,7 +177,6 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
     public static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
             ICriterion filter, int localResultLimit) {
-
         ResultList<Observation> list = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
                 application, mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
 
@@ -240,17 +256,17 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
                 snapshot);
 
         URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
-
         return Response.created(createdUri).entity(createDto).build();
     }
 
     public ResultList<Thing> getThingsRef() {
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
         List<ProviderSnapshot> providers = listProviders(criterion);
-        return new ResultList<>(null, null,
+        ResultList<Thing> result = new ResultList<>(null, null,
                 providers.stream().filter(p -> DtoMapperSimple.getThingService(p) != null).map(
                         p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
                         .toList());
+        return result;
     }
 
 }

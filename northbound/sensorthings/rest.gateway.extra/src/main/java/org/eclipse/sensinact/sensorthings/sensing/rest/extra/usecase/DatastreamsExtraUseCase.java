@@ -106,8 +106,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
 
         checkRequireField(request);
 
-        Sensor sensor = getCachedExpandedSensor(request.model());
-        ObservedProperty observedProperty = getCachedExpandedObservedProperty(request.model());
+        Sensor sensor = getCachedExpandedSensor(sensorCache, request.model());
+        ObservedProperty observedProperty = getCachedExpandedObservedProperty(observedPropertyCache, request.model());
         UnitOfMeasurement unit = request.model().unitOfMeasurement();
 
         String thingId = getThingId(request, datastream, datastreamId);
@@ -206,7 +206,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
      * @param datastream
      * @return
      */
-    private Sensor getCachedExpandedSensor(ExpandedDataStream datastream) {
+    public static Sensor getCachedExpandedSensor(IDtoMemoryCache<Sensor> sensorCache, ExpandedDataStream datastream) {
         Sensor sensor = null;
         // retrieve created sensor
         if (datastream.sensor() != null) {
@@ -280,7 +280,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
      * @param datastream
      * @return
      */
-    private ObservedProperty getCachedExpandedObservedProperty(ExpandedDataStream datastream) {
+    public static ObservedProperty getCachedExpandedObservedProperty(
+            IDtoMemoryCache<ObservedProperty> observedPropertyCache, ExpandedDataStream datastream) {
         ObservedProperty observedProperty = null;
         // retrieve create observedPorperty
         if (datastream.observedProperty() != null) {
@@ -300,14 +301,6 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
             }
         }
         return observedProperty;
-    }
-
-    private void checkRequireField(Id observedProperty) {
-        try {
-            DtoMapperSimple.checkRequireField(observedProperty);
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
-        }
     }
 
     /**

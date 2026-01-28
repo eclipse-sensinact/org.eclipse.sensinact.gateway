@@ -66,7 +66,8 @@ public class DtoMapper {
         if (id == null) {
             id = "null";
         }
-        String link = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).resolveTemplate("id", id).build().toString();
+        String link = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).resolveTemplate("id", "'" + id + "'").build()
+                .toString();
         return link;
     }
 

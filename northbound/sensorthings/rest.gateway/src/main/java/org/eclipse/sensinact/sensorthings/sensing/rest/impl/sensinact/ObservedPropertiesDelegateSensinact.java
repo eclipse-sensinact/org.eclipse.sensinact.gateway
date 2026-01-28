@@ -27,7 +27,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.ObservedPropertiesAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
@@ -37,7 +36,7 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Providers;
 
-public class ObservedPropertiesDelegateSensinact extends AbstractDelegate implements ObservedPropertiesAccess {
+public class ObservedPropertiesDelegateSensinact extends AbstractDelegate {
 
     public ObservedPropertiesDelegateSensinact(UriInfo uriInfo, Providers providers, Application application,
             ContainerRequestContext requestContext) {
@@ -45,7 +44,6 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate implem
         // TODO Auto-generated constructor stub
     }
 
-    @Override
     public ObservedProperty getObservedProperty(String id) {
         ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetResourceSnapshot(id));
@@ -57,12 +55,10 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate implem
         return o;
     }
 
-    @Override
     public ResultList<Datastream> getObservedPropertyDatastreams(String id) {
         return new ResultList<>(null, null, List.of(getObservedPropertyDatastream(id, id)));
     }
 
-    @Override
     public Datastream getObservedPropertyDatastream(String id, String id2) {
         if (!id.equals(id2)) {
             throw new NotFoundException();
@@ -73,7 +69,7 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate implem
     }
 
     @PaginationLimit(500)
-    @Override
+
     public ResultList<Observation> getObservedPropertyDatastreamObservations(String id, String id2) {
         if (!id.equals(id2)) {
             throw new NotFoundException();
@@ -82,7 +78,6 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate implem
                 getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
     }
 
-    @Override
     public ObservedProperty getObservedPropertyDatastreamObservedProperty(String id, String id2) {
         if (!id.equals(id2)) {
             throw new NotFoundException();
@@ -90,7 +85,6 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate implem
         return getObservedProperty(id);
     }
 
-    @Override
     public Sensor getObservedPropertyDatastreamSensor(String id, String id2) {
         if (!id.equals(id2)) {
             throw new NotFoundException();
@@ -100,7 +94,6 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate implem
                 parseFilter(SENSORS), validateAndGetResourceSnapshot(id2));
     }
 
-    @Override
     public Thing getObservedPropertyDatastreamThing(String id, String id2) {
         String provider = extractFirstIdSegment(id);
         String provider2 = extractFirstIdSegment(id2);

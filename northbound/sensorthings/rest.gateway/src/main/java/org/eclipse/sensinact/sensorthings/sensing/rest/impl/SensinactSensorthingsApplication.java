@@ -20,7 +20,6 @@ import java.util.Set;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.RootResourceDelegateSensorthings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessServiceUseCaseProvider;
@@ -63,7 +62,7 @@ public class SensinactSensorthingsApplication extends Application {
                 // Features/extensions
                 SensorThingsFeature.class, ThrowableMapperProvider.class, SensinactSessionProvider.class,
                 SensorthingsFilterProvider.class, AccessProviderUseCaseProvider.class,
-                AccessResourceUseCaseProvider.class, AccessServiceUseCaseProvider.class,
+                AccessResourceUseCaseProvider.class, AccessServiceUseCaseProvider.class, LoggingFilter.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections

@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.delete;
 
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
+
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
@@ -24,6 +26,6 @@ public interface FeaturesOfInterestDelete {
      * @param id : id of a feature of interest
      */
     @DELETE
-    public Response deleteFeatureOfInterest(@PathParam("id") String id);
+    public Response deleteFeatureOfInterest(@PathParam("id") ODataId id);
 
 }

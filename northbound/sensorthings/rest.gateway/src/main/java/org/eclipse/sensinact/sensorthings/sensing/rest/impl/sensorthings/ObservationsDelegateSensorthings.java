@@ -47,6 +47,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -101,6 +102,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Datastream getObservationDatastream(String id) {
+
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
 
@@ -117,11 +119,13 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
     @PaginationLimit(500)
 
     public ResultList<Observation> getObservationDatastreamObservations(String id) {
+
         return RootResourceDelegateSensorthings.getObservationList(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), getObservationResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
     }
 
     public ObservedProperty getObservationDatastreamObservedProperty(String id) {
+
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
@@ -130,6 +134,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Sensor getObservationDatastreamSensor(String id) {
+
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
@@ -141,6 +146,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Thing getObservationDatastreamThing(String id) {
+
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
 
         String idThing = getThingIdFromDatastream(datastreamId);
@@ -152,6 +158,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public FeatureOfInterest getObservationFeatureOfInterest(String id) {
+
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
@@ -162,6 +169,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
     // No history as it is *live* observation data not a data stream
 
     public ResultList<Observation> getObservationFeatureOfInterestObservations(String id) {
+
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
         ICriterion criterion = parseFilter(OBSERVATIONS);
 
@@ -179,6 +187,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Response updateObservationDatastreamRef(String id, RefId datastream) {
+
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), datastream, id,
                 ExpandedObservation.class, ExpandedDataStream.class);
 
@@ -186,6 +195,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Response updateObservationFeatureOfInterestRef(String id, RefId foi) {
+
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), foi, id,
                 ExpandedObservation.class, FeatureOfInterest.class);
 
@@ -193,12 +203,14 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Response deleteObservation(String id) {
+
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedObservation.class);
 
         return Response.noContent().build();
     }
 
     public Response deleteObservationFeatureOfInterest(String id) {
+
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedObservation.class,
                 FeatureOfInterest.class);
 
