@@ -57,7 +57,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
     public HistoricalLocation getHistoricalLocation(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getHistoricalLocation(id);
         } else {
             return getSensorthingsHandler().getHistoricalLocation(id);
@@ -69,7 +69,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
     public ResultList<Location> getHistoricalLocationLocations(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getHistoricalLocationLocations(id);
         } else {
             return getSensorthingsHandler().getHistoricalLocationLocations(id);
@@ -81,7 +81,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
     public Location getHistoricalLocationLocation(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getHistoricalLocationLocation(id, id2);
         } else {
             return getSensorthingsHandler().getHistoricalLocationLocation(id, id2);
@@ -93,7 +93,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
     public ResultList<Thing> getHistoricalLocationLocationThings(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getHistoricalLocationLocationThings(id, id2);
         } else {
             return getSensorthingsHandler().getHistoricalLocationLocationThings(id, id2);
@@ -105,7 +105,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
     public ResultList<HistoricalLocation> getHistoricalLocationLocationHistoricalLocations(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getHistoricalLocationLocationHistoricalLocations(id, id2);
         } else {
             return getSensorthingsHandler().getHistoricalLocationLocationHistoricalLocations(id, id2);
@@ -117,7 +117,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
     public Thing getHistoricalLocationThing(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getHistoricalLocationThing(id);
         } else {
             return getSensorthingsHandler().getHistoricalLocationThing(id);
@@ -129,7 +129,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
     public ResultList<Datastream> getHistoricalLocationThingDatastreams(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getHistoricalLocationThingDatastreams(id);
         } else {
             return getSensorthingsHandler().getHistoricalLocationThingDatastreams(id);
@@ -141,7 +141,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
     public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getHistoricalLocationThingHistoricalLocations(id);
         } else {
             return getSensorthingsHandler().getHistoricalLocationThingHistoricalLocations(id);
@@ -153,7 +153,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
     public ResultList<Location> getHistoricalLocationThingLocations(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getHistoricalLocationThingLocations(id);
         } else {
             return getSensorthingsHandler().getHistoricalLocationThingLocations(id);

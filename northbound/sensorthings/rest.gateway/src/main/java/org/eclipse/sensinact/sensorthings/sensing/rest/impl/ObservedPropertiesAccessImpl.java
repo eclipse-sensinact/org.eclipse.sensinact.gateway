@@ -64,7 +64,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     public ObservedProperty getObservedProperty(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservedProperty(id);
         } else {
             return getSensorthingsHandler().getObservedProperty(id);
@@ -76,7 +76,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     public ResultList<Datastream> getObservedPropertyDatastreams(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservedPropertyDatastreams(id);
         } else {
             return getSensorthingsHandler().getObservedPropertyDatastreams(id);
@@ -88,7 +88,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     public Datastream getObservedPropertyDatastream(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservedPropertyDatastream(id, id2);
         } else {
             return getSensorthingsHandler().getObservedPropertyDatastream(id, id2);
@@ -100,7 +100,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     public ResultList<Observation> getObservedPropertyDatastreamObservations(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservedPropertyDatastreamObservations(id, id2);
         } else {
             return getSensorthingsHandler().getObservedPropertyDatastreamObservations(id, id2);
@@ -112,7 +112,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     public ObservedProperty getObservedPropertyDatastreamObservedProperty(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservedPropertyDatastreamObservedProperty(id, id2);
         } else {
             return getSensorthingsHandler().getObservedPropertyDatastreamObservedProperty(id, id2);
@@ -124,7 +124,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     public Sensor getObservedPropertyDatastreamSensor(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservedPropertyDatastreamSensor(id, id2);
         } else {
             return getSensorthingsHandler().getObservedPropertyDatastreamSensor(id, id2);
@@ -136,7 +136,7 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
     public Thing getObservedPropertyDatastreamThing(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservedPropertyDatastreamThing(id, id2);
         } else {
             return getSensorthingsHandler().getObservedPropertyDatastreamThing(id, id2);

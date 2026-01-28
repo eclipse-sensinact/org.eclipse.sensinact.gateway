@@ -64,7 +64,7 @@ public class ObservationsAccessImpl extends AbstractAccess
     public Observation getObservation(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservation(id);
         } else {
             return getSensorthingsHandler().getObservation(id);
@@ -76,7 +76,7 @@ public class ObservationsAccessImpl extends AbstractAccess
     public Datastream getObservationDatastream(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservationDatastream(id);
         } else {
             return getSensorthingsHandler().getObservationDatastream(id);
@@ -88,7 +88,7 @@ public class ObservationsAccessImpl extends AbstractAccess
     public ResultList<Observation> getObservationDatastreamObservations(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservationDatastreamObservations(id);
         } else {
             return getSensorthingsHandler().getObservationDatastreamObservations(id);
@@ -100,7 +100,7 @@ public class ObservationsAccessImpl extends AbstractAccess
     public ObservedProperty getObservationDatastreamObservedProperty(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservationDatastreamObservedProperty(id);
         } else {
             return getSensorthingsHandler().getObservationDatastreamObservedProperty(id);
@@ -112,7 +112,7 @@ public class ObservationsAccessImpl extends AbstractAccess
     public Sensor getObservationDatastreamSensor(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservationDatastreamSensor(id);
         } else {
             return getSensorthingsHandler().getObservationDatastreamSensor(id);
@@ -124,7 +124,7 @@ public class ObservationsAccessImpl extends AbstractAccess
     public Thing getObservationDatastreamThing(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservationDatastreamThing(id);
         } else {
             return getSensorthingsHandler().getObservationDatastreamThing(id);
@@ -136,7 +136,7 @@ public class ObservationsAccessImpl extends AbstractAccess
     public FeatureOfInterest getObservationFeatureOfInterest(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservationFeatureOfInterest(id);
         } else {
             return getSensorthingsHandler().getObservationFeatureOfInterest(id);
@@ -148,7 +148,7 @@ public class ObservationsAccessImpl extends AbstractAccess
     public ResultList<Observation> getObservationFeatureOfInterestObservations(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getObservationFeatureOfInterestObservations(id);
         } else {
             return getSensorthingsHandler().getObservationFeatureOfInterestObservations(id);

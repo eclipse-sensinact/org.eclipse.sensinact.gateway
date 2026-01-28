@@ -62,7 +62,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     public Sensor getSensor(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getSensor(id);
         } else {
             return getSensorthingsHandler().getSensor(id);
@@ -74,7 +74,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     public ResultList<Datastream> getSensorDatastreams(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getSensorDatastreams(id);
         } else {
             return getSensorthingsHandler().getSensorDatastreams(id);
@@ -86,7 +86,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     public Datastream getSensorDatastream(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getSensorDatastream(id, id2);
         } else {
             return getSensorthingsHandler().getSensorDatastream(id, id2);
@@ -98,7 +98,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     public ResultList<Observation> getSensorDatastreamObservations(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getSensorDatastreamObservations(id, id2);
         } else {
             return getSensorthingsHandler().getSensorDatastreamObservations(id, id2);
@@ -110,7 +110,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     public ObservedProperty getSensorDatastreamObservedProperty(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getSensorDatastreamObservedProperty(id, id2);
         } else {
             return getSensorthingsHandler().getSensorDatastreamObservedProperty(id, id2);
@@ -122,7 +122,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     public Sensor getSensorDatastreamSensor(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getSensorDatastreamSensor(id, id2);
         } else {
             return getSensorthingsHandler().getSensorDatastreamSensor(id, id2);
@@ -134,7 +134,7 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     public Thing getSensorDatastreamThing(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getSensorDatastreamThing(id, id2);
         } else {
             return getSensorthingsHandler().getSensorDatastreamThing(id, id2);

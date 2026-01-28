@@ -61,7 +61,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
     public FeatureOfInterest getFeatureOfInterest(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getFeatureOfInterest(id);
         } else {
             return getSensorthingsHandler().getFeatureOfInterest(id);
@@ -73,7 +73,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
     public ResultList<Observation> getFeatureOfInterestObservations(String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getFeatureOfInterestObservations(id);
         } else {
             return getSensorthingsHandler().getFeatureOfInterestObservations(id);
@@ -85,7 +85,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
     public Observation getFeatureOfInterestObservation(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getFeatureOfInterestObservation(id, id2);
         } else {
             return getSensorthingsHandler().getFeatureOfInterestObservation(id, id2);
@@ -97,7 +97,7 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
     public Datastream getFeatureOfInterestObservationDatastream(String id, String id2) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
-       if (!isSensorthingModel(provider)) {
+        if (!isSensorthingModel(provider)) {
             return getSensinactHandler().getFeatureOfInterestObservationDatastream(id, id2);
         } else {
             return getSensorthingsHandler().getFeatureOfInterestObservationDatastream(id, id2);

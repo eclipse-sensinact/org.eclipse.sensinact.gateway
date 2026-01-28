@@ -53,7 +53,6 @@
       <artifactId>jackson-jakarta-rs-json-provider</artifactId>
     </dependency>
   </dependencies>
-
   <build>
     <plugins>
       <plugin>
