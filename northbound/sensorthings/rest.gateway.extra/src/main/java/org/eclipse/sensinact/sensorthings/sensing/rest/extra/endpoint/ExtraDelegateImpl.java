@@ -49,7 +49,6 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             D dto, String parentId) {
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
-
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, method, dto, parentId);
         ExtraUseCaseResponse<S> result = useCase.create(request);
         if (!result.success()) {
@@ -80,7 +79,9 @@ public class ExtraDelegateImpl implements IExtraDelegate {
 
     @SuppressWarnings("unchecked")
     protected <D extends Id, S> IExtraUseCase<D, S> getExtraUseCase(Class<D> clazz) {
-        return providers.getContextResolver(IExtraUseCase.class, MediaType.WILDCARD_TYPE).getContext(clazz);
+        IExtraUseCase<D, S> useCase = providers.getContextResolver(IExtraUseCase.class, MediaType.WILDCARD_TYPE)
+                .getContext(clazz);
+        return useCase;
     }
 
     @SuppressWarnings("unchecked")

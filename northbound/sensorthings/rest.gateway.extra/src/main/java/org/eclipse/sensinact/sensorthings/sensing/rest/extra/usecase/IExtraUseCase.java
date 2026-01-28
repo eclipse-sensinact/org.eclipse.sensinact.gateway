@@ -45,6 +45,8 @@ public interface IExtraUseCase<M extends Id, S> {
         }
     }
 
+    public void ensureDependenciesUseCase();
+
     /**
      * generic class for use case request
      *
