@@ -13,11 +13,12 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.integration.sensinact;
 
 import static java.time.Duration.ofDays;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.abort;
 
 import java.net.URLEncoder;
@@ -39,6 +40,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
@@ -121,6 +123,9 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
 
         // Wait for the servlet to be valid
         waitForSensorthingsAPI();
+
+        // Wait for the provider to exist
+        waitForHistory(true);
     }
 
     private void waitForHistoryTables() {
@@ -167,12 +172,39 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
         assertTrue(ready, "SensorThings API setup timed out: " + lastError);
     }
 
+    private void waitForHistory(boolean exists) throws InterruptedException {
+        for (int i = 0; i < 20; i++) {
+            try {
+                ProviderDescription describeProvider = session.describeProvider("timescale-history");
+                if (exists) {
+                    if (describeProvider != null && "timescale-history".equals(describeProvider.provider)) {
+                        return;
+                    }
+                } else if (describeProvider == null) {
+                    return;
+                }
+            } catch (Exception e) {
+                if (!exists) {
+                    return;
+                }
+            }
+            Thread.sleep(250);
+        }
+        if (exists) {
+            fail("No history provider exists");
+        } else {
+            fail("History provider still exists");
+        }
+    }
+
     @AfterEach
     void cleanupTest() throws Exception {
         if (historyProviderConfig != null) {
             historyProviderConfig.delete();
             historyProviderConfig = null;
         }
+        // Wait for the provider to be deleted
+        waitForHistory(false);
 
         try (Connection connection = getDataSource().getConnection()) {
             final Statement stmt = connection.createStatement();
@@ -362,6 +394,8 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
         createResource(testProvider, svc, rc, 25.5, earlierTime);
         createResource(testProvider, "admin", "location", new Point(Coordinates.EMPTY, null, null));
         createResource(testProvider, svc, rc, 30.2, laterTime);
+
+        waitForRowCount("sensinact.numeric_data", 2);
 
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils.queryJson(

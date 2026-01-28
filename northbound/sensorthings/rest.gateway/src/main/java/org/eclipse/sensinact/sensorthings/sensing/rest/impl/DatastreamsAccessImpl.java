@@ -38,7 +38,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.update.DatastreamsUpdate;
 import jakarta.ws.rs.core.Response;
 
 public class DatastreamsAccessImpl extends AbstractAccess
-        implements DatastreamsDelete, DatastreamsAccess, DatastreamsCreate, DatastreamsUpdate {
+    implements DatastreamsDelete, DatastreamsAccess, DatastreamsCreate, DatastreamsUpdate {
     private DatastreamsDelegateSensinact sensinactHandler;
     private DatastreamsDelegateSensorthings sensorthigHandler;
 

@@ -201,8 +201,9 @@ public abstract class AbstractDelegate {
      * @return
      */
     private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
-        return getProviderSnapshot(getSession(), id);
+        return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
+
 
     private static Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
         String idProvider = DtoMapperSimple.extractFirstIdSegment(id);

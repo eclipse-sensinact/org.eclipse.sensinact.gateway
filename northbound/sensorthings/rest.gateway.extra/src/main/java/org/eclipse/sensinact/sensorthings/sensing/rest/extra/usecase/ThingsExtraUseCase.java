@@ -91,12 +91,14 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
             datastreamIds.addAll(getDatastreamIds(provider));
         }
         List<ExpandedDataStream> listDatastream = Optional.ofNullable(request.model().datastreams()).orElseGet(List::of)
-                .stream().peek(DtoMapperSimple::checkRequireField).map(ds -> {
-                    checkRequireField(ds);
+                .stream().map(ds -> {
                     Sensor sensor = DatastreamsExtraUseCase.getCachedExpandedSensor(sensorCache, ds);
                     ObservedProperty observedProperty = DatastreamsExtraUseCase
                             .getCachedExpandedObservedProperty(observedPropertyCache, ds);
-                    checkRequireLink(sensor, observedProperty);
+                    if (!DtoMapperSimple.isRecordOnlyField(ds, "id")) {
+                        checkRequireField(ds);
+                        checkRequireLink(sensor, observedProperty);
+                    }
 
                     return new ExpandedDataStream(ds.selfLink(), ds.id(), ds.name(), ds.description(),
                             ds.observationType(), ds.unitOfMeasurement(), ds.observedArea(), ds.phenomenonTime(),

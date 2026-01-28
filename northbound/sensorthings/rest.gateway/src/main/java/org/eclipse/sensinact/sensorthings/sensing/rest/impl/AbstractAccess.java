@@ -113,7 +113,7 @@ public abstract class AbstractAccess {
      * @return
      */
     protected ProviderSnapshot validateAndGetProvider(String id) {
-        DtoMapperSimple.extractFirstIdSegment(id);
+
         Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(id);
 
         if (providerSnapshot.isEmpty()) {

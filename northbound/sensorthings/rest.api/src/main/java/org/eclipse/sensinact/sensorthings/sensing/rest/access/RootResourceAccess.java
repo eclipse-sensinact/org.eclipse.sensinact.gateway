@@ -56,7 +56,9 @@ public interface RootResourceAccess {
                         "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/count",
                         "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/filter",
                         "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/built-in-filter-operations",
-                        "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/built-in-query-functions"));
+                        "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/built-in-query-functions",
+                        "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/expand",
+                        "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/expand-deep"));
 
         List<NameUrl> value = List.of(new NameUrl("Things", info.getAbsolutePathBuilder().path("Things").toString()),
                 new NameUrl("Locations", info.getAbsolutePathBuilder().path("Locations").toString()),

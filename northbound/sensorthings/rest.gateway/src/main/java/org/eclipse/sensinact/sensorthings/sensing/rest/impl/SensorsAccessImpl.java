@@ -175,7 +175,6 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
     @Override
     public Response deleteSensor(ODataId id) {
 
-        validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(id.value()));
         return getSensorthingsHandler().deleteSensor(id.value());
 
     }

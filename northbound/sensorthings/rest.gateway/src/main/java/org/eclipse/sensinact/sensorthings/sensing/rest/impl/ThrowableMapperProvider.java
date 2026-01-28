@@ -27,12 +27,18 @@ public class ThrowableMapperProvider implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable e) {
-        LOG.error("Unhandled exception while processing request", e);
-
         if (e instanceof WebApplicationException webEx) {
             // Log at WARN instead of ERROR
+            if (webEx.getResponse().getStatus() < 500) {
+                LOG.warn("WebApplicationException caught: message {} status {}", webEx.getMessage(),
+                        webEx.getResponse().getStatus());
+            } else {
+                LOG.error("WebApplicationException exception while processing request", e);
+
+            }
             return webEx.getResponse(); // preserve original status
         }
+        LOG.error("Unhandled exception while processing request", e);
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal server error").build();
     }
 }
