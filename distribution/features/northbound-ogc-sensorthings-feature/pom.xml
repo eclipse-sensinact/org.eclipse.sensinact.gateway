@@ -45,7 +45,6 @@
       <artifactId>dto</artifactId>
       <version>${sensorthings.version}</version>
     </dependency>
-    
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>filter</artifactId>
