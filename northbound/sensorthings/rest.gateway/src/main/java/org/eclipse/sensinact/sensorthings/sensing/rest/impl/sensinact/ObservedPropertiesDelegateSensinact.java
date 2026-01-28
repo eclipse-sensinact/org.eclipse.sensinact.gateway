@@ -13,15 +13,23 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact;
 
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.DATASTREAMS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.extractFirstIdSegment;
-
 import java.util.List;
+import java.util.Optional;
 
+import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
@@ -106,6 +114,80 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate {
 
     public ResultList<Datastream> getObservedPropertyDatastreamThingDatastreams(String value, String value2) {
         return new ResultList<Datastream>(null, null, List.of(getObservedPropertyDatastream(value, value2)));
+    }
+
+    public ResultList<HistoricalLocation> getObservedPropertyDatastreamThingHistoricalLocations(String value,
+            String value2) {
+        String provider = extractFirstIdSegment(value2);
+        try {
+            ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
+            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+            ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
+                    application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
+            if (list.value().isEmpty())
+                list = new ResultList<>(null, null,
+                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+            return list;
+        } catch (IllegalArgumentException iae) {
+            throw new NotFoundException();
+        }
+    }
+
+    public ResultList<Location> getObservedPropertyDatastreamThingLocations(String value, String value2) {
+        String provider = extractFirstIdSegment(value2);
+
+        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
+                getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider))));
+
+        return list;
+    }
+
+    public ResultList<Observation> getObservedPropertyDatastreamObservationFeatureOfInterestObservations(String value,
+            String value2, String value3) {
+        String provider = extractFirstIdSegment(value);
+        String provider2 = extractFirstIdSegment(value2);
+        String provider3 = extractFirstIdSegment(value3);
+
+        if (!provider.equals(provider2) || !provider3.equals(provider)) {
+            throw new NotFoundException();
+        }
+        // refactor TODO same part as datastream
+        ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
+        ResultList<Observation> observationList = RootResourceDelegateSensinact.getObservationList(getSession(),
+                application, getMapper(), uriInfo, requestContext, validateAndGetResourceSnapshot(provider), filter);
+        return observationList;
+    }
+
+    public FeatureOfInterest getObservedPropertyDatastreamObservationFeatureOfInterest(String value, String value2,
+            String value3) {
+        String provider = extractFirstIdSegment(value);
+        String provider2 = extractFirstIdSegment(value2);
+        String provider3 = extractFirstIdSegment(value3);
+
+        if (!provider.equals(provider2) || !provider3.equals(provider)) {
+            throw new NotFoundException();
+        }
+        // TODO refacto same as datastream endpoint
+        ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
+        return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), filter,
+                validateAndGetProvider(provider3));
+    }
+
+    public Observation getObservedPropertyDatastreamObservation(String value, String value2, String value3) {
+        String provider = extractFirstIdSegment(value);
+        String provider2 = extractFirstIdSegment(value2);
+        String provider3 = extractFirstIdSegment(value3);
+
+        if (!provider.equals(provider2) || !provider3.equals(provider)) {
+            throw new NotFoundException();
+        }
+        // TODO refacto same as datastream endpoint
+        ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
+        Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), filter, validateAndGetResourceSnapshot(value3));
+
+        return o.get();
     }
 
 }

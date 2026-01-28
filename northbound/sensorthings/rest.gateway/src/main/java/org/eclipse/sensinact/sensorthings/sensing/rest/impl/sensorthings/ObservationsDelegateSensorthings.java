@@ -14,6 +14,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings;
 
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.DATASTREAMS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVED_PROPERTIES;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
@@ -37,6 +39,8 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
@@ -47,7 +51,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -215,6 +218,54 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
                 FeatureOfInterest.class);
 
         return Response.noContent().build();
+    }
+
+    public ResultList<Datastream> getObservationDatastreamThingDataastreams(String id) {
+        ProviderSnapshot providerDatastream = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(id));
+        String thingId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                "thingId", String.class);
+        ProviderSnapshot providerThing = validateAndGetProvider(thingId);
+        List<?> datastreamIds = DtoMapperSimple.getResourceField(DtoMapperSimple.getThingService(providerThing),
+                "datastreamIds", List.class);
+        ICriterion criterion = parseFilter(OBSERVATIONS);
+
+        return new ResultList<Datastream>(null, null,
+                datastreamIds.stream().map(dsId -> validateAndGetProvider((String) dsId)).map(p -> DtoMapper
+                        .toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
+                        .toList());
+    }
+
+    public ResultList<HistoricalLocation> getObservationDatastreamThingHistoricalLocations(String value) {
+        ProviderSnapshot providerDatastream = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(value));
+        String thingId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                "thingId", String.class);
+        ProviderSnapshot providerThing = validateAndGetProvider(thingId);
+        try {
+            ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
+            ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
+                    getSession(), application, getMapper(), uriInfo, getExpansions(), filter, providerThing, 0);
+            if (list.value().isEmpty()) {
+                list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        filter, providerThing);
+            }
+            return list;
+        } catch (IllegalArgumentException iae) {
+            throw new NotFoundException();
+        }
+
+    }
+
+    public ResultList<Location> getObservationDatastreamThingLocations(String value) {
+        ProviderSnapshot providerDatastream = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(value));
+        String thingId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                "thingId", String.class);
+        ResultList<Location> list = new ResultList<>(
+                null, null, getLocationIdsFromThing(getSession(), thingId).stream()
+                        .map(idLoc -> validateAndGetProvider(idLoc)).map(p -> DtoMapper.toLocation(getSession(),
+                                application, getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), p))
+                        .toList());
+
+        return list;
     }
 
 }

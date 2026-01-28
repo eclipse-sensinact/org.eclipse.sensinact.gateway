@@ -16,6 +16,9 @@ import jakarta.ws.rs.core.Response;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
@@ -175,6 +178,74 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
         validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(id.value()));
         return getSensorthingsHandler().deleteSensor(id.value());
 
+    }
+
+    @Override
+    public ResultList<HistoricalLocation> getSensorDatastreamThingHistoricalLocations(ODataId id, ODataId id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getSensorDatastreamThingHistoricalLocations(id.value(), id2.value());
+        } else {
+            return getSensorthingsHandler().getSensorDatastreamThingHistoricalLocations(id.value(), id2.value());
+
+        }
+    }
+
+    @Override
+    public ResultList<Location> getSensorDatastreamThingLocations(ODataId id, ODataId id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getSensorDatastreamThingLocations(id.value(), id2.value());
+        } else {
+            return getSensorthingsHandler().getSensorDatastreamThingLocations(id.value(), id2.value());
+
+        }
+    }
+
+    @Override
+    public Observation getSensorDatastreamObservation(ODataId id, ODataId id2, ODataId id3) {
+
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getSensorDatastreamObservation(id.value(), id2.value(), id3.value());
+        } else {
+            return getSensorthingsHandler().getSensorDatastreamObservation(id.value(), id2.value(), id3.value());
+
+        }
+    }
+
+    @Override
+    public FeatureOfInterest getSensorDatastreamObservationFeatureOfInterest(ODataId id, ODataId id2, ODataId id3) {
+
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getSensorDatastreamObservationFeatureOfInterest(id.value(), id2.value(),
+                    id3.value());
+        } else {
+            return getSensorthingsHandler().getSensorDatastreamObservationFeatureOfInterest(id.value(), id2.value(),
+                    id3.value());
+
+        }
+    }
+
+    @Override
+    public ResultList<Observation> getSensorDatastreamObservationFeatureOfInterestObservations(ODataId id, ODataId id2,
+            ODataId id3) {
+
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getSensorDatastreamObservationFeatureOfInterestObservations(id.value(),
+                    id2.value(), id3.value());
+        } else {
+            return getSensorthingsHandler().getSensorDatastreamObservationFeatureOfInterestObservations(id.value(),
+                    id2.value(), id3.value());
+
+        }
     }
 
 }
