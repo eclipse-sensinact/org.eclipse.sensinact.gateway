@@ -60,6 +60,7 @@ public abstract class AbstractExtraUseCaseDtoDelete<M extends Id, S> extends Abs
             if (provider == null) {
                 throw new NotFoundException();
             }
+
             gatewayThread.execute(dtoToDelete(request)).getValue();
         } catch (InvocationTargetException | InterruptedException e) {
             throw new InternalServerErrorException(e);

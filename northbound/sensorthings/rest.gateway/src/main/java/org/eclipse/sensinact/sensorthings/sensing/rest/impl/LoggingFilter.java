@@ -1,3 +1,15 @@
+/*********************************************************************
+* Copyright (c) 2022 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Provider
 public class LoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
@@ -28,27 +41,22 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
         if (MAPPER == null) {
             MAPPER = new ObjectMapper();
             MAPPER.registerModule(new JavaTimeModule());
+            MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
         }
         return MAPPER;
     }
 
     @Override
     public void filter(ContainerRequestContext request) throws IOException {
-//        try {
-//            Thread.sleep(1000);
-//        } catch (InterruptedException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
+
         LOG.info("{} - Method  : {}", Instant.now().toString(), request.getMethod());
         LOG.info("{} - URI     : {}", Instant.now().toString(), request.getUriInfo().getRequestUri());
-        // LOG.info("Headers : {}", request.getHeaders());
 
         if (request.hasEntity()) {
             String body = readStream(request.getEntityStream());
             LOG.info("{} - Body : {}", Instant.now().toString(), body);
 
-            // reset stream for endpoint consumption
             request.setEntityStream(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
         }
     }
@@ -56,11 +64,9 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) {
         LOG.info("{} - Status  : {}", Instant.now().toString(), response.getStatus());
-        // LOG.info("Headers : {}", response.getHeaders());
 
         if (response.getEntity() != null) {
             try {
-                // Convert entity to JSON string for logging
                 String json = getMapper().writeValueAsString(response.getEntity());
                 LOG.info("{} - Body    : {}", Instant.now().toString(), json);
             } catch (Exception e) {
