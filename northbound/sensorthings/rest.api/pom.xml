@@ -57,7 +57,7 @@
         <artifactId>annotation</artifactId>
         <version>0.0.2-SNAPSHOT</version>
     </dependency>
-     <dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jul-to-slf4j</artifactId>
       <version>${slf4j.version}</version>
