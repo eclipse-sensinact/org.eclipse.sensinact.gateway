@@ -49,29 +49,33 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
     @Override
     public void filter(ContainerRequestContext request) throws IOException {
+        if (LOG.isTraceEnabled()) {
 
-        LOG.info("{} - Method  : {}", Instant.now().toString(), request.getMethod());
-        LOG.info("{} - URI     : {}", Instant.now().toString(), request.getUriInfo().getRequestUri());
+            LOG.trace("{} - Method  : {}", Instant.now().toString(), request.getMethod());
+            LOG.trace("{} - URI     : {}", Instant.now().toString(), request.getUriInfo().getRequestUri());
 
-        if (request.hasEntity()) {
-            String body = readStream(request.getEntityStream());
-            LOG.info("{} - Body : {}", Instant.now().toString(), body);
+            if (request.hasEntity()) {
+                String body = readStream(request.getEntityStream());
+                LOG.trace("{} - Body : {}", Instant.now().toString(), body);
 
-            request.setEntityStream(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+                request.setEntityStream(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+            }
         }
     }
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) {
-        LOG.info("{} - Status  : {}", Instant.now().toString(), response.getStatus());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("{} - Status  : {}", Instant.now().toString(), response.getStatus());
 
-        if (response.getEntity() != null) {
-            try {
-                String json = getMapper().writeValueAsString(response.getEntity());
-                LOG.info("{} - Body    : {}", Instant.now().toString(), json);
-            } catch (Exception e) {
-                LOG.warn("Could not serialize response entity to JSON", e);
-                LOG.info("{} - Body    : {}", Instant.now().toString(), response.getEntity());
+            if (response.getEntity() != null) {
+                try {
+                    String json = getMapper().writeValueAsString(response.getEntity());
+                    LOG.trace("{} - Body    : {}", Instant.now().toString(), json);
+                } catch (Exception e) {
+                    LOG.trace("Could not serialize response entity to JSON", e);
+                    LOG.trace("{} - Body    : {}", Instant.now().toString(), response.getEntity());
+                }
             }
         }
     }

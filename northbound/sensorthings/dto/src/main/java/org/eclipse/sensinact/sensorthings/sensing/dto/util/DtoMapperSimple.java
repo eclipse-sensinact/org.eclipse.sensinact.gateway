@@ -547,7 +547,7 @@ public class DtoMapperSimple {
                     obs.result(), obs.resultQuality(), obs.validTime(), obs.parameters(), datastreamLink,
                     featureOfInterestLink);
             DtoMapperSimple.checkRequireField(observation);
-            // DtoMapperSimple.checkRequireLink(obs.featureOfInterest());
+            DtoMapperSimple.checkRequireLink(obs.featureOfInterest());
 
             return observation;
 

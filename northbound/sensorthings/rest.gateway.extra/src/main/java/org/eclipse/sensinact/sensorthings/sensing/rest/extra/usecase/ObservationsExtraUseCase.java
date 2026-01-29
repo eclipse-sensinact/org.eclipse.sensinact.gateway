@@ -19,8 +19,6 @@ import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.DependentCommand;
 import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
-import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
@@ -169,13 +167,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
     @Override
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedObservation> request) {
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(request.id());
-        ProviderSnapshot provider = providerUseCase.read(request.session(), datastreamId);
-        // get resource observation
-        // check if observation exists
-        ResourceSnapshot resource = provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation");
-        if (!resource.isSet()) {
-            throw new NotFoundException();
-        }
+
         ResourceCommand<TimedValue<String>> parentCommand = new ResourceCommand<TimedValue<String>>(datastreamId,
                 DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation") {
             @Override
@@ -192,6 +184,9 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
                 try {
                     if (parentResult.getFailure() == null) {
                         String obsStr = parentResult.getValue().getValue();
+                        if (obsStr == null) {
+                            return pf.failed(new NotFoundException());
+                        }
                         ExpandedObservation obs = parseObservation(request, obsStr);
                         if (request.id() == null || !request.id().startsWith((String) obs.id())) {
                             return pf.failed(new BadRequestException());
