@@ -25,9 +25,13 @@ import java.util.Optional;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
@@ -163,6 +167,26 @@ public class HistoricalLocationsDelegateSensinact extends AbstractDelegate {
 
     public ResultList<Location> getHistoricalLocationThingLocations(String id) {
         return getHistoricalLocationLocations(id);
+    }
+
+    public ObservedProperty getHistoricalLocationThingDatastreamObservedProperty(String value) {
+        return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
+                validateAndGetResourceSnapshot(value));
+    }
+
+    public Sensor getHistoricalLocationThingDatastreamSensor(String value) {
+        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
+                validateAndGetResourceSnapshot(value));
+    }
+
+    public FeatureOfInterest getHistoricalLocationThingDatastreamObservationFeatureOfInterest(String value) {
+        return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
+                validateAndGetProvider(value));
+    }
+
+    public ResultList<Observation> getHistoricalLocationThingDatastreamObservations(String value) {
+        return RootResourceDelegateSensinact.getObservationList(getSession(), application, getMapper(), uriInfo,
+                requestContext, validateAndGetResourceSnapshot(value), null);
     }
 
 }

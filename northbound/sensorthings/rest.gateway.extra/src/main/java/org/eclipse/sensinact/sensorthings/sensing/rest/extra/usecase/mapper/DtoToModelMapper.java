@@ -94,7 +94,11 @@ public class DtoToModelMapper {
      * @return
      */
     public static String getNewId(Id model) {
-        return sanitizeId(model.id() != null ? model.id() : UUID.randomUUID().toString().substring(0, 8));
+        return sanitizeId(model.id() != null ? model.id() : getNewId());
+    }
+
+    public static String getNewId() {
+        return UUID.randomUUID().toString().substring(0, 8);
     }
 
     /**
@@ -328,7 +332,7 @@ public class DtoToModelMapper {
 
         // last observation
         ExpandedObservation obs = lastObservationReceived;
-        if (lastObservationReceived != null && lastObservation != null) {
+        if (lastObservation != null) {
 
             String observationId = lastObservationReceived.id() != null ? (String) lastObservationReceived.id()
                     : String.format("%s~%s", providerId, getNewId(obs));
@@ -337,6 +341,9 @@ public class DtoToModelMapper {
                     : lastObservation.phenomenonTime();
             Instant resultTime = lastObservationReceived.resultTime() != null ? lastObservationReceived.resultTime()
                     : lastObservation.resultTime();
+            if (resultTime == null) {
+                resultTime = Instant.now();
+            }
             Object result = lastObservationReceived.result() != null ? lastObservationReceived.result()
                     : lastObservation.result();
             Object resultQuality = lastObservationReceived.resultQuality() != null
@@ -344,6 +351,7 @@ public class DtoToModelMapper {
                     : lastObservation.resultQuality();
             TimeInterval validTime = lastObservationReceived.validTime() != null ? lastObservationReceived.validTime()
                     : lastObservation.validTime();
+
             Map<String, Object> parameters = lastObservationReceived.parameters() != null
                     ? lastObservationReceived.parameters()
                     : lastObservation.parameters();
@@ -497,7 +505,7 @@ public class DtoToModelMapper {
      * @return
      */
     public static List<SensorThingsUpdate> toThingUpdates(ExtraUseCaseRequest<ExpandedThing> request, String id,
-            List<String> existingLocationIds, List<String> existingDatastreamIds) {
+            List<String> existingLocationIds, List<String> existingDatastreamIds, List<ExpandedDataStream> listDs) {
         String providerIdThing = id;
         ExpandedThing thing = request.model();
         List<SensorThingsUpdate> listUpdate = new ArrayList<SensorThingsUpdate>();
@@ -517,20 +525,26 @@ public class DtoToModelMapper {
                 }
                 existingLocationIds.add(locationId);
             }
-            thing.locations().stream().filter(l -> !isRecordOnlyField(l, "id"))
-                    .map(l -> toLocationUpdate(getLocationId(l), l)).forEach(listUpdate::add);
-            existingLocationIds.addAll(thing.locations().stream().map(l -> getLocationId(l)).toList());
+
             geoLocationAggregate = getAggregateLocation(request, existingLocationIds);
         }
-        if (thing.datastreams() != null) {
-            for (ExpandedDataStream ds : thing.datastreams()) {
+        if (listDs != null) {
+            for (ExpandedDataStream ds : listDs) {
+                // check require field for datastream + require link
+
                 String idDatastream = getDatastreamid(ds);
                 existingDatastreamIds.add(idDatastream);
                 if (ds.observations() != null && ds.observations().size() > 0) {
+                    final GeoJsonObject feature = geoLocationAggregate != null ? geoLocationAggregate : new Point(0, 0);
                     listUpdate.addAll(ds.observations().stream().map(obs -> {
+                        FeatureOfInterest foi = obs.featureOfInterest();
+                        if (foi == null) {
+
+                            foi = new FeatureOfInterest(null, DtoToModelMapper.getNewId(), "default",
+                                    "default feature of interest", "application/vnd.geo+json", feature, null);
+                        }
                         return toDatastreamUpdate(request.mapper(), idDatastream, null, providerIdThing, ds,
-                                ds.sensor(), ds.observedProperty(), ds.unitOfMeasurement(), obs,
-                                obs.featureOfInterest());
+                                ds.sensor(), ds.observedProperty(), ds.unitOfMeasurement(), obs, foi);
                     }).toList());
                 } else {
                     listUpdate.add(toDatastreamUpdate(request.mapper(), idDatastream, null, providerIdThing, ds,

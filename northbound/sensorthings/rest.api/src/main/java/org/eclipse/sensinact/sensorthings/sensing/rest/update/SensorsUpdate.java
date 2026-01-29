@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.update;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
+
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.PathParam;
@@ -27,9 +29,9 @@ public interface SensorsUpdate {
      * @return
      */
     @PUT
-    public Response updateSensor(@PathParam("id") String id, Sensor sensor);
+    public Response updateSensor(@PathParam("id") ODataId id, Sensor sensor);
 
     @PATCH
-    public Response patchSensor(@PathParam("id") String id, Sensor sensor);
+    public Response patchSensor(@PathParam("id") ODataId id, Sensor sensor);
 
 }

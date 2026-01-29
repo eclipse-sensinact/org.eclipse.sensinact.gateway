@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.create;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
 
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -32,7 +33,7 @@ public interface ThingsCreate {
      */
     @POST
     @Path("/Datastreams")
-    public Response createDatastream(@PathParam("id") String id, ExpandedDataStream datastream);
+    public Response createDatastream(@PathParam("id") ODataId id, ExpandedDataStream datastream);
 
     /**
      * create location link to thing
@@ -43,7 +44,7 @@ public interface ThingsCreate {
      */
     @POST
     @Path("/Locations")
-    public Response createLocation(@PathParam("id") String id, ExpandedLocation location);
+    public Response createLocation(@PathParam("id") ODataId id, ExpandedLocation location);
 
     /**
      * update location ref
@@ -55,7 +56,7 @@ public interface ThingsCreate {
      */
     @POST
     @Path("/Locations/$ref")
-    public Response updateLocationRef(@PathParam("id") String id, RefId location);
+    public Response updateLocationRef(@PathParam("id") ODataId id, RefId location);
 
     /**
      * update datastream ref
@@ -67,6 +68,6 @@ public interface ThingsCreate {
      */
     @POST
     @Path("/Datastreams/$ref")
-    public Response updateDatastreamRef(@PathParam("id") String id, RefId datastream);
+    public Response updateDatastreamRef(@PathParam("id") ODataId id, RefId datastream);
 
 }

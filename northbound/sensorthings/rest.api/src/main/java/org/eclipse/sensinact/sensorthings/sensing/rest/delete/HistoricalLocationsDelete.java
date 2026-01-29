@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.delete;
 
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
+
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
@@ -23,6 +25,6 @@ public interface HistoricalLocationsDelete {
      * @param id : id of hitoricalLocation
      */
     @DELETE
-    public Response deleteHistoricalLocation(@PathParam("id") String id);
+    public Response deleteHistoricalLocation(@PathParam("id") ODataId id);
 
 }

@@ -65,9 +65,8 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
         Object entity = responseContext.getEntity();
         if (entity instanceof ResultList) {
             ResultList<? extends Self> resultList = (ResultList<?>) entity;
-            ResultList<? extends Self> newEntity = new ResultList<>(resultList.count(),
-                    resultList.nextLink(), resultList.value().stream()
-                    .sorted(comparator).toList());
+            ResultList<? extends Self> newEntity = new ResultList<>(resultList.count(), resultList.nextLink(),
+                    resultList.value().stream().sorted(comparator).toList());
             responseContext.setEntity(newEntity);
         }
     }
@@ -77,27 +76,23 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
         List<String> list = requestContext.getUriInfo().getQueryParameters().getOrDefault("$orderby", List.of());
 
         try {
-            Comparator<Object> comparator = list.stream()
-                    .flatMap(s -> Arrays.stream(s.split(",")))
-                    .map(this::toComparator)
-                    .reduce(Comparator::thenComparing)
-                    .orElseGet(() -> toComparator("id"));
+            Comparator<Object> comparator = list.stream().flatMap(s -> Arrays.stream(s.split(",")))
+                    .map(this::toComparator).reduce(Comparator::thenComparing).orElseGet(() -> toComparator("id"));
             requestContext.setProperty(ORDERBY_PROP, comparator);
         } catch (Exception e) {
-            requestContext.abortWith(Response
-                    .status(Status.BAD_REQUEST)
-                    .entity("Not a valid orderby definition " + list)
-                    .build());
+            requestContext.abortWith(
+                    Response.status(Status.BAD_REQUEST).entity("Not a valid orderby definition " + list).build());
         }
     }
 
-    private static final Comparator<Comparable<Object>> BASE_COMPARATOR = Comparator.nullsFirst(Comparator.naturalOrder());
+    private static final Comparator<Comparable<Object>> BASE_COMPARATOR = Comparator
+            .nullsFirst(Comparator.naturalOrder());
 
     private Comparator<Object> toComparator(String s) {
 
         String clause = s.trim();
         boolean ascending;
-        if(clause.endsWith("asc")) {
+        if (clause.endsWith("asc")) {
             ascending = true;
             clause = clause.substring(0, clause.length() - 3).trim();
         } else if (clause.endsWith("desc")) {
@@ -108,8 +103,8 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
         }
 
         final String[] path = clause.split("/");
-        Comparator<Object> result = (a,b) -> {
-            return BASE_COMPARATOR.compare(get(a, path), get(b,path));
+        Comparator<Object> result = (a, b) -> {
+            return BASE_COMPARATOR.compare(get(a, path), get(b, path));
         };
 
         return ascending ? result : result.reversed();
@@ -123,21 +118,20 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
                 break;
             }
             try {
-                if(o instanceof Record) {
+                if (o instanceof Record) {
                     RecordComponent[] components = o.getClass().getRecordComponents();
-                    RecordComponent component = Arrays.stream(components)
-                        .filter(rc -> rc.getName().equals(s))
-                        .findFirst().get();
+                    RecordComponent component = Arrays.stream(components).filter(rc -> rc.getName().equals(s))
+                            .findFirst().get();
                     result = component.getAccessor().invoke(result);
                 } else if (o instanceof JsonNode jn) {
-                    if(jn.has(s)) {
+                    if (jn.has(s)) {
                         result = jn.get(s);
                     } else {
                         throw new IllegalArgumentException("No property " + s + " in object " + jn);
                     }
                 } else {
                     JsonNode jn = getMapper().convertValue(o, JsonNode.class);
-                    if(jn.has(s)) {
+                    if (jn.has(s)) {
                         result = jn.get(s);
                     } else {
                         throw new IllegalArgumentException("No property " + s + " in object " + jn);

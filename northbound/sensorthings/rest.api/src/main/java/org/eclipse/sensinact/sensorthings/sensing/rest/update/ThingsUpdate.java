@@ -15,6 +15,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.update;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
+
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -32,7 +34,7 @@ public interface ThingsUpdate {
      */
     @PUT
     @Path("/Datastreams({id2})")
-    public Response updateDatastream(@PathParam("id") String id, @PathParam("id2") String id2,
+    public Response updateDatastream(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2,
             ExpandedDataStream datastream);
 
     /**
@@ -45,7 +47,7 @@ public interface ThingsUpdate {
      */
     @PATCH
     @Path("/Datastreams({id2})")
-    public Response patchDatastream(@PathParam("id") String id, @PathParam("id2") String id2,
+    public Response patchDatastream(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2,
             ExpandedDataStream datastream);
 
     /**
@@ -58,11 +60,13 @@ public interface ThingsUpdate {
      */
     @PUT
     @Path("/Locations({id2})")
-    public Response updateLocation(@PathParam("id") String id, @PathParam("id2") String id2, ExpandedLocation location);
+    public Response updateLocation(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2,
+            ExpandedLocation location);
 
     @PATCH
     @Path("/Locations({id2})")
-    public Response patchLocation(@PathParam("id") String id, @PathParam("id2") String id2, ExpandedLocation location);
+    public Response patchLocation(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2,
+            ExpandedLocation location);
 
     /**
      * update thing
@@ -72,7 +76,7 @@ public interface ThingsUpdate {
      * @return
      */
     @PUT
-    public Response updateThing(@PathParam("id") String id, ExpandedThing thing);
+    public Response updateThing(@PathParam("id") ODataId id, ExpandedThing thing);
 
     /**
      * patch thing
@@ -82,6 +86,6 @@ public interface ThingsUpdate {
      * @return
      */
     @PATCH
-    public Response patchThing(@PathParam("id") String id, ExpandedThing thing);
+    public Response patchThing(@PathParam("id") ODataId id, ExpandedThing thing);
 
 }

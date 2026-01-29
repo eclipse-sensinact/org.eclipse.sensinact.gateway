@@ -28,7 +28,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.NameUrl;
 import org.eclipse.sensinact.sensorthings.sensing.dto.RootResponse.ServerSettings;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.RefFilter;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -56,7 +56,9 @@ public interface RootResourceAccess {
                         "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/count",
                         "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/filter",
                         "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/built-in-filter-operations",
-                        "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/built-in-query-functions"));
+                        "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/built-in-query-functions",
+                        "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/expand",
+                        "http://www.opengis.net/spec/iot_sensing/1.1/req/request-data/expand-deep"));
 
         List<NameUrl> value = List.of(new NameUrl("Things", info.getAbsolutePathBuilder().path("Things").toString()),
                 new NameUrl("Locations", info.getAbsolutePathBuilder().path("Locations").toString()),
@@ -105,33 +107,58 @@ public interface RootResourceAccess {
 
     @GET
     @Path("Things/$ref")
-    ResultList<RefId> getThingsRef();
+    @RefFilter
+    default ResultList<Thing> getThingsRef() {
+        return getThings();
+    }
 
     @GET
     @Path("Locations/$ref")
-    ResultList<RefId> getLocationsRef();
+    @RefFilter
+    default ResultList<Location> getLocationsRef() {
+        return getLocations();
+    }
 
     @GET
     @Path("HistoricalLocations/$ref")
-    ResultList<RefId> getHistoricalLocationsRef();
+    @RefFilter
+    default ResultList<HistoricalLocation> getHistoricalLocationsRef() {
+        return getHistoricalLocations();
+    }
 
     @GET
     @Path("Datastreams/$ref")
-    ResultList<RefId> getDatastreamsRef();
+    @RefFilter
+    default ResultList<Datastream> getDatastreamsRef() {
+        return getDatastreams();
+    }
 
     @GET
     @Path("Sensors/$ref")
-    ResultList<RefId> getSensorsRef();
+    @RefFilter
+    default ResultList<Sensor> getSensorsRef() {
+        return getSensors();
+    }
 
     @GET
     @Path("Observations/$ref")
-    ResultList<RefId> getObservationsRef();
+    @RefFilter
+    default ResultList<Observation> getObservationsRef() {
+        return getObservations();
+    }
 
     @GET
     @Path("ObservedProperties/$ref")
-    ResultList<RefId> getObservedPropertiesRef();
+    @RefFilter
+    default ResultList<ObservedProperty> getObservedPropertiesRef() {
+        return getObservedProperties();
+    }
 
     @GET
     @Path("FeaturesOfInterest/$ref")
-    ResultList<RefId> getFeaturesOfInterestRef();
+    @RefFilter
+    default ResultList<FeatureOfInterest> getFeaturesOfInterestRef() {
+        return getFeaturesOfInterest();
+    }
+
 }

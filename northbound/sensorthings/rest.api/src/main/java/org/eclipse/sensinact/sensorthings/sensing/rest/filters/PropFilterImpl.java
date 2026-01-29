@@ -32,7 +32,8 @@ import jakarta.ws.rs.ext.WriterInterceptor;
 import jakarta.ws.rs.ext.WriterInterceptorContext;
 
 /**
- * This filter restricts the serialized output to contain only the named property, or property value
+ * This filter restricts the serialized output to contain only the named
+ * property, or property value
  */
 @PropFilter
 public class PropFilterImpl implements WriterInterceptor {
@@ -52,7 +53,7 @@ public class PropFilterImpl implements WriterInterceptor {
         Object entity = context.getEntity();
 
         String propName = uriInfo.getPathParameters().getFirst("prop");
-        if(propName == null || propName.isEmpty()) {
+        if (propName == null || propName.isEmpty()) {
             throw new BadRequestException("Invalid property filter");
         }
 
@@ -60,26 +61,26 @@ public class PropFilterImpl implements WriterInterceptor {
 
         try {
             Object prop;
-            if(entity instanceof Record) {
+            if (entity instanceof Record) {
                 RecordComponent[] components = entity.getClass().getRecordComponents();
-                RecordComponent component = Arrays.stream(components)
-                    .filter(rc -> rc.getName().equals(propName))
-                    .findFirst().get();
+                RecordComponent component = Arrays.stream(components).filter(rc -> rc.getName().equals(propName))
+                        .findFirst().get();
                 prop = component.getAccessor().invoke(entity);
             } else if (entity instanceof JsonNode jn) {
-                if(jn.has(propName)) {
+                if (jn.has(propName)) {
                     prop = jn.get(propName);
                 } else {
                     throw new IllegalArgumentException("No property " + propName + " in object " + jn);
                 }
             } else {
                 JsonNode jn = getMapper().convertValue(entity, JsonNode.class);
-                if(jn.has(propName)) {
+                if (jn.has(propName)) {
                     prop = jn.get(propName);
                 } else {
                     throw new IllegalArgumentException("No property " + propName + " in object " + jn);
                 }
             }
+
             context.setEntity(rawValue ? prop : Map.of(propName, prop));
         } catch (Exception e) {
             throw new BadRequestException("Failed to locate property " + propName, e);
