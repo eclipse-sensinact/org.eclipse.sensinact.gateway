@@ -45,7 +45,8 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>api</artifactId>
-  <version>${project.version}</version>    </dependency>
+      <version>${project.version}</version>
+    </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
       <artifactId>session-api</artifactId>
