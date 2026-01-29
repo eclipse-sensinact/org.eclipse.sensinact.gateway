@@ -477,8 +477,7 @@ public class DtoMapper {
 
         ExpandedObservation lastObservation = DtoMapperSimple.getObservationFromService(mapper, serviceSnapshot);
         if (lastObservation != null && lastObservation.featureOfInterest() != null) {
-            String foiId = String.format("%s~%s~%s", provider.getName(), lastObservation.id(),
-                    lastObservation.featureOfInterest().id());
+            String foiId = String.format("%s~%s", lastObservation.id(), lastObservation.featureOfInterest().id());
 
             String selfLink = getLink(uriInfo, VERSION, "FeaturesOfInterest({id})", foiId);
             String observationLink = getLink(uriInfo, selfLink, "Observations");
