@@ -535,11 +535,13 @@ public class DtoToModelMapper {
                 String idDatastream = getDatastreamid(ds);
                 existingDatastreamIds.add(idDatastream);
                 if (ds.observations() != null && ds.observations().size() > 0) {
+                    final GeoJsonObject feature = geoLocationAggregate != null ? geoLocationAggregate : new Point(0, 0);
                     listUpdate.addAll(ds.observations().stream().map(obs -> {
                         FeatureOfInterest foi = obs.featureOfInterest();
                         if (foi == null) {
+
                             foi = new FeatureOfInterest(null, DtoToModelMapper.getNewId(), "default",
-                                    "default feature of interest", "application/vnd.geo+json", new Point(0, 0), null);
+                                    "default feature of interest", "application/vnd.geo+json", feature, null);
                         }
                         return toDatastreamUpdate(request.mapper(), idDatastream, null, providerIdThing, ds,
                                 ds.sensor(), ds.observedProperty(), ds.unitOfMeasurement(), obs, foi);
