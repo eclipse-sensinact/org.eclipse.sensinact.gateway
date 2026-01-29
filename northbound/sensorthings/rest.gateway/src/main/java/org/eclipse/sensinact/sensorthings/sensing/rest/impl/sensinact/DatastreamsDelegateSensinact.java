@@ -1,15 +1,15 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact;
 
 import static java.util.stream.Collectors.toList;
@@ -64,8 +64,8 @@ public class DatastreamsDelegateSensinact extends AbstractDelegate {
 
     public ResultList<Observation> getDatastreamObservations(String id) {
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
-        ResultList<Observation> observationList = RootResourceDelegateSensinact.getObservationList(getSession(), application,
-                getMapper(), uriInfo, requestContext, validateAndGetResourceSnapshot(id), filter);
+        ResultList<Observation> observationList = RootResourceDelegateSensinact.getObservationList(getSession(),
+                application, getMapper(), uriInfo, requestContext, validateAndGetResourceSnapshot(id), filter);
         return observationList;
     }
 
@@ -170,6 +170,14 @@ public class DatastreamsDelegateSensinact extends AbstractDelegate {
                 .filter(r -> !r.getMetadata().containsKey(SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA))
                 .map(r -> DtoMapper.toDatastream(userSession, application, mapper, uriInfo, expansions, r, filter))
                 .collect(toList()));
+    }
+
+    public ResultList<Observation> getDatastreamThingDatastreamObserations(String id, String id2) {
+        return getDatastreamObservations(id2);
+    }
+
+    public ResultList<Thing> getDatastreamThingLocationThings(String id, String id2) {
+        return new ResultList<Thing>(null, null, List.of(getDatastreamThing(id2)));
     }
 
 }

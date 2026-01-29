@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.update;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
 
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.PUT;
@@ -32,10 +33,10 @@ public interface DatastreamsUpdate {
      * @return
      */
     @PUT
-    public Response updateDatastreams(@PathParam("id") String id, ExpandedDataStream dataStream);
+    public Response updateDatastreams(@PathParam("id") ODataId id, ExpandedDataStream dataStream);
 
     @PATCH
-    public Response patchDatastreams(@PathParam("id") String id, ExpandedDataStream dataStream);
+    public Response patchDatastreams(@PathParam("id") ODataId id, ExpandedDataStream dataStream);
 
     /**
      * update observation link to thing and datastream
@@ -47,12 +48,12 @@ public interface DatastreamsUpdate {
      */
     @PUT
     @Path("/Observations({id2})")
-    public Response updateDatastreamsObservation(@PathParam("id") String id, @PathParam("id2") String id2,
+    public Response updateDatastreamsObservation(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2,
             Observation observation);
 
     @PATCH
     @Path("/Observations({id2})")
-    public Response patchDatastreamsObservation(@PathParam("id") String id, @PathParam("id2") String id2,
+    public Response patchDatastreamsObservation(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2,
             Observation observation);
 
     /**
@@ -65,7 +66,7 @@ public interface DatastreamsUpdate {
      */
     @PUT
     @Path("/Thing/$ref")
-    public Response updateDatastreamThingRef(@PathParam("id") String id, RefId thing);
+    public Response updateDatastreamThingRef(@PathParam("id") ODataId id, RefId thing);
 
     /**
      * update sensor link to datastream
@@ -77,7 +78,7 @@ public interface DatastreamsUpdate {
      */
     @PUT
     @Path("/Sensor/$ref")
-    public Response updateDatastreamSensorRef(@PathParam("id") String id, RefId sensor);
+    public Response updateDatastreamSensorRef(@PathParam("id") ODataId id, RefId sensor);
 
     /**
      * update sensor link to datastream
@@ -89,6 +90,6 @@ public interface DatastreamsUpdate {
      */
     @PUT
     @Path("/ObservedProperty/$ref")
-    public Response updateDatastreamObservedPropertyRef(@PathParam("id") String id, RefId observedProperty);
+    public Response updateDatastreamObservedPropertyRef(@PathParam("id") ODataId id, RefId observedProperty);
 
 }

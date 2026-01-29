@@ -26,7 +26,10 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
@@ -127,6 +130,50 @@ public class FeaturesOfInterestDeletegateSensinact extends AbstractDelegate {
         }
 
         return d;
+    }
+
+    public Thing getFeatureOfInterestObservationDatastreamThing(String id, String id2) {
+        String provider = extractFirstIdSegment(id);
+        String provider2 = extractFirstIdSegment(id2);
+        if (!provider.equals(provider2)) {
+            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
+        }
+
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
+                providerSnapshot);
+    }
+
+    public Sensor getFeatureOfInterestObservationDatastreamSensor(String id, String id2) {
+        String provider = extractFirstIdSegment(id);
+        String provider2 = extractFirstIdSegment(id2);
+        if (!provider.equals(provider2)) {
+            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
+        }
+
+        ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id2);
+        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
+                resourceSnapshot);
+    }
+
+    public ObservedProperty getFeatureOfInterestObservationDatastreamObservedProperty(String id, String id2) {
+        String provider = extractFirstIdSegment(id);
+        String provider2 = extractFirstIdSegment(id2);
+        if (!provider.equals(provider2)) {
+            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
+        }
+
+        ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id2);
+        return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
+                resourceSnapshot);
+    }
+
+    public ResultList<Observation> getFeatureOfInterestObservationDatastreamObservations(String id, String id2) {
+        // TODO refacto
+        ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
+        ResultList<Observation> observationList = RootResourceDelegateSensinact.getObservationList(getSession(),
+                application, getMapper(), uriInfo, requestContext, validateAndGetResourceSnapshot(id2), filter);
+        return observationList;
     }
 
 }

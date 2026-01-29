@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.update;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
 
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.PUT;
@@ -28,9 +29,9 @@ public interface ObservedPropertiesUpdate {
      * @return
      */
     @PUT
-    public Response updateObservedProperties(@PathParam("id") String id, ObservedProperty observedProperty);
+    public Response updateObservedProperties(@PathParam("id") ODataId id, ObservedProperty observedProperty);
 
     @PATCH
-    public Response patchObservedProperties(@PathParam("id") String id, ObservedProperty observedProperty);
+    public Response patchObservedProperties(@PathParam("id") ODataId id, ObservedProperty observedProperty);
 
 }

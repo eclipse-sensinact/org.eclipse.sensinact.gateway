@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.update;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
+
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.PathParam;
@@ -27,9 +29,9 @@ public interface FeaturesOfInterestUpdate {
      * @return
      */
     @PUT
-    public Response updateFeaturesOfInterest(@PathParam("id") String id, FeatureOfInterest foi);
+    public Response updateFeaturesOfInterest(@PathParam("id") ODataId id, FeatureOfInterest foi);
 
     @PATCH
-    public Response patchFeaturesOfInterest(@PathParam("id") String id, FeatureOfInterest foi);
+    public Response patchFeaturesOfInterest(@PathParam("id") ODataId id, FeatureOfInterest foi);
 
 }

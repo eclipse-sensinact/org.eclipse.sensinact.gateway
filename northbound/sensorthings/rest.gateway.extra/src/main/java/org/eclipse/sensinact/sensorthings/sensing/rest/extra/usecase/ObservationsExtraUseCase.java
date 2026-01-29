@@ -24,6 +24,7 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
@@ -35,6 +36,7 @@ import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -91,6 +93,10 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         FeatureOfInterest foi = getFeatureOfInterest(observation);
         if (foi != null) {
             checkRequireField(foi);
+        } else {
+            // create default foi
+            foi = new FeatureOfInterest(null, DtoToModelMapper.getNewId(), "default_foi", "default Foi",
+                    "application/vnd.geo+json", new Point(0, 0), null);
         }
         String id = request.parentId() != null ? request.parentId() : request.id();
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
@@ -161,7 +167,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
     @Override
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedObservation> request) {
         String datastreamId = DtoMapperSimple.extractFirstIdSegment(request.id());
-        // get resource observation
+
         ResourceCommand<TimedValue<String>> parentCommand = new ResourceCommand<TimedValue<String>>(datastreamId,
                 DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation") {
             @Override
@@ -178,6 +184,9 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
                 try {
                     if (parentResult.getFailure() == null) {
                         String obsStr = parentResult.getValue().getValue();
+                        if (obsStr == null) {
+                            return pf.failed(new NotFoundException());
+                        }
                         ExpandedObservation obs = parseObservation(request, obsStr);
                         if (request.id() == null || !request.id().startsWith((String) obs.id())) {
                             return pf.failed(new BadRequestException());

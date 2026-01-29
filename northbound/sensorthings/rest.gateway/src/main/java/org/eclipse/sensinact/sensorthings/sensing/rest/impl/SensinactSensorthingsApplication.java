@@ -63,7 +63,7 @@ public class SensinactSensorthingsApplication extends Application {
                 // Features/extensions
                 SensorThingsFeature.class, ThrowableMapperProvider.class, SensinactSessionProvider.class,
                 SensorthingsFilterProvider.class, AccessProviderUseCaseProvider.class,
-                AccessResourceUseCaseProvider.class, AccessServiceUseCaseProvider.class,
+                AccessResourceUseCaseProvider.class, AccessServiceUseCaseProvider.class, LoggingFilter.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections

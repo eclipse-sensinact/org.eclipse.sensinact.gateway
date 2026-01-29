@@ -14,9 +14,13 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -33,8 +37,29 @@ public abstract class AbstractExtraUseCaseDtoDelete<M extends Id, S> extends Abs
         super(providers);
     }
 
+    protected static void checkRequireField(Id ds) {
+        try {
+            DtoMapperSimple.checkRequireField(ds);
+        } catch (Exception e) {
+            throw new WebApplicationException(409);
+        }
+    }
+
+    protected static void checkRequireLink(Object... obs) {
+        try {
+            DtoMapperSimple.checkRequireLink(obs);
+        } catch (Exception e) {
+            throw new WebApplicationException(409);
+        }
+    }
+
     public ExtraUseCaseResponse<S> delete(ExtraUseCaseRequest<M> request) {
         try {
+            String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+            ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
+            if (provider == null) {
+                throw new NotFoundException();
+            }
 
             gatewayThread.execute(dtoToDelete(request)).getValue();
         } catch (InvocationTargetException | InterruptedException e) {

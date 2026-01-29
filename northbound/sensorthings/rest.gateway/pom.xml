@@ -45,6 +45,7 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>api</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
@@ -69,7 +70,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>

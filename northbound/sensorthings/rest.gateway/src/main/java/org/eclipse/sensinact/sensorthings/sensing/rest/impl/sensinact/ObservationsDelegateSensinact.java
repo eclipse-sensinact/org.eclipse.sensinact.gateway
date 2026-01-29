@@ -22,6 +22,7 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.Dto
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -31,6 +32,8 @@ import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
@@ -159,6 +162,30 @@ public class ObservationsDelegateSensinact extends AbstractDelegate {
                 .flatMap(s -> s.getResources().stream()).filter(ResourceSnapshot::isSet).map(r -> DtoMapper
                         .toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .filter(Optional::isPresent).map(Optional::get).toList());
+    }
+
+    public ResultList<Datastream> getObservationDatastreamThingDataastreams(String value) {
+        // TODO Auto-generated method stub
+        return new ResultList<Datastream>(null, null, List.of(getObservationDatastream(value)));
+    }
+
+    public ResultList<HistoricalLocation> getObservationDatastreamThingHistoricalLocations(String value) {
+        String provider = extractFirstIdSegment(value);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ICriterion filter = parseFilter(OBSERVATIONS);
+        ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
+                application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
+        if (list.value().isEmpty())
+            list = new ResultList<>(null, null, DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
+                    uriInfo, getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
+        return list;
+    }
+
+    public ResultList<Location> getObservationDatastreamThingLocations(String value) {
+        String provider = extractFirstIdSegment(value);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        return new ResultList<Location>(null, null, List.of(DtoMapper.toLocation(getSession(), application, getMapper(),
+                uriInfo, getExpansions(), null, providerSnapshot)));
     }
 
 }

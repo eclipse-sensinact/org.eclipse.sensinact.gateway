@@ -27,6 +27,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractAccess;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -46,6 +47,7 @@ public class HistoryResourceHelperSensorthings {
     public static ResultList<Observation> loadHistoricalObservations(SensiNactSession userSession,
             Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
             ResourceSnapshot resourceSnapshot, ICriterion filter, int localResultLimit) {
+
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
 
         if (historyProvider == null) {
@@ -87,6 +89,7 @@ public class HistoryResourceHelperSensorthings {
     static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot providerThing, int localResultLimit) {
+
         return loadHistoricalLocations(userSession, application, mapper, uriInfo, expansions, filter,
                 List.of(providerThing), null, localResultLimit);
     }
@@ -95,6 +98,7 @@ public class HistoryResourceHelperSensorthings {
     static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             List<ProviderSnapshot> providerThings, String locationId, int localResultLimit) {
+
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
         if (historyProvider == null) {
             return new ResultList<>(null, null, List.of());
@@ -136,6 +140,7 @@ public class HistoryResourceHelperSensorthings {
     }
 
     private static Integer getMaxResult(Application application, int localResultLimit) {
+
         Integer maxResults = (Integer) application.getProperties().get("sensinact.history.result.limit");
         if (localResultLimit > 0) {
             maxResults = Math.min(localResultLimit, maxResults);

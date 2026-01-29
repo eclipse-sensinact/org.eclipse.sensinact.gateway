@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.delete;
 
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
+
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -25,7 +27,7 @@ public interface ThingsDelete {
      * @param id : id of thing
      */
     @DELETE
-    public Response deleteThing(@PathParam("id") String id);
+    public Response deleteThing(@PathParam("id") ODataId id);
 
     /**
      * delete datastream thing ref
@@ -35,7 +37,7 @@ public interface ThingsDelete {
      */
     @DELETE
     @Path("/Datastreams/$ref")
-    public Response deleteDatastreamRef(@PathParam("id") String id, @QueryParam("id2") String id2);
+    public Response deleteDatastreamRef(@PathParam("id") ODataId id, @QueryParam("id2") ODataId id2);
 
     /**
      * delete location thing ref
@@ -45,7 +47,7 @@ public interface ThingsDelete {
      */
     @DELETE
     @Path("/Locations({id2})/$ref")
-    public Response deleteLocationRef(@PathParam("id") String id, @PathParam("id2") String id2);
+    public Response deleteLocationRef(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2);
 
     /**
      * delete locations thing ref
@@ -54,5 +56,5 @@ public interface ThingsDelete {
      */
     @DELETE
     @Path("/Locations/$ref")
-    public Response deleteLocationsRef(@PathParam("id") String id);
+    public Response deleteLocationsRef(@PathParam("id") ODataId id);
 }

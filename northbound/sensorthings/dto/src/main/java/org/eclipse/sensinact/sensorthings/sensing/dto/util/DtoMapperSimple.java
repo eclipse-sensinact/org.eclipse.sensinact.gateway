@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -335,8 +336,10 @@ public class DtoMapperSimple {
     }
 
     public static String extractIdSegment(String id, int part) {
+
         if (id.isEmpty())
             return null;
+
         String[] parts = id.split("~");
         if (parts == null || parts.length == 0) {
             return id;
@@ -347,6 +350,15 @@ public class DtoMapperSimple {
             return parts[part];
         }
         return null;
+    }
+
+    public static String getIdWithoutQuote(String id) {
+        String idWithoutQuote = id;
+        if ((idWithoutQuote.startsWith("'") && idWithoutQuote.endsWith("'"))
+                || (idWithoutQuote.startsWith("\"") && idWithoutQuote.endsWith("\""))) {
+            idWithoutQuote = idWithoutQuote.substring(1, idWithoutQuote.length() - 1);
+        }
+        return idWithoutQuote;
     }
 
     public static UnitOfMeasurement toUnitOfMeasure(ProviderSnapshot provider) {
@@ -433,8 +445,11 @@ public class DtoMapperSimple {
             String historicalLocationsLink, String locationsLink) {
         String name = getResourceField(getAdminService(provider), FRIENDLY_NAME, String.class);
         String description = getResourceField(getAdminService(provider), DESCRIPTION, String.class);
+        Map<String, Object> properties = getThingService(provider).getResource("id").getMetadata().entrySet().stream()
+                .collect(Collectors.toMap(entry -> entry.getKey().replace("sensorthings.thing.", ""),
+                        Map.Entry::getValue));
 
-        Thing thing = new Thing(selfLink, id, name, description, null, datastreamsLink, historicalLocationsLink,
+        Thing thing = new Thing(selfLink, id, name, description, properties, datastreamsLink, historicalLocationsLink,
                 locationsLink);
 
         DtoMapperSimple.checkRequireField(thing);
@@ -550,7 +565,7 @@ public class DtoMapperSimple {
         try {
             obs = mapper.readValue((String) val, ExpandedObservation.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            obs = null;
         }
         return obs;
     }
@@ -596,6 +611,7 @@ public class DtoMapperSimple {
     }
 
     public static String extractFirstIdSegment(String id) {
+
         return extractIdSegment(id, 0);
     }
 

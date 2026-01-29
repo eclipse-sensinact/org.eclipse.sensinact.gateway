@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.delete;
 
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
+
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
@@ -24,6 +26,6 @@ public interface ObservedPropertiesDelete {
      * @param id : id of observed property
      */
     @DELETE
-    public Response deleteObservedProperty(@PathParam("id") String id);
+    public Response deleteObservedProperty(@PathParam("id") ODataId id);
 
 }

@@ -34,6 +34,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
@@ -61,8 +63,8 @@ public class ThingsDelegateSensinact extends AbstractDelegate {
     public ResultList<Datastream> getThingDatastreams(String id) {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
 
-        return DatastreamsDelegateSensinact.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), providerSnapshot);
+        return DatastreamsDelegateSensinact.getDataStreams(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(DATASTREAMS), providerSnapshot);
     }
 
     public Datastream getThingDatastream(String id, String id2) {
@@ -209,6 +211,33 @@ public class ThingsDelegateSensinact extends AbstractDelegate {
                 getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider))));
 
         return list;
+    }
+
+    public ResultList<Thing> getThingHistoricalLocationLocationThings(ODataId id, ODataId id2, ODataId id3) {
+        // TODO
+
+        List<ProviderSnapshot> providerLocations = AbstractDelegate.getLocationThingsProvider(getSession(),
+                id3.value());
+        return new ResultList<Thing>(null, null, providerLocations.stream()
+                .map(p -> DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), null, p))
+                .toList());
+    }
+
+    public Observation getThingDatastreamObservation(String id, String id2, String id3) {
+        // TODO
+        String providerThingId = DtoMapperSimple.extractFirstIdSegment(id);
+        String providerDatastreamId = DtoMapperSimple.extractFirstIdSegment(id2);
+        if (!isDatastreamInThing(providerThingId, providerDatastreamId)) {
+            throw new NotFoundException();
+        }
+
+        Optional<Observation> obs = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), null, getObservationResourceSnapshot(id3));
+        if (obs.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return obs.get();
+
     }
 
     public Location getThingLocation(String id, String id2) {

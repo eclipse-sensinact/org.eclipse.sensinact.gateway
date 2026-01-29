@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.update;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
 
 import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.PUT;
@@ -28,9 +29,9 @@ public interface LocationsUpdate {
      * @return
      */
     @PUT
-    public Response updateLocation(@PathParam("id") String id, ExpandedLocation location);
+    public Response updateLocation(@PathParam("id") ODataId id, ExpandedLocation location);
 
     @PATCH
-    public Response patchLocation(@PathParam("id") String id, ExpandedLocation location);
+    public Response patchLocation(@PathParam("id") ODataId id, ExpandedLocation location);
 
 }
