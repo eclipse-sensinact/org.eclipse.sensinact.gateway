@@ -158,7 +158,7 @@
 
     <!-- plugin dependency versions -->
     <bnd.version>7.0.0</bnd.version>
-    <bnd.resolver.version>7.1.0-SNAPSHOT</bnd.resolver.version>
+    <bnd.resolver.version>7.1.0</bnd.resolver.version>
 
     <!-- Default properties for resolver setup in development -->
     <save.test.bndrun.changes>true</save.test.bndrun.changes>

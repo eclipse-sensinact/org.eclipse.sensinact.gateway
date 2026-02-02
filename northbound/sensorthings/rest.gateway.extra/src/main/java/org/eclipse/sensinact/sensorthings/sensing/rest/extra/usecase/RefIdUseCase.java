@@ -51,6 +51,9 @@ import jakarta.ws.rs.ext.Providers;
 /**
  * manage create , update or delete of $ref
  */
+@DependsOnUseCases({ DatastreamsExtraUseCase.class, FeatureOfInterestExtraUseCase.class,
+    LocationsExtraUseCase.class, ThingsExtraUseCase.class, ObservationsExtraUseCase.class,
+    ObservedPropertiesExtraUseCase.class, SensorsExtraUseCase.class })
 public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
     private final IAccessProviderUseCase providerUseCase;
@@ -94,9 +97,6 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
             new RefKey(ExpandedThing.class, ExpandedLocation.class), this::updateThingLocationRef);
 
     @SuppressWarnings("unchecked")
-    @DependsOnUseCases({ DatastreamsExtraUseCase.class, FeatureOfInterestExtraUseCase.class,
-            LocationsExtraUseCase.class, ThingsExtraUseCase.class, ObservationsExtraUseCase.class,
-            ObservedPropertiesExtraUseCase.class, SensorsExtraUseCase.class })
     public RefIdUseCase(Providers providers) {
         super(providers);
         observedPropertyCaches = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);

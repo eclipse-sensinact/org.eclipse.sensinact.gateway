@@ -232,7 +232,7 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>emf-api</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <!-- gogo shell test -->
     <dependency>
@@ -254,11 +254,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>
-            org.eclipse.sensinact.gateway.northbound.sensorthings
-        </groupId>
+        <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
         <artifactId>dto</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>${project.version}</version>
     </dependency>
   </dependencies>
 

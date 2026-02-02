@@ -92,18 +92,14 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>
-        org.eclipse.sensinact.gateway.northbound.sensorthings
-      </groupId>
+      <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>dto</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>
-        org.eclipse.sensinact.gateway.northbound.sensorthings
-      </groupId>
+      <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>rest.api</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   <build>

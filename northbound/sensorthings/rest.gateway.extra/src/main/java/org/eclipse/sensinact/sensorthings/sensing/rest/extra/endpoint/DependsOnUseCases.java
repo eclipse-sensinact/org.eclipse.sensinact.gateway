@@ -20,7 +20,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.AbstractExt
 import java.lang.annotation.ElementType;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.CONSTRUCTOR, ElementType.TYPE })
+@Target(ElementType.TYPE)
 public @interface DependsOnUseCases {
     Class<? extends AbstractExtraUseCase<?, ?>>[] value();
 }

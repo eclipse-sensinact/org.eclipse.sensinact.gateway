@@ -43,11 +43,11 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * observation
  */
+@DependsOnUseCases(value = { FeatureOfInterestExtraUseCase.class })
 public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedObservation, ServiceSnapshot> {
 
     private FeatureOfInterestExtraUseCase featureOfInterestUseCase;
 
-    @DependsOnUseCases(value = { FeatureOfInterestExtraUseCase.class })
     public ObservationsExtraUseCase(Providers providers) {
         super(providers);
         featureOfInterestUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);

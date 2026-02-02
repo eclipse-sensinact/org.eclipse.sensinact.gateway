@@ -13,8 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -83,6 +81,7 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
                 return c.getConstructor(Providers.class).newInstance(providers);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                LOG.error("Failed creating a Use Case Provider for type {}.", type, e);
                 throw new InternalServerErrorException("Failed to make the Extra Use Case provider", e);
             }
         });
@@ -95,8 +94,8 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
      * @param cacheKey
      */
     private void createDepedenciesUseCase(Class<? extends AbstractExtraUseCase<?, ?>> cacheKey, Providers providers) {
-        DependsOnUseCases depends = cacheKey.getAnnotation(DependsOnUseCases.class);
-        if (depends != null) {
+        if (cacheKey.isAnnotationPresent(DependsOnUseCases.class)) {
+            DependsOnUseCases depends = cacheKey.getAnnotation(DependsOnUseCases.class);
             for (Class<? extends AbstractExtraUseCase<?, ?>> dep : depends.value()) {
                 getContext(dep); // appel récursif pour créer les dépendances
             }
