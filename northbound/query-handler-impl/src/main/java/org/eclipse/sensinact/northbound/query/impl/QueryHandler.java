@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -107,6 +108,9 @@ public class QueryHandler implements IQueryHandler {
 
     @Reference
     ResourceSelectorFilterFactory resourceSelectorFilterFactory;
+
+    @Reference
+    DataUpdate push;
 
     /**
      * Current filter handler
@@ -314,8 +318,8 @@ public class QueryHandler implements IQueryHandler {
      */
     private AbstractResultDTO handleSet(final SensiNactSession userSession, final QuerySetDTO dto) {
         final SensinactPath path = dto.uri;
-        if (!path.targetsSpecificResource() && !path.targetsSpecificMetadata()) {
-            return new ErrorResultDTO(405, "Can only set a resource or its metadata");
+        if (!path.targetsSpecificProvider() && !path.targetsSpecificResource() && !path.targetsSpecificMetadata()) {
+            return new ErrorResultDTO(405, "Can only set a provider, a resource or its metadata");
         }
 
         final TypedResponse<ResponseSetDTO> result = new TypedResponse<>(EResultType.SET_RESPONSE);
@@ -328,6 +332,9 @@ public class QueryHandler implements IQueryHandler {
         if (path.targetsSpecificResource()) {
             response.name = path.resource;
             userSession.setResourceValue(path.provider, path.service, path.resource, newValue, timestamp);
+        } else if (path.targetsSpecificProvider()) {
+            response.name = path.provider;
+            userSession.setProvider(path.provider, (Map<String, Object>) newValue, push);
         } else {
             response.name = path.resource + "/" + path.metadata;
             userSession.setResourceMetadata(path.provider, path.service, path.resource, path.metadata, newValue);

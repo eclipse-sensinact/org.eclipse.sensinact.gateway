@@ -52,6 +52,11 @@ public interface IRestNorthbound {
     @GET
     AbstractResultDTO describeProvider(@PathParam("providerId") String providerId);
 
+    @Path("providers/{providerId}")
+    @POST
+    AbstractResultDTO setProvider(@PathParam("providerId") String providerId,
+            WrappedAccessMethodCallParametersDTO parameters);
+
     @Path("providers/{providerId}/link/{childId}")
     @POST
     AbstractResultDTO linkProvider(@PathParam("providerId") String providerId,

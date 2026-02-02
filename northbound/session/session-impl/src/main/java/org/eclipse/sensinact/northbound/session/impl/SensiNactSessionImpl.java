@@ -42,6 +42,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.authorization.NotPermittedException;
 import org.eclipse.sensinact.core.authorization.PermissionLevel;
@@ -60,6 +61,9 @@ import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
+import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.snapshot.CommonProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
@@ -91,6 +95,8 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SensiNactSessionImpl implements SensiNactSession {
 
@@ -1209,5 +1215,65 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public ProviderDescription unlinkProviders(String parent, String child) {
         return linkOrUnlinkProviders(parent, child, false);
+    }
+
+    @Override
+    public ProviderDescription setProvider(String provider, Map<String, Object> rcValues, DataUpdate push) {
+        if (preAuthorizer.preAuthProvider(UPDATE, provider) == DENY) {
+            String msg = String.format("The user %s does not have permission to update provider %s", user.getUserId(), provider);
+            throw new NotPermittedException(msg);
+        }
+
+        // Extract special values
+        final String modelPackageUri = (String) rcValues.remove("@modelPackageUri");
+        final String model = (String) rcValues.remove("@model");
+        final String svcModel = (String) rcValues.remove("@serviceModel");
+        Instant timestamp = Instant.now();
+
+        BulkGenericDto bulk = new BulkGenericDto();
+        bulk.dtos = new ArrayList<>();
+        for (var entry: rcValues.entrySet()) {
+            final String[] parts = entry.getKey().split("/", 2);
+            if (parts.length != 2) {
+                continue;
+            }
+            final GenericDto dto = new GenericDto();
+            dto.modelPackageUri = modelPackageUri;
+            dto.model = model;
+            dto.provider = provider;
+            dto.service = parts[0];
+            dto.resource = parts[1];
+            dto.timestamp = timestamp;
+            dto.nullAction = NullAction.UPDATE;
+            dto.serviceModel = svcModel;
+
+            Object value = entry.getValue();
+            if (dto.service.equals("admin") && dto.resource.equals("location")) {
+                dto.type = GeoJsonObject.class;
+                dto.value = new ObjectMapper().convertValue(value, GeoJsonObject.class);
+            } else {
+                if (value instanceof Map) {
+                    Map<String, Object> map = (Map) value;
+                    if (map.containsKey("value")) {
+                        value = map.get("value");
+                        dto.upperBound = (int) map.getOrDefault("limit", 1);
+                        dto.metadata = (Map<String, Object>) map.getOrDefault("metadata", null);
+                    }
+                }
+                dto.value = value;
+                dto.type = dto.value != null ? dto.value.getClass() : Object.class;
+            }
+
+            bulk.dtos.add(dto);
+        }
+        try {
+            push.pushUpdate(bulk).getValue();
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot update provider");
+        }
+
+        ProviderDescription res = new ProviderDescription();
+        res.provider = provider;
+        return res;
     }
 }

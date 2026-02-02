@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -24,10 +25,14 @@ import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.filters.resource.selector.api.CompactResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
+import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
+import org.eclipse.sensinact.northbound.query.api.EResultType;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseSnapshotDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.SnapshotProviderDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.SnapshotResourceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.SnapshotServiceDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
@@ -115,5 +120,29 @@ public class ResourceSnapshotTest {
         assertEquals("R1", resourceDTO.name);
         assertEquals("java.lang.String", resourceDTO.type);
         assertEquals("V1", resourceDTO.value);
+    }
+
+    @Test
+    void setProvider() throws Exception {
+        // Set a provider
+        Map<String, Object> request = Map.of("parameters",
+            List.of(
+                Map.of(
+                    "name", "value",
+                    "value", Map.of(
+                        "foo/bar", 42
+                    )
+                )
+            )
+        );
+        utils.queryJson("/providers/setProviderIT", request, AbstractResultDTO.class);
+
+        // Check it has been set
+        TypedResponse<?> result = utils.queryJson("/providers/setProviderIT/services/foo/resources/bar/GET", TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.GET_RESPONSE, "setProviderIT", "foo", "bar");
+        ResponseGetDTO response = utils.convert(result, ResponseGetDTO.class);
+        assertEquals("bar", response.name);
+        assertEquals(42, response.value);
+        assertEquals("java.lang.Integer", response.type);
     }
 }
