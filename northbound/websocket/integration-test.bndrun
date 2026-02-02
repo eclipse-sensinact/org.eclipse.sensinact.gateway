@@ -56,7 +56,11 @@
 	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.jndi;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.plus;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.servlet;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.servlet-api;version='[5.0.2,5.0.3)',\
+	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.webapp;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.websocket.api;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.websocket.client;version='[11.0.13,11.0.14)',\

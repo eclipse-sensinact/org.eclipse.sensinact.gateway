@@ -62,6 +62,7 @@
 	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
+	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.osgitech.rest;version='[1.2.2,1.2.3)',\
 	org.eclipse.osgitech.rest.jetty;version='[1.2.2,1.2.3)',\
 	org.eclipse.osgitech.rest.sse;version='[1.2.2,1.2.3)',\
