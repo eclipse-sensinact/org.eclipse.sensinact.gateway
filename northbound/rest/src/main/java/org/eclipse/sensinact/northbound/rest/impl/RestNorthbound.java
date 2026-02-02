@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.notification.ClientDataListener;
@@ -49,6 +49,8 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionActivityChecker;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.osgi.util.promise.Deferred;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -59,6 +61,11 @@ import jakarta.ws.rs.sse.Sse;
 import jakarta.ws.rs.sse.SseEventSink;
 
 public class RestNorthbound implements IRestNorthbound {
+
+    /**
+     * Logger
+     */
+    private static final Logger logger = LoggerFactory.getLogger(RestNorthbound.class);
 
     /**
      * Server-sent events handling
@@ -334,29 +341,49 @@ public class RestNorthbound implements IRestNorthbound {
     public void watchResource(String providerId, String serviceName, String rcName, SseEventSink eventSink) {
         // Create a new session, specific to this SSE connection
         final SensiNactSession sseSession = prepareSSESession((pf, s) -> {
-            if (eventSink.isClosed()) {
-                // Event sink is already closed: do not keep the session alive
+            try {
+                if (eventSink.isClosed()) {
+                    // Event sink is already closed: expire the session immediately
+                    logger.debug("Event sink is closed. Expiring session {} immediately", s.getSessionId());
+                    s.expire();
+                    return pf.resolved(false);
+                }
+
+                // Send a comment to check if the connection is still alive
+                final Deferred<Boolean> deferred = pf.deferred();
+                eventSink
+                        .send(sse.newEventBuilder().comment("liveness-check").build())
+                        .toCompletableFuture()
+                        .orTimeout(10, TimeUnit.SECONDS)
+                        .handle((r, t) -> {
+                            if (t != null) {
+                                logger.error("Error handling liveness check result. Considering session inactive",
+                                        t);
+                                s.expire();
+                                deferred.fail(t);
+                            } else {
+                                deferred.resolve(true);
+                            }
+                            return null;
+                        });
+                return deferred.getPromise();
+            } catch (Exception e) {
+                // The event sink closure detection can let us come here
+                logger.error("Error sending liveness check SSE comment. Expiring session immediately", e);
+                s.expire();
                 return pf.resolved(false);
             }
-
-            // Send a comment to check if the connection is still alive
-            final Deferred<Boolean> deferred = pf.deferred();
-            final CompletionStage<?> pingCompletion = eventSink
-                    .send(sse.newEventBuilder().comment("liveness-check").build());
-            pingCompletion.whenComplete((r, t) -> {
-                if (t != null) {
-                    deferred.fail(t);
-                } else {
-                    deferred.resolve(true);
-                }
-            });
-            return deferred.getPromise();
         });
         sseSession.addExpirationListener(s -> {
             // Session expired: close the event sink
-            if (!eventSink.isClosed()) {
-                eventSink.send(sse.newEventBuilder().comment("session-expired").build());
-                eventSink.close();
+            try {
+                logger.debug("SSE session {} expired. Closing event sink.", s.getSessionId());
+                if (!eventSink.isClosed()) {
+                    eventSink.send(sse.newEventBuilder().comment("session-expired").build());
+                    eventSink.close();
+                }
+            } catch (Exception e) {
+                logger.error("Error closing SSE after sensiNact session expiration", e);
             }
         });
 
@@ -365,27 +392,41 @@ public class RestNorthbound implements IRestNorthbound {
                 serviceName.equals(e.service()) && rcName.equals(e.resource());
 
         final ClientDataListener cdl = (t, e) -> {
-            if (eventSink.isClosed()) {
-                // Event sink is already closed: expire the session
-                sseSession.expire();
-                return;
-            }
+            try {
+                if (eventSink.isClosed()) {
+                    // Event sink is already closed: expire the session
+                    logger.debug("Expire SSE session, as the event sink is closed");
+                    sseSession.expire();
+                    return;
+                }
 
-            if (filter.test(e)) {
-                eventSink.send(sse.newEventBuilder().name("data").mediaType(MediaType.APPLICATION_JSON_TYPE)
-                        .data(new ResourceDataNotificationDTO(e)).build());
+                if (filter.test(e)) {
+                    eventSink.send(sse.newEventBuilder().name("data").mediaType(MediaType.APPLICATION_JSON_TYPE)
+                            .data(new ResourceDataNotificationDTO(e)).build());
+                }
+            } catch (Exception ex) {
+                logger.error("Error sending resource data notification SSE event. Closing connection and session.", ex);
+                sseSession.expire();
+                eventSink.close();
             }
         };
 
         final ClientLifecycleListener cll = (t, e) -> {
-            if (eventSink.isClosed()) {
-                // Event sink is already closed: expire the session
+            try {
+                if (eventSink.isClosed()) {
+                    // Event sink is already closed: expire the session
+                    logger.debug("Expire SSE session, as the event sink is closed");
+                    sseSession.expire();
+                    return;
+                }
+                if (filter.test(e)) {
+                    eventSink.send(sse.newEventBuilder().name("lifecycle").mediaType(MediaType.APPLICATION_JSON_TYPE)
+                            .data(new ResourceLifecycleNotificationDTO(e)).build());
+                }
+            } catch (Exception ex) {
+                logger.error("Error sending resource data notification SSE event. Closing connection and session.", ex);
                 sseSession.expire();
-                return;
-            }
-            if (filter.test(e)) {
-                eventSink.send(sse.newEventBuilder().name("lifecycle").mediaType(MediaType.APPLICATION_JSON_TYPE)
-                        .data(new ResourceLifecycleNotificationDTO(e)).build());
+                eventSink.close();
             }
         };
 

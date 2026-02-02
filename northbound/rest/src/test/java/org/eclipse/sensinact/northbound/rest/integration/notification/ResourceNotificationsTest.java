@@ -16,11 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.util.BlockingArrayQueue;
@@ -37,6 +39,7 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.service.cm.Configuration;
@@ -46,6 +49,8 @@ import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 
@@ -54,8 +59,22 @@ import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.sse.SseEventSource;
 
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "expiry", value = "" + ResourceNotificationsTest.SESSION_EXPIRY_SECONDS),
+        @Property(key = "activity.check.interval", value = ""
+                + ResourceNotificationsTest.SESSION_ACTIVITY_INTERVAL_SECONDS),
+        @Property(key = "activity.check.extension", value = ""
+                + ResourceNotificationsTest.SESSION_ACTIVITY_EXTENSION_SECONDS),
+        @Property(key = "activity.check.threshold", value = "1"),
+})
 public class ResourceNotificationsTest {
+
+    public static final int SESSION_EXPIRY_SECONDS = 4;
+    public static final int SESSION_ACTIVITY_INTERVAL_SECONDS = 1;
+    public static final int SESSION_ACTIVITY_EXTENSION_SECONDS = 3;
+
+    private static final Logger logger = LoggerFactory.getLogger(ResourceNotificationsTest.class);
 
     @BeforeEach
     public void await(
@@ -70,7 +89,6 @@ public class ResourceNotificationsTest {
                 if (utils.queryStatus("/").statusCode() == 200)
                     return;
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             Thread.sleep(200);
@@ -133,16 +151,16 @@ public class ResourceNotificationsTest {
         final BlockingArrayQueue<ResourceDataNotificationDTO> dataEvents = new BlockingArrayQueue<>();
         sseSource.register(ise -> {
             switch (ise.getName()) {
-            case "lifecycle":
-                lifeCycleEvents.add(ise.readData(ResourceLifecycleNotificationDTO.class));
-                break;
+                case "lifecycle":
+                    lifeCycleEvents.add(ise.readData(ResourceLifecycleNotificationDTO.class));
+                    break;
 
-            case "data":
-                dataEvents.add(ise.readData(ResourceDataNotificationDTO.class));
-                break;
+                case "data":
+                    dataEvents.add(ise.readData(ResourceDataNotificationDTO.class));
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         });
         sseSource.open();
@@ -216,6 +234,165 @@ public class ResourceNotificationsTest {
             assertNull(lifeCycleEvents.poll());
         } finally {
             sseSource.close();
+        }
+    }
+
+    /**
+     * Ensure that SSE sessions expire when the client closes the connection
+     */
+    @Test
+    @Disabled("Client closure is not detected properly on server side due to framework limitations")
+    void sseExpireOnClientClose() throws Exception {
+
+        // Ensure that no session is present at start
+        final SensiNactSession defaultSession = sessionManager.getDefaultSession(USER);
+        for (String sessionId : sessionManager.getSessionIds(USER)) {
+            SensiNactSession session = sessionManager.getSession(USER, sessionId);
+            if (session.getSessionId() != defaultSession.getSessionId()) {
+                session.expire();
+            }
+        }
+        assertEquals(List.of(defaultSession.getSessionId()), sessionManager.getSessionIds(USER));
+
+        final String service = "new";
+        final String resource = "new-resource";
+
+        // Subscribe to a non-existent resource
+        final Client client = clientBuilder.connectTimeout(3, TimeUnit.SECONDS).register(JacksonJsonProvider.class)
+                .build();
+        final SseEventSource sseSource = sseClient
+                .newSource(client.target("http://localhost:8185/sensinact/").path("providers").path(PROVIDER)
+                        .path("services").path(service).path("resources").path(resource).path("SUBSCRIBE"));
+
+        final BlockingArrayQueue<Instant> expirationEvent = new BlockingArrayQueue<>();
+        sseSource.register(ise -> {
+            final String comment = ise.getComment();
+            if ("session-expired".equals(comment)) {
+                logger.debug("Got session expired message");
+                expirationEvent.add(Instant.now());
+            }
+        });
+        sseSource.open();
+
+        try {
+            // Wait a bit to ensure the session is up
+            Thread.sleep(100);
+
+            // Look for the session
+            SensiNactSession sseSession = null;
+            for (String sessionId : sessionManager.getSessionIds(USER)) {
+                SensiNactSession session = sessionManager.getSession(USER, sessionId);
+                if (session != defaultSession && !sessionId.equals(defaultSession.getSessionId())) {
+                    sseSession = session;
+                    break;
+                }
+            }
+            assertNotNull(sseSession, "SSE session not found");
+            final CountDownLatch snaExpired = new CountDownLatch(1);
+            sseSession.addExpirationListener(s -> {
+                logger.debug("SSE session {} expired on server side", s.getSessionId());
+                snaExpired.countDown();
+            });
+            logger.debug("Detected SSE session: {}", sseSession.getSessionId());
+
+            // Wait for session to pass first expiry check
+            Instant expiration = expirationEvent.poll(SESSION_EXPIRY_SECONDS + SESSION_ACTIVITY_INTERVAL_SECONDS + 1,
+                    TimeUnit.SECONDS);
+            assertNull(expiration, "Session expired too early");
+
+            // Close the client side
+            logger.debug("Closing SSE connection from client side");
+            assertTrue(sseSource.close(5, TimeUnit.SECONDS), "SSE connection not closed in time from client side");
+            logger.debug("SSE connection closed from client side");
+            assertFalse(sseSource.isOpen(), "SSE connection still open after close from client side");
+
+            // Wait a bit to ensure the server processes the closing
+            expiration = expirationEvent.poll(SESSION_EXPIRY_SECONDS + SESSION_ACTIVITY_INTERVAL_SECONDS + 1,
+                    TimeUnit.SECONDS);
+            // We should not have gotten an expiration message, as the client closed the
+            // connection
+            assertNull(expiration, "Expiration message received");
+
+            // Ensure the session is expired on the server side
+            assertTrue(snaExpired.await(200, TimeUnit.MILLISECONDS),
+                    "Session did not expire on server side after client closed the connection");
+
+            assertNull(sessionManager.getSession(USER, sseSession.getSessionId()),
+                    "Session did not expire after client closed the connection");
+        } finally {
+            if (sseSource.isOpen()) {
+                sseSource.close();
+            }
+        }
+    }
+
+    /**
+     * Ensure that SSE is closed when the server expires the session
+     */
+    @Test
+    void sseExpireOnServiceSide() throws Exception {
+
+        // Ensure that no session is present at start
+        final SensiNactSession defaultSession = sessionManager.getDefaultSession(USER);
+        for (String sessionId : sessionManager.getSessionIds(USER)) {
+            SensiNactSession session = sessionManager.getSession(USER, sessionId);
+            if (session.getSessionId() != defaultSession.getSessionId()) {
+                session.expire();
+            }
+        }
+        assertEquals(List.of(defaultSession.getSessionId()), sessionManager.getSessionIds(USER));
+
+        final String service = "new";
+        final String resource = "new-resource";
+
+        // Subscribe to a non-existent resource
+        final Client client = clientBuilder.connectTimeout(3, TimeUnit.SECONDS).register(JacksonJsonProvider.class)
+                .build();
+        final SseEventSource sseSource = sseClient
+                .newSource(client.target("http://localhost:8185/sensinact/").path("providers").path(PROVIDER)
+                        .path("services").path(service).path("resources").path(resource).path("SUBSCRIBE"));
+
+        final BlockingArrayQueue<Instant> expirationEvent = new BlockingArrayQueue<>();
+        sseSource.register(ise -> {
+            final String comment = ise.getComment();
+            if ("session-expired".equals(comment)) {
+                expirationEvent.add(Instant.now());
+            }
+        });
+        sseSource.open();
+
+        try {
+            // Wait a bit to ensure the session is up
+            Thread.sleep(100);
+
+            // Look for the session
+            SensiNactSession sseSession = null;
+            for (String sessionId : sessionManager.getSessionIds(USER)) {
+                SensiNactSession session = sessionManager.getSession(USER, sessionId);
+                if (session != defaultSession && !sessionId.equals(defaultSession.getSessionId())) {
+                    sseSession = session;
+                    break;
+                }
+            }
+            assertNotNull(sseSession, "SSE session not found");
+
+            // Wait for session to pass first expiry check
+            Instant expiration = expirationEvent.poll(SESSION_EXPIRY_SECONDS + SESSION_ACTIVITY_INTERVAL_SECONDS + 1,
+                    TimeUnit.SECONDS);
+            assertNull(expiration, "Session expired too early");
+
+            // Expire the session on the server side
+            final Instant closingTime = Instant.now();
+            sseSession.expire();
+
+            // Expiration should be received quickly
+            expiration = expirationEvent.poll(500, TimeUnit.MILLISECONDS);
+            assertNotNull(expiration, "Session expired event not received");
+            assertFalse(expiration.isBefore(closingTime), "Session expired too early");
+        } finally {
+            if (sseSource.isOpen()) {
+                sseSource.close();
+            }
         }
     }
 }
