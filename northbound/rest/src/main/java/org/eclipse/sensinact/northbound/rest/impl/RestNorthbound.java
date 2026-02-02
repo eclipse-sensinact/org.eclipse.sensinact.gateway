@@ -19,12 +19,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Predicate;
 
-import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
@@ -46,6 +46,9 @@ import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
 import org.eclipse.sensinact.northbound.rest.api.IRestNorthbound;
 import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionActivityChecker;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.osgi.util.promise.Deferred;
 
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
@@ -76,10 +79,21 @@ public class RestNorthbound implements IRestNorthbound {
     UriInfo uriInfo;
 
     /**
-     * Returns a user session
+     * Returns the default user session
      */
     private SensiNactSession getSession() {
         return providers.getContextResolver(SensiNactSession.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    /**
+     * Prepares a new sensiNact session for the current user, with the given
+     * activity checker
+     */
+    private SensiNactSession prepareSSESession(final SensiNactSessionActivityChecker activityChecker) {
+        final SensiNactSessionManager sessionManager = providers
+                .getContextResolver(SensiNactSessionManager.class, MediaType.WILDCARD_TYPE).getContext(null);
+        final SensiNactSession restSession = getSession();
+        return sessionManager.createNewSession(restSession.getUserInfo(), activityChecker);
     }
 
     /**
@@ -318,8 +332,33 @@ public class RestNorthbound implements IRestNorthbound {
 
     @Override
     public void watchResource(String providerId, String serviceName, String rcName, SseEventSink eventSink) {
-        final SensiNactSession session = getSession();
-        final AtomicReference<String> listenerId = new AtomicReference<>();
+        // Create a new session, specific to this SSE connection
+        final SensiNactSession sseSession = prepareSSESession((pf, s) -> {
+            if (eventSink.isClosed()) {
+                // Event sink is already closed: do not keep the session alive
+                return pf.resolved(false);
+            }
+
+            // Send a comment to check if the connection is still alive
+            final Deferred<Boolean> deferred = pf.deferred();
+            final CompletionStage<?> pingCompletion = eventSink
+                    .send(sse.newEventBuilder().comment("liveness-check").build());
+            pingCompletion.whenComplete((r, t) -> {
+                if (t != null) {
+                    deferred.fail(t);
+                } else {
+                    deferred.resolve(true);
+                }
+            });
+            return deferred.getPromise();
+        });
+        sseSession.addExpirationListener(s -> {
+            // Session expired: close the event sink
+            if (!eventSink.isClosed()) {
+                eventSink.send(sse.newEventBuilder().comment("session-expired").build());
+                eventSink.close();
+            }
+        });
 
         // TODO replace this with a single-level wildcard when typed events permits it
         Predicate<ResourceNotification> filter = e -> providerId.equals(e.provider()) &&
@@ -327,12 +366,12 @@ public class RestNorthbound implements IRestNorthbound {
 
         final ClientDataListener cdl = (t, e) -> {
             if (eventSink.isClosed()) {
-                // Event sink is already closed: remove listener
-                session.removeListener(listenerId.get());
+                // Event sink is already closed: expire the session
+                sseSession.expire();
                 return;
             }
 
-            if(filter.test(e)) {
+            if (filter.test(e)) {
                 eventSink.send(sse.newEventBuilder().name("data").mediaType(MediaType.APPLICATION_JSON_TYPE)
                         .data(new ResourceDataNotificationDTO(e)).build());
             }
@@ -340,19 +379,20 @@ public class RestNorthbound implements IRestNorthbound {
 
         final ClientLifecycleListener cll = (t, e) -> {
             if (eventSink.isClosed()) {
-                // Event sink is already closed: remove listener
-                session.removeListener(listenerId.get());
+                // Event sink is already closed: expire the session
+                sseSession.expire();
                 return;
             }
-            if(filter.test(e)) {
+            if (filter.test(e)) {
                 eventSink.send(sse.newEventBuilder().name("lifecycle").mediaType(MediaType.APPLICATION_JSON_TYPE)
                         .data(new ResourceLifecycleNotificationDTO(e)).build());
             }
         };
 
         // Register the listener
-        // TODO use single level wildcard final String topic = String.join("/", providerId, serviceName, rcName);
-        listenerId.set(session.addListener(List.of("*"), cdl, null, cll, null));
+        // TODO use single level wildcard final String topic = String.join("/",
+        // providerId, serviceName, rcName);
+        sseSession.addListener(List.of("*"), cdl, null, cll, null);
     }
 
     @Override
