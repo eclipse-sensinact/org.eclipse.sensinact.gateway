@@ -243,15 +243,17 @@ public class WebSocketEndpoint {
         Session ws = wsSession.get();
         if (ws != null && ws.isOpen()) {
             try {
-                // Cancel any existing ping in progress
-                Optional.ofNullable(activityCheckInProgress.getAndSet(null)).ifPresent(existingPromise ->
-                // Ping in progress, cancel it
-                existingPromise
-                        .fail(new IllegalStateException("New WebSocket ping sent while previous ping is in progress")));
+                final Deferred<Boolean> deferred = activityCheckInProgress.updateAndGet(current -> {
+                    if (current == null) {
+                        // No ping in progress: create a new promise
+                        return pf.<Boolean>deferred();
+                    } else {
+                        logger.warn("New ping requested while previous one is in progress. Using current promise.");
+                        return current;
+                    }
+                });
 
-                // Send new ping
-                final Deferred<Boolean> deferred = pf.<Boolean>deferred();
-                activityCheckInProgress.set(deferred);
+                // Send a new ping
                 ws.getRemote().sendPing(ByteBuffer.wrap(pingPayload));
                 return deferred.getPromise();
             } catch (IOException e) {
@@ -274,15 +276,24 @@ public class WebSocketEndpoint {
                     wsSession.getRemote().sendPong(frame.getPayload());
                     break;
                 case PONG:
-                    // Check content
-                    if (Arrays.equals(frame.getPayload().array(), pingPayload)) {
+                    // Check pong content
+                    if (!frame.hasPayload() || frame.getPayloadLength() != pingPayload.length) {
+                        logger.warn("Ignoring PONG frame with no or invalid payload from client: {}", wsSession);
+                        break;
+                    }
+
+                    // Extract payload
+                    final byte[] payload = new byte[frame.getPayloadLength()];
+                    frame.getPayload().get(payload);
+
+                    if (Arrays.equals(payload, pingPayload)) {
                         // Notify pong received
                         Optional.ofNullable(activityCheckInProgress.getAndSet(null)).ifPresent(deferred -> {
                             // Pong received, complete the activity check successfully
                             deferred.resolve(true);
                         });
                     } else {
-                        logger.warn("Ignoring unexpected PONG frame payload from client: {}", wsSession);
+                        logger.warn("Ignoring PONG frame payload with invalid content from client: {}", wsSession);
                     }
                     break;
 
@@ -291,7 +302,7 @@ public class WebSocketEndpoint {
                     logger.debug("Ignoring WebSocket frame of type {} from client: {}", frame.getType(), wsSession);
                     break;
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Error handling WebSocket frame {}: {}", frame.getType(), e.getMessage(), e);
         }
     }
