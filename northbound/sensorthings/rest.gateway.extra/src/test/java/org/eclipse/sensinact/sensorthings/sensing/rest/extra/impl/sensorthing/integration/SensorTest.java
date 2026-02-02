@@ -12,9 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
