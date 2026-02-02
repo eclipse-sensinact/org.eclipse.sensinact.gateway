@@ -14,8 +14,6 @@ package org.eclipse.sensinact.northbound.rest.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -62,7 +60,6 @@ public class ResourceSnapshotTest {
                 if (utils.queryStatus("/").statusCode() == 200)
                     return;
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             Thread.sleep(200);
@@ -98,7 +95,6 @@ public class ResourceSnapshotTest {
     void resourceGetSnapshot() throws Exception {
         // Register the resource
         GenericDto dto = utils.makeDto("M1", "P1", "S1", "R1", "V1", String.class);
-        Instant updateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         push.pushUpdate(dto).getValue();
 
         List<ResourceSelector> request = new ArrayList<>();
