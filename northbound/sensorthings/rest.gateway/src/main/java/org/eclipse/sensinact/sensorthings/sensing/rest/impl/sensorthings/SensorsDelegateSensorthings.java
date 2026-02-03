@@ -49,14 +49,15 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     public SensorsDelegateSensorthings(UriInfo uriInfo, Providers providers, Application application,
             ContainerRequestContext requestContext) {
         super(uriInfo, providers, application, requestContext);
-        // TODO Auto-generated constructor stub
     }
 
     public Sensor getSensor(String id) {
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
+
         return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.SENSORS), validateAndGetProvider(providerId));
+
     }
 
     public ResultList<Datastream> getSensorDatastreams(String id) {
@@ -140,8 +141,14 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
 
     public Response updateSensor(String id, Sensor sensor) {
 
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, sensor);
-        return Response.noContent().build();
+        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), id, sensor);
+        ICriterion criterion = parseFilter(EFilterContext.SENSORS);
+
+        Sensor createDto = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                criterion, snapshot);
+
+        return Response.ok().entity(createDto).build();
     }
 
     public Response patchSensor(String id, Sensor sensor) {
@@ -153,7 +160,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
 
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, Sensor.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public ResultList<HistoricalLocation> getSensorDatastreamThingHistoricalLocations(String value, String value2) {

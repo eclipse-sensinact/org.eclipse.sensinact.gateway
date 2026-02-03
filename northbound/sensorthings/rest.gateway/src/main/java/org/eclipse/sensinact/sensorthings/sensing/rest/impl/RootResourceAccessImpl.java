@@ -25,6 +25,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.RootResourceAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.RootResourceCreate;
@@ -75,6 +76,13 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
     public Response createObservedProperties(ObservedProperty observedProperty) {
 
         return getSensorthingsHandler().createObservedProperties(observedProperty);
+
+    }
+
+    @Override
+    public Response createObservations(ExpandedObservation observation) {
+
+        return getSensorthingsHandler().createObservation(observation);
 
     }
 
@@ -133,8 +141,9 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         ResultList<Sensor> resultSensinact = getSensinactHandler().getSensors();
         ResultList<Sensor> resultSensorthing = getSensorthingsHandler().getSensors();
-        return new ResultList<Sensor>(null, null,
-                Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
+        Stream<Sensor> list = Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream());
+        list = Stream.concat(list, getCacheSensor().values().stream());
+        return new ResultList<Sensor>(null, null, list.toList());
     }
 
     @Override
@@ -151,8 +160,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         ResultList<ObservedProperty> resultSensinact = getSensinactHandler().getObservedProperties();
         ResultList<ObservedProperty> resultSensorthing = getSensorthingsHandler().getObservedProperties();
-        return new ResultList<ObservedProperty>(null, null,
-                Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
+        Stream<ObservedProperty> list = Stream.concat(resultSensinact.value().stream(),
+                resultSensorthing.value().stream());
+        list = Stream.concat(list, getCacheObservedProperty().values().stream());
+        return new ResultList<ObservedProperty>(null, null, list.toList());
     }
 
     @Override

@@ -30,6 +30,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
@@ -99,8 +100,14 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                 String locationId = request.id();
                 if (!ids.contains(locationId)) {
                     ids = Stream.concat(ids.stream(), Stream.of(locationId)).toList();
-                    return new ThingUpdate(providerId, DtoToModelMapper.getAggregateLocation(request, ids), null, null,
-                            providerId, null, ids, null);
+                    ExpandedLocation expandLocation = request.model();
+                    List<Location> newLocation = List.of(new Location(null, expandLocation.id(), expandLocation.name(),
+                            expandLocation.description(), expandLocation.encodingType(),
+                            expandLocation.location(), null, null));
+                    return new ThingUpdate(providerId,
+                            DtoToModelMapper.getAggregateLocation(request, ids,
+                                    newLocation),
+                            null, null, providerId, null, ids, null);
                 }
                 return null;
             }).filter(java.util.Objects::nonNull).forEach(listUpdates::add);

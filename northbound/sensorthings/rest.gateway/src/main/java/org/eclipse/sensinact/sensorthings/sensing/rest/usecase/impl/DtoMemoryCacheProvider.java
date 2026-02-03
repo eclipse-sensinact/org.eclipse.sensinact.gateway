@@ -10,14 +10,13 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint;
+package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.DtoMemoryCache;
 
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;

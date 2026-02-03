@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -26,6 +27,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoT
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Providers;
@@ -68,8 +70,12 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
             return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
 
         } else {
-            throw new WebApplicationException("FeatureOfInterest is mandatory for Observation",
-                    Response.Status.CONFLICT);
+            String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+            ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
+            if (provider == null) {
+                throw new NotFoundException();
+            }
+            throw new WebApplicationException("Sensor is mandatory for Datastream", Response.Status.CONFLICT);
         }
 
     }

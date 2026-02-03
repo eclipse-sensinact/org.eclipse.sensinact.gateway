@@ -17,6 +17,7 @@ import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage
 import java.lang.reflect.RecordComponent;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,7 +52,35 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.BadRequestException;
+
 public class DtoMapperSimple {
+
+    public class UnitOfMeasureValidator {
+
+        // Map symbol -> definition URI
+        private static final Map<String, String> VALID_UNITS = new HashMap<>();
+        static {
+            VALID_UNITS.put("°C", "DegreeCelsius");
+            VALID_UNITS.put("K", "Kelvin");
+            VALID_UNITS.put("lm", "Lumen");
+            VALID_UNITS.put("m", "Meter");
+            VALID_UNITS.put("kg", "Kilogram");
+            VALID_UNITS.put("s", "Second");
+            VALID_UNITS.put("Pa", "Pa");
+            VALID_UNITS.put("C", "Coulomb");
+
+            // add more units as needed
+        }
+
+        public static void checkConsistencySymbolDefinition(String symbol, String definition) {
+            String expectedDefinition = VALID_UNITS.get(symbol);
+            if (!definition.contains(expectedDefinition)) {
+                throw new BadRequestException(
+                        "symbol " + symbol + " definition " + definition + " expectedDefinition " + expectedDefinition);
+            }
+        }
+    }
 
     private static final String DESCRIPTION = "description";
     private static final String FRIENDLY_NAME = "friendlyName";
@@ -83,6 +112,20 @@ public class DtoMapperSimple {
         return eNS_URI.equals(provider.getModelPackageUri());
     }
 
+    public static void checkConsistencyObservedProperty(String definition) {
+        // List of allowed or expected definitions for ObservedProperty
+        List<String> allowedDefinitions = List.of(
+                "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Temperature",
+                "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux",
+                "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Humidity"
+        // add other definitions your implementation should support
+        );
+
+        if (!allowedDefinitions.contains(definition)) {
+            throw new RuntimeException("ObservedProperty definition not recognized: " + definition);
+        }
+    }
+
     public static void checkRequireField(ObservedProperty dto) {
         if (dto == null) {
             throw new RuntimeException("ObservedProperty not found in  ObservedProperty");
@@ -93,7 +136,7 @@ public class DtoMapperSimple {
         if (dto.definition() == null) {
             throw new RuntimeException("definition not found in  ObservedProperty");
         }
-
+        // checkConsistencyObservedProperty(dto.definition());
     }
 
     public static void checkRequireField(ExpandedObservation dto) {
@@ -180,6 +223,7 @@ public class DtoMapperSimple {
         if (datastream.observationType() == null) {
             throw new RuntimeException("observationType not found in  Datastream");
         }
+        checkRequireField(datastream.unitOfMeasurement());
 
     }
 
@@ -191,6 +235,7 @@ public class DtoMapperSimple {
         if (datastream.unitOfMeasurement() == null) {
             throw new RuntimeException("unit Of Measure not found in  Datastream");
         }
+        checkRequireField(datastream.unitOfMeasurement());
         if (datastream.observationType() == null) {
             throw new RuntimeException("observationType not found in  Datastream");
         }
@@ -238,6 +283,9 @@ public class DtoMapperSimple {
         if (unit.symbol() == null) {
             throw new RuntimeException("symbol not found in  UnitOfMeasurement");
         }
+        // check consistency for unit of measure
+        // UnitOfMeasureValidator.checkConsistencySymbolDefinition(unit.symbol(),
+        // unit.definition());
 
     }
 
@@ -557,7 +605,9 @@ public class DtoMapperSimple {
 
     public static ExpandedObservation getObservationFromService(ObjectMapper mapper, ServiceSnapshot service) {
         String obsStr = getResourceField(service, "lastObservation", String.class);
-        return parseExpandObservation(mapper, obsStr);
+        if (obsStr != null)
+            return parseExpandObservation(mapper, obsStr);
+        return null;
     }
 
     public static ExpandedObservation parseExpandObservation(ObjectMapper mapper, Object val) {
@@ -591,6 +641,7 @@ public class DtoMapperSimple {
         @SuppressWarnings("unchecked")
         Map<String, Object> metadata = getResourceField(getDatastreamService(provider), "properties", Map.class);
         UnitOfMeasurement unit = toUnitOfMeasure(provider);
+        String observationType = getResourceField(getDatastreamService(provider), "observationType", String.class);
 
         GeoJsonObject observedAreaRead = getResourceField(getAdminService(provider), LOCATION, GeoJsonObject.class);
         Polygon observedArea = getObservedArea(observedAreaRead);
@@ -600,9 +651,8 @@ public class DtoMapperSimple {
         ObservedProperty observedProperty = toObservedProperty(provider, null, null);
         UnitOfMeasurement unitOfMeasurement = toUnitOfMeasure(provider);
 
-        Datastream datastream = new Datastream(selfLink, provider.getName(), name, description,
-                "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
-                metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
+        Datastream datastream = new Datastream(selfLink, provider.getName(), name, description, observationType, unit,
+                observedArea, null, null, metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
 
         DtoMapperSimple.checkRequireField(datastream);
         DtoMapperSimple.checkRequireLink(unit, sensor, observedProperty, unitOfMeasurement, thingId);

@@ -188,7 +188,6 @@ public class ObservationsAccessImpl extends AbstractAccess
 
     @Override
     public Response deleteObservation(ODataId id) {
-
         return getSensorthingsHandler().deleteObservation(id.value());
 
     }

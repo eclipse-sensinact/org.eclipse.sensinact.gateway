@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
 
+import java.net.URI;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +31,7 @@ import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
@@ -62,6 +64,11 @@ public abstract class AbstractDelegate {
         this.providers = providers;
         this.application = application;
         this.requestContext = requestContext;
+    }
+
+    protected URI getCreatedUri(Self createDto) {
+        URI createdUri = URI.create(createDto.selfLink());
+        return createdUri;
     }
 
     protected List<ProviderSnapshot> getLocationProvidersFromThing(String thingId) {
@@ -203,7 +210,6 @@ public abstract class AbstractDelegate {
     private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
         return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
-
 
     private static Optional<ProviderSnapshot> getProviderSnapshot(SensiNactSession session, String id) {
         String idProvider = DtoMapperSimple.extractFirstIdSegment(id);

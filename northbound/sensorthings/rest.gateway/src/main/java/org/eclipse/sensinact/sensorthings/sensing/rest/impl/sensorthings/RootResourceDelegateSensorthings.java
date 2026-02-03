@@ -29,6 +29,7 @@ import java.util.Optional;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -42,6 +43,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
@@ -49,6 +51,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
@@ -196,7 +199,7 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
 
         Datastream createDto = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, snapshot);
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+        URI createdUri = getCreatedUri(createDto);
 
         return Response.created(createdUri).entity(createDto).build();
     }
@@ -205,9 +208,24 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         FeatureOfInterest createDto = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), featuresOfInterest);
 
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+        URI createdUri = getCreatedUri(createDto);
 
         return Response.created(createdUri).entity(createDto).build();
+
+    }
+
+    public Response createObservation(ExpandedObservation observation) {
+        ServiceSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), observation);
+        ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
+        Optional<Observation> createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+                EMPTY, criterion, snapshot.getResource("lastObservation"));
+        if (createDto.isEmpty()) {
+            throw new NotFoundException();
+        }
+        URI createdUri = getCreatedUri(createDto.get());
+
+        return Response.created(createdUri).entity(createDto.get()).build();
 
     }
 
@@ -220,7 +238,7 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, snapshot, criterionThing);
 
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+        URI createdUri = getCreatedUri(createDto);
 
         return Response.created(createdUri).entity(createDto).build();
 
@@ -230,7 +248,7 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         ObservedProperty createDto = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), observedProperty);
 
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+        URI createdUri = getCreatedUri(createDto);
 
         return Response.created(createdUri).entity(createDto).build();
 
@@ -240,7 +258,7 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         Sensor createDto = getExtraDelegate().create(getSession(), getMapper(), uriInfo, requestContext.getMethod(),
                 sensor);
 
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+        URI createdUri = getCreatedUri(createDto);
 
         return Response.created(createdUri).entity(createDto).build();
 
@@ -255,7 +273,7 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         Thing createDto = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
                 snapshot);
 
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+        URI createdUri = getCreatedUri(createDto);
         return Response.created(createdUri).entity(createDto).build();
     }
 

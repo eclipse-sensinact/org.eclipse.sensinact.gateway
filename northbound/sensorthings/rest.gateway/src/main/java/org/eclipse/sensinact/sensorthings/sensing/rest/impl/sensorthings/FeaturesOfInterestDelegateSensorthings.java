@@ -131,9 +131,12 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
     public Response updateFeaturesOfInterest(String id, FeatureOfInterest foi) {
 
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, foi);
-
-        return Response.noContent().build();
+        ServiceSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), id, foi);
+        ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
+        FeatureOfInterest createDto = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot.getProvider());
+        return Response.ok().entity(createDto).build();
     }
 
     public Response patchFeaturesOfInterest(String id, FeatureOfInterest foi) {

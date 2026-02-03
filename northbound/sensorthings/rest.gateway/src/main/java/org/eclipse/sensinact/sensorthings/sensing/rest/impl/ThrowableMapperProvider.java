@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import org.eclipse.sensinact.sensorthings.sensing.dto.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,20 +26,46 @@ public class ThrowableMapperProvider implements ExceptionMapper<Throwable> {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensinactSensorthingsApplication.class);
 
+    private String getErrorCodeFromStatus(int status) {
+        switch (status) {
+        case 400:
+            return "BadRequest";
+        case 404:
+            return "NotFound";
+        case 405:
+            return "MethodNotAllowed";
+        case 409:
+            return "Conflict";
+        case 415:
+            return "UnsupportedMediaType";
+        case 501:
+            return "NotImplemented";
+        default:
+            return "ServerError";
+        }
+    }
+
     @Override
     public Response toResponse(Throwable e) {
+        ErrorResponse error;
+
         if (e instanceof WebApplicationException webEx) {
             // Log at WARN instead of ERROR
-            if (webEx.getResponse().getStatus() < 500) {
+            int status = webEx.getResponse().getStatus();
+            String message = webEx.getMessage();
+            error = new ErrorResponse(getErrorCodeFromStatus(status), message);
+            if (status < 500) {
                 LOG.warn("WebApplicationException caught: message {} status {}", webEx.getMessage(),
                         webEx.getResponse().getStatus());
             } else {
                 LOG.error("WebApplicationException exception while processing request", e);
 
             }
-            return webEx.getResponse(); // preserve original status
+            return Response.status(status).entity(error).build();
         }
         LOG.error("Unhandled exception while processing request", e);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal server error").build();
+
+        error = new ErrorResponse(getErrorCodeFromStatus(500), e.getMessage());
+        return Response.status(500).entity(error).build();
     }
 }

@@ -21,6 +21,7 @@ import org.eclipse.sensinact.core.annotation.dto.Provider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.AbstractExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.DatastreamsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.FeatureOfInterestExtraUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.HistoricalLocationExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.LocationsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ObservationsExtraUseCase;
@@ -28,9 +29,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ObservedPro
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.RefIdUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.SensorsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ThingsExtraUseCase;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.ContextResolver;
@@ -50,15 +48,14 @@ import jakarta.ws.rs.ext.Providers;
 @SuppressWarnings("rawtypes")
 @Provider
 public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
-    private static final Logger LOG = LoggerFactory.getLogger(SensorThingsExtraFeature.class);
 
     @Context
-    Providers providers;
+    public Providers providers;
 
     private final List<Class<? extends AbstractExtraUseCase<?, ?>>> knownExtras = List.of(DatastreamsExtraUseCase.class,
             FeatureOfInterestExtraUseCase.class, LocationsExtraUseCase.class, ObservationsExtraUseCase.class,
             ObservedPropertiesExtraUseCase.class, SensorsExtraUseCase.class, ThingsExtraUseCase.class,
-            RefIdUseCase.class);
+            HistoricalLocationExtraUseCase.class, RefIdUseCase.class);
 
     private final Map<Class<? extends AbstractExtraUseCase<?, ?>>, IExtraUseCase<?, ?>> useCases = new ConcurrentHashMap<>();
 

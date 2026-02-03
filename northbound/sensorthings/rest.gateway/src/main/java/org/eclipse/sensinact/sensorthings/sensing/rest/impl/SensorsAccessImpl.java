@@ -66,14 +66,16 @@ public class SensorsAccessImpl extends AbstractAccess implements SensorsDelete, 
 
     @Override
     public Sensor getSensor(ODataId id) {
-
-        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
-        ProviderSnapshot provider = validateAndGetProvider(providerId);
-        if (!isSensorthingModel(provider)) {
-            return getSensinactHandler().getSensor(id.value());
+        if (getCacheSensor().getDto(id.value()) != null) {
+            return getCacheSensor().getDto(id.value());
         } else {
-            return getSensorthingsHandler().getSensor(id.value());
-
+            String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+            ProviderSnapshot provider = validateAndGetProvider(providerId);
+            if (!isSensorthingModel(provider)) {
+                return getSensinactHandler().getSensor(id.value());
+            } else {
+                return getSensorthingsHandler().getSensor(id.value());
+            }
         }
     }
 

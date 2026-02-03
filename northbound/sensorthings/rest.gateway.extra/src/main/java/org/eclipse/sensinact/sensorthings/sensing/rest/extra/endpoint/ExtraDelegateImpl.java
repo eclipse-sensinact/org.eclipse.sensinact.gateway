@@ -19,10 +19,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase.ExtraUseCaseRequest;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase.ExtraUseCaseResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.HttpMethod;
@@ -48,12 +44,9 @@ public class ExtraDelegateImpl implements IExtraDelegate {
         this.providers = providers;
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(SensorThingsExtraFeature.class);
-
     @SuppressWarnings("unchecked")
     public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             D dto, String parentId) {
-        logCreatePayload(mapper, dto, parentId);
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, method, dto, parentId);
         ExtraUseCaseResponse<S> result = useCase.create(request);
@@ -65,16 +58,6 @@ public class ExtraDelegateImpl implements IExtraDelegate {
 
     }
 
-    private <D extends Id> void logCreatePayload(ObjectMapper mapper, D dto, String parentId) {
-        try {
-            LOG.info(String.format("Create - Class=%s, id=%s,  model=%s ", dto.getClass().getSimpleName(), parentId,
-                    mapper.writeValueAsString(dto)));
-        } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
     public <D extends Id, S> S create(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             D dto) {
         return create(session, mapper, uriInfo, method, dto, null);
@@ -83,7 +66,6 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     @SuppressWarnings("unchecked")
     public <D extends Id, S> S delete(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             String id, Class<D> clazz) {
-        logDeletePayload(id, clazz);
 
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(clazz);
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, method, id);
@@ -93,10 +75,6 @@ public class ExtraDelegateImpl implements IExtraDelegate {
             throw new UnsupportedOperationException(result.message(), result.e());
         }
         return result.snapshot();
-    }
-
-    private <D extends Id> void logDeletePayload(String id, Class<D> clazz) {
-        LOG.info(String.format("Delete - Class=%s, id=%s,   ", clazz.getSimpleName(), id));
     }
 
     @SuppressWarnings("unchecked")
@@ -109,7 +87,6 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     @SuppressWarnings("unchecked")
     public <D extends Id, S> S update(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
             String id, D dto, String parentId) {
-        logUpdatePayload(mapper, id, dto);
 
         IExtraUseCase<D, S> useCase = (IExtraUseCase<D, S>) getExtraUseCase(dto.getClass());
         ExtraUseCaseRequest<D> request = new ExtraUseCaseRequest<D>(session, mapper, uriInfo, method, id, dto,
@@ -120,16 +97,6 @@ public class ExtraDelegateImpl implements IExtraDelegate {
             throw new UnsupportedOperationException(result.message(), result.e());
         }
         return result.snapshot();
-    }
-
-    private <D extends Id> void logUpdatePayload(ObjectMapper mapper, String id, D dto) {
-        try {
-            LOG.info(String.format("Update - Class=%s, id=%s,   ", dto.getClass().getSimpleName(), id,
-                    mapper.writeValueAsBytes(dto)));
-        } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -143,7 +110,6 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     @Override
     public <S> S updateRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method, RefId dto,
             String parentId, Class<? extends Id> clazzModel, Class<? extends Id> clazzRef) {
-        logUpdateRefPayload(mapper, dto, clazzModel, clazzRef);
 
         IExtraUseCase<RefId, S> useCase = (IExtraUseCase<RefId, S>) getExtraUseCase(dto.getClass());
         ExtraUseCaseRequest<RefId> request = new ExtraUseCaseRequest<RefId>(session, mapper, uriInfo, method, dto,
@@ -156,12 +122,6 @@ public class ExtraDelegateImpl implements IExtraDelegate {
             throw new UnsupportedOperationException(result.message(), result.e());
         }
         return result.snapshot();
-    }
-
-    private void logUpdateRefPayload(ObjectMapper mapper, RefId dto, Class<? extends Id> clazzModel,
-            Class<? extends Id> clazzRef) {
-        LOG.info(String.format("Create - Class=%s, model=%s, modeRef=%s ", dto.id(), clazzModel.getSimpleName(),
-                clazzRef.getSimpleName()));
     }
 
     @SuppressWarnings("unchecked")
@@ -201,7 +161,6 @@ public class ExtraDelegateImpl implements IExtraDelegate {
     @Override
     public <S> S deleteRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String id, String parentId,
             Class<? extends Id> clazzUseCase, Class<? extends Id> clazzRef) {
-        logDeleteRefPayload(mapper, id, clazzUseCase, clazzRef);
         IExtraUseCase<RefId, S> useCase = (IExtraUseCase<RefId, S>) getExtraUseCase(RefId.class);
         ExtraUseCaseRequest<RefId> request = new ExtraUseCaseRequest<RefId>(session, mapper, uriInfo, HttpMethod.DELETE,
                 id, parentId, clazzUseCase, clazzRef);
@@ -213,12 +172,6 @@ public class ExtraDelegateImpl implements IExtraDelegate {
             throw new UnsupportedOperationException(result.message(), result.e());
         }
         return result.snapshot();
-    }
-
-    private void logDeleteRefPayload(ObjectMapper mapper, String id, Class<? extends Id> clazzUseCase,
-            Class<? extends Id> clazzRef) {
-        LOG.info(String.format("Create - Class=%s, model=%s, modeRef=%s ", id, clazzUseCase.getSimpleName(),
-                clazzRef.getSimpleName()));
     }
 
     public <S> S deleteRef(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String parentId,

@@ -18,9 +18,9 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -41,7 +41,7 @@ public abstract class AbstractExtraUseCaseDtoDelete<M extends Id, S> extends Abs
         try {
             DtoMapperSimple.checkRequireField(ds);
         } catch (Exception e) {
-            throw new WebApplicationException(409);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -49,7 +49,7 @@ public abstract class AbstractExtraUseCaseDtoDelete<M extends Id, S> extends Abs
         try {
             DtoMapperSimple.checkRequireLink(obs);
         } catch (Exception e) {
-            throw new WebApplicationException(409);
+            throw new BadRequestException(e.getMessage());
         }
     }
 

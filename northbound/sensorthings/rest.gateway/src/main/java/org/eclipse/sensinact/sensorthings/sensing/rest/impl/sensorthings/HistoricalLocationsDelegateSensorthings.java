@@ -48,10 +48,10 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     public HistoricalLocationsDelegateSensorthings(UriInfo uriInfo, Providers providers, Application application,
             ContainerRequestContext requestContext) {
         super(uriInfo, providers, application, requestContext);
-        // TODO Auto-generated constructor stub
     }
 
     public HistoricalLocation getHistoricalLocation(String id) {
+
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
@@ -100,6 +100,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public ResultList<Thing> getHistoricalLocationLocationThings(String id, String id2) {
+
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
@@ -110,6 +111,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public ResultList<HistoricalLocation> getHistoricalLocationLocationHistoricalLocations(String id, String id2) {
+
         String thingId = DtoMapperSimple.extractFirstIdSegment(id);
 
         getTimestampFromId(id);
@@ -132,6 +134,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Thing getHistoricalLocationThing(String id) {
+
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
@@ -151,6 +154,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public ResultList<Datastream> getHistoricalLocationThingDatastreams(String id) {
+
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
@@ -159,6 +163,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(String id) {
+
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         getTimestampFromId(id);
 
@@ -178,11 +183,6 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
 
     public ResultList<Location> getHistoricalLocationThingLocations(String id) {
         return getHistoricalLocationLocations(id);
-    }
-
-    public Response deleteHistoricalLocation(String id) {
-        // we don't support delete of historical location
-        return Response.status(409).build();
     }
 
     public FeatureOfInterest getHistoricalLocationThingDatastreamObservationFeatureOfInterest(String value) {
@@ -207,6 +207,10 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     public Sensor getHistoricalLocationThingDatastreamSensor(String value) {
         ProviderSnapshot provider = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(value));
         return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), null, provider);
+    }
+
+    public Response deleteHistoricalLocation(String value) {
+        return getExtraDelegate().delete(getSession(), getMapper(), uriInfo, value, HistoricalLocation.class);
     }
 
 }

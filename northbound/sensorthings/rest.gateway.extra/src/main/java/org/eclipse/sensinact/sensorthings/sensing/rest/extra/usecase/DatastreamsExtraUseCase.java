@@ -117,11 +117,18 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         addDatastreamIdLinkToLinkThing(request, datastreamId, providerThing, listUpdates);
 
         if (datastream.observations() != null && datastream.observations().size() > 0) {
-            listUpdates.addAll(datastream.observations().stream()
-                    .map(obs -> DtoToModelMapper.toDatastreamUpdate(request.mapper(), datastreamId, observedArea,
-                            thingId, datastream, sensor, observedProperty, unit, obs,
-                            getCachedFeatureOfInterest(obs.featureOfInterest())))
-                    .toList());
+            throw new BadRequestException("observations list should not be present");
+//            listUpdates.addAll(datastream.observations().stream().map(obs -> {
+//                FeatureOfInterest foi = getCachedFeatureOfInterest(obs.featureOfInterest());
+//                if (foi == null) {
+//                    final GeoJsonObject feature = observedArea != null ? observedArea : new Point(0, 0);
+//
+//                    foi = new FeatureOfInterest(null, DtoToModelMapper.getNewId(), "default",
+//                            "default feature of interest", "application/vnd.geo+json", feature, null);
+//                }
+//                return DtoToModelMapper.toDatastreamUpdate(request.mapper(), datastreamId, observedArea, thingId,
+//                        datastream, sensor, observedProperty, unit, obs, foi);
+//            }).toList());
         } else {
             listUpdates.add(DtoToModelMapper.toDatastreamUpdate(request.mapper(), datastreamId, observedArea, thingId,
                     datastream, sensor, observedProperty, unit, null, null));
@@ -362,6 +369,11 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         // delete datastream
         // TODO Authorization
         String thingId = getThingId(request);
+        Sensor sensor = DtoMapperSimple.toSensor(providerUseCase.read(request.session(), request.id()), null, null);
+        ObservedProperty observedProperty = DtoMapperSimple
+                .toObservedProperty(providerUseCase.read(request.session(), request.id()), null, null);
+        sensorCache.addDto((String) sensor.id(), sensor);
+        observedPropertyCache.addDto((String) observedProperty.id(), observedProperty);
         ResourceCommand<TimedValue<List<String>>> parentCommand = new ResourceCommand<TimedValue<List<String>>>(thingId,
                 DtoMapperSimple.SERVICE_THING, "datastreamIds") {
             @Override
@@ -376,6 +388,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
                     SensinactModelManager modelMgr, PromiseFactory pf) {
 
                 SensinactProvider sp = twin.getProvider(request.id());
+
                 if (sp != null) {
                     sp.delete();
                 }

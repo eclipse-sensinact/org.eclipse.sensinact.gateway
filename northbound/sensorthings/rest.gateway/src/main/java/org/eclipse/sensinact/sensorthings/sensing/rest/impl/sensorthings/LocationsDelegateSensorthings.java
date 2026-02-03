@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -175,9 +176,14 @@ public class LocationsDelegateSensorthings extends AbstractDelegate {
 
     public Response updateLocation(String id, ExpandedLocation location) {
 
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, location);
+        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), id, location);
+        ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
 
-        return Response.noContent().build();
+        Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                criterion, snapshot);
+
+        return Response.ok().entity(createDto).build();
     }
 
     public Response patchLocation(String id, ExpandedLocation location) {
@@ -189,7 +195,7 @@ public class LocationsDelegateSensorthings extends AbstractDelegate {
 
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedLocation.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteThingsRef(String id) {
@@ -197,7 +203,7 @@ public class LocationsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedLocation.class,
                 ExpandedThing.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteThingRef(String id, String id2) {
@@ -205,7 +211,7 @@ public class LocationsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id2, id, ExpandedLocation.class,
                 ExpandedThing.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Sensor getLocationThingDatastreamSensor(String id) {

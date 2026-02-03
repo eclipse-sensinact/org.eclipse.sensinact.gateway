@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.access;
 
+import java.util.List;
+
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 
 /**
@@ -43,6 +45,13 @@ public interface IDtoMemoryCache<M extends Id> {
      * @return
      */
     public M getDto(String id);
+
+    /**
+     * return list of dto cached
+     *
+     * @return
+     */
+    public List<M> values();
 
     /**
      * get type of DTO to store in cache

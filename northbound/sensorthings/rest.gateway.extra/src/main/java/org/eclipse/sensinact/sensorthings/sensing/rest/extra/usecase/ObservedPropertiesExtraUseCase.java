@@ -14,6 +14,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
@@ -23,6 +25,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoT
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Providers;
@@ -45,9 +48,11 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Obse
     private ObservedProperty updateInMemoryObservedProperty(ExtraUseCaseRequest<ObservedProperty> request,
             ObservedProperty property) {
         ObservedProperty updateProp = request.model();
+        String selfLink = getLink(request.uriInfo(), DtoMapperSimple.VERSION, "/ObservedProperties({id})",
+                request.id());
+        String datastreamLink = getLink(request.uriInfo(), selfLink, "Datastreams");
         String observedPropertyLink = getLink(request.uriInfo(), DtoMapperSimple.VERSION, "/ObservedProperties({id})",
                 request.id());
-        String datastreamLink = getLink(request.uriInfo(), observedPropertyLink, "Datastreams");
         ObservedProperty createdProp = new ObservedProperty(observedPropertyLink, request.id(),
                 updateProp.name() != null ? updateProp.name() : property.name(),
                 updateProp.description() != null ? updateProp.description() : property.description(),
@@ -61,9 +66,13 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Obse
         ObservedProperty observedProperty = request.model();
         checkRequireField(request);
         String observedPropertyId = request.id();
-        ObservedProperty createExpandedProperty = new ObservedProperty(null, observedPropertyId,
+        String selfLink = getLink(request.uriInfo(), DtoMapperSimple.VERSION, "/ObservedProperties({id})",
+                observedPropertyId);
+        String datastreamLink = getLink(request.uriInfo(), selfLink, "Datastreams");
+
+        ObservedProperty createExpandedProperty = new ObservedProperty(selfLink, observedPropertyId,
                 observedProperty.name(), observedProperty.description(), observedProperty.definition(),
-                observedProperty.properties(), null);
+                observedProperty.properties(), datastreamLink);
         cacheObservedProperty.addDto(observedPropertyId, createExpandedProperty);
 
         return new ExtraUseCaseResponse<Object>(observedPropertyId, createExpandedProperty);
@@ -76,7 +85,12 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Obse
             return new ExtraUseCaseResponse<Object>(true, "observed property deleted");
 
         } else {
-            throw new WebApplicationException("ObservedProperty is mandatory for Datastream", Response.Status.CONFLICT);
+            String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+            ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
+            if (provider == null) {
+                throw new NotFoundException();
+            }
+            throw new WebApplicationException("Sensor is mandatory for Datastream", Response.Status.CONFLICT);
         }
     }
 

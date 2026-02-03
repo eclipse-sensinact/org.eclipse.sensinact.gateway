@@ -46,6 +46,7 @@ import org.osgi.annotation.versioning.ProviderType;
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorProperties <em>Sensor Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyProperties <em>Observed Property Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getLastObservation <em>Last Observation</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationType <em>Observation Type</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getThingId <em>Thing Id</em>}</li>
  * </ul>
  *
@@ -428,6 +429,28 @@ public interface DataStreamService extends Service {
 	 * @generated
 	 */
 	void setLastObservation(String value);
+
+	/**
+	 * Returns the value of the '<em><b>Observation Type</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Observation Type</em>' attribute.
+	 * @see #setObservationType(String)
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservationType()
+	 * @model
+	 * @generated
+	 */
+	String getObservationType();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationType <em>Observation Type</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Observation Type</em>' attribute.
+	 * @see #getObservationType()
+	 * @generated
+	 */
+	void setObservationType(String value);
 
 	/**
 	 * Returns the value of the '<em><b>Thing Id</b></em>' attribute.

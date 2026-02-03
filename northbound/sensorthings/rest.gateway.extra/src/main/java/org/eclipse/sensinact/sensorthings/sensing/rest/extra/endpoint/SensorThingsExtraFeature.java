@@ -47,7 +47,6 @@ public class SensorThingsExtraFeature implements Feature {
         context.register(new GatewayThreadProvider(this.gatewayThread));
         context.register(ExtraDelegateProvider.class);
         context.register(UseCaseProvider.class);
-        context.register(DtoMemoryCacheProvider.class);
         return true;
     }
 

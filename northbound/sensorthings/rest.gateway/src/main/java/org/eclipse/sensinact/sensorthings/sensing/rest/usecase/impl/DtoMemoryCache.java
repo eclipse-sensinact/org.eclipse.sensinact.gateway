@@ -10,8 +10,9 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
+package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,5 +45,10 @@ public class DtoMemoryCache<M extends Id> implements IDtoMemoryCache<M> {
     @Override
     public Class<M> getType() {
         return type;
+    }
+
+    @Override
+    public List<M> values() {
+        return dtoById.values().stream().toList();
     }
 }

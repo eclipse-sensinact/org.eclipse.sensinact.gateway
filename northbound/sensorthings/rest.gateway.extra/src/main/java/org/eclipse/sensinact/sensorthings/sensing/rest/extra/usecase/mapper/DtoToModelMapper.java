@@ -21,6 +21,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -324,6 +325,7 @@ public class DtoToModelMapper {
         Map<String, Object> observedPropertyProperties = observedProperty != null ? observedProperty.properties()
                 : null;
 
+        String observationType = ds != null ? ds.observationType() : null;
         // --- Unit ---
         String unitName = unit != null ? unit.name() : null;
         String unitSymbol = unit != null ? unit.symbol() : null;
@@ -369,10 +371,11 @@ public class DtoToModelMapper {
         }
         String obsStr = serializeObservation(mapper, obs);
         // --- Build DatastreamUpdate ---
-        DatastreamUpdate datastreamUpdate = new DatastreamUpdate(providerId, providerId, name, description, timestamp,
-                observedAreaToUpdate, thingId, sensorId, sensorName, sensorDescription, sensorEncodingType,
-                sensorMetadata, sensorProperties, observedPropertyId, observedPropertyName, observedPropertyDescription,
-                observedPropertyDefinition, observedPropertyProperties, unitName, unitSymbol, unitDefinition, obsStr);
+        DatastreamUpdate datastreamUpdate = new DatastreamUpdate(providerId, providerId, name, description,
+                observationType, timestamp, observedAreaToUpdate, thingId, sensorId, sensorName, sensorDescription,
+                sensorEncodingType, sensorMetadata, sensorProperties, observedPropertyId, observedPropertyName,
+                observedPropertyDescription, observedPropertyDefinition, observedPropertyProperties, unitName,
+                unitSymbol, unitDefinition, obsStr);
 
         return datastreamUpdate;
     }
@@ -526,7 +529,9 @@ public class DtoToModelMapper {
                 existingLocationIds.add(locationId);
             }
 
-            geoLocationAggregate = getAggregateLocation(request, existingLocationIds);
+            List<Location> newLocations = thing.locations().stream().map(l -> new Location(null, l.id(), l.name(),
+                    l.description(), l.encodingType(), l.location(), null, null)).toList();
+            geoLocationAggregate = getAggregateLocation(request, existingLocationIds, newLocations);
         }
         if (listDs != null) {
             for (ExpandedDataStream ds : listDs) {
@@ -569,11 +574,13 @@ public class DtoToModelMapper {
      * @param existingLocationIds
      * @return
      */
-    public static GeoJsonObject getAggregateLocation(ExtraUseCaseRequest<?> request, List<String> existingLocationIds) {
-        return aggregate(existingLocationIds.stream()
+    public static GeoJsonObject getAggregateLocation(ExtraUseCaseRequest<?> request, List<String> existingLocationIds,
+            List<Location> locationsInLine) {
+        Stream<Location> existingLocations = existingLocationIds.stream()
                 .map(idLocation -> UtilDto.getProviderSnapshot(request.session(), idLocation))
                 .filter(Optional::isPresent).map(Optional::get)
-                .map(p -> DtoMapperSimple.toLocation(request.mapper(), p, null, null, null)).toList());
+                .map(p -> DtoMapperSimple.toLocation(request.mapper(), p, null, null, null));
+        return aggregate(Stream.concat(existingLocations, locationsInLine.stream()).toList());
     }
 
     /**

@@ -49,35 +49,40 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
     @Override
     public void filter(ContainerRequestContext request) throws IOException {
-        if (LOG.isTraceEnabled()) {
-
-            LOG.trace("{} - Method  : {}", Instant.now().toString(), request.getMethod());
-            LOG.trace("{} - URI     : {}", Instant.now().toString(), request.getUriInfo().getRequestUri());
-
-            if (request.hasEntity()) {
-                String body = readStream(request.getEntityStream());
-                LOG.trace("{} - Body : {}", Instant.now().toString(), body);
-
-                request.setEntityStream(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
-            }
+        try {
+            // Thread.sleep(1000);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+//        if (LOG.isinfoEnabled()) {
+
+        LOG.info("{} - Query     {} : {}", Instant.now().toString(), request.getMethod(),
+                request.getUriInfo().getRequestUri());
+
+        if (request.hasEntity()) {
+            String body = readStream(request.getEntityStream());
+            LOG.info("{} - Body : {}", Instant.now().toString(), body);
+
+            request.setEntityStream(new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+        }
+//        }
     }
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("{} - Status  : {}", Instant.now().toString(), response.getStatus());
+//        if (LOG.isinfoEnabled()) {
+        LOG.info("{} - Status  : {}", Instant.now().toString(), response.getStatus());
 
-            if (response.getEntity() != null) {
-                try {
-                    String json = getMapper().writeValueAsString(response.getEntity());
-                    LOG.trace("{} - Body    : {}", Instant.now().toString(), json);
-                } catch (Exception e) {
-                    LOG.trace("Could not serialize response entity to JSON", e);
-                    LOG.trace("{} - Body    : {}", Instant.now().toString(), response.getEntity());
-                }
+        if (response.getEntity() != null) {
+            try {
+                String json = getMapper().writeValueAsString(response.getEntity());
+                LOG.info("{} - Body    {} : {}", Instant.now().toString(), response.getStatus(), json);
+            } catch (Exception e) {
+                LOG.info("Could not serialize response entity to JSON", e);
+                LOG.info("{} - Body    {} : {}", Instant.now().toString(), response.getStatus(), response.getEntity());
             }
         }
+//        }
     }
 
     private String readStream(InputStream is) throws IOException {

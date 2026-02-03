@@ -210,8 +210,7 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
         if (createDto.isEmpty()) {
             throw new BadRequestException("fail to create observation");
         }
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.get().id())).build();
-
+        URI createdUri = getCreatedUri(createDto.get());
         return Response.created(createdUri).entity(createDto).build();
     }
 
@@ -220,21 +219,32 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), observation, id,
                 ExpandedDataStream.class, ExpandedObservation.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response updateDatastreams(String id, ExpandedDataStream dataStream) {
 
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, dataStream);
+        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), id, dataStream);
+        ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
 
-        return Response.noContent().build();
+        Datastream createDto = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                criterion, snapshot);
+
+        return Response.ok().entity(createDto).build();
     }
 
     public Response updateDatastreamsObservation(String id, String id2, Observation observation) {
 
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id2, observation, id);
-
-        return Response.noContent().build();
+        ServiceSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), id2, observation, id);
+        ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
+        Optional<Observation> createDto = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot.getResource("lastObservation"));
+        if (createDto.isEmpty()) {
+            throw new BadRequestException("fail to create observation");
+        }
+        return Response.ok().entity(createDto).build();
     }
 
     public Response updateDatastreamThingRef(String id, RefId thing) {
@@ -242,7 +252,7 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), thing, id,
                 ExpandedDataStream.class, ExpandedThing.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response updateDatastreamSensorRef(String id, RefId sensor) {
@@ -250,7 +260,7 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), sensor, id,
                 ExpandedDataStream.class, Sensor.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response updateDatastreamObservedPropertyRef(String id, RefId observedProperty) {
@@ -258,7 +268,7 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), observedProperty,
                 id, ExpandedDataStream.class, ObservedProperty.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response patchDatastreams(String id, ExpandedDataStream dataStream) {
@@ -275,14 +285,14 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
 
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteDatastreamSensorRef(String id) {
 
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class, Sensor.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteDatastreamObservedPropertyRef(String id) {
@@ -290,7 +300,7 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedDataStream.class,
                 ObservedProperty.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteDatastreamObservationsRef(String id) {

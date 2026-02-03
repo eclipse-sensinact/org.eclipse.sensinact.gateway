@@ -14,14 +14,18 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Providers;
@@ -34,10 +38,13 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<Sensor, Object>
 
     private final IDtoMemoryCache<Sensor> cacheSensor;
 
+    private final IAccessProviderUseCase providerUseCase;
+
     @SuppressWarnings("unchecked")
     public SensorsExtraUseCase(Providers providers) {
         super(providers);
         cacheSensor = resolve(providers, IDtoMemoryCache.class, Sensor.class);
+        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
     }
 
     public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<Sensor> request) {
@@ -60,6 +67,12 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<Sensor, Object>
             return new ExtraUseCaseResponse<Object>(true, "sensor deleted");
 
         } else {
+            // check if exists else return 404
+            String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+            ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
+            if (provider == null) {
+                throw new NotFoundException();
+            }
             throw new WebApplicationException("Sensor is mandatory for Datastream", Response.Status.CONFLICT);
         }
 

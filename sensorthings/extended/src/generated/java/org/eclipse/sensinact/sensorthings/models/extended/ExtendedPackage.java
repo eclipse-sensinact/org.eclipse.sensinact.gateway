@@ -403,13 +403,22 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	int DATA_STREAM_SERVICE__LAST_OBSERVATION = ProviderPackage.SERVICE_FEATURE_COUNT + 16;
 
 	/**
+	 * The feature id for the '<em><b>Observation Type</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int DATA_STREAM_SERVICE__OBSERVATION_TYPE = ProviderPackage.SERVICE_FEATURE_COUNT + 17;
+
+	/**
 	 * The feature id for the '<em><b>Thing Id</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int DATA_STREAM_SERVICE__THING_ID = ProviderPackage.SERVICE_FEATURE_COUNT + 17;
+	int DATA_STREAM_SERVICE__THING_ID = ProviderPackage.SERVICE_FEATURE_COUNT + 18;
 
 	/**
 	 * The number of structural features of the '<em>Data Stream Service</em>' class.
@@ -418,7 +427,7 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	 * @generated
 	 * @ordered
 	 */
-	int DATA_STREAM_SERVICE_FEATURE_COUNT = ProviderPackage.SERVICE_FEATURE_COUNT + 18;
+	int DATA_STREAM_SERVICE_FEATURE_COUNT = ProviderPackage.SERVICE_FEATURE_COUNT + 19;
 
 	/**
 	 * The operation id for the '<em>EIs Set</em>' operation.
@@ -954,6 +963,17 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	EAttribute getDataStreamService_LastObservation();
 
 	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationType <em>Observation Type</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Observation Type</em>'.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationType()
+	 * @see #getDataStreamService()
+	 * @generated
+	 */
+	EAttribute getDataStreamService_ObservationType();
+
+	/**
 	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getThingId <em>Thing Id</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1272,6 +1292,14 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 		 * @generated
 		 */
 		EAttribute DATA_STREAM_SERVICE__LAST_OBSERVATION = eINSTANCE.getDataStreamService_LastObservation();
+
+		/**
+		 * The meta object literal for the '<em><b>Observation Type</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute DATA_STREAM_SERVICE__OBSERVATION_TYPE = eINSTANCE.getDataStreamService_ObservationType();
 
 		/**
 		 * The meta object literal for the '<em><b>Thing Id</b></em>' attribute feature.

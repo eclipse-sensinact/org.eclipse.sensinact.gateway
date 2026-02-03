@@ -68,6 +68,7 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
         }
 
         return o;
+
     }
 
     public ResultList<Datastream> getObservedPropertyDatastreams(String id) {
@@ -138,9 +139,14 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
 
     public Response updateObservedProperties(String id, ObservedProperty observedProperty) {
 
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, observedProperty);
+        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), id, observedProperty);
+        ICriterion criterion = parseFilter(EFilterContext.OBSERVED_PROPERTIES);
 
-        return Response.noContent().build();
+        ObservedProperty createDto = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot);
+
+        return Response.ok().entity(createDto).build();
     }
 
     public Response patchObservedProperties(String id, ObservedProperty observedProperty) {
@@ -152,7 +158,7 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
 
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ObservedProperty.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public ResultList<Datastream> getObservedPropertyDatastreamThingDatastreams(String value, String value2) {

@@ -12,6 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -35,6 +38,7 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
         implements HistoricalLocationsAccess, HistoricalLocationsDelete {
     private HistoricalLocationsDelegateSensinact sensinactHandler;
     private HistoricalLocationsDelegateSensorthings sensorthigHandler;
+    private static List<String> deletedHistoricalLocation = new ArrayList<String>(); // workaround
 
     public HistoricalLocationsDelegateSensinact getSensinactHandler() {
         if (sensinactHandler == null)
@@ -50,12 +54,6 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
                     requestContext);
         return sensorthigHandler;
 
-    }
-
-    @Override
-    public Response deleteHistoricalLocation(ODataId id) {
-
-        return getSensorthingsHandler().deleteHistoricalLocation(id.value());
     }
 
     @Override
@@ -228,6 +226,12 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
             return getSensorthingsHandler().getHistoricalLocationThingDatastreamObservedProperty(id3.value());
 
         }
+    }
+
+    @Override
+    public Response deleteHistoricalLocation(ODataId id) {
+        getSensorthingsHandler().deleteHistoricalLocation(id.value());
+        return Response.ok().build();
     }
 
 }

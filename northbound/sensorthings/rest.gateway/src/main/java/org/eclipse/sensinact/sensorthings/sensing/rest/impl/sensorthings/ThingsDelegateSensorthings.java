@@ -291,7 +291,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         Datastream createDto = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, snapshot);
 
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+        URI createdUri = getCreatedUri(createDto);
 
         return Response.created(createdUri).entity(createDto).build();
 
@@ -306,7 +306,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         Location createDto = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 criterion, snapshot);
 
-        URI createdUri = uriInfo.getAbsolutePathBuilder().path(String.valueOf(createDto.id())).build();
+        URI createdUri = getCreatedUri(createDto);
 
         return Response.created(createdUri).entity(createDto).build();
 
@@ -314,23 +314,33 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
 
     public Response updateDatastream(String id, String id2, ExpandedDataStream datastream) {
 
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id2, datastream, id);
+        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), id2, datastream, id);
+        ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
 
-        return Response.noContent().build();
+        Datastream createDto = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                criterion, snapshot);
+
+        return Response.ok().entity(createDto).build();
     }
 
     public Response updateLocation(String id, String id2, ExpandedLocation location) {
 
         getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id2, location, id);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response updateThing(String id, ExpandedThing thing) {
 
-        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, thing);
+        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), id, thing);
+        ICriterion criterion = parseFilter(EFilterContext.THINGS);
 
-        return Response.noContent().build();
+        Thing createDto = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
+                snapshot);
+
+        return Response.ok().entity(createDto).build();
     }
 
     public Response updateLocationRef(String id, RefId location) {
@@ -338,7 +348,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), location, id,
                 ExpandedThing.class, ExpandedLocation.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response updateDatastreamRef(String id, RefId datastream) {
@@ -347,7 +357,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), thingId,
                 (String) datastream.id(), ExpandedDataStream.class, ExpandedThing.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response patchDatastream(String id, String id2, ExpandedDataStream datastream) {
@@ -369,7 +379,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
 
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedThing.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteDatastreamRef(String id, String id2) {
@@ -377,7 +387,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, id2, ExpandedThing.class,
                 ExpandedDataStream.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteLocationRef(String id, String id2) {
@@ -385,7 +395,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, id2, ExpandedThing.class,
                 ExpandedLocation.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteLocationsRef(String id) {
@@ -393,7 +403,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedThing.class,
                 ExpandedLocation.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
 }

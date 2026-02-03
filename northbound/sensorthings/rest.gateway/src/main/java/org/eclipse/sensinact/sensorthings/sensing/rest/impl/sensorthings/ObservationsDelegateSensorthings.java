@@ -98,7 +98,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
                     criterion, resourceSnapshot);
         }
 
-        if (result.isEmpty()) {
+        if (result == null || result.isEmpty()) {
             throw new NotFoundException();
         }
         return result.get();
@@ -194,7 +194,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), datastream, id,
                 ExpandedObservation.class, ExpandedDataStream.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response updateObservationFeatureOfInterestRef(String id, RefId foi) {
@@ -202,14 +202,14 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), foi, id,
                 ExpandedObservation.class, FeatureOfInterest.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteObservation(String id) {
 
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedObservation.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteObservationFeatureOfInterest(String id) {
@@ -217,7 +217,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedObservation.class,
                 FeatureOfInterest.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public ResultList<Datastream> getObservationDatastreamThingDataastreams(String id) {

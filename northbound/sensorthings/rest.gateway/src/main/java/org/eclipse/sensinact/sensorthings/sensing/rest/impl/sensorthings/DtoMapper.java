@@ -66,7 +66,8 @@ public class DtoMapper {
         if (id == null) {
             id = "null";
         }
-        String link = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).resolveTemplate("id", id).build().toString();
+        String link = uriInfo.getBaseUriBuilder().uri(baseUri).path(path).resolveTemplate("id", "\"" + id + "\"")
+                .build().toString();
         return link;
     }
 
@@ -435,6 +436,10 @@ public class DtoMapper {
             }
         }
         final Instant time = t.map(TimedValue::getTimestamp).orElse(Instant.EPOCH);
+        final Object location = t.map(TimedValue::getValue).orElse(null);
+        if (location == null) {
+            return Optional.empty();
+        }
         String id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
 
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("HistoricalLocations({id})")

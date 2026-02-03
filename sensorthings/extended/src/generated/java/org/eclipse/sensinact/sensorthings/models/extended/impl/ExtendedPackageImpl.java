@@ -381,8 +381,18 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 	 * @generated
 	 */
 	@Override
-	public EAttribute getDataStreamService_ThingId() {
+	public EAttribute getDataStreamService_ObservationType() {
 		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(17);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public EAttribute getDataStreamService_ThingId() {
+		return (EAttribute)dataStreamServiceEClass.getEStructuralFeatures().get(18);
 	}
 
 	/**
@@ -529,6 +539,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__SENSOR_PROPERTIES);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVED_PROPERTY_PROPERTIES);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__LAST_OBSERVATION);
+		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__OBSERVATION_TYPE);
 		createEAttribute(dataStreamServiceEClass, DATA_STREAM_SERVICE__THING_ID);
 
 		sensorThingServiceEClass = createEClass(SENSOR_THING_SERVICE);
@@ -618,6 +629,7 @@ public class ExtendedPackageImpl extends EPackageImpl implements ExtendedPackage
 		g1.getETypeArguments().add(g2);
 		initEAttribute(getDataStreamService_ObservedPropertyProperties(), g1, "observedPropertyProperties", null, 0, 1, DataStreamService.class, IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getDataStreamService_LastObservation(), ecorePackage.getEString(), "lastObservation", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+		initEAttribute(getDataStreamService_ObservationType(), ecorePackage.getEString(), "observationType", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 		initEAttribute(getDataStreamService_ThingId(), ecorePackage.getEString(), "thingId", null, 0, 1, DataStreamService.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
 		initEClass(sensorThingServiceEClass, SensorThingService.class, "SensorThingService", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);

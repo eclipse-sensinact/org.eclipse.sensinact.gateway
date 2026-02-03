@@ -67,7 +67,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
 
         }
 
-        ServiceSnapshot service = serviceUseCase.read(request.session(), request.parentId(), "datastream");
+        ServiceSnapshot service = serviceUseCase.read(request.session(), getProviderId(request), "datastream");
         if (service != null) {
             removeFeatureOfInterest(request.model());
             return new ExtraUseCaseResponse<ServiceSnapshot>(observationId, service);
@@ -98,15 +98,21 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
             foi = new FeatureOfInterest(null, DtoToModelMapper.getNewId(), "default_foi", "default Foi",
                     "application/vnd.geo+json", new Point(0, 0), null);
         }
-        String id = request.parentId() != null ? request.parentId() : request.id();
+        String id = getProviderId(request);
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         String serviceId = "datastream";
         ServiceSnapshot serviceDatastream = serviceUseCase.read(request.session(), providerId, serviceId);
         checkRequireLink(serviceDatastream);
-        ExpandedObservation existingObservation = getExpandedObservationFromService(request, serviceDatastream);
         return List.of(DtoToModelMapper.toDatastreamUpdate(request.mapper(), providerId,
-                getObservedArea(request.session(), providerId), null, null, null, null, null, existingObservation,
-                observation, foi));
+                getObservedArea(request.session(), providerId), null, null, null, null, null, null, observation, foi));
+    }
+
+    private String getProviderId(ExtraUseCaseRequest<ExpandedObservation> request) {
+        String id = request.parentId() != null ? request.parentId() : (String) request.model().datastream().id();
+        if (id == null) {
+            id = request.id();
+        }
+        return id;
     }
 
     private void checkRequireField(FeatureOfInterest foi) {
