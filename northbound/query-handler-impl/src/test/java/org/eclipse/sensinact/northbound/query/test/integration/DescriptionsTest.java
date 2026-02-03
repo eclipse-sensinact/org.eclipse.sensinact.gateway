@@ -61,7 +61,10 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
 @Requirement(namespace = ServiceNamespace.SERVICE_NAMESPACE, filter = "(objectClass=org.eclipse.sensinact.northbound.session.SensiNactSessionManager)")
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "name", value = "test-session"),
+})
 public class DescriptionsTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
@@ -86,7 +89,7 @@ public class DescriptionsTest {
     final TestUtils utils = new TestUtils();
 
     @BeforeEach
-    void start(@InjectService SensiNactSessionManager sessionManager) {
+    void start(@InjectService(filter = "(name=test-session)", timeout = 1000) SensiNactSessionManager sessionManager) {
         session = sessionManager.getDefaultSession(USER);
     }
 

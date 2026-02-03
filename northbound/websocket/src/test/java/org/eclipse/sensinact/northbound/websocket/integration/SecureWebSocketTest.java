@@ -44,20 +44,28 @@ import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.security.api.Authenticator.Scheme;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "AUTHENTICATED_ONLY"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "name", value = "test-session"),
+})
 public class SecureWebSocketTest {
 
     final ObjectMapper mapper = new ObjectMapper();
+
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
+    SensiNactSessionManager sessionManager;
 
     static URI wsUri;
 

@@ -59,7 +59,10 @@ import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.ComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "name", value = "test-session"),
+})
 class GatewayProxyIntegrationTest {
 
     private static final String FROST_URI_PROP = "frost.uri";
@@ -70,7 +73,7 @@ class GatewayProxyIntegrationTest {
 
     static HttpClient CLIENT;
 
-    @InjectService
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
     SensiNactSessionManager sessionManager;
     SensiNactSession session;
     BlockingQueue<ResourceDataNotification> queue;

@@ -57,6 +57,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
         @Property(key = "activity.check.extension", value = ""
                 + WebSocketActivityTest.SESSION_ACTIVITY_EXTENSION_SECONDS),
         @Property(key = "activity.check.threshold", value = "1"),
+        @Property(key = "name", value = "test-session"),
 })
 public class WebSocketActivityTest {
 
@@ -64,7 +65,7 @@ public class WebSocketActivityTest {
     public static final int SESSION_ACTIVITY_INTERVAL_SECONDS = 1;
     public static final int SESSION_ACTIVITY_EXTENSION_SECONDS = 3;
 
-    @InjectService
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
     SensiNactSessionManager sessionManager;
 
     final ObjectMapper mapper = new ObjectMapper();
