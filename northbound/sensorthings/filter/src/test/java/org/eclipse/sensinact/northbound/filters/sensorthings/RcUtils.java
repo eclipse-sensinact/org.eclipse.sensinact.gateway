@@ -28,6 +28,7 @@ import org.eclipse.sensinact.core.notification.ClientActionListener;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.ClientMetadataListener;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -253,6 +254,12 @@ public class RcUtils {
         public void removeExpirationListener(SensiNactSessionExpirationListener listener) {
             // TODO Auto-generated method stub
 
+        }
+
+        @Override
+        public ProviderDescription setProvider(String provider, Map<String, Object> rcValues, DataUpdate push) {
+            // TODO Auto-generated method stub
+            return null;
         }
 
     }

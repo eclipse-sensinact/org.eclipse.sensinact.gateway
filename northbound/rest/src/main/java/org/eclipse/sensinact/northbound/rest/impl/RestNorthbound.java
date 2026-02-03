@@ -453,4 +453,12 @@ public class RestNorthbound implements IRestNorthbound {
     public AbstractResultDTO unlinkProvider(String providerId, String childId) {
         return doLinkOrUnlink(providerId, childId, REMOVE);
     }
+
+    @Override
+    public AbstractResultDTO setProvider(String providerId, WrappedAccessMethodCallParametersDTO parameters) {
+        final QuerySetDTO query = new QuerySetDTO();
+        query.uri = new SensinactPath(providerId);
+        query.value = extractSetValue(parameters.parameters);
+        return handleQuery(query);
+    }
 }

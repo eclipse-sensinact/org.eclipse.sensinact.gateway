@@ -23,6 +23,8 @@ import org.eclipse.sensinact.core.notification.ClientActionListener;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.ClientMetadataListener;
+import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -428,6 +430,16 @@ public interface SensiNactSession {
      * {@return the list of providers}
      */
     List<ProviderDescription> listProviders();
+
+    /**
+     * Set a provider
+     *
+     * @param provider the provider name
+     * @param rcValues map of "service/resource".
+     * Some special keys: "@modelPackageUri", "@model", "@serviceModel", "@linkedProviders"
+     * @param push the data update component
+     */
+    ProviderDescription setProvider(String provider, Map<String, Object> rcValues, DataUpdate push);
 
     /**
      * Returns a (filtered) snapshot of the model
