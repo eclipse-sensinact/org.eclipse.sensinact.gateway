@@ -67,6 +67,7 @@ import jakarta.ws.rs.sse.SseEventSource;
         @Property(key = "activity.check.extension", value = ""
                 + ResourceNotificationsTest.SESSION_ACTIVITY_EXTENSION_SECONDS),
         @Property(key = "activity.check.threshold", value = "1"),
+        @Property(key = "name", value = "test-session"),
 })
 public class ResourceNotificationsTest {
 
@@ -104,7 +105,7 @@ public class ResourceNotificationsTest {
     @InjectService
     protected SseEventSourceFactory sseClient;
 
-    @InjectService
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
     SensiNactSessionManager sessionManager;
 
     @InjectService

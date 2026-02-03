@@ -49,6 +49,7 @@ import org.osgi.test.common.annotation.config.WithConfiguration;
         @Property(key = "activity.check.extension", value = ""
                 + SessionExpirationTest.SESSION_ACTIVITY_EXTENSION_SECONDS),
         @Property(key = "activity.check.threshold", value = "1"),
+        @Property(key = "name", value = "test-session"),
 })
 public class SessionExpirationTest {
 
@@ -58,7 +59,7 @@ public class SessionExpirationTest {
 
     private static final UserInfo BOB = new TestUserInfo("bob", true);
 
-    @InjectService
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
     SensiNactSessionManager sessionManager;
 
     @AfterEach
