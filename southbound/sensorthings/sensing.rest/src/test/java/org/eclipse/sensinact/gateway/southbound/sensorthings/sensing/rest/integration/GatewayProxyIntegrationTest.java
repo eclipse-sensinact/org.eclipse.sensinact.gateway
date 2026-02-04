@@ -87,7 +87,7 @@ class GatewayProxyIntegrationTest {
         CLIENT = HttpClient.newHttpClient();
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(GatewayProxyIntegrationTest.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader(DockerClientFactory.class.getClassLoader());
         try {
             try {
                 DockerClientFactory.lazyClient().versionCmd().exec();

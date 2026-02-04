@@ -38,6 +38,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.test.testcontainers.postgres.RequirePostgresContainer;
 import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -56,11 +57,12 @@ import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+@RequirePostgresContainer
 public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest {
     /** 2012-01-01T01:23:45.123456Z */
     private static final Instant TS_2012 = Instant.parse("2012-01-01T01:23:45.123456Z");
@@ -73,7 +75,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
     @BeforeAll
     static void startContainer() throws Exception {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(ObservationHistorySensorthingsTest.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader(DockerClientFactory.class.getClassLoader());
         try {
             try {
                 DockerClientFactory.lazyClient().versionCmd().exec();
@@ -81,7 +83,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
                 abort("No docker executable on the path, so tests will be skipped");
             }
 
-            container = new PostgreSQLContainer<>(DockerImageName.parse("timescale/timescaledb-ha")
+            container = new PostgreSQLContainer(DockerImageName.parse("timescale/timescaledb-ha")
                     .asCompatibleSubstituteFor("postgres").withTag("pg14-latest"));
             container.withDatabaseName("sensinactHistory");
             container.start();
