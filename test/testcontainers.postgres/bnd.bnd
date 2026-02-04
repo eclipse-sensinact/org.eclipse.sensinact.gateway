@@ -1,0 +1,37 @@
+-includeresource: \
+    @testcontainers-database-commons-${testcontainers.version}.jar,\
+    @testcontainers-jdbc-${testcontainers.version}.jar, \
+    @testcontainers-postgresql-${testcontainers.version}.jar, \
+    @testcontainers-r2dbc-${testcontainers.version}.jar,\
+    @r2dbc-spi-${r2dbc.version}.jar
+
+Fragment-Host: org.eclipse.sensinact.gateway.test.testcontainers.bundle
+
+Provide-Capability: \
+    osgi.implementation;osgi.implementation="testcontainers-postgresql";\
+    version:Version="${testcontainers.version}";\
+    uses:="org.testcontainers"
+
+Import-Package: \
+    !javax.annotation.*,\
+    *
+
+Export-Package: \
+    io.r2dbc.spi;version=${r2dbc.version};-split-package:=first,\
+    org.testcontainers.containers;\
+    org.testcontainers.delegate;\
+    org.testcontainers.exception;\
+    org.testcontainers.jdbc;\
+    org.testcontainers.postgresql;\
+    org.testcontainers.r2dbc;version=${testcontainers.version};-split-package:=first
+
+# Remove warnings about annotation dependencies from repackaged code
+-fixupmessages: \
+    "While traversing the type tree for io.r2dbc.spi.* cannot find class javax.annotation.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for io.r2dbc.spi.* cannot find class lombok.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class javax.annotation.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class lombok.*"; \
+    restrict:=warning; is:=ignore
