@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*********************************************************************
+* Copyright (c) 2022 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.eclipse.sensinact.gateway</groupId>
+    <artifactId>sensinact-parent</artifactId>
+    <version>${revision}${changelist}</version>
+  </parent>
+  <groupId>org.eclipse.sensinact.gateway.test</groupId>
+  <artifactId>test</artifactId>
+  <packaging>pom</packaging>
+  <name>SensiNact Test</name>
+
+  <properties>
+    <testcontainers.version>2.0.3</testcontainers.version>
+    <!-- These need to be kept in sync with the testcontainers -->
+    <docker.java.version>3.7.0</docker.java.version>
+    <duct.tape.version>1.0.8</duct.tape.version>
+    <dec.version>0.1.2</dec.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers</artifactId>
+        <version>${testcontainers.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.docker-java</groupId>
+        <artifactId>docker-java-transport-zerodep</artifactId>
+        <version>${docker.java.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.rnorth.duct-tape</groupId>
+        <artifactId>duct-tape</artifactId>
+        <version>${duct.tape.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.brotli</groupId>
+        <artifactId>dec</artifactId>
+        <version>${dec.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <modules>
+    <module>testcontainers.bundle</module>
+    <module>testcontainers.postgres</module>
+  </modules>
+
+</project>
