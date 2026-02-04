@@ -71,7 +71,7 @@ import jakarta.ws.rs.sse.SseEventSource;
 })
 public class ResourceNotificationsTest {
 
-    public static final int SESSION_EXPIRY_SECONDS = 4;
+    public static final int SESSION_EXPIRY_SECONDS = 3;
     public static final int SESSION_ACTIVITY_INTERVAL_SECONDS = 1;
     public static final int SESSION_ACTIVITY_EXTENSION_SECONDS = 3;
 

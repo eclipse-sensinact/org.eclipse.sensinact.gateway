@@ -132,13 +132,13 @@ public class MqttSslAuthTest {
     /**
      * MQTT broker
      */
-    private Server server;
+    private static Server server;
 
     /**
      * Generates the certificates used in the tests
      */
     @BeforeAll
-    static void generateCertificates() throws Exception {
+    static void generateCertificatesAndStartServer() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         final String caAlias = "ca";
 
@@ -180,13 +180,38 @@ public class MqttSslAuthTest {
         try (FileOutputStream fos = new FileOutputStream(CLIENT_CERT_UNSIGNED_WITH_CA_P12)) {
             clientUnsignedWithCAKeyStore.store(fos, CLIENT_CERT_PASS.toCharArray());
         }
+
+        server = new Server();
+        final IConfig config = new MemoryConfig(new Properties());
+        config.setProperty(IConfig.HOST_PROPERTY_NAME, "localhost");
+        config.setProperty(IConfig.PORT_PROPERTY_NAME, BrokerConstants.DISABLED_PORT_BIND);
+        config.setProperty(IConfig.SSL_PORT_PROPERTY_NAME, "2183");
+
+        // WebSocket
+        config.setProperty(IConfig.WSS_PORT_PROPERTY_NAME, "2184");
+        config.setProperty(IConfig.WEB_SOCKET_PATH_PROPERTY_NAME, "/ws");
+
+        // Setup SSL
+        config.setProperty(IConfig.KEY_STORE_TYPE, SSLUtils.PKCS12);
+        config.setProperty(IConfig.JKS_PATH_PROPERTY_NAME, SERVER_CERT_P12);
+        config.setProperty(IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME, SERVER_CERT_PASS);
+        config.setProperty(IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME, SERVER_CERT_PASS);
+
+        // Client authentication
+        config.setProperty(BrokerConstants.NEED_CLIENT_AUTH, "true");
+        server.startServer(config);
     }
 
     /**
      * Removes certificate files
      */
     @AfterAll
-    static void cleanupCertificates() {
+    static void stopServerAndcleanupCertificates() {
+        try {
+            server.stopServer();
+        } catch (Exception e) {
+        }
+
         for (String file : Arrays.asList(SERVER_CERT_P12, CLIENT_CERT_P12, CLIENT_CERT_KEY_PEM, CLIENT_CERT_PEM,
                 CLIENT_CERT_UNSIGNED_P12, CLIENT_CERT_UNSIGNED_WITH_CA_P12, TRUST_CERT_P12, TRUST_CERT_PEM)) {
             try {
@@ -351,26 +376,6 @@ public class MqttSslAuthTest {
      */
     @BeforeEach
     void start() throws Exception {
-        server = new Server();
-        final IConfig config = new MemoryConfig(new Properties());
-        config.setProperty(IConfig.HOST_PROPERTY_NAME, "localhost");
-        config.setProperty(IConfig.PORT_PROPERTY_NAME, BrokerConstants.DISABLED_PORT_BIND);
-        config.setProperty(IConfig.SSL_PORT_PROPERTY_NAME, "2183");
-
-        // WebSocket
-        config.setProperty(IConfig.WSS_PORT_PROPERTY_NAME, "2184");
-        config.setProperty(IConfig.WEB_SOCKET_PATH_PROPERTY_NAME, "/ws");
-
-        // Setup SSL
-        config.setProperty(IConfig.KEY_STORE_TYPE, SSLUtils.PKCS12);
-        config.setProperty(IConfig.JKS_PATH_PROPERTY_NAME, SERVER_CERT_P12);
-        config.setProperty(IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME, SERVER_CERT_PASS);
-        config.setProperty(IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME, SERVER_CERT_PASS);
-
-        // Client authentication
-        config.setProperty(BrokerConstants.NEED_CLIENT_AUTH, "true");
-        server.startServer(config);
-
         client = new MqttClient("ssl://localhost:2183", MqttClient.generateClientId());
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(true);
@@ -382,17 +387,13 @@ public class MqttSslAuthTest {
 
     @AfterEach
     void stop() throws Exception {
-        try {
-            if (client.isConnected()) {
-                client.disconnect();
-            }
-            client.close();
+        if (client.isConnected()) {
+            client.disconnect();
+        }
+        client.close();
 
-            for (MqttClientHandler handler : handlers) {
-                handler.deactivate();
-            }
-        } finally {
-            server.stopServer();
+        for (MqttClientHandler handler : handlers) {
+            handler.deactivate();
         }
     }
 
