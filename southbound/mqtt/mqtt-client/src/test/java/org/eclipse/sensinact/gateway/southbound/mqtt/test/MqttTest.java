@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,9 @@ import org.eclipse.sensinact.gateway.southbound.mqtt.api.IMqttMessage;
 import org.eclipse.sensinact.gateway.southbound.mqtt.api.IMqttMessageListener;
 import org.eclipse.sensinact.gateway.southbound.mqtt.impl.MqttClientConfiguration;
 import org.eclipse.sensinact.gateway.southbound.mqtt.impl.MqttClientHandler;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -58,15 +61,19 @@ public class MqttTest {
      */
     private final List<MqttClientHandler> handlers = new ArrayList<>();
 
-    private Server server;
+    private static  Server server;
 
-    @BeforeEach
-    void start() throws Exception {
+    @BeforeAll
+    static void startServer() throws Exception {
         server = new Server();
         IConfig config = new MemoryConfig(new Properties());
         config.setProperty(IConfig.HOST_PROPERTY_NAME, "127.0.0.1");
         config.setProperty(IConfig.PORT_PROPERTY_NAME, "2183");
         server.startServer(config);
+    }
+
+    @BeforeEach
+    void start() throws Exception {
 
         client = new MqttClient("tcp://127.0.0.1:2183", MqttClient.generateClientId());
         MqttConnectOptions options = new MqttConnectOptions();
@@ -79,16 +86,17 @@ public class MqttTest {
 
     @AfterEach
     void stop() throws Exception {
-        try {
-            client.disconnect();
-            client.close();
+        client.disconnect();
+        client.close();
 
-            for (MqttClientHandler handler : handlers) {
-                handler.deactivate();
-            }
-        } finally {
-            server.stopServer();
+        for (MqttClientHandler handler : handlers) {
+            handler.deactivate();
         }
+    }
+
+    @AfterAll
+    static void stopServer() throws Exception {
+        server.stopServer();
     }
 
     MqttClientHandler setupHandler(final String handlerId, final String... topics) throws Exception {
