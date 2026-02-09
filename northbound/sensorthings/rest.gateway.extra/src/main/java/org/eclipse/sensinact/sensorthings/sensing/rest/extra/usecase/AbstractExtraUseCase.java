@@ -21,6 +21,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Providers;
@@ -35,10 +36,20 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
 
     private Class<M> type;
     protected Providers providers;
+    protected Application application;
 
-    public AbstractExtraUseCase(Providers providers) {
+    public AbstractExtraUseCase(Providers providers, Application application) {
         this.type = internalGetUseCaseTypeParameter(getClass());
         this.providers = providers;
+        this.application = application;
+    }
+
+    protected boolean isHistoryMemory() {
+        Object flag = application.getProperties().get("sensinact.history.in.memory");
+        if (flag != null)
+            return (boolean) flag;
+        return false;
+
     }
 
     public static Class<?> getUseCaseTypeParameter(Class<? extends AbstractExtraUseCase<?, ?>> c) {
@@ -48,15 +59,21 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
     protected ExpandedObservation getExpandedObservationFromService(ExtraUseCaseRequest<?> request,
             ServiceSnapshot serviceDatastream) {
         String obsStr = DtoMapperSimple.getResourceField(serviceDatastream, "lastObservation", String.class);
+        if (obsStr == null) {
+            return null;
+        }
         return parseObservation(request, obsStr);
     }
 
     protected ExpandedObservation parseObservation(ExtraUseCaseRequest<?> request, String obsStr) {
         ExpandedObservation existingObservation;
+        if (obsStr == null) {
+            return null;
+        }
         try {
             existingObservation = request.mapper().readValue(obsStr, ExpandedObservation.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return null;
         }
         if (existingObservation == null) {
             existingObservation = new ExpandedObservation(null, request.id(), null, null, null, null, null, null, null,

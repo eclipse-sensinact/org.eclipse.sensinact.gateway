@@ -13,14 +13,22 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.osgi.util.promise.Promise;
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -33,24 +41,22 @@ public abstract class AbstractExtraUseCaseDtoDelete<M extends Id, S> extends Abs
 
     public abstract AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<M> request);
 
-    public AbstractExtraUseCaseDtoDelete(Providers providers) {
-        super(providers);
+    public AbstractExtraUseCaseDtoDelete(Providers providers, Application application) {
+        super(providers, application);
     }
 
-    protected static void checkRequireField(Id ds) {
-        try {
-            DtoMapperSimple.checkRequireField(ds);
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
-        }
-    }
+    protected List<Promise<Void>> removeDatastream(SensinactDigitalTwin twin, String providerId) {
+        ArrayList<Promise<Void>> list = new ArrayList<Promise<Void>>();
 
-    protected static void checkRequireLink(Object... obs) {
-        try {
-            DtoMapperSimple.checkRequireLink(obs);
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
+        SensinactResource resource = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM, "id");
+        if (resource != null) {
+            list.add(resource.setValue(null));
         }
+        resource = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation");
+        if (resource != null) {
+            list.add(resource.setValue(null));
+        }
+        return list;
     }
 
     public ExtraUseCaseResponse<S> delete(ExtraUseCaseRequest<M> request) {
@@ -60,8 +66,9 @@ public abstract class AbstractExtraUseCaseDtoDelete<M extends Id, S> extends Abs
             if (provider == null) {
                 throw new NotFoundException();
             }
-
-            gatewayThread.execute(dtoToDelete(request)).getValue();
+            AbstractSensinactCommand<?> command = dtoToDelete(request);
+            if (command != null)
+                gatewayThread.execute(command).getValue();
         } catch (InvocationTargetException | InterruptedException e) {
             throw new InternalServerErrorException(e);
         }

@@ -13,8 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
 
 import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
-import static org.eclipse.sensinact.core.annotation.dto.NullAction.UPDATE_IF_PRESENT;
-
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.sensinact.core.annotation.dto.Data;
 import org.eclipse.sensinact.core.annotation.dto.Model;
@@ -24,17 +22,20 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION;
 
+import java.util.Map;
+
 /**
  * Update record for the Location of a SensorThing / Device
  */
 @Service("admin")
 public record LocationUpdate(@Model EClass model, @Provider String providerId,
         @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object id,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String friendlyName,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String description,
-        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) String encodingType,
-        @Data(onDuplicate = UPDATE_IF_DIFFERENT, onNull = UPDATE_IF_PRESENT) GeoJsonObject location)
-        implements SensorThingsUpdate {
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String friendlyName,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
+        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String encodingType,
+        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Map<String, Object> properties,
+
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) GeoJsonObject location) implements SensorThingsUpdate {
 
     public LocationUpdate {
         if (model == null) {
@@ -47,7 +48,7 @@ public record LocationUpdate(@Model EClass model, @Provider String providerId,
     }
 
     public LocationUpdate(String providerId, Object id, String name, String description, String encodingType,
-            GeoJsonObject location) {
-        this(SENSOR_THING_LOCATION, providerId, id, name, description, encodingType, location);
+            Map<String, Object> properties, GeoJsonObject location) {
+        this(SENSOR_THING_LOCATION, providerId, id, name, description, encodingType, properties, location);
     }
 }

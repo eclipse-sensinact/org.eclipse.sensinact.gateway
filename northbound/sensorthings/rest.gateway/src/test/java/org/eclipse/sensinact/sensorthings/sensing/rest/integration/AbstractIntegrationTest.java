@@ -173,7 +173,7 @@ public class AbstractIntegrationTest {
     }
 
     protected FeatureOfInterest getFeatureOfInterest(String foiRefId) {
-        return new FeatureOfInterest(null, foiRefId, "test", null, "test", new Point(0, 0), null);
+        return new FeatureOfInterest(null, foiRefId, "test", null, "test", new Point(0, 0), null, null);
     }
 
     protected void createDatastream(String provider, String thingId, int value) {

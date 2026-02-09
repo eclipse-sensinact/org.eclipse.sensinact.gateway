@@ -21,13 +21,11 @@ import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
-import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
@@ -38,6 +36,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUse
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint.DependsOnUseCases;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -45,15 +44,16 @@ import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Providers;
 
 /**
  * manage create , update or delete of $ref
  */
-@DependsOnUseCases({ DatastreamsExtraUseCase.class, FeatureOfInterestExtraUseCase.class,
-    LocationsExtraUseCase.class, ThingsExtraUseCase.class, ObservationsExtraUseCase.class,
-    ObservedPropertiesExtraUseCase.class, SensorsExtraUseCase.class })
+@DependsOnUseCases({ DatastreamsExtraUseCase.class, FeatureOfInterestExtraUseCase.class, LocationsExtraUseCase.class,
+        ThingsExtraUseCase.class, ObservationsExtraUseCase.class, ObservedPropertiesExtraUseCase.class,
+        SensorsExtraUseCase.class })
 public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
     private final IAccessProviderUseCase providerUseCase;
@@ -97,8 +97,8 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
             new RefKey(ExpandedThing.class, ExpandedLocation.class), this::updateThingLocationRef);
 
     @SuppressWarnings("unchecked")
-    public RefIdUseCase(Providers providers) {
-        super(providers);
+    public RefIdUseCase(Providers providers, Application application) {
+        super(providers, application);
         observedPropertyCaches = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
         providerUseCase = resolve(providers, IAccessProviderUseCase.class);
         gatewayThread = resolve(providers, GatewayThread.class);
@@ -263,7 +263,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         ProviderSnapshot snapshot = providerUseCase.read(request.session(), idDatastream);
 
         // create new datastream link to thing provider
-        ExpandedDataStream newDatastream = toDatastream(snapshot);
+        ExpandedDataStream newDatastream = DtoToModelMapper.toDatastream(snapshot);
         ExtraUseCaseResponse<ProviderSnapshot> response = datastreamUseCase
                 .update(new ExtraUseCaseRequest<ExpandedDataStream>(request.session(), request.mapper(),
                         request.uriInfo(), HttpMethod.PATCH, newDatastream, idThing));
@@ -271,18 +271,6 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         return new ExtraUseCaseResponse<Object>(response.id(), response.snapshot(), response.success(), response.e(),
                 response.message());
 
-    }
-
-    public static ExpandedDataStream toDatastream(ProviderSnapshot provider) {
-        Datastream datastream = DtoMapperSimple.toDatastream(provider, null, null, null, null, null);
-        UnitOfMeasurement uom = DtoMapperSimple.toUnitOfMeasure(provider);
-        ObservedProperty observedProperty = DtoMapperSimple.toObservedProperty(provider, null, null);
-        Sensor sensor = DtoMapperSimple.toSensor(provider, null, null);
-
-        return new ExpandedDataStream(null, datastream.id(), datastream.name(), datastream.description(),
-                datastream.observationType(), uom, datastream.observedArea(), datastream.phenomenonTime(),
-                datastream.resultTime(), datastream.properties(), null, null, null, null, null, observedProperty,
-                sensor, null, null);
     }
 
     /**
@@ -374,7 +362,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     public static ExpandedLocation toLocation(ObjectMapper mapper, ProviderSnapshot provider, String thingId) {
         Location location = DtoMapperSimple.toLocation(mapper, provider, null, null, null);
         return new ExpandedLocation(null, location.id(), location.name(), location.description(),
-                location.encodingType(), location.location(), null, null, List.of(new RefId(thingId)));
+                location.encodingType(), location.location(), null, null, null, List.of(new RefId(thingId)));
     }
 
 }

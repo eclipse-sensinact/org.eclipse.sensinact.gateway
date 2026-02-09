@@ -14,33 +14,41 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 
-import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.DependentCommand;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * observedProperty
  */
-public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<ObservedProperty, Object> {
+public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDtoDelete<ObservedProperty, Object> {
 
     private final IDtoMemoryCache<ObservedProperty> cacheObservedProperty;
 
     @SuppressWarnings("unchecked")
-    public ObservedPropertiesExtraUseCase(Providers providers) {
-        super(providers);
+    public ObservedPropertiesExtraUseCase(Providers providers, Application application) {
+        super(providers, application);
         cacheObservedProperty = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
 
     }
@@ -79,18 +87,17 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Obse
 
     }
 
+    @Override
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<ObservedProperty> request) {
-        if (cacheObservedProperty.getDto(request.id()) != null) {
-            cacheObservedProperty.removeDto(request.id());
-            return new ExtraUseCaseResponse<Object>(true, "observed property deleted");
+        if (isIdFromCache(request.id())) {
+            if (cacheObservedProperty.getDto(request.id()) != null) {
+                cacheObservedProperty.removeDto(request.id());
+                return new ExtraUseCaseResponse<Object>(true, "observed property deleted");
+            }
+            throw new NotFoundException();
 
         } else {
-            String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
-            ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-            if (provider == null) {
-                throw new NotFoundException();
-            }
-            throw new WebApplicationException("Sensor is mandatory for Datastream", Response.Status.CONFLICT);
+            return super.delete(request);
         }
     }
 
@@ -140,6 +147,52 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDto<Obse
 
     public ObservedProperty getInMemoryObservedProperty(String id) {
         return cacheObservedProperty.getDto(id);
+    }
+
+    @Override
+    public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ObservedProperty> request) {
+        AbstractSensinactCommand<Map<String, TimedValue<?>>> parentCommand = getContextDeleteDatastreamProvider(
+                request);
+
+        return new DependentCommand<Map<String, TimedValue<?>>, Void>(parentCommand) {
+
+            @Override
+            protected Promise<Void> call(Promise<Map<String, TimedValue<?>>> parentResult, SensinactDigitalTwin twin,
+                    SensinactModelManager modelMgr, PromiseFactory pf) {
+                try {
+                    String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+                    SensinactProvider sp = twin.getProvider(providerId);
+                    String sensorId = (String) parentResult.getValue().get("sensorId").getValue();
+                    String id = (String) parentResult.getValue().get("id").getValue();
+
+                    if (sp != null) {
+                        // check if there are still observed property and sensor
+                        if (hasNoDatastreamAndSensor(sensorId, id)) {
+                            sp.delete();
+                        } else if (id == null) {
+
+                            return removeObservedProperty(twin, providerId);
+                        }
+                    }
+
+                    return pf.resolved(null);
+                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.failed(e);
+                }
+            }
+
+            private Promise<Void> removeObservedProperty(SensinactDigitalTwin twin, String providerId) {
+                SensinactResource resource = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
+                        "observedPropertyId");
+                return resource.setValue(null);
+            }
+
+            private boolean hasNoDatastreamAndSensor(String sensorId, String id) {
+                return sensorId == null && id == null;
+            }
+
+        };
+
     }
 
     public void removeInMemoryObservedProperty(String id) {

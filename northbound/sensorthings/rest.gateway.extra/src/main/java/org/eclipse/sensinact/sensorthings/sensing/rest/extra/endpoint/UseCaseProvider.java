@@ -29,7 +29,11 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ObservedPro
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.RefIdUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.SensorsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ThingsExtraUseCase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Providers;
@@ -48,6 +52,10 @@ import jakarta.ws.rs.ext.Providers;
 @SuppressWarnings("rawtypes")
 @Provider
 public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
+    private static final Logger LOG = LoggerFactory.getLogger(SensorThingsExtraFeature.class);
+
+    @Context
+    protected Application application;
 
     @Context
     public Providers providers;
@@ -75,7 +83,7 @@ public class UseCaseProvider implements ContextResolver<IExtraUseCase> {
 
         IExtraUseCase<?, ?> useCase = useCases.computeIfAbsent(cacheKey, c -> {
             try {
-                return c.getConstructor(Providers.class).newInstance(providers);
+                return c.getConstructor(Providers.class, Application.class).newInstance(providers, application);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                 LOG.error("Failed creating a Use Case Provider for type {}.", type, e);

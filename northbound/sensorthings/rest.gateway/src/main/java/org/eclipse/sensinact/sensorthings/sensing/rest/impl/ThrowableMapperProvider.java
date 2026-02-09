@@ -16,6 +16,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -48,12 +50,17 @@ public class ThrowableMapperProvider implements ExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable e) {
         ErrorResponse error;
+        int status = 500;
+        error = new ErrorResponse(getErrorCodeFromStatus(status), e.getMessage());
 
+        if (e instanceof UnrecognizedPropertyException) {
+            status = 400;
+            return Response.status(status).entity(error).build();
+
+        }
         if (e instanceof WebApplicationException webEx) {
             // Log at WARN instead of ERROR
-            int status = webEx.getResponse().getStatus();
-            String message = webEx.getMessage();
-            error = new ErrorResponse(getErrorCodeFromStatus(status), message);
+            status = webEx.getResponse().getStatus();
             if (status < 500) {
                 LOG.warn("WebApplicationException caught: message {} status {}", webEx.getMessage(),
                         webEx.getResponse().getStatus());
@@ -61,11 +68,12 @@ public class ThrowableMapperProvider implements ExceptionMapper<Throwable> {
                 LOG.error("WebApplicationException exception while processing request", e);
 
             }
+
             return Response.status(status).entity(error).build();
         }
         LOG.error("Unhandled exception while processing request", e);
 
-        error = new ErrorResponse(getErrorCodeFromStatus(500), e.getMessage());
-        return Response.status(500).entity(error).build();
+        error = new ErrorResponse(getErrorCodeFromStatus(status), e.getMessage());
+        return Response.status(status).entity(error).build();
     }
 }

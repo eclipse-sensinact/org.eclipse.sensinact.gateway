@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 import java.io.IOException;
 import java.lang.reflect.RecordComponent;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
@@ -82,8 +83,16 @@ public class PropFilterImpl implements WriterInterceptor {
             }
 
             context.setEntity(rawValue ? prop : Map.of(propName, prop));
+            System.out.println(context.getEntity().toString());
         } catch (Exception e) {
-            throw new BadRequestException("Failed to locate property " + propName, e);
+            if (rawValue) {
+                Map<String, Object> map = new HashMap<>();
+                map.put(propName, null);
+                context.setEntity(map);
+            } else {
+                context.setEntity(null);
+            }
+
         }
 
         context.proceed();

@@ -16,13 +16,16 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper.getTimestampFromId;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple.getTimestampFromId;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -32,6 +35,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
@@ -50,12 +54,22 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
         super(uriInfo, providers, application, requestContext);
     }
 
+    @Override
     public HistoricalLocation getHistoricalLocation(String id) {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        getTimestampFromId(id);
+        Instant timestamp = getTimestampFromId(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        ResourceSnapshot location = providerSnapshot.getResource(DtoMapperSimple.SERVICE_ADMIN,
+                DtoMapperSimple.LOCATION);
+        Instant resourceStamp = location.getValue().getTimestamp();
+        if (isHistoryMemory() && getCacheHistoricalLocation().getDto(id) != null) {
+            return DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                    null, id, getCacheHistoricalLocation().getDto(id));
+        } else if (!timestamp.equals(resourceStamp)) {
+            throw new NotFoundException();
+        }
         try {
             Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(getSession(), application,
                     getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
@@ -186,15 +200,25 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public FeatureOfInterest getHistoricalLocationThingDatastreamObservationFeatureOfInterest(String value) {
-        ProviderSnapshot provider = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(value));
-        return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
-                provider);
+
+        ResourceSnapshot resource = getObservationResourceSnapshot(value);
+        ICriterion criterion = parseFilter(HISTORICAL_LOCATIONS);
+        String val = resource.getValue() != null ? (String) resource.getValue().getValue() : null;
+        Instant stamp = resource.getValue().getTimestamp();
+        if (val == null) {
+            throw new NotFoundException();
+        }
+        ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(getMapper(), val);
+        return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                criterion, stamp, obs);
+
     }
 
     public ObservedProperty getHistoricalLocationThingDatastreamObservedProperty(String value) {
         ProviderSnapshot provider = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(value));
-        return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
-                provider);
+        return DtoMapper
+                .toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), null, provider)
+                .get();
     }
 
     public ResultList<Observation> getHistoricalLocationThingDatastreamObservations(String value) {
@@ -206,11 +230,21 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
 
     public Sensor getHistoricalLocationThingDatastreamSensor(String value) {
         ProviderSnapshot provider = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(value));
-        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), null, provider);
+        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), null, provider)
+                .get();
     }
 
     public Response deleteHistoricalLocation(String value) {
         return getExtraDelegate().delete(getSession(), getMapper(), uriInfo, value, HistoricalLocation.class);
     }
 
+    public Response updateHistoricalLocation(String value, HistoricalLocation hl) {
+        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), value, hl);
+        ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
+        HistoricalLocation createDto = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot, value, getCacheHistoricalLocation().getDto(value));
+
+        return Response.ok().entity(createDto).build();
+    }
 }

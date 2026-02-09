@@ -1,4 +1,23 @@
+-includeresource: \
+    @postgresql-1.21.4.jar, \
+    @jdbc-1.21.4.jar, \
+    @database-commons-1.21.4.jar, \
+    @testcontainers-1.21.4.jar, \
+    @docker-java-api-3.4.2.jar, \
+    @docker-java-transport-zerodep-3.4.2.jar, \
+    @docker-java-transport-3.4.2.jar,\
+    @duct-tape-1.0.8.jar
+
 Import-Package: \
-    !org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl,\
-    !org.mockito.*,\
+    !android.os.*,\
+    !com.github.dockerjava.zerodep.*,\
+    !com.google.appengine.*,\
+    !com.google.apphosting.*,\
+    !com.google.cloud.*,\
+    !io.r2dbc.*,\
+    !javax.annotation.*, \
+    !org.conscrypt, \
+    !org.eclipse.sensinact.northbound.filters.sensorthings.impl, \
+    !org.testcontainers.r2dbc.*, \
+    !sun.nio.ch, \
     *

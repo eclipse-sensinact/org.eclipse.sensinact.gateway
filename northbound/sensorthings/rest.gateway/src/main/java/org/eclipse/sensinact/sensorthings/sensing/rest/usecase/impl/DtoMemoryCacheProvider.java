@@ -15,7 +15,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 
 import jakarta.ws.rs.core.Application;
@@ -37,14 +36,13 @@ public class DtoMemoryCacheProvider implements ContextResolver<IDtoMemoryCache> 
 
     @Override
     public IDtoMemoryCache<?> getContext(Class<?> type) {
-        if (!Id.class.isAssignableFrom(type)) {
+        if (!Object.class.isAssignableFrom(type)) {
             return null;
         }
         return mapRepoCaches.computeIfAbsent(type, this::createCacheMap);
     }
 
-    @SuppressWarnings("unchecked")
     private IDtoMemoryCache<?> createCacheMap(Class<?> type) {
-        return new DtoMemoryCache<>((Class<? extends Id>) type);
+        return new DtoMemoryCache<>(type);
     }
 }

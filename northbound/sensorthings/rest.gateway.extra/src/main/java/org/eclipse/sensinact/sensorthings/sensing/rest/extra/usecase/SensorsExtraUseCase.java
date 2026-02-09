@@ -14,37 +14,42 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 
-import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.DependentCommand;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
+
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * sensor
  */
-public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<Sensor, Object> {
+public class SensorsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Sensor, Object> {
 
     private final IDtoMemoryCache<Sensor> cacheSensor;
 
-    private final IAccessProviderUseCase providerUseCase;
-
     @SuppressWarnings("unchecked")
-    public SensorsExtraUseCase(Providers providers) {
-        super(providers);
+    public SensorsExtraUseCase(Providers providers, Application application) {
+        super(providers, application);
         cacheSensor = resolve(providers, IDtoMemoryCache.class, Sensor.class);
-        providerUseCase = resolve(providers, IAccessProviderUseCase.class);
     }
 
     public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<Sensor> request) {
@@ -60,22 +65,62 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<Sensor, Object>
 
     }
 
+    @Override
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<Sensor> request) {
+        if (isIdFromCache(request.id())) {
+            if (cacheSensor.getDto(request.id()) != null) {
+                cacheSensor.removeDto(request.id());
+                return new ExtraUseCaseResponse<Object>(true, "sensor deleted");
 
-        if (cacheSensor.getDto(request.id()) != null) {
-            cacheSensor.removeDto(request.id());
-            return new ExtraUseCaseResponse<Object>(true, "sensor deleted");
-
-        } else {
-            // check if exists else return 404
-            String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
-            ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-            if (provider == null) {
-                throw new NotFoundException();
             }
-            throw new WebApplicationException("Sensor is mandatory for Datastream", Response.Status.CONFLICT);
+            throw new NotFoundException();
+        } else {
+            return super.delete(request);
         }
 
+    }
+
+    @Override
+    public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<Sensor> request) {
+        AbstractSensinactCommand<Map<String, TimedValue<?>>> parentCommand = getContextDeleteDatastreamProvider(
+                request);
+
+        return new DependentCommand<Map<String, TimedValue<?>>, Void>(parentCommand) {
+
+            @Override
+            protected Promise<Void> call(Promise<Map<String, TimedValue<?>>> parentResult, SensinactDigitalTwin twin,
+                    SensinactModelManager modelMgr, PromiseFactory pf) {
+                try {
+                    String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+                    SensinactProvider sp = twin.getProvider(providerId);
+                    String sensorId = (String) parentResult.getValue().get("observedPropertyId").getValue();
+                    String id = (String) parentResult.getValue().get("id").getValue();
+
+                    if (sp != null) {
+                        // check if there are still observed property and sensor
+                        if (hasNoDatastreamAndObservedProperty(sensorId, id)) {
+                            sp.delete();
+                        } else if (id == null) {
+                            return removeSensor(twin, providerId);
+                        }
+                    }
+
+                    return pf.resolved(null);
+                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.failed(e);
+                }
+            }
+
+            private Promise<Void> removeSensor(SensinactDigitalTwin twin, String providerId) {
+                SensinactResource resource = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
+                        "sensorId");
+                return resource.setValue(null);
+            }
+
+            private boolean hasNoDatastreamAndObservedProperty(String sensorId, String id) {
+                return sensorId == null && id == null;
+            }
+        };
     }
 
     @Override
@@ -124,12 +169,17 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDto<Sensor, Object>
 
     private Sensor updateInMemorySensor(ExtraUseCaseRequest<Sensor> request, Sensor sensor) {
         Sensor updateSensor = request.model();
-        Sensor createdSensor = new Sensor(null, request.id(),
+        ;
+        String selfLink = DtoToModelMapper.getLink(request.uriInfo(), DtoMapperSimple.VERSION, "/Sensors({id})",
+                request.id());
+        String datastreamLink = DtoToModelMapper.getLink(request.uriInfo(), selfLink, "/Datastream");
+
+        Sensor createdSensor = new Sensor(selfLink, request.id(),
                 updateSensor.name() != null ? updateSensor.name() : sensor.name(),
                 updateSensor.description() != null ? updateSensor.description() : sensor.description(),
                 updateSensor.encodingType() != null ? updateSensor.encodingType() : sensor.encodingType(),
                 updateSensor.metadata() != null ? updateSensor.metadata() : sensor.metadata(),
-                updateSensor.properties() != null ? updateSensor.properties() : sensor.properties(), null);
+                updateSensor.properties() != null ? updateSensor.properties() : sensor.properties(), datastreamLink);
         cacheSensor.addDto(request.id(), createdSensor);
         return createdSensor;
     }

@@ -12,9 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -31,11 +34,17 @@ import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.BadRequestException;
@@ -44,6 +53,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Providers;
@@ -66,13 +76,66 @@ public abstract class AbstractDelegate {
         this.requestContext = requestContext;
     }
 
-    protected URI getCreatedUri(Self createDto) {
+    protected boolean isHistoryMemory() {
+        Object flag = application.getProperties().get("sensinact.history.in.memory");
+        if (flag != null)
+            return (boolean) flag;
+        return false;
+
+    }
+
+    public Thing getThing(String id) {
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
+
+        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
+                providerSnapshot);
+    }
+
+    public HistoricalLocation getHistoricalLocationFromThing(String id) {
+
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
+
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        try {
+            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(getSession(), application,
+                    getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
+            if (historicalLocation.isEmpty()) {
+                throw new NotFoundException();
+            }
+            return historicalLocation.get();
+        } catch (IllegalArgumentException iae) {
+            throw new NotFoundException("No feature of interest with id");
+        }
+    }
+
+    public HistoricalLocation getHistoricalLocation(String id) {
+
+        HistoricalLocation historicalLocation = getHistoricalLocationFromThing(id);
+        if (!historicalLocation.id().equals(id)) {
+            throw new NotFoundException();
+        }
+        return historicalLocation;
+    }
+
+    public URI getCreatedUri(Self createDto) {
         URI createdUri = URI.create(createDto.selfLink());
         return createdUri;
     }
 
     protected List<ProviderSnapshot> getLocationProvidersFromThing(String thingId) {
         return getLinkProvidersFromThing(getSession(), thingId, "locationIds");
+    }
+
+    public Response updateThing(String id, ExpandedThing thing) {
+
+        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), id, thing);
+        ICriterion criterion = parseFilter(EFilterContext.THINGS);
+
+        Thing createDto = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
+                snapshot);
+
+        return Response.ok().entity(createDto).build();
     }
 
     protected List<ResourceSnapshot> listSetResources(final ICriterion criterion) {
@@ -103,6 +166,23 @@ public abstract class AbstractDelegate {
 
     }
 
+    @SuppressWarnings("unchecked")
+    protected IDtoMemoryCache<ExpandedObservation> getCacheObservation() {
+        return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
+                .getContext(ExpandedObservation.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected IDtoMemoryCache<FeatureOfInterest> getCacheFeatureOfInterest() {
+        return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
+                .getContext(FeatureOfInterest.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected IDtoMemoryCache<Instant> getCacheHistoricalLocation() {
+        return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE).getContext(Instant.class);
+    }
+
     protected List<ResourceSnapshot> listResources(final ICriterion criterion) {
 
         final SensiNactSession userSession = getSession();
@@ -121,6 +201,7 @@ public abstract class AbstractDelegate {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(id));
         ServiceSnapshot serviceSnapshot = DtoMapperSimple.getDatastreamService(providerSnapshot);
         ResourceSnapshot resourceSnapshot = serviceSnapshot.getResource("lastObservation");
+
         return resourceSnapshot;
     }
 

@@ -16,10 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 
-public class DtoMemoryCache<M extends Id> implements IDtoMemoryCache<M> {
+public class DtoMemoryCache<M> implements IDtoMemoryCache<M> {
 
     Map<String, M> dtoById = new ConcurrentHashMap<String, M>();
 

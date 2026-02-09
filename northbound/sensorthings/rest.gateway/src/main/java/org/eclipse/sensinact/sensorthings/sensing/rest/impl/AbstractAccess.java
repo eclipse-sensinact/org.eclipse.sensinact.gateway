@@ -25,6 +25,7 @@ import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
@@ -103,6 +104,12 @@ public abstract class AbstractAccess {
     protected IDtoMemoryCache<ObservedProperty> getCacheObservedProperty() {
         return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
                 .getContext(ObservedProperty.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected IDtoMemoryCache<FeatureOfInterest> getCacheFeatureOfInterest() {
+        return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
+                .getContext(FeatureOfInterest.class);
     }
 
     /**

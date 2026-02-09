@@ -46,7 +46,7 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>rest.gateway</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
@@ -246,9 +246,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
+        <groupId>
+            org.eclipse.sensinact.gateway.northbound.sensorthings
+        </groupId>
         <artifactId>dto</artifactId>
-        <version>${project.version}</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 

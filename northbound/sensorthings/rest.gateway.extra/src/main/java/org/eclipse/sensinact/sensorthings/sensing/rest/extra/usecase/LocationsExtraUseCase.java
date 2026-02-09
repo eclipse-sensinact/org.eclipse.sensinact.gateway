@@ -13,9 +13,11 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,20 +29,24 @@ import org.eclipse.sensinact.core.command.DependentCommand;
 import org.eclipse.sensinact.core.command.IndependentCommands;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
 /**
@@ -49,15 +55,23 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedLocation, ProviderSnapshot> {
 
-    public LocationsExtraUseCase(Providers providers) {
-        super(providers);
+    private final IDtoMemoryCache<GeoJsonObject> cacheHl;
+
+    @SuppressWarnings("unchecked")
+    public LocationsExtraUseCase(Providers providers, Application application) {
+        super(providers, application);
+        cacheHl = resolve(providers, IDtoMemoryCache.class, GeoJsonObject.class);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         try {
+            List<ResourceSnapshot> locationThings = getHistoricalLocationsForMemoryHistory(request, listDtoModels);
+
             dataUpdate.pushUpdate(listDtoModels).getValue();
+
+            updateHistoricalLocationMemoryHistory(locationThings);
             LocationUpdate locationUpdate = (LocationUpdate) listDtoModels.stream().filter(s -> {
                 return s instanceof LocationUpdate;
             }).findFirst().get();
@@ -76,12 +90,34 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
 
     }
 
+    private void updateHistoricalLocationMemoryHistory(List<ResourceSnapshot> locationThings) {
+        if (locationThings != null) {
+            locationThings.stream()
+                    .forEach(location -> cacheHl.addDto(
+                            location.getService().getProvider().getName() + "~"
+                                    + DtoMapperSimple.stampToId(location.getValue().getTimestamp()),
+                            (GeoJsonObject) location.getValue().getValue()));
+        }
+    }
+
+    private List<ResourceSnapshot> getHistoricalLocationsForMemoryHistory(ExtraUseCaseRequest<ExpandedLocation> request,
+            List<SensorThingsUpdate> listDtoModels) {
+        List<ResourceSnapshot> locationThings = null;
+        if (isHistoryMemory()) {
+            // get if exists last historical
+            locationThings = listDtoModels.stream().filter(update -> update instanceof ThingUpdate)
+                    .map(update -> getLocationExistingThing(request.session(), ((ThingUpdate) update).providerId()))
+                    .filter(Objects::nonNull).toList();
+        }
+        return locationThings;
+    }
+
     @Override
     public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<ExpandedLocation> request) {
         // read thing for each location and update it
         ExpandedLocation location = request.model();
         checkRequireField(request);
-
+        Instant stamp = Instant.now();
         List<SensorThingsUpdate> listUpdates = DtoToModelMapper.toLocationUpdates(request.model(), request.id());
         if (location.things() != null && location.things().size() >= 0 || request.parentId() != null) {
             List<String> listThingIds = new ArrayList<String>();
@@ -102,12 +138,11 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                     ids = Stream.concat(ids.stream(), Stream.of(locationId)).toList();
                     ExpandedLocation expandLocation = request.model();
                     List<Location> newLocation = List.of(new Location(null, expandLocation.id(), expandLocation.name(),
-                            expandLocation.description(), expandLocation.encodingType(),
-                            expandLocation.location(), null, null));
-                    return new ThingUpdate(providerId,
-                            DtoToModelMapper.getAggregateLocation(request, ids,
-                                    newLocation),
-                            null, null, providerId, null, ids, null);
+                            expandLocation.description(), expandLocation.encodingType(), expandLocation.location(),
+                            expandLocation.properties(), null, null));
+                    GeoJsonObject locationThing = DtoToModelMapper.getAggregateLocation(request, ids, newLocation);
+                    cacheHl.addDto(providerId + "~" + Long.toString(stamp.toEpochMilli(), 16), locationThing);
+                    return new ThingUpdate(providerId, stamp, locationThing, null, null, providerId, null, ids, null);
                 }
                 return null;
             }).filter(java.util.Objects::nonNull).forEach(listUpdates::add);
@@ -119,7 +154,12 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         try {
+            List<ResourceSnapshot> locationThings = getHistoricalLocationsForMemoryHistory(request, listDtoModels);
+
             dataUpdate.pushUpdate(listDtoModels).getValue();
+
+            updateHistoricalLocationMemoryHistory(locationThings);
+
             LocationUpdate locationUpdate = (LocationUpdate) listDtoModels.get(0);
 
             ProviderSnapshot provider = providerUseCase.read(request.session(), locationUpdate.providerId());

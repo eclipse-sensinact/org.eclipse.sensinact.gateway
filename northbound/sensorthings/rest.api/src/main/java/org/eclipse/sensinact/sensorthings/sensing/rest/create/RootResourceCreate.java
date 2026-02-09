@@ -16,6 +16,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedHistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
@@ -54,6 +55,16 @@ public interface RootResourceCreate {
     @POST
     @Path("/FeaturesOfInterest")
     public Response createFeaturesOfInterest(FeatureOfInterest featuresOfInterest);
+
+    /**
+     * create historicalLocation
+     *
+     * @param location
+     * @return
+     */
+    @POST
+    @Path("/HistoricalLocations")
+    public Response createHistoricalLocation(ExpandedHistoricalLocation historicalLocation);
 
     /**
      * create location

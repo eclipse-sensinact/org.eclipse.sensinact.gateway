@@ -71,7 +71,6 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) {
 //        if (LOG.isinfoEnabled()) {
-        LOG.info("{} - Status  : {}", Instant.now().toString(), response.getStatus());
 
         if (response.getEntity() != null) {
             try {
@@ -81,6 +80,10 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
                 LOG.info("Could not serialize response entity to JSON", e);
                 LOG.info("{} - Body    {} : {}", Instant.now().toString(), response.getStatus(), response.getEntity());
             }
+        }
+        if (response.getHeaderString("Location") != null) {
+            LOG.info("{} - Location : {} ", Instant.now().toString(), response.getHeaderString("Location"));
+
         }
 //        }
     }

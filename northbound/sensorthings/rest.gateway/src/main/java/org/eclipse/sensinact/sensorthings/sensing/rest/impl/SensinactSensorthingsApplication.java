@@ -43,6 +43,8 @@ public class SensinactSensorthingsApplication extends Application {
         default NOT_SET;
 
         int history_results_max() default 3000;
+
+        boolean history_in_memory() default false;
     }
 
     public static final String NOT_SET = "<<NOT_SET>>";
@@ -80,10 +82,11 @@ public class SensinactSensorthingsApplication extends Application {
 
         Map<String, Object> properties = NOT_SET.equals(config.history_provider())
                 ? new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
-                        "sensinact.history.result.limit", config.history_results_max()))
+                        "sensinact.history.in.memory", config.history_in_memory(), "sensinact.history.result.limit",
+                        config.history_results_max()))
                 : new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
-                        "sensinact.history.provider", config.history_provider(), "sensinact.history.result.limit",
-                        config.history_results_max()));
+                        "sensinact.history.in.memory", config.history_in_memory(), "sensinact.history.provider",
+                        config.history_provider(), "sensinact.history.result.limit", config.history_results_max()));
 
         return properties;
     }

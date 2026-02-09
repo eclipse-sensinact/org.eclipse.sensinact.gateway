@@ -24,6 +24,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
@@ -67,15 +68,17 @@ public class ObservationsAccessImpl extends AbstractAccess
 
     @Override
     public Observation getObservation(ODataId id) {
+        Observation obs = null;
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
         ProviderSnapshot provider = validateAndGetProvider(providerId);
         if (!isSensorthingModel(provider)) {
-            return getSensinactHandler().getObservation(id.value());
+            obs = getSensinactHandler().getObservation(id.value());
         } else {
-            return getSensorthingsHandler().getObservation(id.value());
-
+            obs = getSensorthingsHandler().getObservation(id.value());
         }
+        return obs;
+
     }
 
     @Override
@@ -221,6 +224,18 @@ public class ObservationsAccessImpl extends AbstractAccess
             return getSensorthingsHandler().getObservationDatastreamThingLocations(id.value());
 
         }
+    }
+
+    @Override
+    public Response updateObservation(ODataId id, ExpandedObservation obs) {
+        return getSensorthingsHandler().updateObservation(id.value(), obs);
+
+    }
+
+    @Override
+    public Response patchObservation(ODataId id, ExpandedObservation obs) {
+        return updateObservation(id, obs);
+
     }
 
 }

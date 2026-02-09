@@ -29,25 +29,30 @@ import jakarta.ws.rs.ext.Providers;
  * Provides access to Resource snapshots via a {@link ContextResolver}
  */
 @Provider
-public class AccessResourceUseCaseProvider implements ContextResolver<IAccessResourceUseCase> {
+public class AccessResourceUseCaseProvider implements ContextResolver<IAccessResourceUseCase>, IAccessResourceUseCase {
 
     @Context
     Providers providers;
 
     @Override
     public IAccessResourceUseCase getContext(Class<?> type) {
-        return this::read;
+        return this;
     }
 
     public ResourceSnapshot read(SensiNactSession session, String id) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(session, providerId);
-
         String service = DtoMapperSimple.extractSecondIdSegment(id);
         String resource = DtoMapperSimple.extractThirdIdSegment(id);
 
-        ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
+        return read(session, providerId, service, resource);
+    }
+
+    public ResourceSnapshot read(SensiNactSession session, String providerId, String serviceId, String resourceName) {
+
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(session, providerId);
+
+        ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(serviceId, resourceName);
 
         return resourceSnapshot;
     }

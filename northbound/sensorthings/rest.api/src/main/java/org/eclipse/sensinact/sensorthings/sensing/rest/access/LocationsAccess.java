@@ -277,7 +277,7 @@ public interface LocationsAccess {
     public FeatureOfInterest getLocationThingDatastreamObservationFeatureOfInterest(@PathParam("id") ODataId id,
             @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3, @PathParam("id3") ODataId id4);
 
-    @Path("Things({id2})/Datastreams({id3})/Observations/$ref")
+    @Path("Things({id2})/Datastreams({id3})/Observations/FeatureOfInterest/$ref")
     @GET
     @RefFilter
     default public FeatureOfInterest getLocationThingDatastreamObservationFeatureOfInterestRef(

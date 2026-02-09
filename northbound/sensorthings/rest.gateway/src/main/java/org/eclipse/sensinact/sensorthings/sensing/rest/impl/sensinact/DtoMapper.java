@@ -163,7 +163,7 @@ public class DtoMapper {
         String historicalLocationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("HistoricalLocations").build()
                 .toString();
 
-        Location location = new Location(selfLink, id, name, description, ENCODING_TYPE_VND_GEO_JSON, object,
+        Location location = new Location(selfLink, id, name, description, ENCODING_TYPE_VND_GEO_JSON, object, null,
                 thingsLink, historicalLocationsLink);
         if (expansions.shouldExpand("Things", location)) {
             ResultList<Thing> list = new ResultList<>(null, null, List.of(DtoMapper.toThing(userSession, application,
@@ -395,7 +395,7 @@ public class DtoMapper {
         String observationsLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("Observations").build().toString();
 
         FeatureOfInterest featureOfInterest = new FeatureOfInterest(selfLink, id, name, description,
-                ENCODING_TYPE_VND_GEO_JSON, object, observationsLink);
+                ENCODING_TYPE_VND_GEO_JSON, object, null, observationsLink);
         if (expansions.shouldExpand("Observations", featureOfInterest)) {
             expansions.addExpansion("Observations", featureOfInterest, getLiveObservations(userSession, application,
                     mapper, uriInfo, expansions.getExpansionSettings("Observations"), filter, provider));

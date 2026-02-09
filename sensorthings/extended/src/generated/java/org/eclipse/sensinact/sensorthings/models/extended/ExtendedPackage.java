@@ -204,13 +204,22 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	int SENSOR_THING_LOCATION_SERVICE__ID = ProviderPackage.SERVICE_FEATURE_COUNT + 1;
 
 	/**
+	 * The feature id for the '<em><b>Properties</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int SENSOR_THING_LOCATION_SERVICE__PROPERTIES = ProviderPackage.SERVICE_FEATURE_COUNT + 2;
+
+	/**
 	 * The number of structural features of the '<em>Sensor Thing Location Service</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int SENSOR_THING_LOCATION_SERVICE_FEATURE_COUNT = ProviderPackage.SERVICE_FEATURE_COUNT + 2;
+	int SENSOR_THING_LOCATION_SERVICE_FEATURE_COUNT = ProviderPackage.SERVICE_FEATURE_COUNT + 3;
 
 	/**
 	 * The operation id for the '<em>EIs Set</em>' operation.
@@ -421,13 +430,22 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	int DATA_STREAM_SERVICE__THING_ID = ProviderPackage.SERVICE_FEATURE_COUNT + 18;
 
 	/**
+	 * The feature id for the '<em><b>Properties</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 * @ordered
+	 */
+	int DATA_STREAM_SERVICE__PROPERTIES = ProviderPackage.SERVICE_FEATURE_COUNT + 19;
+
+	/**
 	 * The number of structural features of the '<em>Data Stream Service</em>' class.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
 	 * @ordered
 	 */
-	int DATA_STREAM_SERVICE_FEATURE_COUNT = ProviderPackage.SERVICE_FEATURE_COUNT + 19;
+	int DATA_STREAM_SERVICE_FEATURE_COUNT = ProviderPackage.SERVICE_FEATURE_COUNT + 20;
 
 	/**
 	 * The operation id for the '<em>EIs Set</em>' operation.
@@ -766,6 +784,17 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	EAttribute getSensorThingLocationService_Id();
 
 	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getProperties <em>Properties</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Properties</em>'.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getProperties()
+	 * @see #getSensorThingLocationService()
+	 * @generated
+	 */
+	EAttribute getSensorThingLocationService_Properties();
+
+	/**
 	 * Returns the meta object for class '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService <em>Data Stream Service</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -985,6 +1014,17 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	EAttribute getDataStreamService_ThingId();
 
 	/**
+	 * Returns the meta object for the attribute '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getProperties <em>Properties</em>}'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the meta object for the attribute '<em>Properties</em>'.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getProperties()
+	 * @see #getDataStreamService()
+	 * @generated
+	 */
+	EAttribute getDataStreamService_Properties();
+
+	/**
 	 * Returns the meta object for class '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingService <em>Sensor Thing Service</em>}'.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -1148,6 +1188,14 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 		EAttribute SENSOR_THING_LOCATION_SERVICE__ID = eINSTANCE.getSensorThingLocationService_Id();
 
 		/**
+		 * The meta object literal for the '<em><b>Properties</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute SENSOR_THING_LOCATION_SERVICE__PROPERTIES = eINSTANCE.getSensorThingLocationService_Properties();
+
+		/**
 		 * The meta object literal for the '{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl <em>Data Stream Service</em>}' class.
 		 * <!-- begin-user-doc -->
 		 * <!-- end-user-doc -->
@@ -1308,6 +1356,14 @@ public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 		 * @generated
 		 */
 		EAttribute DATA_STREAM_SERVICE__THING_ID = eINSTANCE.getDataStreamService_ThingId();
+
+		/**
+		 * The meta object literal for the '<em><b>Properties</b></em>' attribute feature.
+		 * <!-- begin-user-doc -->
+		 * <!-- end-user-doc -->
+		 * @generated
+		 */
+		EAttribute DATA_STREAM_SERVICE__PROPERTIES = eINSTANCE.getDataStreamService_Properties();
 
 		/**
 		 * The meta object literal for the '{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingServiceImpl <em>Sensor Thing Service</em>}' class.

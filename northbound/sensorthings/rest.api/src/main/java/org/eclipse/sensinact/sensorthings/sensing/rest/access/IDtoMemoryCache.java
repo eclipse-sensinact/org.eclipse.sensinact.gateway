@@ -14,14 +14,12 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.access;
 
 import java.util.List;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
-
 /**
  * memory repository cache for storing dto that are not assign to datastream
  *
  * @param <M>
  */
-public interface IDtoMemoryCache<M extends Id> {
+public interface IDtoMemoryCache<M> {
 
     /**
      * add dto in cache on id

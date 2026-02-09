@@ -12,9 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -31,14 +28,14 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.HistoricalLocation
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.HistoricalLocationsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.HistoricalLocationsDelegateSensinact;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.HistoricalLocationsDelegateSensorthings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.HistoricalLocationsUpdate;
 
 import jakarta.ws.rs.core.Response;;
 
 public class HistoricalLocationsAccessImpl extends AbstractAccess
-        implements HistoricalLocationsAccess, HistoricalLocationsDelete {
+        implements HistoricalLocationsAccess, HistoricalLocationsDelete, HistoricalLocationsUpdate {
     private HistoricalLocationsDelegateSensinact sensinactHandler;
     private HistoricalLocationsDelegateSensorthings sensorthigHandler;
-    private static List<String> deletedHistoricalLocation = new ArrayList<String>(); // workaround
 
     public HistoricalLocationsDelegateSensinact getSensinactHandler() {
         if (sensinactHandler == null)
@@ -234,4 +231,13 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
         return Response.ok().build();
     }
 
+    @Override
+    public Response updateHistoricalLocation(ODataId id, HistoricalLocation hl) {
+        return getSensorthingsHandler().updateHistoricalLocation(id.value(), hl);
+    }
+
+    @Override
+    public Response patchHistoricalLocation(ODataId id, HistoricalLocation hl) {
+        return getSensorthingsHandler().updateHistoricalLocation(id.value(), hl);
+    }
 }

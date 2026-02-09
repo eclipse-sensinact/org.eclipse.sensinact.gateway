@@ -24,6 +24,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedHistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
@@ -81,8 +82,13 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
     @Override
     public Response createObservations(ExpandedObservation observation) {
-
         return getSensorthingsHandler().createObservation(observation);
+    }
+
+    @Override
+    public Response createHistoricalLocation(ExpandedHistoricalLocation historicalLocation) {
+
+        return getSensorthingsHandler().createHistoricalLocation(historicalLocation);
 
     }
 
@@ -151,8 +157,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         ResultList<Observation> resultSensinact = getSensinactHandler().getObservations();
         ResultList<Observation> resultSensorthing = getSensorthingsHandler().getObservations();
-        return new ResultList<Observation>(null, null,
-                Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
+        Stream<Observation> result = Stream.concat(resultSensinact.value().stream(),
+                resultSensorthing.value().stream());
+
+        return new ResultList<Observation>(null, null, result.toList());
     }
 
     @Override

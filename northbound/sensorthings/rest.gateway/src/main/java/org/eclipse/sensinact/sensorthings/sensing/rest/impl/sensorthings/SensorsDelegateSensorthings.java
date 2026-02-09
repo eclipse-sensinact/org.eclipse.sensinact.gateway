@@ -16,6 +16,7 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.extractFirstIdSegment;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ import jakarta.ws.rs.ext.Providers;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -37,6 +39,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
@@ -55,9 +58,12 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
 
-        return DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Optional<Sensor> s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.SENSORS), validateAndGetProvider(providerId));
-
+        if (s.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return s.get();
     }
 
     public ResultList<Datastream> getSensorDatastreams(String id) {
@@ -75,8 +81,12 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
 
-        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(EFilterContext.DATASTREAMS), validateAndGetProvider(providerId2));
+        Optional<Datastream> d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), parseFilter(EFilterContext.DATASTREAMS), validateAndGetProvider(providerId2));
+        if (d.isEmpty()) {
+            throw new NotFoundException();
+        }
+        return d.get();
     }
 
     @PaginationLimit(500)
@@ -102,10 +112,12 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
 
-        ObservedProperty o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+        Optional<ObservedProperty> o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), validateAndGetProvider(providerId2));
+        if (o.isEmpty())
+            throw new NotFoundException();
 
-        return o;
+        return o.get();
     }
 
     public Sensor getSensorDatastreamSensor(String id, String id2) {
@@ -136,17 +148,13 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
         return new ResultList<Datastream>(null, null,
                 getDatastreamProvidersFromThing(getSession(), ThingId).stream().map(p -> DtoMapper
                         .toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), null, p))
-                        .toList());
+                        .filter(ds -> ds.isPresent()).map(ds -> ds.get()).toList());
     }
 
     public Response updateSensor(String id, Sensor sensor) {
 
-        ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
-                requestContext.getMethod(), id, sensor);
-        ICriterion criterion = parseFilter(EFilterContext.SENSORS);
-
-        Sensor createDto = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                criterion, snapshot);
+        Sensor createDto = getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id,
+                sensor);
 
         return Response.ok().entity(createDto).build();
     }
@@ -222,11 +230,16 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(providerObs);
-        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
+        ResourceSnapshot resource = getObservationResourceSnapshot(value3);
+        String val = resource.getValue() != null ? (String) resource.getValue().getValue() : null;
+        if (val == null) {
+            throw new NotFoundException();
+        }
+        Instant stamp = resource.getValue().getTimestamp();
 
+        ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(getMapper(), val);
         FeatureOfInterest o = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), filter, providerSnapshot);
+                getExpansions(), filter, stamp, obs);
 
         return o;
     }

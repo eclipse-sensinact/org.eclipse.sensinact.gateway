@@ -19,6 +19,7 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.DtoMemoryCacheProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.DatastreamsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.FeatureOfInterestExtraUseCase;
@@ -60,7 +61,7 @@ class UseCaseTest {
         ucp.providers = providers;
         Mockito.when(providers.<IExtraUseCase>getContextResolver(
                 Mockito.argThat(c -> c != null && IExtraUseCase.class.isAssignableFrom(c)), Mockito.any()))
-        .thenReturn(ucp);
+                .thenReturn(ucp);
 
         // Dependencies
         Mockito.when(providers.<IDtoMemoryCache>getContextResolver(
@@ -81,9 +82,9 @@ class UseCaseTest {
 
     }
 
-    @ValueSource(classes = {DatastreamsExtraUseCase.class, FeatureOfInterestExtraUseCase.class, LocationsExtraUseCase.class,
-            ObservationsExtraUseCase.class, ObservedPropertiesExtraUseCase.class, RefIdUseCase.class, SensorsExtraUseCase.class,
-            ThingsExtraUseCase.class})
+    @ValueSource(classes = { DatastreamsExtraUseCase.class, FeatureOfInterestExtraUseCase.class,
+            LocationsExtraUseCase.class, ObservationsExtraUseCase.class, ObservedPropertiesExtraUseCase.class,
+            RefIdUseCase.class, SensorsExtraUseCase.class, ThingsExtraUseCase.class })
     @ParameterizedTest
     void testUseCaseCreation(Class<?> c) {
         assertNotNull(ucp.getContext(c));

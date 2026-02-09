@@ -26,6 +26,8 @@ import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.charset.StandardCharsets;
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -44,12 +46,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.Property.TemplateArgument;
 import org.osgi.test.common.annotation.Property.ValueSource;
+import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -297,7 +301,21 @@ public class AbstractIntegrationTest {
     public static final String CONTENT_TYPE = "Content-Type";
 
     @BeforeEach
-    void start(@InjectBundleContext BundleContext bc, TestInfo info) throws Exception {
+    void start(@InjectBundleContext BundleContext bc,
+            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "?")) Configuration sensorthingsConfig,
+            TestInfo info) throws Exception {
+
+        Hashtable<String, Object> newProps = new Hashtable<String, Object>();
+        newProps.put("history.in.memory", true);
+
+        Dictionary<String, Object> properties = sensorthingsConfig.getProperties();
+        Enumeration<String> keys = properties.keys();
+        while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            newProps.put(key, properties.get(key));
+        }
+
+        sensorthingsConfig.update(newProps);
 
         Class<?> test = info.getTestClass().get();
         while (test.isMemberClass()) {
