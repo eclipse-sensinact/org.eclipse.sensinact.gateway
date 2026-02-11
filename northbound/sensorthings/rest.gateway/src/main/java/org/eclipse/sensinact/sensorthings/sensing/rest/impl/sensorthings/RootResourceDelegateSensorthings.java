@@ -22,9 +22,12 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper.toThing;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
+
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -134,10 +137,27 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         List<ProviderSnapshot> providers = listProviders(criterion);
         List<ResourceSnapshot> resources = providers.stream().map(p -> DtoMapperSimple.getDatastreamService(p))
                 .filter(Objects::nonNull).map(s -> s.getResource("lastObservation")).toList();
-        ;
-        ResultList<Observation> result = new ResultList<>(null, null, resources.stream()
+
+        Stream<Observation> listStoreObservation = resources.stream()
                 .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
-                .filter(Optional::isPresent).map(Optional::get).toList());
+                .filter(Optional::isPresent).map(Optional::get);
+        Stream<Observation> observationsCache = Stream.empty();
+        if (isHistoryMemory()) {
+            observationsCache = getCacheObservation().keySet().stream().map(obsId -> {
+                ProviderSnapshot datastreamProvider = validateAndGetProvider(
+                        DtoMapperSimple.extractFirstIdSegment(obsId));
+                ResourceSnapshot resource = datastreamProvider.getResource(DtoMapperSimple.SERVICE_DATASTREAM,
+                        "lastObservation");
+                Instant stamp = DtoMapperSimple.getTimestampFromId(obsId);
+                ExpandedObservation expObs = getCacheObservation().getDto(obsId);
+
+                return toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
+                        resource, stamp, expObs);
+            }).filter(opt -> opt.isPresent()).map(o -> o.get());
+        }
+
+        ResultList<Observation> result = new ResultList<>(null, null,
+                Stream.concat(listStoreObservation, observationsCache).toList());
         return result;
     }
 
@@ -162,15 +182,31 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         List<ProviderSnapshot> providers = listProviders(criterion);
         List<ResourceSnapshot> resources = providers.stream().map(p -> DtoMapperSimple.getDatastreamService(p))
                 .filter(Objects::nonNull).map(s -> s.getResource("lastObservation")).toList();
+        Stream<FeatureOfInterest> foisCache = Stream.empty();
+        if (isHistoryMemory()) {
+            foisCache = getCacheObservation().keySet().stream().map(obsId -> {
+                ProviderSnapshot datastreamProvider = validateAndGetProvider(
+                        DtoMapperSimple.extractFirstIdSegment(obsId));
+                ResourceSnapshot resource = datastreamProvider.getResource(DtoMapperSimple.SERVICE_DATASTREAM,
+                        "lastObservation");
+                Instant stamp = DtoMapperSimple.getTimestampFromId(obsId);
+                ExpandedObservation expObs = getCacheObservation().getDto(obsId);
 
-        ResultList<FeatureOfInterest> result = new ResultList<>(null, null, resources.stream().map(r -> {
+                return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        criterion, stamp, expObs);
+            });
+        }
+        Stream<FeatureOfInterest> fois = resources.stream().map(r -> {
             if (r.getValue() != null) {
                 ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(getMapper(), r.getValue().getValue());
+
                 return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
                         criterion, r.getValue().getTimestamp(), obs);
             }
             return null;
-        }).filter(Objects::nonNull).toList());
+        }).filter(Objects::nonNull);
+
+        ResultList<FeatureOfInterest> result = new ResultList<>(null, null, Stream.concat(fois, foisCache).toList());
         return result;
     }
 

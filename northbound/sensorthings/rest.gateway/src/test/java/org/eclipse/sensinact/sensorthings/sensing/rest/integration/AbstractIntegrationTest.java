@@ -239,7 +239,7 @@ public class AbstractIntegrationTest {
         ExpandedObservation obs = new ExpandedObservation(null, id,
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
-                null, null, null, null, foi);
+                null, null, null, null, foi, false);
         return toString(obs);
     }
 

@@ -294,7 +294,7 @@ public class DtoMapper {
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resource, TimedValue<?> t) {
         if (resource == null) {
-            throw new NotFoundException();
+            return Optional.empty();
         }
         final Instant timestamp = t.getTimestamp();
 
@@ -309,6 +309,9 @@ public class DtoMapper {
         if (val != null && val instanceof String) {
             ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(mapper, val);
             if (obs != null) {
+                if (obs.deleted()) {
+                    return Optional.empty();
+                }
                 return toObservation(userSession, application, mapper, uriInfo, expansions, filter, resource, timestamp,
                         obs);
             }
@@ -319,6 +322,8 @@ public class DtoMapper {
     public static Optional<Observation> toObservation(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ResourceSnapshot resource, final Instant timestamp, ExpandedObservation obs) {
+        if (obs.deleted())
+            return Optional.empty();
         String id = String.format("%s~%s", obs.id(), DtoMapperSimple.stampToId(timestamp));
 
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})").resolveTemplate("id", id)

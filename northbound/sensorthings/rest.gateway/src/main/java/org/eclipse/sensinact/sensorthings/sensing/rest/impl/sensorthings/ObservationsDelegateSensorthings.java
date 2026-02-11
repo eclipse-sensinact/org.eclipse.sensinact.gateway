@@ -85,8 +85,10 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
             Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
             if (isHistoryMemory() && getCacheObservation().getDto(id) != null) {
                 ExpandedObservation obs = getCacheObservation().getDto(id);
+
                 result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                         criterion, resourceSnapshot, timestamp, obs);
+
             } else {
                 if (timestamp.isBefore(milliTimestamp)) {
                     String history = (String) application.getProperties().get("sensinact.history.provider");

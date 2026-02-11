@@ -114,7 +114,7 @@ class HistoryResourceHelperSensorthingsTest {
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
                 null, null, null, null,
-                new FeatureOfInterest(null, "test", "test", "test", "test", new Point(0, 0), null, null));
+                new FeatureOfInterest(null, "test", "test", "test", "test", new Point(0, 0), null, null), false);
         try {
             return mapper.writeValueAsString(obs);
         } catch (JsonProcessingException e) {

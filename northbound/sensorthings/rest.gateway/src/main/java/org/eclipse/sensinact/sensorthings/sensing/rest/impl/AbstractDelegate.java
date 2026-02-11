@@ -288,7 +288,7 @@ public abstract class AbstractDelegate {
      * @param id
      * @return
      */
-    private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
+    public Optional<ProviderSnapshot> getProviderSnapshot(String id) {
         return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
 

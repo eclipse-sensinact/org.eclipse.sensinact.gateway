@@ -342,7 +342,7 @@ public class OGCParserTestSensorthings {
         FeatureOfInterest foi = new FeatureOfInterest(null, providerId + "~test~test", "test", null, null, null, null,
                 null);
         ExpandedObservation obs = new ExpandedObservation("test", providerId + "~test", resultTime, resultTime, value,
-                "test", null, null, null, null, null, null, foi);
+                "test", null, null, null, null, null, null, foi, false);
         try {
             return getMapper().writeValueAsString(obs);
         } catch (JsonProcessingException e) {

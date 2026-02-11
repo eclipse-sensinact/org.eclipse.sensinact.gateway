@@ -50,4 +50,22 @@ public class DtoMemoryCache<M> implements IDtoMemoryCache<M> {
     public List<M> values() {
         return dtoById.values().stream().toList();
     }
+
+    @Override
+    public List<String> keySet() {
+        // TODO Auto-generated method stub
+        return dtoById.keySet().stream().toList();
+    }
+
+    @Override
+    public void removeDtoStartWith(String providerId) {
+        List<String> idToDelete = keySet().stream().filter(id -> id.startsWith(providerId)).toList();
+        idToDelete.stream().forEach(id -> removeDto(id));
+    }
+
+    @Override
+    public void removeDtoContain(String providerId) {
+        List<String> idToDelete = keySet().stream().filter(id -> id.contains(providerId)).toList();
+        idToDelete.stream().forEach(id -> removeDto(id));
+    }
 }
