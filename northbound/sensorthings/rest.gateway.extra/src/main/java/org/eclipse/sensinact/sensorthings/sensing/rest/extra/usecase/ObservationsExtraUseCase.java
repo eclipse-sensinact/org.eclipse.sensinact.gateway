@@ -61,6 +61,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
     public ObservationsExtraUseCase(Providers providers, Application application) {
         super(providers, application);
         featureOfInterestUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
+        featureOfInterestUseCase.setObservationExtraUseCase(this);
         cacheObs = resolve(providers, IDtoMemoryCache.class, ExpandedObservation.class);
         cacheFoi = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
 
@@ -93,13 +94,6 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
             return new ExtraUseCaseResponse<ServiceSnapshot>(getProviderId(request), service);
         }
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
-
-    }
-
-    private void checkRequireLink(ServiceSnapshot datastream) {
-        if (datastream == null) {
-            throw new BadRequestException("datastream not found in Observation Payload");
-        }
 
     }
 
@@ -167,30 +161,19 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         return foi;
     }
 
-    private void removeFeatureOfInterest(ExpandedObservation observation) {
-        // retrieve created sensor
-        if (observation.featureOfInterest() != null
-                && DtoToModelMapper.isRecordOnlyField(observation.featureOfInterest(), "id")) {
-            String idFoi = DtoToModelMapper.getIdFromRecord(observation.featureOfInterest());
-
-            featureOfInterestUseCase.removeInMemoryFeatureOfInterest(idFoi);
-        }
-
-    }
-
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {
         String observationId = request.id();
         Instant stamp = DtoMapperSimple.getTimestampFromId(observationId);
         String providerId = DtoMapperSimple.extractFirstIdSegment(observationId);
         checkNoInline(request);
         if (isHistoryMemory() && cacheObs.getDto(observationId) != null) {
-            updateObservationMemoryHistory(cacheObs, cacheFoi, request, cacheObs.getDto(observationId), stamp);
+            updateObservationMemoryHistory(cacheObs, request, cacheObs.getDto(observationId), stamp);
         }
 
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
         // get old observation before update
         ResourceSnapshot resource = getObservationForMemoryHistory(request.session(), providerId);
-
+        checkDeletedObservation(request, resource);
         // update/create provider
         try {
             dataUpdate.pushUpdate(listDtoModels).getValue();
@@ -199,7 +182,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
             throw new InternalServerErrorException(e);
 
         }
-        updateObservationMemoryHistory(cacheObs, cacheFoi, request, resource, stamp);
+        updateObservationMemoryHistory(cacheObs, request, resource, stamp);
         String dataStreamId = getProviderId(request);
         ServiceSnapshot service = serviceUseCase.read(request.session(), dataStreamId, "datastream");
         if (service != null) {
@@ -208,19 +191,26 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
     }
 
-    private void updateObservationMemoryHistory(IDtoMemoryCache<ExpandedObservation> cacheObs2,
-            IDtoMemoryCache<FeatureOfInterest> cacheFoi2, ExtraUseCaseRequest<ExpandedObservation> request,
-            ResourceSnapshot resource, Instant stamp) {
-        if (resource != null) {
-            ExpandedObservation oldObs = DtoMapperSimple.parseExpandObservation(request.mapper(),
-                    resource.getValue().getValue());
-            updateObservationMemoryHistory(cacheObs2, cacheFoi2, request, oldObs, stamp);
+    private void checkDeletedObservation(ExtraUseCaseRequest<ExpandedObservation> request, ResourceSnapshot resource) {
+        if (resource.getValue() != null) {
+            ExpandedObservation obs = parseObservation(request.mapper(), (String) resource.getValue().getValue());
+            if (obs.deleted()) {
+                throw new NotFoundException();
+            }
         }
     }
 
-    private void updateObservationMemoryHistory(IDtoMemoryCache<ExpandedObservation> cacheObs2,
-            IDtoMemoryCache<FeatureOfInterest> cacheFoi2, ExtraUseCaseRequest<ExpandedObservation> request,
-            ExpandedObservation oldObs, Instant stamp) {
+    private void updateObservationMemoryHistory(IDtoMemoryCache<ExpandedObservation> cacheObs,
+            ExtraUseCaseRequest<ExpandedObservation> request, ResourceSnapshot resource, Instant stamp) {
+        if (resource != null) {
+            ExpandedObservation oldObs = DtoMapperSimple.parseExpandObservation(request.mapper(),
+                    resource.getValue().getValue());
+            updateObservationMemoryHistory(cacheObs, request, oldObs, stamp);
+        }
+    }
+
+    private void updateObservationMemoryHistory(IDtoMemoryCache<ExpandedObservation> cacheObs,
+            ExtraUseCaseRequest<ExpandedObservation> request, ExpandedObservation oldObs, Instant stamp) {
         ExpandedObservation newObs = request.model();
 
         ExpandedObservation newOldObs = new ExpandedObservation(oldObs.selfLink(), oldObs.id(),
@@ -231,10 +221,9 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
                 newObs.validTime() == null ? oldObs.validTime() : newObs.validTime(),
                 newObs.parameters() == null ? oldObs.parameters() : newObs.parameters(),
                 newObs.properties() == null ? oldObs.properties() : newObs.properties(), oldObs.datastreamLink(),
-                oldObs.featureOfInterestLink(), oldObs.datastream(), oldObs.featureOfInterest());
+                oldObs.featureOfInterestLink(), oldObs.datastream(), oldObs.featureOfInterest(), oldObs.deleted());
         cacheObs.addDto(oldObs.id() + "~" + DtoMapperSimple.stampToId(stamp), newOldObs);
-        cacheFoi.addDto(oldObs.id() + "~" + newOldObs.featureOfInterest().id() + "~" + DtoMapperSimple.stampToId(stamp),
-                oldObs.featureOfInterest());
+
     }
 
     @Override
@@ -251,9 +240,11 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
         if (isHistoryMemory() && cacheObs.getDto(request.id()) != null) {
             ExpandedObservation obs = cacheObs.getDto(request.id());
-            cacheFoi.addDto(obs.id() + "~" + obs.featureOfInterest().id() + "~" + DtoMapperSimple.stampToId(timestamp),
-                    obs.featureOfInterest());
-            cacheObs.removeDto(request.id());
+            if (obs.deleted()) {
+                throw new NotFoundException();
+            }
+            cacheObs.addDto(request.id(), getObservationDeleted(obs));
+            return null;
 
         } else if (!milliTimestamp.equals(timestamp)) {
             throw new NotFoundException();
@@ -277,7 +268,10 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
                         if (obsStr == null) {
                             return pf.failed(new NotFoundException());
                         }
-                        ExpandedObservation obs = parseObservation(request, obsStr);
+                        ExpandedObservation obs = parseObservation(request.mapper(), obsStr);
+                        if (obs == null) {
+                            throw new InternalServerErrorException();
+                        }
                         if (request.id() == null || !request.id().startsWith((String) obs.id())) {
                             // not the last one, we ask for delete historized obs
                             return pf.resolved(null);
@@ -286,8 +280,8 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
 
                         SensinactProvider sp = twin.getProvider(datastreamId);
                         SensinactResource resource = sp.getResource("datastream", "lastObservation");
-                        cacheFoi.addDto(obs.id() + "~" + obs.featureOfInterest().id() + "~"
-                                + DtoMapperSimple.stampToId(milliTimestamp), obs.featureOfInterest());
+                        ExpandedObservation obsDeleted = getObservationDeleted(obs);
+                        cacheObs.addDto(observationId, obsDeleted);
                         return resource.setValue(null);
                     }
                     return pf.resolved(null);

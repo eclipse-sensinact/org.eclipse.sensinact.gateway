@@ -421,12 +421,11 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
                         // check if there are still observed property and sensor
                         if (hasNoObservedPropertyAndSensor(opId, sensorId)) {
                             sp.delete();
+                            obsCache.removeDtoStartWith(providerId);
                         } else {
-                            ExpandedObservation lastObs = parseObservation(request, obsStr);
-                            if (lastObs != null)
-                                foiCache.addDto(lastObs.id() + "~" + lastObs.featureOfInterest().id()
-                                        + DtoMapperSimple.stampToId(obsStamp), lastObs.featureOfInterest());
+                            saveObservationHistoryMemory(obsCache, request, obsStr, obsStamp);
                             pf.all(removeDatastream(twin, providerId));
+
                         }
                     }
                     @SuppressWarnings("unchecked")

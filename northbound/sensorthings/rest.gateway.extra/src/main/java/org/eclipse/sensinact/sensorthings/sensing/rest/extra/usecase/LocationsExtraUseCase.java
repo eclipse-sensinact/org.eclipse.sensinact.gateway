@@ -55,12 +55,12 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedLocation, ProviderSnapshot> {
 
-    private final IDtoMemoryCache<GeoJsonObject> cacheHl;
+    private final IDtoMemoryCache<Instant> cacheHl;
 
     @SuppressWarnings("unchecked")
     public LocationsExtraUseCase(Providers providers, Application application) {
         super(providers, application);
-        cacheHl = resolve(providers, IDtoMemoryCache.class, GeoJsonObject.class);
+        cacheHl = resolve(providers, IDtoMemoryCache.class, Instant.class);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedLocation> request) {
@@ -90,26 +90,28 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
 
     }
 
-    private void updateHistoricalLocationMemoryHistory(List<ResourceSnapshot> locationThings) {
-        if (locationThings != null) {
-            locationThings.stream()
-                    .forEach(location -> cacheHl.addDto(
-                            location.getService().getProvider().getName() + "~"
-                                    + DtoMapperSimple.stampToId(location.getValue().getTimestamp()),
-                            (GeoJsonObject) location.getValue().getValue()));
+    private void updateHistoricalLocationMemoryHistory(List<ResourceSnapshot> providerThings) {
+        if (providerThings != null) {
+            providerThings.stream().forEach(thing -> {
+                cacheHl.addDto(
+                        thing.getService().getProvider().getName() + "~"
+                                + DtoMapperSimple.stampToId(thing.getValue().getTimestamp()),
+                        thing.getValue().getTimestamp());
+            });
         }
     }
 
     private List<ResourceSnapshot> getHistoricalLocationsForMemoryHistory(ExtraUseCaseRequest<ExpandedLocation> request,
             List<SensorThingsUpdate> listDtoModels) {
-        List<ResourceSnapshot> locationThings = null;
+        List<ResourceSnapshot> resourceLocations = null;
         if (isHistoryMemory()) {
             // get if exists last historical
-            locationThings = listDtoModels.stream().filter(update -> update instanceof ThingUpdate)
-                    .map(update -> getLocationExistingThing(request.session(), ((ThingUpdate) update).providerId()))
+            resourceLocations = listDtoModels.stream().filter(update -> update instanceof ThingUpdate)
+                    .map(update -> getProviderThingIfLocationFieldExists(request.session(),
+                            ((ThingUpdate) update).providerId()))
                     .filter(Objects::nonNull).toList();
         }
-        return locationThings;
+        return resourceLocations;
     }
 
     @Override
@@ -141,7 +143,8 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
                             expandLocation.description(), expandLocation.encodingType(), expandLocation.location(),
                             expandLocation.properties(), null, null));
                     GeoJsonObject locationThing = DtoToModelMapper.getAggregateLocation(request, ids, newLocation);
-                    cacheHl.addDto(providerId + "~" + Long.toString(stamp.toEpochMilli(), 16), locationThing);
+                    if (isHistoryMemory())
+                        cacheHl.addDto(providerId + "~" + Long.toString(stamp.toEpochMilli(), 16), stamp);
                     return new ThingUpdate(providerId, stamp, locationThing, null, null, providerId, null, ids, null);
                 }
                 return null;
@@ -154,11 +157,11 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
         try {
-            List<ResourceSnapshot> locationThings = getHistoricalLocationsForMemoryHistory(request, listDtoModels);
+            List<ResourceSnapshot> resourceLocation = getHistoricalLocationsForMemoryHistory(request, listDtoModels);
 
             dataUpdate.pushUpdate(listDtoModels).getValue();
 
-            updateHistoricalLocationMemoryHistory(locationThings);
+            updateHistoricalLocationMemoryHistory(resourceLocation);
 
             LocationUpdate locationUpdate = (LocationUpdate) listDtoModels.get(0);
 
@@ -179,14 +182,29 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedLocation> request) {
         // delete location with link between location and thing
         String locationId = request.id();
-
-        AbstractSensinactCommand<Void> deleteLocationCommand = new AbstractSensinactCommand<Void>() {
+        AbstractSensinactCommand<Map<String, TimedValue<List<String>>>> thingsListProviderCommand = getCommandThingProviders(
+                null);
+        DependentCommand<Map<String, TimedValue<List<String>>>, List<Void>> deleteLocationCommand = new DependentCommand<Map<String, TimedValue<List<String>>>, List<Void>>(
+                thingsListProviderCommand) {
 
             @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
+            protected Promise<List<Void>> call(Promise<Map<String, TimedValue<List<String>>>> parentResult,
+                    SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
                 SensinactProvider sp = twin.getProvider(locationId);
+
                 if (sp != null) {
                     sp.delete();
+                    try {
+                        parentResult.getValue().keySet().stream().forEach(id -> cacheHl.removeDtoContain(id));
+                        List<Promise<Void>> promises = parentResult
+                                .getValue().keySet().stream().map(id -> twin.getProvider(id)
+                                        .getResource(DtoMapperSimple.SERVICE_ADMIN, DtoMapperSimple.LOCATION))
+                                .map(r -> r.setValue(null)).toList();
+                        return pf.all(promises);
+                    } catch (InvocationTargetException | InterruptedException e) {
+                        return pf.failed(e);
+                    }
+
                 }
                 return pf.resolved(null);
             }
@@ -222,6 +240,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expande
 
                         List<String> newLocationsList = timedValue.getValue().stream()
                                 .filter(id -> !id.equals(locationId)).toList();
+                        cacheHl.removeDtoContain(es.getKey());
                         return twin.getResource(es.getKey(), DtoMapperSimple.SERVICE_THING, "locationIds")
                                 .setValue(newLocationsList);
                     }).toList();

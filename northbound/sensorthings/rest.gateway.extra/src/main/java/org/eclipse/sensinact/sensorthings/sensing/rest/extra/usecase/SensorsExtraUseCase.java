@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,7 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
@@ -35,6 +38,7 @@ import org.osgi.util.promise.PromiseFactory;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
@@ -45,11 +49,13 @@ import jakarta.ws.rs.ext.Providers;
 public class SensorsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Sensor, Object> {
 
     private final IDtoMemoryCache<Sensor> cacheSensor;
+    private final IDtoMemoryCache<ExpandedObservation> obsCache;
 
     @SuppressWarnings("unchecked")
     public SensorsExtraUseCase(Providers providers, Application application) {
         super(providers, application);
         cacheSensor = resolve(providers, IDtoMemoryCache.class, Sensor.class);
+        obsCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservation.class);
     }
 
     public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<Sensor> request) {
@@ -85,23 +91,42 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Sensor, O
         AbstractSensinactCommand<Map<String, TimedValue<?>>> parentCommand = getContextDeleteDatastreamProvider(
                 request);
 
-        return new DependentCommand<Map<String, TimedValue<?>>, Void>(parentCommand) {
+        return new DependentCommand<Map<String, TimedValue<?>>, List<Void>>(parentCommand) {
 
             @Override
-            protected Promise<Void> call(Promise<Map<String, TimedValue<?>>> parentResult, SensinactDigitalTwin twin,
-                    SensinactModelManager modelMgr, PromiseFactory pf) {
+            protected Promise<List<Void>> call(Promise<Map<String, TimedValue<?>>> parentResult,
+                    SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
                 try {
                     String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
                     SensinactProvider sp = twin.getProvider(providerId);
-                    String sensorId = (String) parentResult.getValue().get("observedPropertyId").getValue();
+                    String observedPropertyId = (String) parentResult.getValue().get("observedPropertyId").getValue();
+                    String obsStr = (String) parentResult.getValue().get("lastObservation").getValue();
+                    Instant obsStamp = parentResult.getValue().get("lastObservation").getTimestamp();
+
                     String id = (String) parentResult.getValue().get("id").getValue();
 
                     if (sp != null) {
                         // check if there are still observed property and sensor
-                        if (hasNoDatastreamAndObservedProperty(sensorId, id)) {
+                        if (hasNoDatastreamAndObservedProperty(observedPropertyId, id)) {
                             sp.delete();
+                            obsCache.removeDtoStartWith(providerId);
+
                         } else if (id == null) {
-                            return removeSensor(twin, providerId);
+
+                            return pf.all(removeSensor(twin, providerId));
+                        } else {
+                            if (isHistoryMemory()) {// for TCK we remove datastream when we remove sensor (not
+                                                    // compliant)
+                                saveObservationHistoryMemory(obsCache, request, obsStr, obsStamp);
+
+                                List<Promise<Void>> result = new ArrayList<Promise<Void>>();
+                                result.addAll(removeDatastream(twin, providerId));
+                                result.addAll(removeSensor(twin, providerId));
+                                return pf.all(result);
+                            } else
+
+                                return pf.failed(new WebApplicationException(
+                                        String.format("datastream %s still exists", providerId), 409));
                         }
                     }
 
@@ -111,10 +136,22 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Sensor, O
                 }
             }
 
-            private Promise<Void> removeSensor(SensinactDigitalTwin twin, String providerId) {
-                SensinactResource resource = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
+            private List<Promise<Void>> removeSensor(SensinactDigitalTwin twin, String providerId) {
+                SensinactResource sensorId = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
                         "sensorId");
-                return resource.setValue(null);
+                SensinactResource sensorName = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
+                        "sensorName");
+                SensinactResource sensorDescription = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
+                        "sensorDescription");
+                SensinactResource sensorProperties = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
+                        "sensorProperties");
+                SensinactResource sensorMetadata = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
+                        "sensorMetadata");
+                SensinactResource sensorEncodingType = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
+                        "sensorEncodingType");
+                return List.of(sensorId.setValue(null), sensorName.setValue(null), sensorDescription.setValue(null),
+                        sensorProperties.setValue(null), sensorMetadata.setValue(null),
+                        sensorEncodingType.setValue(null));
             }
 
             private boolean hasNoDatastreamAndObservedProperty(String sensorId, String id) {

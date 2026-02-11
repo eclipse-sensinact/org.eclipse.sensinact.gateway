@@ -164,7 +164,7 @@ public class DtoFactory {
             FeatureOfInterest featureOfInterest) {
 
         return new ExpandedObservation(null, null, Instant.now(), Instant.now(), 5.0, "test", null, null, null, null,
-                null, datastreamRefId, featureOfInterest);
+                null, datastreamRefId, featureOfInterest, false);
 
     }
 
@@ -172,7 +172,7 @@ public class DtoFactory {
             RefId datastreamRefId, FeatureOfInterest featureOfInterest) {
 
         return new ExpandedObservation(null, "obs2", PhenomTime, null, result, "test", null, null, null, null, null,
-                datastreamRefId, featureOfInterest);
+                datastreamRefId, featureOfInterest, false);
 
     }
 

@@ -37,6 +37,19 @@ public interface IDtoMemoryCache<M> {
     public void removeDto(String id);
 
     /**
+     * remove dto by id start with providerId
+     *
+     * @param id
+     */
+    public void removeDtoStartWith(String providerId);
+
+    /**
+     *
+     * @param providerId
+     */
+    public void removeDtoContain(String providerId);
+
+    /**
      * get the dto by id
      *
      * @param id
@@ -50,6 +63,13 @@ public interface IDtoMemoryCache<M> {
      * @return
      */
     public List<M> values();
+
+    /**
+     * return list of dto key cached
+     *
+     * @return
+     */
+    public List<String> keySet();
 
     /**
      * get type of DTO to store in cache

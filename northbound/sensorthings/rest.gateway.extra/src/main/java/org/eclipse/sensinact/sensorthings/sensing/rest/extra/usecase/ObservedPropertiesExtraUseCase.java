@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,7 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
@@ -35,6 +38,7 @@ import org.osgi.util.promise.PromiseFactory;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
@@ -45,12 +49,13 @@ import jakarta.ws.rs.ext.Providers;
 public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDtoDelete<ObservedProperty, Object> {
 
     private final IDtoMemoryCache<ObservedProperty> cacheObservedProperty;
+    private final IDtoMemoryCache<ExpandedObservation> obsCache;
 
     @SuppressWarnings("unchecked")
     public ObservedPropertiesExtraUseCase(Providers providers, Application application) {
         super(providers, application);
         cacheObservedProperty = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
-
+        obsCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservation.class);
     }
 
     private ObservedProperty updateInMemoryObservedProperty(ExtraUseCaseRequest<ObservedProperty> request,
@@ -154,24 +159,41 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDtoDelet
         AbstractSensinactCommand<Map<String, TimedValue<?>>> parentCommand = getContextDeleteDatastreamProvider(
                 request);
 
-        return new DependentCommand<Map<String, TimedValue<?>>, Void>(parentCommand) {
+        return new DependentCommand<Map<String, TimedValue<?>>, List<Void>>(parentCommand) {
 
             @Override
-            protected Promise<Void> call(Promise<Map<String, TimedValue<?>>> parentResult, SensinactDigitalTwin twin,
-                    SensinactModelManager modelMgr, PromiseFactory pf) {
+            protected Promise<List<Void>> call(Promise<Map<String, TimedValue<?>>> parentResult,
+                    SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
                 try {
                     String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
                     SensinactProvider sp = twin.getProvider(providerId);
                     String sensorId = (String) parentResult.getValue().get("sensorId").getValue();
                     String id = (String) parentResult.getValue().get("id").getValue();
+                    String obsStr = (String) parentResult.getValue().get("lastObservation").getValue();
+                    Instant obsStamp = parentResult.getValue().get("lastObservation").getTimestamp();
 
                     if (sp != null) {
                         // check if there are still observed property and sensor
                         if (hasNoDatastreamAndSensor(sensorId, id)) {
                             sp.delete();
-                        } else if (id == null) {
+                            obsCache.removeDtoStartWith(providerId);
 
-                            return removeObservedProperty(twin, providerId);
+                        } else if (id == null) {// datastream must be delted for delete observed property
+
+                            return pf.all(removeObservedProperty(twin, providerId));
+                        } else {
+                            if (isHistoryMemory()) {// for TCK we remove datastream when we remove sensor (not
+                                // compliant)
+                                saveObservationHistoryMemory(obsCache, request, obsStr, obsStamp);
+
+                                List<Promise<Void>> result = new ArrayList<Promise<Void>>();
+                                result.addAll(removeDatastream(twin, providerId));
+                                result.addAll(removeObservedProperty(twin, providerId));
+                                return pf.all(result);
+                            } else
+
+                                return pf.failed(new WebApplicationException(
+                                        String.format("datastream %s still exists", providerId), 409));
                         }
                     }
 
@@ -181,10 +203,20 @@ public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDtoDelet
                 }
             }
 
-            private Promise<Void> removeObservedProperty(SensinactDigitalTwin twin, String providerId) {
-                SensinactResource resource = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
+            private List<Promise<Void>> removeObservedProperty(SensinactDigitalTwin twin, String providerId) {
+                SensinactResource observedPropertyId = twin.getResource(providerId, DtoMapperSimple.SERVICE_DATASTREAM,
                         "observedPropertyId");
-                return resource.setValue(null);
+                SensinactResource observedPropertyName = twin.getResource(providerId,
+                        DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId");
+                SensinactResource observedPropertyDescription = twin.getResource(providerId,
+                        DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId");
+                SensinactResource observedPropertyDéfinition = twin.getResource(providerId,
+                        DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId");
+                SensinactResource observedPropertyPRoperties = twin.getResource(providerId,
+                        DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId");
+                return List.of(observedPropertyId.setValue(null), observedPropertyName.setValue(null),
+                        observedPropertyDescription.setValue(null), observedPropertyDéfinition.setValue(null),
+                        observedPropertyPRoperties.setValue(null));
             }
 
             private boolean hasNoDatastreamAndSensor(String sensorId, String id) {

@@ -80,7 +80,8 @@ public class LocationsDelegateSensorthings extends AbstractDelegate {
                 return new ResultList<HistoricalLocation>(null, null, List.of());
             }
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    getSession(), application, getMapper(), uriInfo, getExpansions(), filter, providerThings, id, 0);
+                    getSession(), application, getMapper(), uriInfo, getExpansions(), filter, providerThings,
+                    isHistoryMemory() ? getCacheHistoricalLocation() : null, id, 0);
             if (list.value().isEmpty()) {
                 list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
                         filter, providerThings, id);
@@ -161,7 +162,8 @@ public class LocationsDelegateSensorthings extends AbstractDelegate {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerThing = validateAndGetProvider(id2);
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    getSession(), application, getMapper(), uriInfo, getExpansions(), filter, providerThing, 0);
+                    getSession(), application, getMapper(), uriInfo, getExpansions(), filter, providerThing,
+                    isHistoryMemory() ? getCacheHistoricalLocation() : null, 0);
             if (list.value().isEmpty()) {
                 list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
                         filter, providerThing);

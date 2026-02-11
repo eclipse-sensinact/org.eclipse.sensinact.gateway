@@ -103,12 +103,11 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
         return resource;
     }
 
-    protected ResourceSnapshot getLocationExistingThing(SensiNactSession session, String thingId) {
+    protected ResourceSnapshot getProviderThingIfLocationFieldExists(SensiNactSession session, String thingId) {
         ResourceSnapshot locationThing = null;
         if (isHistoryMemory()) {
             // get if exists last historical
             locationThing = resourceUseCase.read(session, thingId, DtoMapperSimple.SERVICE_ADMIN, "location");
-
         }
         if (!locationThing.isSet())
             return null;
@@ -155,13 +154,16 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
                 @SuppressWarnings("unchecked")
                 Promise<TimedValue<?>> sensorId = (Promise<TimedValue<?>>) (Promise<?>) sp
                         .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "sensorId").getValue(String.class);
+                @SuppressWarnings("unchecked")
+                Promise<TimedValue<?>> lastObservation = (Promise<TimedValue<?>>) (Promise<?>) sp
+                        .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation").getValue(String.class);
 
                 // Combine all promises in a concrete list
-                List<Promise<TimedValue<?>>> promises = List.of(id, observedPropertyId, sensorId);
+                List<Promise<TimedValue<?>>> promises = List.of(id, observedPropertyId, sensorId, lastObservation);
 
                 // pf.all now works
-                return pf.all(promises).map(
-                        list -> Map.of("id", list.get(0), "observedPropertyId", list.get(1), "sensorId", list.get(2)));
+                return pf.all(promises).map(list -> Map.of("id", list.get(0), "observedPropertyId", list.get(1),
+                        "sensorId", list.get(2), "lastObservation", list.get(3)));
 
             }
         };

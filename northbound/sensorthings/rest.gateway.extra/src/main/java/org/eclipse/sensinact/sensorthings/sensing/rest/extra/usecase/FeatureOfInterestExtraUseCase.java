@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
@@ -23,8 +24,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
-
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Application;
@@ -38,6 +39,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
 
     private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
     private final IDtoMemoryCache<ExpandedObservation> obsCache;
+    private ObservationsExtraUseCase observationExtraUseCase;
 
     @SuppressWarnings("unchecked")
     public FeatureOfInterestExtraUseCase(Providers providers, Application application) {
@@ -67,7 +69,23 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         if (cacheFoi.getDto(request.id()) != null) {
             cacheFoi.removeDto(request.id());
             return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
-
+        }
+        String[] split = request.id().split("~");
+        if (split.length > 3) {
+            String idObs = String.format("%s~%s~%s", split[0], split[1], split[3]);
+            if (isHistoryMemory() && obsCache.getDto(idObs) != null) {
+                obsCache.removeDto(idObs);
+                return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
+            }
+            ExtraUseCaseRequest<ExpandedObservation> requestObs = new ExtraUseCaseRequest<ExpandedObservation>(
+                    request.session(), request.mapper(), request.uriInfo(), HttpMethod.DELETE, idObs);
+            ExtraUseCaseResponse<ServiceSnapshot> result = observationExtraUseCase.delete(requestObs);
+            if (result.success()) {
+                if (isHistoryMemory() && obsCache.getDto(idObs) != null) {
+                    obsCache.removeDto(idObs);
+                }
+                return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
+            }
         }
         throw new NotFoundException();
 
@@ -155,6 +173,10 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
 
     public FeatureOfInterest getInMemoryFeatureOfInterest(String id) {
         return cacheFoi.getDto(id);
+    }
+
+    public void setObservationExtraUseCase(ObservationsExtraUseCase useCase) {
+        observationExtraUseCase = useCase;
     }
 
 }

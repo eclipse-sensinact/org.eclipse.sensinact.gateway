@@ -19,6 +19,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
@@ -62,23 +63,20 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
         if (obsStr == null) {
             return null;
         }
-        return parseObservation(request, obsStr);
+        return parseObservation(request.mapper(), obsStr);
     }
 
-    protected ExpandedObservation parseObservation(ExtraUseCaseRequest<?> request, String obsStr) {
+    protected ExpandedObservation parseObservation(ObjectMapper mapper, String obsStr) {
         ExpandedObservation existingObservation;
         if (obsStr == null) {
             return null;
         }
         try {
-            existingObservation = request.mapper().readValue(obsStr, ExpandedObservation.class);
+            existingObservation = mapper.readValue(obsStr, ExpandedObservation.class);
         } catch (JsonProcessingException e) {
             return null;
         }
-        if (existingObservation == null) {
-            existingObservation = new ExpandedObservation(null, request.id(), null, null, null, null, null, null, null,
-                    null, null, null, null);
-        }
+
         return existingObservation;
     }
 

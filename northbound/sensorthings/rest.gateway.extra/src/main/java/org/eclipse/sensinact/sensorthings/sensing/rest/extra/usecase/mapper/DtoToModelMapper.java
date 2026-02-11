@@ -374,7 +374,7 @@ public class DtoToModelMapper {
                     : lastObservation.properties();
 
             obs = new ExpandedObservation(null, observationId, phenomenonTime, resultTime, result, resultQuality,
-                    validTime, parameters, obsProperties, null, null, null, featureOfInterest);
+                    validTime, parameters, obsProperties, null, null, null, featureOfInterest, false);
             // DtoMapperSimple.checkRequireField(obs);
             if (featureOfInterest != null && featureOfInterest.feature() != null) {
                 observedAreaToUpdate = mergeObservedArea(observedArea, featureOfInterest.feature());

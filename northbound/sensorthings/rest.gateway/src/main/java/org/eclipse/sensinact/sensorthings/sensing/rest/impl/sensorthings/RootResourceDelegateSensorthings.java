@@ -95,10 +95,17 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
 
         List<ProviderSnapshot> providers = listProviders(criterion);
-        ResultList<HistoricalLocation> result = new ResultList<>(null, null, providers.stream()
-                .filter(p -> DtoMapperSimple.getThingService(p) != null).map(p -> toHistoricalLocation(getSession(),
-                        application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                .filter(Optional::isPresent).map(Optional::get).toList());
+        Stream<HistoricalLocation> cacheHl = Stream.empty();
+        if (isHistoryMemory()) {
+            cacheHl = getCacheHistoricalLocation().keySet().stream()
+                    .map(id -> DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                            getExpansions(), criterion, id, getCacheHistoricalLocation().getDto(id)));
+        }
+        Stream<HistoricalLocation> liveHl = providers.stream().filter(p -> DtoMapperSimple.getThingService(p) != null)
+                .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        criterion, p))
+                .filter(Optional::isPresent).map(Optional::get);
+        ResultList<HistoricalLocation> result = new ResultList<>(null, null, Stream.concat(liveHl, cacheHl).toList());
         return result;
 
     }

@@ -329,7 +329,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
             throw new NotFoundException(entityName + " " + id + " not found");
         }
         ExpandedObservation observation = new ExpandedObservation(null, parentId, null, null, null, null, null, null,
-                null, null, null, null, dto);
+                null, null, null, null, dto, false);
 
         ExtraUseCaseResponse<ServiceSnapshot> response = useCase.update(new ExtraUseCaseRequest<>(request.session(),
                 request.mapper(), request.uriInfo(), HttpMethod.PATCH, observation, parentId));
