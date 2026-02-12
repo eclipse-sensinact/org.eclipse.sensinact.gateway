@@ -19,12 +19,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.DtoFactory;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.UtilsAssert;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.history.provider.AstractIntegrationTestHistoryProvider;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class ObservationHistoryMemoryTest extends AstractIntegrationTestHistoryProvider {
+public class ObservationHistoryMemoryTest extends AstractIntegrationTestHistoryMemory {
 
     /**
      * test create observation through datastream observation endpoint

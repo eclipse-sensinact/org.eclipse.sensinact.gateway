@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing;
+package org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mock.Strictness.LENIENT;
@@ -22,6 +22,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUse
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.DtoMemoryCacheProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint.UseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.DatastreamsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.FeatureOfInterestExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase;
