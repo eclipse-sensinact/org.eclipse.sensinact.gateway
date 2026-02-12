@@ -49,31 +49,20 @@ public class ThrowableMapperProvider implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable e) {
-        ErrorResponse error;
         int status = 500;
-        error = new ErrorResponse(getErrorCodeFromStatus(status), e.getMessage());
-
         if (e instanceof UnrecognizedPropertyException) {
             status = 400;
-            return Response.status(status).entity(error).build();
-
-        }
-        if (e instanceof WebApplicationException webEx) {
-            // Log at WARN instead of ERROR
+        } else if (e instanceof WebApplicationException webEx) {
             status = webEx.getResponse().getStatus();
-            if (status < 500) {
-                LOG.warn("WebApplicationException caught: message {} status {}", webEx.getMessage(),
-                        webEx.getResponse().getStatus());
-            } else {
-                LOG.error("WebApplicationException exception while processing request", e);
-
-            }
-
-            return Response.status(status).entity(error).build();
         }
-        LOG.error("Unhandled exception while processing request", e);
 
-        error = new ErrorResponse(getErrorCodeFromStatus(status), e.getMessage());
+        if (status < 500) {
+            LOG.warn("{} caught: message {} status {}", e.getClass().getSimpleName(), e.getMessage(), status);
+        } else {
+            LOG.error("Exception while processing request", e);
+        }
+
+        ErrorResponse error = new ErrorResponse(getErrorCodeFromStatus(status), e.getMessage());
         return Response.status(status).entity(error).build();
     }
 }
