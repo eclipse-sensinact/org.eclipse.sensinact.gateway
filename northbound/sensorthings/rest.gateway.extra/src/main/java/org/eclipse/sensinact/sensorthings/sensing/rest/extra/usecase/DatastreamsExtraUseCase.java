@@ -89,12 +89,13 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
 
         ProviderSnapshot snapshot = providerUseCase.read(request.session(), idDatastream);
         if (snapshot != null) {
-
-            removeCachedExpandedObservedProperty(request.model());
-            removeCachedExpandedSensor(request.model());
-            if (request.model().observations() != null) {
-                request.model().observations().stream()
-                        .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
+            if (!isHistoryMemory()) {
+                removeCachedExpandedObservedProperty(request.model());
+                removeCachedExpandedSensor(request.model());
+                if (request.model().observations() != null) {
+                    request.model().observations().stream()
+                            .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
+                }
             }
             return new ExtraUseCaseResponse<ProviderSnapshot>(idDatastream, snapshot);
         }
@@ -314,14 +315,14 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         observations.stream().forEach(u -> updateObservationMemoryHistory(obsCache, foiCache, request.mapper(), u));
 
         ProviderSnapshot provider = providerUseCase.read(request.session(), id);
-
-        removeCachedExpandedObservedProperty(request.model());
-        removeCachedExpandedSensor(request.model());
-        if (request.model().observations() != null) {
-            request.model().observations().stream()
-                    .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
+        if (!isHistoryMemory()) {
+            removeCachedExpandedObservedProperty(request.model());
+            removeCachedExpandedSensor(request.model());
+            if (request.model().observations() != null) {
+                request.model().observations().stream()
+                        .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
+            }
         }
-
         return new ExtraUseCaseResponse<ProviderSnapshot>(id, provider);
 
     }

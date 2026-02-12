@@ -18,6 +18,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.DtoFactory;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.UtilsAssert;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.history.memory.AstractIntegrationTestHistoryMemory;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,7 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 /**
  * Unit test for simple App.
  */
-public class LocationHistoryMemoryTest extends AstractIntegrationTestHistoryProvider {
+public class LocationHistoryMemoryTest extends AstractIntegrationTestHistoryMemory {
 
     /**
      * test delete historicalLocation
