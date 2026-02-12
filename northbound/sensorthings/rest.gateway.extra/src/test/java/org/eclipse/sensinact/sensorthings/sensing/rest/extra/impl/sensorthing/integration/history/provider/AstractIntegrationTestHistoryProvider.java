@@ -13,7 +13,7 @@ public abstract class AstractIntegrationTestHistoryProvider extends AbstractInte
     @Override
     protected void updateConfigurationHistory(Configuration sensorthingsConfig) throws IOException {
         Hashtable<String, Object> newProps = new Hashtable<String, Object>();
-        newProps.put("history.in.memory", false);
+        newProps.put("history.in.memory", true);
 
         Dictionary<String, Object> properties = sensorthingsConfig.getProperties();
         Enumeration<String> keys = properties.keys();

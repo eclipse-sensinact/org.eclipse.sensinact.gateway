@@ -296,6 +296,10 @@ public abstract class AbstractIntegrationTest {
         return node.get("@iot.id").asText();
     }
 
+    public static String getIdFromJsonValues(JsonNode node, int index) {
+        return getIdFromJson(node.get("value").get(index));
+    }
+
     public static final String CONTENT_TYPE = "Content-Type";
 
     @BeforeEach

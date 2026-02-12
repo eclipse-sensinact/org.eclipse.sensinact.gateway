@@ -43,7 +43,7 @@ public class LocationHistoryMemoryTest extends AstractIntegrationTestHistoryProv
         json = getJsonResponseFromPost(dtoLocation, String.format("Things(%s)/Locations", idThing), 201);
         UtilsAssert.assertLocation(dtoLocation, json);
         json = getJsonResponseFromGet(String.format("Things(%s)/HistoricalLocations", idThing), 200);
-        String idHistoricalLocation = getIdFromJson(json.get(0));
+        String idHistoricalLocation = getIdFromJsonValues(json, 0);
         getJsonResponseFromDelete(String.format("/HistoricalLocations(%s)", idHistoricalLocation), 200);
 
     }

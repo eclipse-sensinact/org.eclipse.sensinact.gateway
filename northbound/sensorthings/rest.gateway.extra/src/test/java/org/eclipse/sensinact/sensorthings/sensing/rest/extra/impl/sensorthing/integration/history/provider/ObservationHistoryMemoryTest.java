@@ -36,6 +36,8 @@ public class ObservationHistoryMemoryTest extends AstractIntegrationTestHistoryP
         ExpandedObservation observsation = DtoFactory.getObservation(name);
         json = getJsonResponseFromPost(observsation, String.format("Datastreams(%s)/Observations", datastreamId), 201);
         String obsId = getIdFromJson(json);
+        observsation = DtoFactory.getObservation(name);
+        json = getJsonResponseFromPost(observsation, String.format("Datastreams(%s)/Observations", datastreamId), 201);
 
         UtilsAssert.assertObservation(observsation, json);
         json = getJsonResponseFromDelete(String.format("Observations(%s)", obsId), 200);
