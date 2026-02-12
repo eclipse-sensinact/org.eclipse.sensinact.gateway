@@ -339,8 +339,7 @@ public class OGCParserTestSensorthings {
 
     public String getExpandedObservation(Instant resultTime, String providerId, Object value) {
 
-        FeatureOfInterest foi = new FeatureOfInterest(null, providerId + "~test~test", "test", null, null, null, null,
-                null);
+        FeatureOfInterest foi = new FeatureOfInterest(null, "test", "test", null, null, null, null, null);
         ExpandedObservation obs = new ExpandedObservation("test", providerId + "~test", resultTime, resultTime, value,
                 "test", null, null, null, null, null, null, foi, false);
         try {

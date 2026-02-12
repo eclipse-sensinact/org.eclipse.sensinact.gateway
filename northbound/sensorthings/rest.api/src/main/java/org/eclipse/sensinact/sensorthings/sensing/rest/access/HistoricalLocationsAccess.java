@@ -114,6 +114,21 @@ public interface HistoricalLocationsAccess {
         return getHistoricalLocationLocationHistoricalLocations(id, id2);
     }
 
+    @Path("Locations({id2})/HistoricalLocation")
+    @GET
+    default public HistoricalLocation getHistoricalLocationLocationHistoricalLocation(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getHistoricalLocation(id);
+    }
+
+    @Path("Locations({id2})/HistoricalLocations/$ref")
+    @GET
+    @RefFilter
+    default public HistoricalLocation getHistoricalLocationLocationHistoricalLocationRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getHistoricalLocationLocationHistoricalLocation(id, id2);
+    }
+
     @Path("Thing")
     @GET
     public Thing getHistoricalLocationThing(@PathParam("id") ODataId id);

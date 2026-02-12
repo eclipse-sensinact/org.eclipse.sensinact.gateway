@@ -177,14 +177,13 @@ public class AbstractIntegrationTest {
     }
 
     protected void createDatastream(String provider, String thingId, int value) {
-        createDatastream(provider, thingId, value, null);
+        createDatastream(provider, thingId, value, Instant.now());
     }
 
     protected void createObservation(String provider, String thingId, Object value, Instant valueInstant) {
 
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation",
-                getObservation(provider + "~test", value, getFeatureOfInterest(provider + "~test~test"), valueInstant),
-                valueInstant);
+                getObservation(provider + "~test", value, getFeatureOfInterest("test"), valueInstant), valueInstant);
 
     }
 
@@ -194,6 +193,8 @@ public class AbstractIntegrationTest {
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "id", provider,
                 valueInstant);
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "name", "test",
+                valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "observationType", "test",
                 valueInstant);
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "sensorId", "test1",
                 valueInstant);

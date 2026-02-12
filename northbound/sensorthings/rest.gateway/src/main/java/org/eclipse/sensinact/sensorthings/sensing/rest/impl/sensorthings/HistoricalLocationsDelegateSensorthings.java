@@ -19,6 +19,7 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple.getTimestampFromId;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,7 +65,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         ResourceSnapshot location = providerSnapshot.getResource(DtoMapperSimple.SERVICE_ADMIN,
                 DtoMapperSimple.LOCATION);
-        Instant resourceStamp = location.getValue().getTimestamp();
+        Instant resourceStamp = location.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
         if (isHistoryMemory() && getCacheHistoricalLocation().getDto(id) != null) {
             return DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                     null, id, getCacheHistoricalLocation().getDto(id));

@@ -177,6 +177,21 @@ public interface LocationsAccess {
         return getLocationHistoricalLocationLocations(id, id2);
     }
 
+    @Path("HistoricalLocations({id2})/Location")
+    @GET
+    default public Location getLocationHistoricalLocationLocationsLocation(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getLocation(id);
+    }
+
+    @Path("HistoricalLocations({id2})/Location/$ref")
+    @GET
+    @RefFilter
+    default public Location getLocationHistoricalLocationLocationsLocationRef(@PathParam("id") ODataId id,
+            @PathParam("id2") ODataId id2) {
+        return getLocationHistoricalLocationLocationsLocation(id, id2);
+    }
+
     @Path("Things")
     @GET
     public ResultList<Thing> getLocationThings(@PathParam("id") ODataId id);
@@ -187,6 +202,19 @@ public interface LocationsAccess {
     default public ResultList<Id> getLocationThingsRef(@PathParam("id") ODataId id) {
         ResultList<Thing> locationThings = getLocationThings(id);
         return new ResultList<>(locationThings.count(), locationThings.nextLink(), locationThings.value());
+    }
+
+    @Path("Things({id2}/Location")
+    @GET
+    default public Location getLocationThingLocation(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        return getLocation(id);
+    }
+
+    @Path("Things({id2}/Location/$ref")
+    @GET
+    @RefFilter
+    default public Location getLocationThingLocationRef(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        return getLocationThingLocation(id, id2);
     }
 
     @Path("Things({id2})")
