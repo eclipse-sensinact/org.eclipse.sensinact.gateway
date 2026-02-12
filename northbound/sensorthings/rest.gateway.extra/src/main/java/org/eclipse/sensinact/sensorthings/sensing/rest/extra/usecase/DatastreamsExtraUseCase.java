@@ -315,7 +315,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         observations.stream().forEach(u -> updateObservationMemoryHistory(obsCache, foiCache, request.mapper(), u));
 
         ProviderSnapshot provider = providerUseCase.read(request.session(), id);
-        if (!isHistoryMemory()) {
+        if( !isHistoryMemory() ) {
             removeCachedExpandedObservedProperty(request.model());
             removeCachedExpandedSensor(request.model());
             if (request.model().observations() != null) {

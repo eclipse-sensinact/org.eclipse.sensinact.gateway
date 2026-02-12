@@ -18,6 +18,7 @@ import static org.mockito.Mock.Strictness.LENIENT;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.DtoMemoryCacheProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
@@ -31,6 +32,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.RefIdUseCas
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.SensorsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.ThingsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
+import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessServiceUseCaseProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,6 +78,9 @@ class UseCaseTest {
         Mockito.when(providers.<IAccessServiceUseCase>getContextResolver(
                 Mockito.argThat(c -> c != null && IAccessServiceUseCase.class.isAssignableFrom(c)), Mockito.any()))
                 .thenReturn(new AccessServiceUseCaseProvider());
+        Mockito.when(providers.<IAccessResourceUseCase>getContextResolver(
+                Mockito.argThat(c -> c != null && IAccessResourceUseCase.class.isAssignableFrom(c)), Mockito.any()))
+                .thenReturn(new AccessResourceUseCaseProvider());
         Mockito.when(providers.<GatewayThread>getContextResolver(
                 Mockito.argThat(c -> c != null && GatewayThread.class.isAssignableFrom(c)), Mockito.any()))
                 .thenReturn(new GatewayThreadProvider(gatewayThread));
