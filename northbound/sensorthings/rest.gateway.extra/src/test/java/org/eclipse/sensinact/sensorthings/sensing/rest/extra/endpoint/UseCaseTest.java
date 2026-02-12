@@ -17,11 +17,11 @@ import static org.mockito.Mock.Strictness.LENIENT;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.DtoMemoryCacheProvider;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint.UseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.DatastreamsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.FeatureOfInterestExtraUseCase;

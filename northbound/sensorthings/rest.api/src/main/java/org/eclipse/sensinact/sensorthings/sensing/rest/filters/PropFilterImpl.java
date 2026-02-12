@@ -82,7 +82,6 @@ public class PropFilterImpl implements WriterInterceptor {
                 }
             }
             context.setEntity(rawValue ? prop : Map.of(propName, prop));
-            System.out.println(context.getEntity().toString());
         } catch (Exception e) {
             if (rawValue) {
                 Map<String, Object> map = new HashMap<>();

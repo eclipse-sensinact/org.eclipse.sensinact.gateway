@@ -34,7 +34,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint.DependsOnUseCases;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
@@ -51,7 +51,7 @@ import jakarta.ws.rs.ext.Providers;
  * observation
  */
 @DependsOnUseCases(value = { FeatureOfInterestExtraUseCase.class })
-public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedObservation, ServiceSnapshot> {
+public class ObservationsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedObservation, ServiceSnapshot> {
 
     private FeatureOfInterestExtraUseCase featureOfInterestUseCase;
     private IDtoMemoryCache<ExpandedObservation> cacheObs;
@@ -180,7 +180,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {
         String observationId = request.id();
-        Instant stamp = DtoMapperSimple.getTimestampFromId(observationId);
+        Instant stamp = DtoToModelMapper.getTimestampFromId(observationId);
         String providerId = DtoMapperSimple.extractFirstIdSegment(observationId);
         if (!request.acceptInlineOnUpdate()) {
             checkNoInline(request);
@@ -254,7 +254,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
                 DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation");
         // allow to get old observatin
 
-        Instant timestamp = DtoMapperSimple.getTimestampFromId(observationId);
+        Instant timestamp = DtoToModelMapper.getTimestampFromId(observationId);
 
         Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
         if (isHistoryMemory() && cacheObs.getDto(request.id()) != null) {

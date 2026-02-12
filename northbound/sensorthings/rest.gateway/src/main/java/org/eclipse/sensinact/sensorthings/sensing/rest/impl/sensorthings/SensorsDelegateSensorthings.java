@@ -59,7 +59,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
 
-        Optional<Sensor> s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Optional<Sensor> s = getSensorThingDtoMapper().toSensor(getSession(), getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.SENSORS), validateAndGetProvider(providerId));
         if (s.isEmpty()) {
             throw new NotFoundException();
@@ -82,7 +82,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
 
-        Optional<Datastream> d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo,
+        Optional<Datastream> d = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo,
                 getExpansions(), parseFilter(EFilterContext.DATASTREAMS), validateAndGetProvider(providerId2));
         if (d.isEmpty()) {
             throw new NotFoundException();
@@ -100,9 +100,10 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
         ProviderSnapshot provider = validateAndGetProvider(providerId2);
-        return RootResourceDelegateSensorthings.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"),
-                parseFilter(EFilterContext.OBSERVATIONS), 0);
+        return RootResourceDelegateSensorthings.getObservationList(getSession(), getSensorThingDtoMapper(), getMapper(),
+                uriInfo, getExpansions(), provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"),
+                parseFilter(EFilterContext.OBSERVATIONS), getHistoryProvider(), getMaxResult(),
+                getCacheObservationIfHistoryMemory());
     }
 
     public ObservedProperty getSensorDatastreamObservedProperty(String id, String id2) {
@@ -113,7 +114,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
 
-        Optional<ObservedProperty> o = DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo,
+        Optional<ObservedProperty> o = getSensorThingDtoMapper().toObservedProperty(getSession(), getMapper(), uriInfo,
                 getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), validateAndGetProvider(providerId2));
         if (o.isEmpty())
             throw new NotFoundException();
@@ -136,7 +137,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
         String thingId = getThingIdFromDatastream(id);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(thingId);
 
-        Thing t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        Thing t = getSensorThingDtoMapper().toThing(getSession(), getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.THINGS), providerSnapshot);
         if (!thingId.equals(t.id())) {
             throw new NotFoundException();
@@ -147,8 +148,8 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     public ResultList<Datastream> getSensorDatastreamThingDatastreams(String value, String value2) {
         String ThingId = getThingIdFromDatastream(value2);
         return new ResultList<Datastream>(null, null,
-                getDatastreamProvidersFromThing(getSession(), ThingId).stream().map(p -> DtoMapper
-                        .toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), null, p))
+                getDatastreamProvidersFromThing(getSession(), ThingId).stream().map(p -> getSensorThingDtoMapper()
+                        .toDatastream(getSession(), getMapper(), uriInfo, getExpansions(), null, p))
                         .filter(ds -> ds.isPresent()).map(ds -> ds.get()).toList());
     }
 
@@ -159,7 +160,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
         Sensor createDto;
         if (result instanceof ProviderSnapshot) {
             ProviderSnapshot provider = (ProviderSnapshot) result;
-            createDto = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+            createDto = getSensorThingDtoMapper().toSensor(getSession(), getMapper(), uriInfo, getExpansions(),
                     parseFilter(EFilterContext.SENSORS), provider).get();
         } else if (result instanceof Sensor) {
             createDto = (Sensor) result;
@@ -190,11 +191,11 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    getSession(), application, getMapper(), uriInfo, getExpansions(), filter, providerThing,
-                    isHistoryMemory() ? getCacheHistoricalLocation() : null, 0);
+                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), filter,
+                    providerThing, getHistoryProvider(), getMaxResult(), getCacheHistoricalLocationIfHistoryMemory());
             if (list.value().isEmpty()) {
-                list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        filter, providerThing);
+                list = getSensorThingDtoMapper().toHistoricalLocations(getSession(), getMapper(), uriInfo,
+                        getExpansions(), filter, providerThing);
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -205,11 +206,10 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     public ResultList<Location> getSensorDatastreamThingLocations(String value, String value2) {
         // same method in thing TODO refacto
         String ThingId = getThingIdFromDatastream(value2);
-        ResultList<Location> list = new ResultList<>(
-                null, null, getLocationIdsFromThing(getSession(), ThingId).stream()
-                        .map(idLoc -> validateAndGetProvider(idLoc)).map(p -> DtoMapper.toLocation(getSession(),
-                                application, getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), p))
-                        .toList());
+        ResultList<Location> list = new ResultList<>(null, null, getLocationIdsFromThing(getSession(), ThingId)
+                .stream().map(idLoc -> validateAndGetProvider(idLoc)).map(p -> getSensorThingDtoMapper()
+                        .toLocation(getSession(), getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), p))
+                .toList());
 
         return list;
     }
@@ -226,7 +226,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(providerObs);
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
 
-        Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+        Optional<Observation> o = getSensorThingDtoMapper().toObservation(getSession(), getMapper(), uriInfo,
                 getExpansions(), filter, service.getResource("lastObservation"));
 
         return o.get();
@@ -250,7 +250,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
         Instant stamp = resource.getValue().getTimestamp();
 
         ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(getMapper(), val);
-        FeatureOfInterest o = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
+        FeatureOfInterest o = getSensorThingDtoMapper().toFeatureOfInterest(getSession(), getMapper(), uriInfo,
                 getExpansions(), filter, stamp, obs);
 
         return o;
@@ -269,8 +269,9 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
         ProviderSnapshot providerDatastream = validateAndGetProvider(provider3);
         ResultList<Observation> observationList = RootResourceDelegateSensorthings.getObservationList(getSession(),
-                application, getMapper(), uriInfo, requestContext,
-                providerDatastream.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter);
+                getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext,
+                providerDatastream.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter,
+                getHistoryProvider(), getMaxResult(), getCacheObservationIfHistoryMemory());
         return observationList;
     }
 }

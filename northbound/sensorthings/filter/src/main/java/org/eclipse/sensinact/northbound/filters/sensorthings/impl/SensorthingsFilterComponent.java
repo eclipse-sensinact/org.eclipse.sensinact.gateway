@@ -15,6 +15,8 @@ package org.eclipse.sensinact.northbound.filters.sensorthings.impl;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.ISensorThingsFilterConstants.OGC_FILTER;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.ISensorThingsFilterConstants.SENSORTHINGS_FILTER;
 
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -36,15 +38,42 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.Resource
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
-@Component
+@Component(configurationPid = "sensinact.sensorthings.northbound.rest")
 @FiltersSupported({ OGC_FILTER, SENSORTHINGS_FILTER })
 public class SensorthingsFilterComponent implements IFilterParser, ISensorthingsFilterParser {
 
+    public static @interface Config {
+        String history_provider()
+
+        default NOT_SET;
+
+        int history_results_max()
+
+        default 3000;
+
+        boolean history_in_memory() default false;
+    }
+
+    public static final String NOT_SET = "<<NOT_SET>>";
+
+    @Activate
+    Config config;
+
     @Reference
     SensiNactSessionManager sessionManager;
+
+    @Reference(target = "(cache.type=expanded-observation)")
+    IDtoMemoryCache<ExpandedObservation> cacheObs;
+
+    @Reference(target = "(cache.type=historical-location)")
+    IDtoMemoryCache<Instant> cacheHl;
 
     SensiNactSession session;
 
@@ -78,6 +107,20 @@ public class SensorthingsFilterComponent implements IFilterParser, ISensorthings
         return parseFilter(query, context);
     }
 
+    private volatile Map<String, Object> dynamicProps = new HashMap<>();
+
+    @Activate
+    @Modified
+    protected void update(Map<String, Object> properties) {
+        this.dynamicProps = properties;
+    }
+
+    public boolean isHistoryMemory() {
+        return dynamicProps.containsKey("history.in.memory")
+                ? Boolean.parseBoolean(String.valueOf(dynamicProps.get("history.in.memory")))
+                : config.history_in_memory();
+    }
+
     @Override
     public ICriterion parseFilter(String query, EFilterContext filterContext) throws FilterParserException {
         final Predicate<ResourceValueFilterInputHolder> predicate;
@@ -96,6 +139,7 @@ public class SensorthingsFilterComponent implements IFilterParser, ISensorthings
         }
 
         // Return the ICriterion
-        return new SensorthingsCriterion(filterContext, getSession(), predicate);
+        return new SensorthingsCriterion(filterContext, getSession(), predicate, dynamicProps,
+                isHistoryMemory() ? cacheObs : null, isHistoryMemory() ? cacheHl : null);
     }
 }

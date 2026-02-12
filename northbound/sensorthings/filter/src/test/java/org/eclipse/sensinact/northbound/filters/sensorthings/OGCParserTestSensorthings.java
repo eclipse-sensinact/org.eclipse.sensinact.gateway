@@ -119,12 +119,14 @@ public class OGCParserTestSensorthings {
         ProviderSnapshot provider = RcUtils.makeProvider(SENSOR_THING_DEVICE.getName(), eNS_URI, "testProvider");
 
         ResourceSnapshot rc = makeLocatedResource(inCircle, provider);
+
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), provider, List.of(rc));
+                RcUtils.getSession(), provider, List.of(rc), Map.of());
         assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
 
         rc = makeLocatedResource(outOfCircle, provider);
-        holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, RcUtils.getSession(), provider, List.of(rc));
+        holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, RcUtils.getSession(), provider, List.of(rc),
+                Map.of());
         assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
     }
 
@@ -143,7 +145,7 @@ public class OGCParserTestSensorthings {
 
         ResourceSnapshot rc = makeLocatedResource(rect1, provider);
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), provider, List.of(rc));
+                RcUtils.getSession(), provider, List.of(rc), Map.of());
 
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
         expectations.put(String.format("st_equals(%s, %s)", point1, point1), true);
@@ -261,7 +263,8 @@ public class OGCParserTestSensorthings {
                 getExpandedObservation(Instant.now(), "testProvider", 5));
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), providerThing, rc1);
+                RcUtils.getSession(), providerThing, rc1, Map.of());
+
         assertQueries(expectations, holder);
 
     }
@@ -279,7 +282,7 @@ public class OGCParserTestSensorthings {
                 getExpandedObservation(Instant.now(), "testProvider", 5.0));
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -313,7 +316,7 @@ public class OGCParserTestSensorthings {
                 ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant(), "provider", 5.0));
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -333,14 +336,13 @@ public class OGCParserTestSensorthings {
                 ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant());
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
     public String getExpandedObservation(Instant resultTime, String providerId, Object value) {
 
-        FeatureOfInterest foi = new FeatureOfInterest(null, providerId + "~test~test", "test", null, null, null, null,
-                null);
+        FeatureOfInterest foi = new FeatureOfInterest(null, "test", "test", null, null, null, null, null);
         ExpandedObservation obs = new ExpandedObservation("test", providerId + "~test", resultTime, resultTime, value,
                 "test", null, null, null, null, null, null, foi, false);
         try {
@@ -370,7 +372,7 @@ public class OGCParserTestSensorthings {
                 getExpandedObservation(resulTime, "datastream1", 5.0), resulTime);
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), providerThing, List.of(rc));
+                RcUtils.getSession(), providerThing, List.of(rc), Map.of());
         assertQueries(expectations, holder);
     }
 }

@@ -65,38 +65,31 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
         final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
         if (criterion != null && criterion.getResourceValueFilter() != null) {
             final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p)).filter(p -> rcFilter.test(p,
-                    p.getServices().stream().flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
+            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p))
+                    .filter(p -> isNotSensinactRoot(p)).filter(p -> rcFilter.test(p, p.getServices().stream()
+                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
                     .collect(Collectors.toList());
         } else {
-            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p)).toList();
+            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p))
+                    .filter(p -> isNotSensinactRoot(p)).toList();
         }
     }
 
     private List<ResourceSnapshot> listSetResourcesSensinact(final ICriterion criterion) {
         return listResources(criterion).stream().filter(ResourceSnapshot::isSet)
                 .filter(r -> !DtoMapperSimple.isSensorthingModel(r.getService().getProvider()))
-                .collect(Collectors.toList());
+                .filter(r -> isNotSensinactRoot(r.getService().getProvider())).collect(Collectors.toList());
     }
 
-    private List<ResourceSnapshot> listResourcesSensinact(final ICriterion criterion) {
-
-        final SensiNactSession userSession = getSession();
-        List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p))
-                    .flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                    .filter(r -> rcFilter.test(r.getService().getProvider(), List.of(r))).collect(Collectors.toList());
-        } else {
-            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p))
-                    .flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                    .collect(Collectors.toList());
-        }
+    private static boolean isNotSensinactRoot(ProviderSnapshot r) {
+        return !r.getName().equals("sensiNact");
     }
 
     private static Optional<? extends ResourceSnapshot> getResource(final ProviderSnapshot provider,
             final String svcName, final String rcName) {
+        if (!isNotSensinactRoot(provider)) {
+            return Optional.empty();
+        }
         return provider.getServices().stream().filter(s -> !DtoMapperSimple.isSensorthingModel(s.getProvider()))
                 .filter(s -> s.getName().equals(svcName)).flatMap(s -> s.getResources().stream())
                 .filter(r -> r.getName().equals(rcName)).findFirst();

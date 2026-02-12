@@ -12,11 +12,13 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
-
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.ext.ContextResolver;
@@ -34,11 +36,16 @@ public class DtoMemoryCacheProvider implements ContextResolver<IDtoMemoryCache> 
 
     private Map<Class<?>, IDtoMemoryCache<?>> mapRepoCaches = new ConcurrentHashMap<Class<?>, IDtoMemoryCache<?>>();
 
+    @SuppressWarnings("unchecked")
     @Override
     public IDtoMemoryCache<?> getContext(Class<?> type) {
-        if (!Object.class.isAssignableFrom(type)) {
-            return null;
+        if (type.equals(ExpandedObservation.class)) {
+            return (IDtoMemoryCache<ExpandedObservation>) application.getProperties().get("cache.expanded.observation");
         }
+        if (type.equals(Instant.class)) {
+            return (IDtoMemoryCache<Instant>) application.getProperties().get("cache.historical.location");
+        }
+
         return mapRepoCaches.computeIfAbsent(type, this::createCacheMap);
     }
 

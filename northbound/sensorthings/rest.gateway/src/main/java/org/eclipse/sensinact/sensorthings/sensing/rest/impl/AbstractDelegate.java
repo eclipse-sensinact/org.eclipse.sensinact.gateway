@@ -41,10 +41,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.BadRequestException;
@@ -76,6 +76,37 @@ public abstract class AbstractDelegate {
         this.requestContext = requestContext;
     }
 
+    protected int getMaxResult(int localResultLimit) {
+
+        Integer maxResults = (Integer) this.application.getProperties().get("sensinact.history.result.limit");
+        if (localResultLimit > 0) {
+            maxResults = Math.min(localResultLimit, maxResults);
+        }
+        return maxResults;
+    }
+
+    protected int getMaxResult() {
+        return getMaxResult(-1);
+    }
+
+    protected String getHistoryProvider() {
+        return (String) this.application.getProperties().get("sensinact.history.provider");
+    }
+
+    protected IDtoMemoryCache<ExpandedObservation> getCacheObservationIfHistoryMemory() {
+        if (isHistoryMemory()) {
+            return getCacheObservation();
+        }
+        return null;
+    }
+
+    protected IDtoMemoryCache<Instant> getCacheHistoricalLocationIfHistoryMemory() {
+        if (isHistoryMemory()) {
+            return getCacheHistoricalLocation();
+        }
+        return null;
+    }
+
     protected boolean isHistoryMemory() {
         Object flag = application.getProperties().get("sensinact.history.in.memory");
         if (flag != null)
@@ -87,8 +118,8 @@ public abstract class AbstractDelegate {
     public Thing getThing(String id) {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
 
-        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
-                providerSnapshot);
+        return getSensorThingDtoMapper().toThing(getSession(), getMapper(), uriInfo, getExpansions(),
+                parseFilter(THINGS), providerSnapshot);
     }
 
     public HistoricalLocation getHistoricalLocationFromThing(String id) {
@@ -97,8 +128,9 @@ public abstract class AbstractDelegate {
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         try {
-            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(getSession(), application,
-                    getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
+            Optional<HistoricalLocation> historicalLocation = getSensorThingDtoMapper().toHistoricalLocation(
+                    getSession(), getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS),
+                    providerSnapshot);
             if (historicalLocation.isEmpty()) {
                 throw new NotFoundException();
             }
@@ -132,8 +164,8 @@ public abstract class AbstractDelegate {
                 requestContext.getMethod(), id, thing);
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
 
-        Thing createDto = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
-                snapshot);
+        Thing createDto = getSensorThingDtoMapper().toThing(getSession(), getMapper(), uriInfo, getExpansions(),
+                criterion, snapshot);
 
         return Response.ok().entity(createDto).build();
     }
@@ -170,6 +202,10 @@ public abstract class AbstractDelegate {
     protected IDtoMemoryCache<ExpandedObservation> getCacheObservation() {
         return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
                 .getContext(ExpandedObservation.class);
+    }
+
+    protected DtoMapper getSensorThingDtoMapper() {
+        return providers.getContextResolver(DtoMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
     @SuppressWarnings("unchecked")

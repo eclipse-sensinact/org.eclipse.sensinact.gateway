@@ -30,7 +30,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -46,7 +46,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * observedProperty
  */
-public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDtoDelete<ObservedProperty, Object> {
+public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseModelDelete<ObservedProperty, Object> {
 
     private final IDtoMemoryCache<ObservedProperty> cacheObservedProperty;
     private final IDtoMemoryCache<ExpandedObservation> obsCache;

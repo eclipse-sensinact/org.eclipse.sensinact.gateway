@@ -21,7 +21,7 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.extractFirstIdSegment;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.getTimestampFromId;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple.getTimestampFromId;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +56,7 @@ public class ThingsDelegateSensinact extends AbstractDelegate {
         // TODO Auto-generated constructor stub
     }
 
+    @Override
     public Thing getThing(String id) {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
 

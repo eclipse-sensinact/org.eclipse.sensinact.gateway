@@ -13,14 +13,15 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class DatastreamPathHandlerSensorthings extends AbstractPathHandlerSensorthings {
@@ -28,11 +29,12 @@ public class DatastreamPathHandlerSensorthings extends AbstractPathHandlerSensor
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("observations", this::subObservations,
             "observedproperty", this::subObservedProperty, "sensor", this::subSensor, "thing", this::subThing);
 
-    public DatastreamPathHandlerSensorthings(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
+    public DatastreamPathHandlerSensorthings(final PathContext pathContext) {
+        super(pathContext);
     }
 
     public Object handle(final String path) {
+        ProviderSnapshot provider = pathContext.provider();
         final String[] parts = path.toLowerCase().split("/");
         ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
@@ -74,19 +76,25 @@ public class DatastreamPathHandlerSensorthings extends AbstractPathHandlerSensor
     }
 
     private Object subObservations(final String path) {
-        return new ObservationPathHandlerSensorthings(provider, session).handle(path);
+        List<ExpandedObservation> listHistory = getListExpandedObservationWithHistory(pathContext);
+        // return value of live and history to valid this provider if one of them match
+        // perdicate
+        return listHistory.stream().map(o -> new ObservationPathHandlerSensorthings(pathContext, o).handle(path))
+                .toList();
     }
 
     private Object subObservedProperty(final String path) {
-        return new ObservedPropertyPathHandlerSensorthings(provider, session).handle(path);
+        return new ObservedPropertyPathHandlerSensorthings(pathContext).handle(path);
     }
 
     private Object subSensor(final String path) {
-        return new SensorPathHandlerSensorthings(provider, session).handle(path);
+        return new SensorPathHandlerSensorthings(pathContext).handle(path);
     }
 
     private Object subThing(final String path) {
-
-        return new ThingPathHandlerSensorthings(getThingProviderFromDatastream(provider), session).handle(path);
+        PathContext subPathContext = new PathContext(pathContext.mapper(),
+                getThingProviderFromDatastream(pathContext.provider()), pathContext.session(), pathContext.resource(),
+                pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl());
+        return new ThingPathHandlerSensorthings(subPathContext).handle(path);
     }
 }

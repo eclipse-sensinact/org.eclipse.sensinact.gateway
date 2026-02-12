@@ -12,7 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.impl;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -25,18 +27,27 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 
 public class SensorthingsCriterion implements ICriterion {
 
     private final EFilterContext context;
     private final Predicate<ResourceValueFilterInputHolder> predicate;
     private SensiNactSession session;
+    private final Map<String, Object> configProperties;
+    private final IDtoMemoryCache<ExpandedObservation> cacheObs;
+    private final IDtoMemoryCache<Instant> cacheHl;
 
     public SensorthingsCriterion(final EFilterContext context, SensiNactSession session,
-            final Predicate<ResourceValueFilterInputHolder> predicate) {
+            final Predicate<ResourceValueFilterInputHolder> predicate, Map<String, Object> configProperties,
+            IDtoMemoryCache<ExpandedObservation> cacheObs, IDtoMemoryCache<Instant> cacheHl) {
         this.context = context;
         this.predicate = predicate;
         this.session = session;
+        this.configProperties = configProperties;
+        this.cacheHl = cacheHl;
+        this.cacheObs = cacheObs;
     }
 
     @Override
@@ -69,7 +80,8 @@ public class SensorthingsCriterion implements ICriterion {
             return new ResourceValueFilter() {
                 @Override
                 public boolean test(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
-                    return predicate.test(new ResourceValueFilterInputHolder(context, session, provider, resources));
+                    return predicate.test(new ResourceValueFilterInputHolder(context, session, provider, resources,
+                            configProperties, cacheObs, cacheHl));
                 }
             };
 
@@ -81,7 +93,8 @@ public class SensorthingsCriterion implements ICriterion {
                 @Override
                 public boolean test(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
                     return resources.stream().map(r -> {
-                        return new ResourceValueFilterInputHolder(context, session, provider, r);
+                        return new ResourceValueFilterInputHolder(context, session, provider, r, configProperties,
+                                cacheObs, cacheHl);
                     }).anyMatch(predicate);
                 }
             };

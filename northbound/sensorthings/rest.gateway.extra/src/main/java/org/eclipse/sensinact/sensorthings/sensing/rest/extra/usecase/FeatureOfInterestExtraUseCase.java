@@ -22,7 +22,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.HttpMethod;
@@ -36,7 +36,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * FeatureOfInterest
  */
-public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<FeatureOfInterest, Object> {
+public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseModel<FeatureOfInterest, Object> {
 
     private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
     private final IDtoMemoryCache<ExpandedObservation> obsCache;

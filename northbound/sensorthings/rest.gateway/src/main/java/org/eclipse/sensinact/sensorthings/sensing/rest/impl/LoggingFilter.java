@@ -20,8 +20,6 @@ import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
 import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.ext.Provider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,12 +27,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Provider
 public class LoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SensinactSensorthingsApplication.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingFilter.class);
     private static ObjectMapper MAPPER;
 
     private static ObjectMapper getMapper() {
@@ -49,15 +51,11 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
     @Override
     public void filter(ContainerRequestContext request) throws IOException {
-        try {
-            // Thread.sleep(1000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-//        if (LOG.isinfoEnabled()) {
 
-        LOG.info("{} - Query     {} : {}", Instant.now().toString(), request.getMethod(),
-                request.getUriInfo().getRequestUri());
+//        if (LOG.isTraceEnabled()) {
+
+        LOG.info("{} - Query     {} : {}?{}", Instant.now().toString(), request.getMethod(),
+                request.getUriInfo().getRequestUri(), request.getUriInfo().getQueryParameters());
 
         if (request.hasEntity()) {
             String body = readStream(request.getEntityStream());
@@ -70,8 +68,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) {
-//        if (LOG.isinfoEnabled()) {
-
+//        if (LOG.isTraceEnabled()) {
         if (response.getEntity() != null) {
             try {
                 String json = getMapper().writeValueAsString(response.getEntity());
@@ -82,7 +79,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
             }
         }
         if (response.getHeaderString("Location") != null) {
-            LOG.info("{} - Location : {} ", Instant.now().toString(), response.getHeaderString("Location"));
+            LOG.trace("{} - Location : {} ", Instant.now().toString(), response.getHeaderString("Location"));
 
         }
 //        }

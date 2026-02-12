@@ -40,7 +40,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -53,7 +53,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedLocation, ProviderSnapshot> {
+public class LocationsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedLocation, ProviderSnapshot> {
 
     private final IDtoMemoryCache<Instant> cacheHl;
 

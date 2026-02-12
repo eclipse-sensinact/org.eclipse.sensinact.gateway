@@ -55,7 +55,42 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
         return super.visitIsofexpr(ctx);
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * ensure the comparison even if r and l are not the same type convert the r
+     * argument to the same type if possible else return
+     *
+     * @param l
+     * @param r
+     * @return
+     */
+    public int compareTo(Object l, Object r) {
+        if (l == null || r == null)
+            return 0; // Or handle as needed
+
+        // If types already match, just compare
+        if (l.getClass().equals(r.getClass())) {
+            return ((Comparable<Object>) l).compareTo(r);
+        }
+
+        // If types don't match, convert R (the String/Query value) to L's type
+        String rString = r.toString();
+
+        if (l instanceof Integer) {
+            return ((Integer) l).compareTo(Integer.parseInt(rString));
+        } else if (l instanceof Long) {
+            return ((Long) l).compareTo(Long.parseLong(rString));
+        } else if (l instanceof Double) {
+            return ((Double) l).compareTo(Double.parseDouble(rString));
+        } else if (l instanceof Float) {
+            return ((Float) l).compareTo(Float.parseFloat(rString));
+        } else if (l instanceof Boolean) {
+            return ((Boolean) l).compareTo(Boolean.parseBoolean(rString));
+        }
+        // Fallback to String comparison if type is unknown
+        return l.toString().compareTo(rString);
+
+    }
+
     @Override
     public Predicate<ResourceValueFilterInputHolder> visitBoolcommonexpr(BoolcommonexprContext ctx) {
         // Get the leftmost element of the expression
@@ -104,19 +139,19 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
                     break;
                 case ODataFilterParser.RULE_ltexpr:
                     rightExpr = rightVisitor.visit(((LtexprContext) secondElement).commonexpr());
-                    subPredicate = (l, r) -> (l != null && ((Comparable<Object>) l).compareTo(r) < 0);
+                    subPredicate = (l, r) -> (compareTo(l, r) < 0);
                     break;
                 case ODataFilterParser.RULE_leexpr:
                     rightExpr = rightVisitor.visit(((LeexprContext) secondElement).commonexpr());
-                    subPredicate = (l, r) -> (l != null && ((Comparable<Object>) l).compareTo(r) <= 0);
+                    subPredicate = (l, r) -> (compareTo(l, r) <= 0);
                     break;
                 case ODataFilterParser.RULE_gtexpr:
                     rightExpr = rightVisitor.visit(((GtexprContext) secondElement).commonexpr());
-                    subPredicate = (l, r) -> (l != null && ((Comparable<Object>) l).compareTo(r) > 0);
+                    subPredicate = (l, r) -> compareTo(l, r) > 0;
                     break;
                 case ODataFilterParser.RULE_geexpr:
                     rightExpr = rightVisitor.visit(((GeexprContext) secondElement).commonexpr());
-                    subPredicate = (l, r) -> (l != null && ((Comparable<Object>) l).compareTo(r) >= 0);
+                    subPredicate = (l, r) -> (compareTo(l, r) >= 0);
                     break;
 
                 case ODataFilterParser.RULE_hasexpr:

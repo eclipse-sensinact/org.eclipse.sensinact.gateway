@@ -17,7 +17,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.extractFirstIdSegment;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.getTimestampFromId;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +32,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple.getTimestampFromId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -48,6 +48,7 @@ public class HistoricalLocationsDelegateSensinact extends AbstractDelegate {
         super(uriInfo, providers, application, requestContext);
     }
 
+    @Override
     public HistoricalLocation getHistoricalLocation(String id) {
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);

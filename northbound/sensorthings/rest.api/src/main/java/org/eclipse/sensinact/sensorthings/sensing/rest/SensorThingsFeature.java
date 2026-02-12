@@ -19,6 +19,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.filters.ObjectMapperProvi
 import org.eclipse.sensinact.sensorthings.sensing.rest.filters.OrderByFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.filters.PropFilterImpl;
 import org.eclipse.sensinact.sensorthings.sensing.rest.filters.RefFilterImpl;
+import org.eclipse.sensinact.sensorthings.sensing.rest.filters.ResultFormatFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.filters.SelectFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.filters.SkipFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.filters.TopFilter;
@@ -39,6 +40,7 @@ public class SensorThingsFeature implements Feature {
         // Bound response rewriters
         context.register(PropFilterImpl.class);
         context.register(RefFilterImpl.class);
+        context.register(ResultFormatFilter.class);
 
         // Query string handlers
         context.register(CountFilter.class);

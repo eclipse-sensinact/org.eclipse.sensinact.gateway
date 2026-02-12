@@ -29,10 +29,10 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

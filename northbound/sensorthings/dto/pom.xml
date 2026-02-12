@@ -67,8 +67,21 @@
       <artifactId>extended</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- OSGi -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.annotation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.jakartars</artifactId>
+    </dependency>
   </dependencies>
-
+  
   <build>
     <plugins>
       <plugin>

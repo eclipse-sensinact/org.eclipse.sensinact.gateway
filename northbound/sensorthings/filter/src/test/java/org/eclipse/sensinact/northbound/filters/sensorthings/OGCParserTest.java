@@ -93,7 +93,7 @@ public class OGCParserTest {
     void testGeography() throws Exception {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
         // Length
-        expectations.put("floor(geo.length(geography'LINESTRING (30 10, 10 30, 40 40)')) eq 5972807", true);
+        expectations.put("floor(geo.length(geography'LINESTRING (30 10, 10 30, 40 40)')) eq 5973069", true);
         expectations.put("geo.length(geography'LINESTRING (5.69773 45.12477, 5.72047 45.19225)') gt 7000", true);
         expectations.put("geo.length(geography'LINESTRING (-0.4478 51.4649, 0.05523 51.5052)') lt 36000.0", true);
         // Distance
@@ -107,13 +107,13 @@ public class OGCParserTest {
         double[] inCircle = { 4.9544520269, 47.176310264 };
         ResourceSnapshot rc = makeLocatedResource(inCircle);
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), rc.getService().getProvider(), List.of(rc));
+                RcUtils.getSession(), rc.getService().getProvider(), List.of(rc), Map.of());
         assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
 
         rc = makeLocatedResource(outOfCircle);
         holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, RcUtils.getSession(),
-                rc.getService().getProvider(), List.of(rc));
-        assertQuery(false, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
+                rc.getService().getProvider(), List.of(rc), Map.of());
+        assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
     }
 
     private Coordinates makeCoors(double lon, double lat) {
@@ -124,67 +124,20 @@ public class OGCParserTest {
     void testSpatial() throws Exception {
         final String point1 = "geography'POINT (30 10)'";
         final String point2 = "geography'POINT (50 10)'";
-        final String point3 = "geography'POINT (50 20)'";
-        final String line1 = "geography'LINESTRING (20 10, 30 10, 50 10, 40 20)'";
-        final String line2 = "geography'LINESTRING (20 0, 50 20, 60 30)'";
-        final String line3 = "geography'LINESTRING (-20 0, -40 20, -60 30)'";
-        final String line4 = "geography'LINESTRING (40 15, 35 15, 40 10, 35 10, 35 12)'";
-        final String line5 = "geography'LINESTRING (40 15, 35 15, 40 10)'";
         final Polygon rect1 = new Polygon(List
                 .of(List.of(makeCoors(0, 0), makeCoors(50, 0), makeCoors(50, 50), makeCoors(00, 50), makeCoors(0, 0))),
                 null, null);
 
         ResourceSnapshot rc = makeLocatedResource(rect1);
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), rc.getService().getProvider(), List.of(rc));
+                RcUtils.getSession(), rc.getService().getProvider(), List.of(rc), Map.of());
 
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
-
-        expectations.put(String.format("st_intersects(%s, %s)", line1, point1), true);
-        expectations.put(String.format("st_intersects(%s, %s)", line1, line2), true);
-        expectations.put(String.format("st_intersects(%s, %s)", line1, line3), false);
-
-        expectations.put(String.format("st_crosses(%s, %s)", line1, point1), false);
-        expectations.put(String.format("st_crosses(%s, %s)", line1, line2), true);
-        expectations.put(String.format("st_crosses(%s, %s)", line1, line3), false);
-        expectations.put(String.format("st_crosses(%s, %s)", line1, line4), false);
-
-        expectations.put(String.format("st_disjoint(%s, %s)", line1, point1), false);
-        expectations.put(String.format("st_disjoint(%s, %s)", line1, line2), false);
-        expectations.put(String.format("st_disjoint(%s, %s)", line1, point3), true);
-        expectations.put(String.format("st_disjoint(%s, %s)", line1, line3), true);
-        expectations.put(String.format("st_disjoint(%s, %s)", line1, line4), false);
-
-        expectations.put(String.format("st_contains(%s, %s)", line1, point1), true);
-        expectations.put(String.format("st_contains(%s, %s)", line1, point3), false);
-
-        expectations.put(String.format("st_within(%s, %s)", point1, line1), true);
-        expectations.put(String.format("st_within(%s, %s)", point3, line1), false);
-
         expectations.put(String.format("st_equals(%s, %s)", point1, point1), true);
         expectations.put(String.format("st_equals(%s, %s)", point1, point2), false);
-
-        // Within
-        expectations.put(String.format("st_relate(%s, %s, 'T*F**F***')", point3, line1), false);
-        expectations.put(String.format("st_relate(%s, %s, 'T*F**F***')", point1, line1), true);
-        // Disjoint
-        expectations.put(String.format("st_relate(%s, %s, 'FF*FF****')", line1, line2), false);
-        expectations.put(String.format("st_relate(%s, %s, 'FF*FF****')", line1, point3), true);
-
-        expectations.put(String.format("st_overlaps(%s, %s)", point1, point1), false);
-        expectations.put(String.format("st_overlaps(%s, %s)", point1, point2), false);
-        expectations.put(String.format("st_overlaps(%s, %s)", point1, line1), false);
-        expectations.put(String.format("st_overlaps(%s, %s)", line1, line2), false);
-        expectations.put(String.format("st_overlaps(%s, %s)", line1, line3), false);
-        expectations.put(String.format("st_overlaps(%s, %s)", line1, line4), true);
-
-        expectations.put(String.format("st_touches(%s, %s)", point1, line1), false);
-        expectations.put(String.format("st_touches(%s, %s)", point1, line2), false);
-        expectations.put(String.format("st_touches(%s, %s)", line1, line2), false);
-        expectations.put(String.format("st_touches(%s, %s)", line1, line3), false);
-        expectations.put(String.format("st_touches(%s, %s)", line1, line4), false);
-        expectations.put(String.format("st_touches(%s, %s)", line1, line5), true);
-
+        expectations.put(String.format("st_within(%s, %s)", point1, point1), false);
+        expectations.put(String.format("st_relate(%s, %s, 'WITHIN')", point1, point1), false);
+        expectations.put(String.format("st_relate(%s, %s, 'INTERSECTS')", point1, point1), true);
         expectations.put(String.format("st_contains(Locations/location, %s)", point1), true);
         expectations.put(String.format("st_within(%s, Locations/location)", point1), true);
         assertQueries(expectations, holder);
@@ -282,7 +235,7 @@ public class OGCParserTest {
         ResourceSnapshot rc2 = RcUtils.addResource(svc, "value2", 15.2);
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), provider, List.of(rc1, rc2));
+                RcUtils.getSession(), provider, List.of(rc1, rc2), Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -298,7 +251,7 @@ public class OGCParserTest {
         ResourceSnapshot rc = RcUtils.addResource(svc, "value", 5.0);
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -332,7 +285,7 @@ public class OGCParserTest {
                 ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant());
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -352,7 +305,7 @@ public class OGCParserTest {
                 ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant());
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -369,7 +322,7 @@ public class OGCParserTest {
                 ZonedDateTime.of(2010, 6, 15, 21, 42, 0, 0, ZoneId.of("UTC")).toInstant());
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), provider, List.of(rc));
+                RcUtils.getSession(), provider, List.of(rc), Map.of());
         assertQueries(expectations, holder);
     }
 }

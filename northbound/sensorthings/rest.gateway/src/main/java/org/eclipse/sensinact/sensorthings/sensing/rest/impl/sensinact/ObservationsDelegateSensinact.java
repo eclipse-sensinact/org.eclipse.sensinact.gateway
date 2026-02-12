@@ -39,6 +39,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
@@ -57,7 +58,7 @@ public class ObservationsDelegateSensinact extends AbstractDelegate {
 
     public Observation getObservation(String id) {
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
-        Instant timestamp = DtoMapper.getTimestampFromId(id);
+        Instant timestamp = DtoMapperSimple.getTimestampFromId(id);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
         Optional<Observation> result = null;

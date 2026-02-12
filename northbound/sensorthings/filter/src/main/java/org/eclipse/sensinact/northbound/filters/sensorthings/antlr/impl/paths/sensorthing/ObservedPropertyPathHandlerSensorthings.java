@@ -19,19 +19,19 @@ import java.util.function.Function;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class ObservedPropertyPathHandlerSensorthings extends AbstractPathHandlerSensorthings {
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams);
 
-    public ObservedPropertyPathHandlerSensorthings(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
-
+    public ObservedPropertyPathHandlerSensorthings(final PathContext pathContext) {
+        super(pathContext);
     }
 
     public Object handle(final String path) {
+        ProviderSnapshot provider = pathContext.provider();
         final String[] parts = path.toLowerCase().split("/");
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
         if (service == null) {
@@ -80,6 +80,6 @@ public class ObservedPropertyPathHandlerSensorthings extends AbstractPathHandler
 
     private Object subDatastreams(final String path) {
         // Only one datastream per observed property
-        return new DatastreamPathHandlerSensorthings(provider, session).handle(path);
+        return new DatastreamPathHandlerSensorthings(pathContext).handle(path);
     }
 }

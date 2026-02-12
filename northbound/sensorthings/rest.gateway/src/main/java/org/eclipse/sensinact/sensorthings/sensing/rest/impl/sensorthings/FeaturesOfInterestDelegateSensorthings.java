@@ -67,7 +67,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
         } else {
             ResourceSnapshot resourceSnapshot = getObservationResourceSnapshot(id);
-            Instant stampResource = resourceSnapshot.getValue().getTimestamp();
+            Instant stampResource = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
 
             if (stampResource.equals(timestamp)) {
                 String val = (String) resourceSnapshot.getValue().getValue();
@@ -81,7 +81,8 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
                     String resource = resourceSnapshot.getName();
                     // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
                     // (timestamp)
-                    Instant timestampPlusOneMilli = timestamp.plusMillis(1);
+                    Instant timestampPlusOneMilli = timestamp.plusMillis(1).truncatedTo(ChronoUnit.MILLIS);
+                    ;
                     TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
                             Map.of("provider", provider, "service", service, "resource", resource, "time",
                                     timestampPlusOneMilli));
@@ -95,7 +96,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         FeatureOfInterest foi;
         try {
-            foi = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+            foi = getSensorThingDtoMapper().toFeatureOfInterest(getSession(), getMapper(), uriInfo, getExpansions(),
                     parseFilter(FEATURES_OF_INTEREST), timestamp, obs);
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException("No feature of interest with id");
@@ -115,18 +116,18 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
 
-        return getLiveObservations(getSession(), application, getMapper(), uriInfo, getExpansions(),
+        return getLiveObservations(getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.OBSERVATIONS), validateAndGetProvider(provider));
     }
 
-    static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
+    static ResultList<Observation> getLiveObservations(SensiNactSession userSession, DtoMapper dtoMapper,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider) {
 
         ServiceSnapshot datastreamService = DtoMapperSimple.getDatastreamService(provider);
 
-        return new ResultList<>(null, null, DtoMapper.toObservation(userSession, application, mapper, uriInfo,
-                expansions, filter, datastreamService.getResource("lastObservation")).map(List::of).orElse(List.of()));
+        return new ResultList<>(null, null, dtoMapper.toObservation(userSession, mapper, uriInfo, expansions, filter,
+                datastreamService.getResource("lastObservation")).map(List::of).orElse(List.of()));
 
     }
 
@@ -140,7 +141,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider2);
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
-        Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+        Optional<Observation> o = getSensorThingDtoMapper().toObservation(getSession(), getMapper(), uriInfo,
                 getExpansions(), parseFilter(EFilterContext.FEATURES_OF_INTEREST),
                 service.getResource("lastObservation"));
 
@@ -159,7 +160,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
         Datastream d;
         try {
-            d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
+            d = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo, getExpansions(),
                     parseFilter(EFilterContext.DATASTREAMS), providerSnapshot).get();
         } catch (Exception e) {
             throw new NotFoundException();
@@ -200,7 +201,8 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
         String thingId = DtoMapperSimple.getResourceField(service, "thingId", String.class);
         ProviderSnapshot providerThing = validateAndGetProvider(thingId);
-        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), null, providerThing);
+        return getSensorThingDtoMapper().toThing(getSession(), getMapper(), uriInfo, getExpansions(), null,
+                providerThing);
     }
 
     public Sensor getFeatureOfInterestObservationDatastreamSensor(String id, String id2) {
@@ -211,9 +213,8 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         }
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapper
-                .toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), null, providerSnapshot)
-                .get();
+        return getSensorThingDtoMapper()
+                .toSensor(getSession(), getMapper(), uriInfo, getExpansions(), null, providerSnapshot).get();
     }
 
     public ObservedProperty getFeatureOfInterestObservationDatastreamObservedProperty(String id, String id2) {
@@ -224,8 +225,8 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         }
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
-                providerSnapshot).get();
+        return getSensorThingDtoMapper()
+                .toObservedProperty(getSession(), getMapper(), uriInfo, getExpansions(), null, providerSnapshot).get();
     }
 
     public ResultList<Observation> getFeatureOfInterestObservationDatastreamObservations(String id, String id2) {
@@ -234,8 +235,9 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         String providerId = DtoMapperSimple.extractFirstIdSegment(id2);
         ProviderSnapshot provider = validateAndGetProvider(providerId);
         ResultList<Observation> observationList = RootResourceDelegateSensorthings.getObservationList(getSession(),
-                application, getMapper(), uriInfo, requestContext,
-                provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter);
+                getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext,
+                provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter,
+                getHistoryProvider(), getMaxResult(0), getCacheObservationIfHistoryMemory());
         return observationList;
     }
 

@@ -27,6 +27,7 @@ import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
 
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
@@ -75,6 +76,7 @@ class HistoryResourceHelperSensorthingsTest {
     private Application application;
 
     private static ObjectMapper mapper;
+    private static DtoMapper dtoMapper;
 
     @Mock
     private UriInfo uriInfo;
@@ -106,6 +108,13 @@ class HistoryResourceHelperSensorthingsTest {
             mapper.registerModule(new JavaTimeModule());
         }
         return mapper;
+    }
+
+    private DtoMapper getDtoMapper() {
+        if (dtoMapper == null) {
+            dtoMapper = new DtoMapper(null, 0, null);
+        }
+        return dtoMapper;
     }
 
     private String getObservation(String id, Object result, Instant instant) {
@@ -149,7 +158,7 @@ class HistoryResourceHelperSensorthingsTest {
             when(application.getProperties()).thenReturn(Map.of());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, null, 0, null);
 
             assertNotNull(result);
             assertTrue(result.value().isEmpty());
@@ -179,7 +188,7 @@ class HistoryResourceHelperSensorthingsTest {
                     .thenReturn(timedValues);
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, null, 0, null);
 
             assertNotNull(result);
             assertEquals(count.intValue(), result.count().intValue());
@@ -204,8 +213,8 @@ class HistoryResourceHelperSensorthingsTest {
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(Arrays.asList());
 
-            HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession, application, getMapper(), uriInfo,
-                    expansions, resourceSnapshot, null, localResultLimit);
+            HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession, getDtoMapper(), getMapper(),
+                    uriInfo, expansions, resourceSnapshot, null, historyProvider, localResultLimit, null);
 
             verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams());
         }
@@ -246,7 +255,8 @@ class HistoryResourceHelperSensorthingsTest {
                             List.of());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    application, getMapper(), uriInfo, expansions, resourceSnapshot, filter, 0);
+                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, filter, historyProvider, 0,
+                    null);
 
             assertNotNull(result);
             assertEquals(4, result.value().size(), "resource size " + result.value().size());
@@ -282,7 +292,7 @@ class HistoryResourceHelperSensorthingsTest {
                     .thenReturn(Arrays.asList());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, historyProvider, 0, null);
 
             assertNotNull(result);
             assertEquals(Integer.MAX_VALUE, result.count().intValue());
@@ -303,7 +313,7 @@ class HistoryResourceHelperSensorthingsTest {
                     .thenReturn(Arrays.asList());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, historyProvider, 0, null);
 
             assertNotNull(result);
             assertEquals(null, result.count());

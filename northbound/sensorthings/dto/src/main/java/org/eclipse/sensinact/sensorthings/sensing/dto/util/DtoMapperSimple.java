@@ -17,7 +17,6 @@ import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage
 import java.lang.reflect.RecordComponent;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,44 +55,6 @@ import jakarta.ws.rs.BadRequestException;
 
 public class DtoMapperSimple {
 
-    public class UnitOfMeasureValidator {
-
-        // Map symbol -> definition URI
-        private static final Map<String, String> VALID_UNITS = new HashMap<>();
-        static {
-            VALID_UNITS.put("°C", "DegreeCelsius");
-            VALID_UNITS.put("K", "Kelvin");
-            VALID_UNITS.put("lm", "Lumen");
-            VALID_UNITS.put("m", "Meter");
-            VALID_UNITS.put("kg", "Kilogram");
-            VALID_UNITS.put("s", "Second");
-            VALID_UNITS.put("Pa", "Pa");
-            VALID_UNITS.put("C", "Coulomb");
-
-            // add more units as needed
-        }
-
-        public static void checkConsistencySymbolDefinition(String symbol, String definition) {
-            String expectedDefinition = VALID_UNITS.get(symbol);
-            if (!definition.contains(expectedDefinition)) {
-                throw new BadRequestException(
-                        "symbol " + symbol + " definition " + definition + " expectedDefinition " + expectedDefinition);
-            }
-        }
-    }
-
-    public static Instant getTimestampFromId(String id) {
-        int idx = id.lastIndexOf('~');
-        if (idx < 0 || idx == id.length() - 1) {
-            throw new BadRequestException("Invalid id");
-        }
-        try {
-            return Instant.ofEpochMilli(Long.parseLong(id.substring(idx + 1), 16));
-        } catch (Exception e) {
-            throw new BadRequestException("Invalid id");
-        }
-    }
-
     private static final String DESCRIPTION = "description";
     private static final String FRIENDLY_NAME = "friendlyName";
     public static final String LOCATION = "location";
@@ -109,6 +70,18 @@ public class DtoMapperSimple {
 
     public static String stampToId(Instant stamp) {
         return Long.toString(stamp.toEpochMilli(), 16);
+    }
+
+    public static Instant getTimestampFromId(String id) {
+        int idx = id.lastIndexOf('~');
+        if (idx < 0 || idx == id.length() - 1) {
+            throw new BadRequestException("Invalid id");
+        }
+        try {
+            return Instant.ofEpochMilli(Long.parseLong(id.substring(idx + 1), 16));
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid id");
+        }
     }
 
     public static void checkRequireField(Sensor dto) {
@@ -299,9 +272,6 @@ public class DtoMapperSimple {
         if (unit.symbol() == null) {
             throw new RuntimeException("symbol not found in  UnitOfMeasurement");
         }
-        // check consistency for unit of measure
-        // UnitOfMeasureValidator.checkConsistencySymbolDefinition(unit.symbol(),
-        // unit.definition());
 
     }
 
@@ -397,6 +367,22 @@ public class DtoMapperSimple {
             }
         }
         return null;
+    }
+
+    public static List<Object> getRecordField(Object record) {
+
+        if (!record.getClass().isRecord()) {
+            throw new IllegalArgumentException("Ce n'est pas un record !");
+        }
+        RecordComponent[] components = record.getClass().getRecordComponents();
+        return Arrays.stream(components).map(rc -> {
+            try {
+                return rc.getAccessor().invoke(record);
+            } catch (Throwable e) {
+                throw new RuntimeException();
+            }
+        }).toList();
+
     }
 
     public static String extractIdSegment(String id, int part) {

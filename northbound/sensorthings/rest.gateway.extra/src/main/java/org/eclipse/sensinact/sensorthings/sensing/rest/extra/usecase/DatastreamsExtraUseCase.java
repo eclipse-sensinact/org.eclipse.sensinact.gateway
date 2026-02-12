@@ -39,7 +39,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -55,7 +55,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * datastream
  */
-public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedDataStream, ProviderSnapshot> {
+public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedDataStream, ProviderSnapshot> {
 
     private final IDtoMemoryCache<Sensor> sensorCache;
 
@@ -89,12 +89,13 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
 
         ProviderSnapshot snapshot = providerUseCase.read(request.session(), idDatastream);
         if (snapshot != null) {
-
-            removeCachedExpandedObservedProperty(request.model());
-            removeCachedExpandedSensor(request.model());
-            if (request.model().observations() != null) {
-                request.model().observations().stream()
-                        .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
+            if (!isHistoryMemory()) {
+                removeCachedExpandedObservedProperty(request.model());
+                removeCachedExpandedSensor(request.model());
+                if (request.model().observations() != null) {
+                    request.model().observations().stream()
+                            .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
+                }
             }
             return new ExtraUseCaseResponse<ProviderSnapshot>(idDatastream, snapshot);
         }
@@ -314,14 +315,14 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expan
         observations.stream().forEach(u -> updateObservationMemoryHistory(obsCache, foiCache, request.mapper(), u));
 
         ProviderSnapshot provider = providerUseCase.read(request.session(), id);
-
-        removeCachedExpandedObservedProperty(request.model());
-        removeCachedExpandedSensor(request.model());
-        if (request.model().observations() != null) {
-            request.model().observations().stream()
-                    .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
+        if( !isHistoryMemory() ) {
+            removeCachedExpandedObservedProperty(request.model());
+            removeCachedExpandedSensor(request.model());
+            if (request.model().observations() != null) {
+                request.model().observations().stream()
+                        .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
+            }
         }
-
         return new ExtraUseCaseResponse<ProviderSnapshot>(id, provider);
 
     }

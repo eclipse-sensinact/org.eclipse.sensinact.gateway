@@ -32,9 +32,9 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint.DependsOnUseCases;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
