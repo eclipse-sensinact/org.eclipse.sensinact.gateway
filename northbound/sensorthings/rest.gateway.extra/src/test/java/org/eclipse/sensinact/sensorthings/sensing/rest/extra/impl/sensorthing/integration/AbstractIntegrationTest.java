@@ -26,8 +26,6 @@ import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscribers;
 import java.nio.charset.StandardCharsets;
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -80,7 +78,7 @@ import jakarta.ws.rs.ext.Providers;
 @WithConfiguration(pid = "sensinact.session.manager", properties = {
         @Property(key = "auth.policy", value = "ALLOW_ALL"),
         @Property(key = "test.class", source = ValueSource.TestClass) })
-public class AbstractIntegrationTest {
+public abstract class AbstractIntegrationTest {
 
     static final HttpClient client = HttpClient.newHttpClient();
     protected static ObjectMapper mapper = null;
@@ -305,17 +303,7 @@ public class AbstractIntegrationTest {
             @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "?")) Configuration sensorthingsConfig,
             TestInfo info) throws Exception {
 
-        Hashtable<String, Object> newProps = new Hashtable<String, Object>();
-        newProps.put("history.in.memory", true);
-
-        Dictionary<String, Object> properties = sensorthingsConfig.getProperties();
-        Enumeration<String> keys = properties.keys();
-        while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            newProps.put(key, properties.get(key));
-        }
-
-        sensorthingsConfig.update(newProps);
+        updateConfigurationHistory(sensorthingsConfig);
 
         Class<?> test = info.getTestClass().get();
         while (test.isMemberClass()) {
@@ -350,6 +338,10 @@ public class AbstractIntegrationTest {
         if (!ready) {
             fail("SensorThings servlet didn't come up");
         }
+    }
+
+    protected void updateConfigurationHistory(Configuration sensorthingsConfig) throws IOException {
+        // nothin
     }
 
     @AfterEach

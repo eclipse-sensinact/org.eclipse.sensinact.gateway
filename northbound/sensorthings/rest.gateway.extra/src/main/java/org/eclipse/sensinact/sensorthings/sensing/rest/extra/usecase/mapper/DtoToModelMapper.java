@@ -97,7 +97,7 @@ public class DtoToModelMapper {
      * @return
      */
     public static String getNewId(Id model) {
-        return sanitizeId(model.id() != null ? model.id() : getNewId());
+        return model.id() != null ? (String) model.id() : getNewId();
     }
 
     public static String getNewId() {
@@ -225,6 +225,15 @@ public class DtoToModelMapper {
                 datastream.observationType(), uom, datastream.observedArea(), datastream.phenomenonTime(),
                 datastream.resultTime(), datastream.properties(), null, null, null, null, null, observedProperty,
                 sensor, null, null);
+    }
+
+    public static ExpandedDataStream toDatastreamOnly(ProviderSnapshot provider) {
+        Datastream datastream = DtoMapperSimple.toDatastream(provider, null, null, null, null, null);
+        UnitOfMeasurement uom = DtoMapperSimple.toUnitOfMeasure(provider);
+
+        return new ExpandedDataStream(null, datastream.id(), datastream.name(), datastream.description(),
+                datastream.observationType(), uom, datastream.observedArea(), datastream.phenomenonTime(),
+                datastream.resultTime(), datastream.properties(), null, null, null, null, null, null, null, null, null);
     }
 
     /**

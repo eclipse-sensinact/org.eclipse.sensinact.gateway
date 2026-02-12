@@ -44,6 +44,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 
@@ -153,8 +154,18 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
 
     public Response updateSensor(String id, Sensor sensor) {
 
-        Sensor createDto = getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id,
+        Object result = getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id,
                 sensor);
+        Sensor createDto;
+        if (result instanceof ProviderSnapshot) {
+            ProviderSnapshot provider = (ProviderSnapshot) result;
+            createDto = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                    parseFilter(EFilterContext.SENSORS), provider).get();
+        } else if (result instanceof Sensor) {
+            createDto = (Sensor) result;
+        } else {
+            throw new InternalServerErrorException();
+        }
 
         return Response.ok().entity(createDto).build();
     }

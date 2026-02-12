@@ -30,8 +30,8 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
@@ -79,7 +79,7 @@ public class HistoricalLocationExtraUseCase
             if (isHistoryMemory()) {
                 throw new NotFoundException();
             }
-            throw new BadRequestException();
+            throw new WebApplicationException("historical location are immutable", 409);
         }
         if (milliTimestamp.equals(timestamp)) {
             return new AbstractTwinCommand<Void>() {

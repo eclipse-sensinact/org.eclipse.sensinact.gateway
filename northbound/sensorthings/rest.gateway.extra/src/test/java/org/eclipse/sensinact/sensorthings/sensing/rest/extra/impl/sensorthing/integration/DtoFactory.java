@@ -110,7 +110,15 @@ public class DtoFactory {
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
         Sensor sensor = getSensor("test");
         ObservedProperty op = getObservedProperty("Temperature");
-        return getDatastream(name, descriptikon, uom, "obsType", null, sensor, op, List.of(getObservation("test")));
+        return getDatastream(name, descriptikon, uom, obsType, null, sensor, op, List.of(getObservation("test")));
+
+    }
+
+    public static ExpandedDataStream getDatastream(String name, String descriptikon, String obsType) {
+        // Required
+        UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
+
+        return getDatastream(name, descriptikon, uom, obsType, null, null, null, null);
 
     }
 

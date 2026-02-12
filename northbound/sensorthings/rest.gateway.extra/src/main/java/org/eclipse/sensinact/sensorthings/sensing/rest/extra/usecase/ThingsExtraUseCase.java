@@ -152,7 +152,10 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
 
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {
         // ensure we don't have inline entities
-        checkNoInline(request);
+        if (!request.acceptInlineOnUpdate()) {
+            checkNoInline(request);
+
+        }
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
         ResourceSnapshot resourceLocation = getHistoricalLocationForMemoryHistory(request);
         List<ResourceSnapshot> obsThingDatastream = getObservationsForMemoryHistory(request.session(), listDtoModels);
@@ -165,14 +168,21 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
             throw new InternalServerErrorException(e);
         }
         updateHistoricalLocationMemoryHistory(request, resourceLocation);
-        obsThingDatastream.stream()
-                .forEach(u -> updateObservationMemoryHistory(cacheObs, cacheFoi, request.mapper(), u));
+        updateObservationHistoryMemory(request, obsThingDatastream);
+
         ProviderSnapshot snapshot = providerUseCase.read(request.session(), request.id());
         if (snapshot != null) {
             return new ExtraUseCaseResponse<ProviderSnapshot>(request.id(), snapshot);
         }
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
+    }
+
+    private void updateObservationHistoryMemory(ExtraUseCaseRequest<ExpandedThing> request,
+            List<ResourceSnapshot> obsThingDatastream) {
+        if (obsThingDatastream != null)
+            obsThingDatastream.stream()
+                    .forEach(u -> updateObservationMemoryHistory(cacheObs, cacheFoi, request.mapper(), u));
     }
 
     private void updateHistoricalLocationMemoryHistory(ExtraUseCaseRequest<ExpandedThing> request,

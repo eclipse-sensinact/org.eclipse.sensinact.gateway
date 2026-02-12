@@ -28,6 +28,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
@@ -87,7 +88,10 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
                 return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
             }
         }
-        throw new NotFoundException();
+        if (isHistoryMemory())
+            throw new NotFoundException();
+        else
+            throw new WebApplicationException("foi is link to observation so it is immutable", 409);
 
     }
 

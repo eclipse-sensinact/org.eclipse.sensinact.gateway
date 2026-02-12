@@ -41,6 +41,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
@@ -236,7 +237,10 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Response deleteHistoricalLocation(String value) {
-        return getExtraDelegate().delete(getSession(), getMapper(), uriInfo, value, HistoricalLocation.class);
+        if (isHistoryMemory())
+            return getExtraDelegate().delete(getSession(), getMapper(), uriInfo, value, HistoricalLocation.class);
+        else
+            throw new WebApplicationException("historicalLocation is immutable", 409);
     }
 
     public Response updateHistoricalLocation(String value, HistoricalLocation hl) {

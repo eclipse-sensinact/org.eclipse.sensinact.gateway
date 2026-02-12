@@ -223,6 +223,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     }
 
     private ExtraUseCaseResponse<Object> deleteObservationFeatureOfInterest(ExtraUseCaseRequest<RefId> request) {
+
         String idDatastream = DtoMapperSimple.extractFirstIdSegment(request.parentId());
         ServiceSnapshot service = serviceUseCase.read(request.session(), idDatastream,
                 DtoMapperSimple.SERVICE_DATASTREAM);
@@ -263,7 +264,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         ProviderSnapshot snapshot = providerUseCase.read(request.session(), idDatastream);
 
         // create new datastream link to thing provider
-        ExpandedDataStream newDatastream = DtoToModelMapper.toDatastream(snapshot);
+        ExpandedDataStream newDatastream = DtoToModelMapper.toDatastreamOnly(snapshot);
         ExtraUseCaseResponse<ProviderSnapshot> response = datastreamUseCase
                 .update(new ExtraUseCaseRequest<ExpandedDataStream>(request.session(), request.mapper(),
                         request.uriInfo(), HttpMethod.PATCH, newDatastream, idThing));
@@ -310,7 +311,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
                     null, null, null, null, (ObservedProperty) dto, null, null, null);
         }
         ExtraUseCaseResponse<ProviderSnapshot> response = useCase.update(new ExtraUseCaseRequest<>(request.session(),
-                request.mapper(), request.uriInfo(), HttpMethod.PATCH, datastream, null));
+                request.mapper(), request.uriInfo(), HttpMethod.PATCH, datastream, null, true));
         return new ExtraUseCaseResponse<Object>(response.id(), response.snapshot(), response.success(), response.e(),
                 response.message());
     }
@@ -332,7 +333,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
                 null, null, null, null, dto, false);
 
         ExtraUseCaseResponse<ServiceSnapshot> response = useCase.update(new ExtraUseCaseRequest<>(request.session(),
-                request.mapper(), request.uriInfo(), HttpMethod.PATCH, observation, parentId));
+                request.mapper(), request.uriInfo(), HttpMethod.PATCH, observation, parentId, true));
         return new ExtraUseCaseResponse<Object>(response.id(), response.snapshot(), response.success(), response.e(),
                 response.message());
     }
@@ -355,7 +356,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
         ExpandedLocation locationUpdate = toLocation(request.mapper(), providerLocation, idThing);
         ExtraUseCaseResponse<ProviderSnapshot> result = locationUseCase
                 .update(new ExtraUseCaseRequest<ExpandedLocation>(request.session(), request.mapper(),
-                        request.uriInfo(), HttpMethod.PATCH, locationUpdate));
+                        request.uriInfo(), HttpMethod.PATCH, locationUpdate, true));
         return new ExtraUseCaseResponse<Object>(result.id(), result.snapshot());
     }
 

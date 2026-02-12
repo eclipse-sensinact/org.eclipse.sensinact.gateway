@@ -203,13 +203,17 @@ public class DtoMapper {
         }
 
         if (expansions.shouldExpand("ObservedProperty", datastream)) {
-            expansions.addExpansion("ObservedProperty", datastream, toObservedProperty(userSession, application, mapper,
-                    uriInfo, expansions.getExpansionSettings("ObservedProperty"), filter, provider));
+            Optional<ObservedProperty> op = toObservedProperty(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("ObservedProperty"), filter, provider);
+            if (op.isPresent())
+                expansions.addExpansion("ObservedProperty", datastream, op.get());
         }
 
         if (expansions.shouldExpand("Sensor", datastream)) {
-            expansions.addExpansion("Sensor", datastream, toSensor(userSession, application, mapper, uriInfo,
-                    expansions.getExpansionSettings("Sensor"), filter, provider));
+            Optional<Sensor> sensor = toSensor(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Sensor"), filter, provider);
+            if (sensor.isPresent())
+                expansions.addExpansion("Sensor", datastream, sensor.get());
         }
 
         if (expansions.shouldExpand("Thing", datastream)) {

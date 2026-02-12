@@ -98,7 +98,7 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
         if (isHistoryMemory()) {
             resource = resourceUseCase.read(session, providerId, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation");
         }
-        if (!resource.isSet())
+        if (resource == null || !resource.isSet())
             return null;
         return resource;
     }

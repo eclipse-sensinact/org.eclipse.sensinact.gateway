@@ -70,7 +70,7 @@ public class LocationTest extends AbstractIntegrationTest {
         String idLocation = getIdFromJson(json);
         UtilsAssert.assertLocation(dtoLocation, json);
         // when
-        getJsonResponseFromDelete(String.format("Locations(%s)", idLocation), 204);
+        getJsonResponseFromDelete(String.format("Locations(%s)", idLocation), 200);
         // then
         assertThrows(NotFoundException.class, () -> {
             serviceUseCase.read(session, idLocation, "location");
@@ -119,7 +119,7 @@ public class LocationTest extends AbstractIntegrationTest {
         String idLocation = getIdFromJson(json);
         UtilsAssert.assertLocation(dtoLocation, json);
         // when
-        getJsonResponseFromDelete(String.format("Locations(%s)", idLocation), 204);
+        getJsonResponseFromDelete(String.format("Locations(%s)", idLocation), 200);
         // then
         assertThrows(NotFoundException.class, () -> {
             serviceUseCase.read(session, idLocation, "location");
@@ -167,10 +167,10 @@ public class LocationTest extends AbstractIntegrationTest {
         ExpandedLocation dtoLocation = DtoFactory.getLocation(name + "1");
 
         json = getJsonResponseFromPost(dtoLocation, String.format("Things(%s)/Locations", idThing), 201);
-        String idLocation = getIdFromJson(json);
         UtilsAssert.assertLocation(dtoLocation, json);
-        // when
-        getJsonResponseFromDelete(String.format("/HistoricalLocations(%s)", idLocation), 409);
+        json = getJsonResponseFromGet(String.format("Things(%s)/HistoricalLocations", idThing), 200);
+        String idHistoricalLocation = getIdFromJson(json.get(0));
+        getJsonResponseFromDelete(String.format("/HistoricalLocations(%s)", idHistoricalLocation), 409);
 
     }
 
@@ -198,7 +198,7 @@ public class LocationTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
         String idLocation = getIdFromJson(json);
         // when
-        getJsonResponseFromDelete(String.format("/Locations(%s)/Things/$ref", idLocation), 204);
+        getJsonResponseFromDelete(String.format("/Locations(%s)/Things/$ref", idLocation), 200);
         // then
         ServiceSnapshot thingService1 = serviceUseCase.read(session, idThing, DtoMapperSimple.SERVICE_THING);
         ServiceSnapshot thingService2 = serviceUseCase.read(session, idThing2, DtoMapperSimple.SERVICE_THING);
@@ -231,7 +231,7 @@ public class LocationTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
         String idLocation = getIdFromJson(json);
         // when
-        getJsonResponseFromDelete(String.format("/Locations(%s)/Things(%s)/$ref", idLocation, idThing), 204);
+        getJsonResponseFromDelete(String.format("/Locations(%s)/Things(%s)/$ref", idLocation, idThing), 200);
         // then
         ServiceSnapshot thingService1 = serviceUseCase.read(session, idThing, DtoMapperSimple.SERVICE_THING);
         ServiceSnapshot thingService2 = serviceUseCase.read(session, idThing2, DtoMapperSimple.SERVICE_THING);
@@ -261,7 +261,7 @@ public class LocationTest extends AbstractIntegrationTest {
         UtilsAssert.assertLocation(dtoLocation, json);
         String idLocation = getIdFromJson(json);
         ExpandedLocation dtoLocationUpdate = DtoFactory.getLocation(name + "2");
-        json = getJsonResponseFromPut(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 204);
+        json = getJsonResponseFromPut(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 200);
         // then
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idLocation, "admin");
 
@@ -290,7 +290,7 @@ public class LocationTest extends AbstractIntegrationTest {
         UtilsAssert.assertLocation(dtoLocation, json);
         String idLocation = getIdFromJson(json);
         ExpandedLocation dtoLocationUpdate = DtoFactory.getLocation(name + "2");
-        json = getJsonResponseFromPatch(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 204);
+        json = getJsonResponseFromPatch(dtoLocationUpdate, String.format("Locations(%s)", idLocation), 200);
         // then
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idLocation, "admin");
 

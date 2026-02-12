@@ -91,6 +91,9 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         updateObservationMemoryHistory(cacheObs, cacheFoi, request.mapper(), resource);
         ServiceSnapshot service = serviceUseCase.read(request.session(), getProviderId(request), "datastream");
         if (service != null) {
+            if (!isHistoryMemory())
+                removeFeatureOfInterest(request.model());
+
             return new ExtraUseCaseResponse<ServiceSnapshot>(getProviderId(request), service);
         }
         return new ExtraUseCaseResponse<ServiceSnapshot>(false, "fail to get Snapshot");
@@ -131,9 +134,9 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
         String id = request.model().datastream() == null ? request.parentId()
                 : (String) request.model().datastream().id();
         if (id == null) {
-            id = DtoMapperSimple.extractFirstIdSegment(request.id());
+            id = request.id();
         }
-        return id;
+        return DtoMapperSimple.extractFirstIdSegment(id);
     }
 
     private void checkRequireField(FeatureOfInterest foi) {
@@ -153,19 +156,35 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
 
                 foi = featureOfInterestUseCase.getInMemoryFeatureOfInterest(idFoi);
             } else {
-                foi = new FeatureOfInterest(null, DtoToModelMapper.getNewId(), observation.featureOfInterest().name(),
-                        observation.featureOfInterest().description(), observation.featureOfInterest().encodingType(),
-                        observation.featureOfInterest().feature(), Map.of(), null);
+                foi = new FeatureOfInterest(null,
+                        observation.featureOfInterest().id() != null ? observation.featureOfInterest().id()
+                                : DtoToModelMapper.getNewId(),
+                        observation.featureOfInterest().name(), observation.featureOfInterest().description(),
+                        observation.featureOfInterest().encodingType(), observation.featureOfInterest().feature(),
+                        Map.of(), null);
             }
         }
         return foi;
+    }
+
+    private void removeFeatureOfInterest(ExpandedObservation observation) {
+        // retrieve created sensor
+        if (observation.featureOfInterest() != null
+                && DtoToModelMapper.isRecordOnlyField(observation.featureOfInterest(), "id")) {
+            String idFoi = DtoToModelMapper.getIdFromRecord(observation.featureOfInterest());
+
+            featureOfInterestUseCase.removeInMemoryFeatureOfInterest(idFoi);
+        }
+
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {
         String observationId = request.id();
         Instant stamp = DtoMapperSimple.getTimestampFromId(observationId);
         String providerId = DtoMapperSimple.extractFirstIdSegment(observationId);
-        checkNoInline(request);
+        if (!request.acceptInlineOnUpdate()) {
+            checkNoInline(request);
+        }
         if (isHistoryMemory() && cacheObs.getDto(observationId) != null) {
             updateObservationMemoryHistory(cacheObs, request, cacheObs.getDto(observationId), stamp);
         }
@@ -192,7 +211,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
     }
 
     private void checkDeletedObservation(ExtraUseCaseRequest<ExpandedObservation> request, ResourceSnapshot resource) {
-        if (resource.getValue() != null) {
+        if (resource != null && resource.getValue() != null) {
             ExpandedObservation obs = parseObservation(request.mapper(), (String) resource.getValue().getValue());
             if (obs.deleted()) {
                 throw new NotFoundException();

@@ -21,7 +21,7 @@ import java.util.Map;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.DependentCommand;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
@@ -194,11 +194,11 @@ public class SensorsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Sensor, O
             } catch (InvocationTargetException | InterruptedException e) {
                 throw new InternalServerErrorException(e);
             }
-            ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
-            if (serviceSnapshot == null) {
+            ProviderSnapshot snapshot = providerUseCase.read(request.session(), providerId);
+            if (snapshot == null) {
                 return new ExtraUseCaseResponse<Object>(false, "can't find sensor");
             }
-            return new ExtraUseCaseResponse<Object>(request.id(), serviceSnapshot);
+            return new ExtraUseCaseResponse<Object>(request.id(), snapshot);
 
         }
 
