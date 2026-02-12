@@ -13,10 +13,10 @@
 package org.eclipse.sensinact.gateway.southbound.history.timescale.integration;
 
 import static java.time.Duration.ofDays;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.abort;
 
@@ -49,6 +49,7 @@ import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.gateway.test.testcontainers.postgres.RequirePostgresContainer;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -66,9 +67,10 @@ import org.osgi.util.promise.PromiseFactory;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+@RequirePostgresContainer
 public class TimescaleHistoryTest {
 
     private static final Instant TS_2012 = Instant.parse("2012-01-01T00:00:00.00Z");
@@ -80,7 +82,7 @@ public class TimescaleHistoryTest {
     @BeforeAll
     static void startContainer() throws Exception {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(TimescaleHistoryTest.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader(DockerClientFactory.class.getClassLoader());
         try {
             try {
                 DockerClientFactory.lazyClient().versionCmd().exec();
@@ -88,7 +90,7 @@ public class TimescaleHistoryTest {
                 abort("No docker executable on the path, so tests will be skipped");
             }
 
-            container = new PostgreSQLContainer<>(DockerImageName.parse("timescale/timescaledb-ha")
+            container = new PostgreSQLContainer(DockerImageName.parse("timescale/timescaledb-ha")
                     .asCompatibleSubstituteFor("postgres").withTag("pg14-latest"));
             container.withDatabaseName("sensinactHistory");
             container.start();

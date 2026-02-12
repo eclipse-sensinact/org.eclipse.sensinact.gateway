@@ -30,7 +30,7 @@
 	com.fasterxml.jackson.datatype.jackson-datatype-jsr310;version='[2.18.4,2.18.5)',\
 	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-base;version='[2.18.4,2.18.5)',\
 	com.fasterxml.jackson.jakarta.rs.jackson-jakarta-rs-json-provider;version='[2.18.4,2.18.5)',\
-	com.sun.jna;version='[5.13.0,5.13.1)',\
+	com.sun.jna;version='[5.18.1,5.18.2)',\
 	io.dropwizard.metrics.core;version='[4.2.19,4.2.20)',\
 	jakarta.activation-api;version='[2.1.0,2.1.1)',\
 	jakarta.annotation-api;version='[2.1.1,2.1.2)',\
@@ -52,14 +52,16 @@
 	org.apache.aries.component-dsl.component-dsl;version='[1.2.2,1.2.3)',\
 	org.apache.aries.spifly.dynamic.framework.extension;version='[1.3.7,1.3.8)',\
 	org.apache.aries.typedevent.bus;version='[1.0.1,1.0.2)',\
-	org.apache.commons.commons-compress;version='[1.24.0,1.24.1)',\
+	org.apache.commons.commons-compress;version='[1.28.0,1.28.1)',\
+	org.apache.commons.commons-io;version='[2.11.0,2.11.1)',\
+	org.apache.commons.lang3;version='[3.18.0,3.18.1)',\
 	org.apache.felix.cm.json;version='[2.0.0,2.0.1)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
 	org.apache.felix.configurator;version='[1.0.18,1.0.19)',\
 	org.apache.felix.http.jetty;version='[5.0.4,5.0.5)',\
 	org.apache.felix.http.servlet-api;version='[2.1.0,2.1.1)',\
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
-	org.apache.servicemix.bundles.junit;version='[4.13.2,4.13.3)',\
+	org.brotli.dec;version='[0.1.2,0.1.3)',\
 	org.eclipse.emf.common;version='[2.29.0,2.29.1)',\
 	org.eclipse.emf.ecore;version='[2.35.0,2.35.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.36.0,2.36.1)',\
@@ -93,6 +95,8 @@
 	org.eclipse.sensinact.gateway.northbound.session.session-impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.history-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.timescale-provider;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.test.testcontainers.bundle;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.test.testcontainers.postgres;version='[0.0.2,0.0.3)',\
 	org.gecko.emf.osgi.component.minimal;version='[6.3.0,6.3.1)',\
 	org.glassfish.hk2.api;version='[3.0.5,3.0.6)',\
 	org.glassfish.hk2.external.aopalliance-repackaged;version='[3.0.4,3.0.5)',\
@@ -124,6 +128,7 @@
 	org.osgi.util.promise;version='[1.3.0,1.3.1)',\
 	org.osgi.util.pushstream;version='[1.1.0,1.1.1)',\
 	org.postgresql.jdbc;version='[42.7.9,42.7.10)',\
+	org.reactivestreams.reactive-streams;version='[1.0.3,1.0.4)',\
 	slf4j.api;version='[2.0.11,2.0.12)',\
 	tx-control-provider-jdbc-local;version='[1.0.1,1.0.2)',\
 	tx-control-service-local;version='[1.0.1,1.0.2)'

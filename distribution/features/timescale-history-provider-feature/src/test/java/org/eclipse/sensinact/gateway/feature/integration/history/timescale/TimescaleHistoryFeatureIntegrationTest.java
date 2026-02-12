@@ -49,14 +49,16 @@ import org.apache.felix.cm.json.io.ConfigurationReader;
 import org.apache.felix.cm.json.io.ConfigurationResource;
 import org.apache.felix.cm.json.io.Configurations;
 import org.eclipse.sensinact.gateway.feature.utilities.test.ServerProcessHandler;
+import org.eclipse.sensinact.gateway.test.testcontainers.postgres.RequirePostgresContainer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+@RequirePostgresContainer
 class TimescaleHistoryFeatureIntegrationTest {
 
     private static ServerProcessHandler server = new ServerProcessHandler();
@@ -66,7 +68,7 @@ class TimescaleHistoryFeatureIntegrationTest {
     @BeforeAll
     static void check() throws Exception {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(TimescaleHistoryFeatureIntegrationTest.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader(DockerClientFactory.class.getClassLoader());
         try {
             DockerClientFactory.lazyClient().versionCmd().exec();
         } catch (Throwable t) {
@@ -75,13 +77,13 @@ class TimescaleHistoryFeatureIntegrationTest {
             Thread.currentThread().setContextClassLoader(cl);
         }
 
-        container = new PostgreSQLContainer<>(DockerImageName.parse("timescale/timescaledb-ha")
+        container = new PostgreSQLContainer(DockerImageName.parse("timescale/timescaledb-ha")
                 .asCompatibleSubstituteFor("postgres").withTag("pg14-latest"));
 
         container.withDatabaseName("sensinactHistory");
         cl = Thread.currentThread().getContextClassLoader();
         try {
-            Thread.currentThread().setContextClassLoader(TimescaleHistoryFeatureIntegrationTest.class.getClassLoader());
+            Thread.currentThread().setContextClassLoader(DockerClientFactory.class.getClassLoader());
             container.start();
         } finally {
             Thread.currentThread().setContextClassLoader(cl);
