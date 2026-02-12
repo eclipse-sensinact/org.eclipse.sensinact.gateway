@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint;
+package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mock.Strictness.LENIENT;

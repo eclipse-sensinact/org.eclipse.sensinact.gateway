@@ -90,7 +90,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jul-to-slf4j</artifactId>
-      <scope>test</scope>
+      <version>${slf4j.version}</version>
     </dependency>
 
     <!-- OSGi -->
@@ -211,6 +211,12 @@
       <groupId>org.eclipse.sensinact.gateway.filters</groupId>
       <artifactId>resource.selector.impl</artifactId>
       <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+       <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
