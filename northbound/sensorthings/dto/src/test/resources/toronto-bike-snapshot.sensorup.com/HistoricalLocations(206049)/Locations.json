@@ -2,10 +2,10 @@
   "@iot.count": 1,
   "value": [
     {
-      "@iot.id": 206048,
       "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)",
-      "description": "The geographic location with coordinates for the Toronto bike share station Bloor St / Brunswick Ave",
+      "@iot.id": 206048,
       "name": "7061:Bloor St / Brunswick Ave",
+      "description": "The geographic location with coordinates for the Toronto bike share station Bloor St / Brunswick Ave",
       "encodingType": "application/vnd.geo+json",
       "location": {
         "coordinates": [
@@ -14,6 +14,7 @@
         ],
         "type": "Point"
       },
+      "properties": {},
       "Things@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/Things",
       "HistoricalLocations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/HistoricalLocations"
     }

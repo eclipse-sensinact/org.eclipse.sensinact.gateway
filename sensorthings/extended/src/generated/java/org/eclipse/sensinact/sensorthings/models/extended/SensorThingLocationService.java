@@ -12,6 +12,8 @@
  */
 package org.eclipse.sensinact.sensorthings.models.extended;
 
+import java.util.Map;
+
 import org.eclipse.sensinact.model.core.provider.Service;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -27,6 +29,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * <ul>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getEncodingType <em>Encoding Type</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getId <em>Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getProperties <em>Properties</em>}</li>
  * </ul>
  *
  * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocationService()
@@ -78,5 +81,27 @@ public interface SensorThingLocationService extends Service {
 	 * @generated
 	 */
 	void setId(String value);
+
+	/**
+	 * Returns the value of the '<em><b>Properties</b></em>' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Properties</em>' attribute.
+	 * @see #setProperties(Map)
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getSensorThingLocationService_Properties()
+	 * @model transient="true"
+	 * @generated
+	 */
+	Map<?, ?> getProperties();
+
+	/**
+	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationService#getProperties <em>Properties</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @param value the new value of the '<em>Properties</em>' attribute.
+	 * @see #getProperties()
+	 * @generated
+	 */
+	void setProperties(Map<?, ?> value);
 
 } // SensorThingLocationService

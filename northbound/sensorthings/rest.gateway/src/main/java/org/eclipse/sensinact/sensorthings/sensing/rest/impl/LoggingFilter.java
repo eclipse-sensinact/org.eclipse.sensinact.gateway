@@ -49,10 +49,11 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
     @Override
     public void filter(ContainerRequestContext request) throws IOException {
+
         if (LOG.isTraceEnabled()) {
 
-            LOG.trace("{} - Method  : {}", Instant.now().toString(), request.getMethod());
-            LOG.trace("{} - URI     : {}", Instant.now().toString(), request.getUriInfo().getRequestUri());
+            LOG.trace("{} - Query     {} : {}", Instant.now().toString(), request.getMethod(),
+                    request.getUriInfo().getRequestUri());
 
             if (request.hasEntity()) {
                 String body = readStream(request.getEntityStream());
@@ -66,16 +67,19 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
     @Override
     public void filter(ContainerRequestContext request, ContainerResponseContext response) {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("{} - Status  : {}", Instant.now().toString(), response.getStatus());
-
             if (response.getEntity() != null) {
                 try {
                     String json = getMapper().writeValueAsString(response.getEntity());
-                    LOG.trace("{} - Body    : {}", Instant.now().toString(), json);
+                    LOG.trace("{} - Body    {} : {}", Instant.now().toString(), response.getStatus(), json);
                 } catch (Exception e) {
                     LOG.trace("Could not serialize response entity to JSON", e);
-                    LOG.trace("{} - Body    : {}", Instant.now().toString(), response.getEntity());
+                    LOG.trace("{} - Body    {} : {}", Instant.now().toString(), response.getStatus(),
+                            response.getEntity());
                 }
+            }
+            if (response.getHeaderString("Location") != null) {
+                LOG.trace("{} - Location : {} ", Instant.now().toString(), response.getHeaderString("Location"));
+
             }
         }
     }

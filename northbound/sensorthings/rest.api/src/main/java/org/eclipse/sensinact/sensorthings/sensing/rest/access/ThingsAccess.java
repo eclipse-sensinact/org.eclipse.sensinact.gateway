@@ -363,6 +363,12 @@ public interface ThingsAccess {
     @GET
     public ResultList<Thing> getThingLocationThings(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2);
 
+    @Path("Locations({id2})/Thing")
+    @GET
+    default public Thing getThingLocationThing(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        return getThing(id);
+    }
+
     @Path("Locations({id2})/Things({id3})/Datastreams")
     @GET
     public ResultList<Datastream> getThingLocationThingDatastreams(@PathParam("id") ODataId id,
@@ -408,6 +414,13 @@ public interface ThingsAccess {
     default public ResultList<Thing> getThingLocationThingsRef(@PathParam("id") ODataId id,
             @PathParam("id2") ODataId id2) {
         return getThingLocationThings(id, id2);
+    }
+
+    @Path("Locations({id2})/Thing/$ref")
+    @GET
+    @RefFilter
+    default public Thing getThingLocationThingRef(@PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
+        return getThingLocationThing(id, id2);
     }
 
     @Path("Locations({id2})/HistoricalLocations")

@@ -1,4 +1,0 @@
-Import-Package: \
-    !org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl,\
-    !org.mockito.*,\
-    *

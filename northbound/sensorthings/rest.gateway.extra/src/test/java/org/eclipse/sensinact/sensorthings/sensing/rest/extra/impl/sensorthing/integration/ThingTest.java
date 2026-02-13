@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -133,7 +134,6 @@ public class ThingTest extends AbstractIntegrationTest {
     @Test
     public void testCreateThingSimpleMissingField() throws Exception {
         // Given
-        String name = "testCreateThingSimpleMissingField";
 
         ExpandedThing dtoThing = DtoFactory.getExpandedThing(null, "testThing",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -301,7 +301,7 @@ public class ThingTest extends AbstractIntegrationTest {
         ExpandedThing dtoThingToUpdate = DtoFactory.getExpandedThing(name,
                 "testThing With Location and Datastream update",
                 Map.of("manufacturer update", "New Corp update", "installationDate update", "2025-12-25"));
-        getJsonResponseFromPut(dtoThingToUpdate, String.format("/Things(%s)", idJson), 204);
+        getJsonResponseFromPut(dtoThingToUpdate, String.format("/Things(%s)", idJson), 200);
         // then
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idJson, "admin");
         service = serviceUseCase.read(session, idJson, DtoMapperSimple.SERVICE_THING);
@@ -340,7 +340,7 @@ public class ThingTest extends AbstractIntegrationTest {
         // When
 
         json = getJsonResponseFromPut(locationsUpdate, String.format("/Things(%s)/Locations(%s)", idThing, idLocation),
-                204);
+                200);
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idLocation, "admin");
 
         assertEquals(name + "2", DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class));
@@ -375,10 +375,10 @@ public class ThingTest extends AbstractIntegrationTest {
 
         UtilsAssert.assertThing(dtoThing, json);
         // When
-        ExpandedDataStream datastreamsUpdate = DtoFactory.getDatastreamMinimal(name + "3");
+        ExpandedDataStream datastreamsUpdate = DtoFactory.getDatastream(name + "3", null, "test");
 
         json = getJsonResponseFromPut(datastreamsUpdate,
-                String.format("/Things(%s)/Datastreams(%s)", idThing, idDatastream), 204);
+                String.format("/Things(%s)/Datastreams(%s)", idThing, idDatastream), 200);
         // then
 
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idDatastream, "admin");
@@ -414,7 +414,7 @@ public class ThingTest extends AbstractIntegrationTest {
         // When
 
         json = getJsonResponseFromPost(new RefId(idLocation), String.format("/Things(%s)/Locations/$ref", idThing),
-                204);
+                200);
         // then
 
         ServiceSnapshot service = serviceUseCase.read(session, idThing, "thing");
@@ -459,7 +459,7 @@ public class ThingTest extends AbstractIntegrationTest {
         // When
 
         json = getJsonResponseFromPost(new RefId(idDatastreamUpdate),
-                String.format("/Things(%s)/Datastreams/$ref", idThing), 204);
+                String.format("/Things(%s)/Datastreams/$ref", idThing), 200);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idThing, "thing");
         ServiceSnapshot serviceDatastream = serviceUseCase.read(session, idDatastreamUpdate, "datastream");
@@ -498,7 +498,7 @@ public class ThingTest extends AbstractIntegrationTest {
         // When
         ExpandedThing dtoThingToUpdate = DtoFactory.getExpandedThingWithLocations(null,
                 "testThing With Location and Datastream update", Map.of("installationDate update", "2025-12-25"), null);
-        json = getJsonResponseFromPatch(dtoThingToUpdate, String.format("Things(%s)", idJson), 204);
+        json = getJsonResponseFromPatch(dtoThingToUpdate, String.format("Things(%s)", idJson), 200);
         // then
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idJson, "admin");
 
@@ -521,7 +521,7 @@ public class ThingTest extends AbstractIntegrationTest {
         String thingId = getIdFromJson(json);
         UtilsAssert.assertThing(dtoThing, json);
         // WhenIllegalArgumentException
-        getJsonResponseFromDelete(String.format("Things(%s)", thingId), 204);
+        getJsonResponseFromDelete(String.format("Things(%s)", thingId), 200);
         // then
         assertThrows(NotFoundException.class, () -> {
             serviceUseCase.read(session, thingId, "thing");
@@ -551,14 +551,20 @@ public class ThingTest extends AbstractIntegrationTest {
 
         UtilsAssert.assertThing(dtoThing, json);
         // When
-        getJsonResponseFromDelete(String.format("Things(%s)", thingId), 204);
+        getJsonResponseFromDelete(String.format("Things(%s)", thingId), 200);
         // then
         assertThrows(NotFoundException.class, () -> {
             serviceUseCase.read(session, thingId, "thing");
         });
-        assertThrows(NotFoundException.class, () -> {
-            serviceUseCase.read(session, idDatastream, "datastream");
-        });
+        assertTrue(DtoMapperSimple.getResourceField(serviceUseCase.read(session, idDatastream, "datastream"), "id",
+                String.class) == null);
+        assertTrue(DtoMapperSimple.getResourceField(serviceUseCase.read(session, idDatastream, "admin"), "friendlyName",
+                String.class) == null);
+        assertTrue(DtoMapperSimple.getResourceField(serviceUseCase.read(session, idDatastream, "admin"), "description",
+                String.class) == null);
+        assertTrue(DtoMapperSimple.getResourceField(serviceUseCase.read(session, idDatastream, "admin"), "location",
+                GeoJsonObject.class) == null);
+
     }
 
     /**
@@ -649,7 +655,7 @@ public class ThingTest extends AbstractIntegrationTest {
 
         json = getJsonResponseFromPost(dtoLocation, "Locations", 201);
         // when
-        getJsonResponseFromDelete(String.format("/Things(%s)/Locations/$ref", idThing), 204);
+        getJsonResponseFromDelete(String.format("/Things(%s)/Locations/$ref", idThing), 200);
         // then
         ServiceSnapshot thingService1 = serviceUseCase.read(session, idThing, DtoMapperSimple.SERVICE_THING);
         assertEquals(0, DtoMapperSimple.getResourceField(thingService1, "locationIds", List.class).size());

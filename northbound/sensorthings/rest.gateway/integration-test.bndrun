@@ -65,11 +65,6 @@
 	org.eclipse.emf.common;version='[2.29.0,2.29.1)',\
 	org.eclipse.emf.ecore;version='[2.35.0,2.35.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.36.0,2.36.1)',\
-	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
-	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
-	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
-	org.eclipse.jetty.server;version='[11.0.13,11.0.14)',\
-	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
 	org.eclipse.osgitech.rest;version='[1.2.2,1.2.3)',\
 	org.eclipse.osgitech.rest.jetty;version='[1.2.2,1.2.3)',\
 	org.eclipse.osgitech.rest.sse;version='[1.2.2,1.2.3)',\

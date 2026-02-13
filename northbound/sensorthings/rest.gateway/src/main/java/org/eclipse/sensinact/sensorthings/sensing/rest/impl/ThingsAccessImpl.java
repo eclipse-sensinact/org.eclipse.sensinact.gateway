@@ -33,7 +33,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.ThingsAccess;
 import org.eclipse.sensinact.sensorthings.sensing.rest.create.ThingsCreate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.ThingsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.ThingsDelegateSensinact;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.ThingsDelegateSensorthings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.ThingsUpdate;
 
@@ -457,23 +456,37 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
 
     @Override
     public Datastream getThingDatastreamObservationDatastream(ODataId id, ODataId id2, ODataId id3) {
-        Observation obs = getThingDatastreamObservation(id, id2, id3);
-        ProviderSnapshot provider = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(id2.value()));
-        if (obs == null) {
+        String providerDatastreamId = DtoMapperSimple.extractFirstIdSegment(id2.value());
+        String providerDatastreamObservationId = DtoMapperSimple.extractFirstIdSegment(id3.value());
+        if (!providerDatastreamId.equals(providerDatastreamObservationId)) {
             throw new NotFoundException();
         }
-        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), null, provider);
+        ProviderSnapshot provider = validateAndGetProvider(providerDatastreamId);
+        if (isSensorthingModel(provider)) {
+            return getSensorthingsHandler().getThingDatastreamObservationDatastream(id.value(), id2.value(),
+                    id3.value());
+        } else {
+            return getSensinactHandler().getThingDatastreamObservationDatastream(id.value(), id2.value(), id3.value());
+
+        }
     }
 
-    @Override
     public FeatureOfInterest getThingDatastreamObservationFeatureOfInterest(ODataId id, ODataId id2, ODataId id3) {
-        Observation obs = getThingDatastreamObservation(id, id2, id3);
-        if (obs == null) {
+        String providerDatastreamObservationId = DtoMapperSimple.extractFirstIdSegment(id3.value());
+        String providerDatastreamId = DtoMapperSimple.extractFirstIdSegment(id2.value());
+        if (!providerDatastreamId.equals(providerDatastreamObservationId)) {
             throw new NotFoundException();
         }
-        ProviderSnapshot provider = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(id2.value()));
-        return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
-                provider);
+        ProviderSnapshot provider = validateAndGetProvider(providerDatastreamId);
+        if (isSensorthingModel(provider)) {
+            return getSensorthingsHandler().getThingDatastreamObservationFeatureOfInterest(id.value(), id2.value(),
+                    id3.value());
+        } else {
+            return getSensinactHandler().getThingDatastreamObservationFeatureOfInterest(id.value(), id2.value(),
+                    id3.value());
+
+        }
+
     }
 
     @Override

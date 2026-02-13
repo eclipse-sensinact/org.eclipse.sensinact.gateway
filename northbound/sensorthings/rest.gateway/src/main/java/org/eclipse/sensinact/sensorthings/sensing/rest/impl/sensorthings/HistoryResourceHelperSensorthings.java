@@ -12,23 +12,26 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractAccess;
-
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.Application;
@@ -88,23 +91,38 @@ public class HistoryResourceHelperSensorthings {
 
     static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot providerThing, int localResultLimit) {
+            ProviderSnapshot providerThing, IDtoMemoryCache<Instant> cacheHl, int localResultLimit) {
 
         return loadHistoricalLocations(userSession, application, mapper, uriInfo, expansions, filter,
-                List.of(providerThing), null, localResultLimit);
+                List.of(providerThing), cacheHl, null, localResultLimit);
     }
 
     @SuppressWarnings("unchecked")
     static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            List<ProviderSnapshot> providerThings, String locationId, int localResultLimit) {
+            List<ProviderSnapshot> providerThings, IDtoMemoryCache<Instant> cacheHl, String locationId,
+            int localResultLimit) {
+        List<HistoricalLocation> values = new ArrayList<>();
+
+        if (cacheHl != null) {
+            values.addAll(providerThings
+                    .stream().map(p -> p.getName()).flatMap(idProv -> cacheHl.keySet().stream()
+                            .filter(id -> id.startsWith(idProv)).map(id -> DtoMapper.toHistoricalLocation(userSession,
+                                    application, mapper, uriInfo, expansions, filter, id, cacheHl.getDto(id))))
+                    .toList());
+            values.addAll(providerThings.stream().flatMap(prov -> {
+                TimedValue<GeoJsonObject> location = DtoMapperSimple.getLocation(prov, mapper, true);
+                return DtoMapper.toHistoricalLocation(userSession, application, mapper, uriInfo, expansions, filter,
+                        prov, Optional.of(location)).stream();
+            }).toList());
+
+        }
 
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
         if (historyProvider == null) {
-            return new ResultList<>(null, null, List.of());
+            return new ResultList<>(null, null, values);
         }
         AtomicLong totalCount = new AtomicLong(0);
-        List<HistoricalLocation> values = new ArrayList<>();
 
         Integer maxResults = getMaxResult(application, localResultLimit);
         for (ProviderSnapshot providerThing : providerThings) {

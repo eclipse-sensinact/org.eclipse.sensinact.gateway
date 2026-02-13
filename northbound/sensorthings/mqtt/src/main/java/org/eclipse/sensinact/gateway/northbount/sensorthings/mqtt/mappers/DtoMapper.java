@@ -47,7 +47,8 @@ public class DtoMapper {
 
     private static final String NO_DESCRIPTION = "No description";
 
-    private static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider, String resource) {
+    private static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider,
+            String resource) {
         ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> "admin".equals(s.getName())).findFirst()
                 .get();
         return adminSvc.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
@@ -69,7 +70,7 @@ public class DtoMapper {
     }
 
     private static String toString(Feature f, String propName) {
-        Map<String,Object> properties = f.properties();
+        Map<String, Object> properties = f.properties();
         return properties == null ? null : toString(properties.get(propName));
     }
 
@@ -77,8 +78,8 @@ public class DtoMapper {
         final String providerName = provider.getName();
         Thing thing = new Thing(null, providerName,
                 toString(getProviderAdminFieldValue(provider, "friendlyName").orElse(providerName)),
-                toString(getProviderAdminFieldValue(provider, "description").orElse(NO_DESCRIPTION)),
-                null, null, null, null);
+                toString(getProviderAdminFieldValue(provider, "description").orElse(NO_DESCRIPTION)), null, null, null,
+                null);
         return thing;
     }
 
@@ -88,8 +89,8 @@ public class DtoMapper {
             return toString(f, propName);
         } else if (location instanceof FeatureCollection) {
             FeatureCollection fc = (FeatureCollection) location;
-            return fc.features().stream().map(f -> toString(f, propName)).filter(p -> p != null)
-                    .findFirst().orElse(null);
+            return fc.features().stream().map(f -> toString(f, propName)).filter(p -> p != null).findFirst()
+                    .orElse(null);
         }
         return null;
     }
@@ -106,8 +107,7 @@ public class DtoMapper {
 
         String description = Objects.requireNonNullElse(getProperty(object, "description"), NO_DESCRIPTION);
 
-        return new Location(null, id, name, description, "application/vnd.geo+json",
-                object, null, null);
+        return new Location(null, id, name, description, "application/vnd.geo+json", object, null, null, null);
     }
 
     public static HistoricalLocation toHistoricalLocation(ObjectMapper mapper, ProviderSnapshot provider) {
@@ -142,19 +142,19 @@ public class DtoMapper {
         final ProviderSnapshot provider = resource.getService().getProvider();
         final Map<String, Object> metadata = resource.getMetadata();
 
-        String id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(),
-                resource.getName());
+        String id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(), resource.getName());
 
         String name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
         String description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
 
         UnitOfMeasurement unit = new UnitOfMeasurement(Objects.toString(metadata.get("sensorthings.unit.name"), null),
-                Objects.toString(metadata.get("unit"), null), Objects.toString(metadata.get("sensorthings.unit.definition"), null));
+                Objects.toString(metadata.get("unit"), null),
+                Objects.toString(metadata.get("sensorthings.unit.definition"), null));
 
         Geometry observedArea = getObservedArea(getLocation(provider, mapper, false).getValue());
         return new Datastream(null, id, name, description,
-                "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit,
-                observedArea, null, null, metadata, null, null, null, null);
+                "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
+                metadata, null, null, null, null);
     }
 
     public static Sensor toSensor(ResourceSnapshot resource) throws NotFoundException {
@@ -255,7 +255,7 @@ public class DtoMapper {
 
         String description = Objects.requireNonNullElse(getProperty(object, "description"), NO_DESCRIPTION);
 
-        return new FeatureOfInterest(null, providerName, name, description,
-                "application/vnd.geo+json", object, null);
+        return new FeatureOfInterest(null, providerName, name, description, "application/vnd.geo+json", object, null,
+                null);
     }
 }

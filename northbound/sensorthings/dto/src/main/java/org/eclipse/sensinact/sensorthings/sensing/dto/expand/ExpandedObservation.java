@@ -36,5 +36,5 @@ public record ExpandedObservation(String selfLink, Object id, @JsonFormat(shape 
         @JsonProperty("Datastream@iot.navigationLink") String datastreamLink,
         @JsonProperty("FeatureOfInterest@iot.navigationLink") String featureOfInterestLink,
         @JsonProperty("Datastream") RefId datastream,
-        @JsonProperty("FeatureOfInterest") FeatureOfInterest featureOfInterest) implements IdSelf {
+        @JsonProperty("FeatureOfInterest") FeatureOfInterest featureOfInterest, boolean deleted) implements IdSelf {
 }

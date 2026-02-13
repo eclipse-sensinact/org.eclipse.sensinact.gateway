@@ -12,14 +12,14 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.access;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import java.util.List;
 
 /**
  * memory repository cache for storing dto that are not assign to datastream
  *
  * @param <M>
  */
-public interface IDtoMemoryCache<M extends Id> {
+public interface IDtoMemoryCache<M> {
 
     /**
      * add dto in cache on id
@@ -37,12 +37,39 @@ public interface IDtoMemoryCache<M extends Id> {
     public void removeDto(String id);
 
     /**
+     * remove dto by id start with providerId
+     *
+     * @param id
+     */
+    public void removeDtoStartWith(String providerId);
+
+    /**
+     *
+     * @param providerId
+     */
+    public void removeDtoContain(String providerId);
+
+    /**
      * get the dto by id
      *
      * @param id
      * @return
      */
     public M getDto(String id);
+
+    /**
+     * return list of dto cached
+     *
+     * @return
+     */
+    public List<M> values();
+
+    /**
+     * return list of dto key cached
+     *
+     * @return
+     */
+    public List<String> keySet();
 
     /**
      * get type of DTO to store in cache

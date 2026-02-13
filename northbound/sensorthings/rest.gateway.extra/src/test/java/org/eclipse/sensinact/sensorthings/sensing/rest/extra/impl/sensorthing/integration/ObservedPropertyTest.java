@@ -64,7 +64,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         String idObservedProperty = getIdFromJson(json);
         UtilsAssert.assertObservedProperty(ObservedProperty, json);
         // when
-        getJsonResponseFromDelete(String.format("ObservedProperties(%s)", idObservedProperty), 204);
+        getJsonResponseFromDelete(String.format("ObservedProperties(%s)", idObservedProperty), 200);
         // then
         assertNull(observedPropertyCache.getDto(idObservedProperty));
     }
@@ -169,7 +169,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         String idObservedProperty = getIdFromJson(json);
         ObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(name + "2");
         json = getJsonResponseFromPut(ObservedPropertyUpdate,
-                String.format("ObservedProperties(%s)", idObservedProperty), 204);
+                String.format("ObservedProperties(%s)", idObservedProperty), 200);
         // then
         assertEquals(name + "2", observedPropertyCache.getDto(idObservedProperty).name());
 
@@ -208,7 +208,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         // when
         ObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(name + "2");
         json = getJsonResponseFromPut(ObservedPropertyUpdate,
-                String.format("ObservedProperties(%s)", idObservedProperty), 204);
+                String.format("ObservedProperties(%s)", idObservedProperty), 200);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals(name + "2", DtoMapperSimple.getResourceField(service, "observedPropertyName", String.class));
@@ -233,7 +233,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         String idObservedProperty = getIdFromJson(json);
         ObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(null, "test");
         json = getJsonResponseFromPatch(ObservedPropertyUpdate,
-                String.format("ObservedProperties(%s)", idObservedProperty), 204);
+                String.format("ObservedProperties(%s)", idObservedProperty), 200);
         // then
         assertEquals("test", observedPropertyCache.getDto(idObservedProperty).definition());
 
@@ -272,7 +272,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         // when
         ObservedProperty ObservedPropertyUpdate = DtoFactory.getObservedProperty(null, "test");
         json = getJsonResponseFromPatch(ObservedPropertyUpdate,
-                String.format("ObservedProperties(%s)", idObservedProperty), 204);
+                String.format("ObservedProperties(%s)", idObservedProperty), 200);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals("test", DtoMapperSimple.getResourceField(service, "observedPropertyDefinition", String.class));

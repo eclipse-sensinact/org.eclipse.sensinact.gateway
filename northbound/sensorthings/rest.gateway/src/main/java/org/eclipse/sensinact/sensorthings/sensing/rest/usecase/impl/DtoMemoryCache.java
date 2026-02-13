@@ -10,15 +10,15 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
+package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 
-public class DtoMemoryCache<M extends Id> implements IDtoMemoryCache<M> {
+public class DtoMemoryCache<M> implements IDtoMemoryCache<M> {
 
     Map<String, M> dtoById = new ConcurrentHashMap<String, M>();
 
@@ -44,5 +44,28 @@ public class DtoMemoryCache<M extends Id> implements IDtoMemoryCache<M> {
     @Override
     public Class<M> getType() {
         return type;
+    }
+
+    @Override
+    public List<M> values() {
+        return dtoById.values().stream().toList();
+    }
+
+    @Override
+    public List<String> keySet() {
+        // TODO Auto-generated method stub
+        return dtoById.keySet().stream().toList();
+    }
+
+    @Override
+    public void removeDtoStartWith(String providerId) {
+        List<String> idToDelete = keySet().stream().filter(id -> id.startsWith(providerId)).toList();
+        idToDelete.stream().forEach(id -> removeDto(id));
+    }
+
+    @Override
+    public void removeDtoContain(String providerId) {
+        List<String> idToDelete = keySet().stream().filter(id -> id.contains(providerId)).toList();
+        idToDelete.stream().forEach(id -> removeDto(id));
     }
 }

@@ -26,4 +26,7 @@ public interface IAccessResourceUseCase {
      * @return
      */
     public ResourceSnapshot read(SensiNactSession session, String id);
+
+    public ResourceSnapshot read(SensiNactSession session, String providerId, String serviceId, String resourceName);
+
 }

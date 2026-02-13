@@ -64,14 +64,17 @@ public class FeaturesOfInterestAccessImpl extends AbstractAccess
 
     @Override
     public FeatureOfInterest getFeatureOfInterest(ODataId id) {
-
-        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
-        ProviderSnapshot provider = validateAndGetProvider(providerId);
-        if (!isSensorthingModel(provider)) {
-            return getSensinactHandler().getFeatureOfInterest(id.value());
+        if (getCacheFeatureOfInterest().getDto(id.value()) != null) {
+            return getCacheFeatureOfInterest().getDto(id.value());
         } else {
-            return getSensorthingsHandler().getFeatureOfInterest(id.value());
+            String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+            ProviderSnapshot provider = validateAndGetProvider(providerId);
+            if (!isSensorthingModel(provider)) {
+                return getSensinactHandler().getFeatureOfInterest(id.value());
+            } else {
+                return getSensorthingsHandler().getFeatureOfInterest(id.value());
 
+            }
         }
     }
 

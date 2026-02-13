@@ -20,10 +20,10 @@ import java.util.Set;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.RootResourceDelegateSensorthings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessServiceUseCaseProvider;
+import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.DtoMemoryCacheProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -43,6 +43,8 @@ public class SensinactSensorthingsApplication extends Application {
         default NOT_SET;
 
         int history_results_max() default 3000;
+
+        boolean history_in_memory() default false;
     }
 
     public static final String NOT_SET = "<<NOT_SET>>";
@@ -64,6 +66,7 @@ public class SensinactSensorthingsApplication extends Application {
                 SensorThingsFeature.class, ThrowableMapperProvider.class, SensinactSessionProvider.class,
                 SensorthingsFilterProvider.class, AccessProviderUseCaseProvider.class,
                 AccessResourceUseCaseProvider.class, AccessServiceUseCaseProvider.class, LoggingFilter.class,
+                DtoMemoryCacheProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections
@@ -79,10 +82,11 @@ public class SensinactSensorthingsApplication extends Application {
 
         Map<String, Object> properties = NOT_SET.equals(config.history_provider())
                 ? new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
-                        "sensinact.history.result.limit", config.history_results_max()))
+                        "sensinact.history.in.memory", config.history_in_memory(), "sensinact.history.result.limit",
+                        config.history_results_max()))
                 : new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
-                        "sensinact.history.provider", config.history_provider(), "sensinact.history.result.limit",
-                        config.history_results_max()));
+                        "sensinact.history.in.memory", config.history_in_memory(), "sensinact.history.provider",
+                        config.history_provider(), "sensinact.history.result.limit", config.history_results_max()));
 
         return properties;
     }

@@ -12,12 +12,14 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record Location(String selfLink, Object id, String name, String description,
-        String encodingType, GeoJsonObject location,
+public record Location(String selfLink, Object id, String name, String description, String encodingType,
+        GeoJsonObject location, Map<String, Object> properties,
         @JsonProperty("Things@iot.navigationLink") String thingsLink,
         @JsonProperty("HistoricalLocations@iot.navigationLink") String historicalLocationsLink)
         implements NameDescription {

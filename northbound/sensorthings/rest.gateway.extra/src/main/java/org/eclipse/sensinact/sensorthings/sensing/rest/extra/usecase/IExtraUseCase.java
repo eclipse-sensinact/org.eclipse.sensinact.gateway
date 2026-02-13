@@ -52,39 +52,74 @@ public interface IExtraUseCase<M extends Id, S> {
      */
     public record ExtraUseCaseRequest<M extends Id>(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo,
             String method, String id, M model, String parentId, Class<? extends Id> clazzModel,
-            Class<? extends Id> clazzRef) {
+            Class<? extends Id> clazzRef, boolean acceptInlineOnUpdate) {
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
                 String id) {
-            this(session, mapper, uriInfo, method, id, null, null, null, null);
+            this(session, mapper, uriInfo, method, id, null, null, null, null, false);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                String id, boolean acceptInlineOnUpdate) {
+            this(session, mapper, uriInfo, method, id, null, null, null, null, acceptInlineOnUpdate);
         }
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
                 M model, String parentId) {
-            this(session, mapper, uriInfo, method, null, model, parentId, null, null);
+            this(session, mapper, uriInfo, method, null, model, parentId, null, null, false);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                M model, String parentId, boolean acceptInlineOnUpdate) {
+            this(session, mapper, uriInfo, method, null, model, parentId, null, null, acceptInlineOnUpdate);
         }
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
                 M model, String parentId, Class<? extends Id> clazzModel, Class<? extends Id> clazzRef) {
 
-            this(session, mapper, uriInfo, method, null, model, parentId, clazzModel, clazzRef);
+            this(session, mapper, uriInfo, method, null, model, parentId, clazzModel, clazzRef, false);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                M model, String parentId, Class<? extends Id> clazzModel, Class<? extends Id> clazzRef,
+                boolean acceptInlineOnUpdate) {
+
+            this(session, mapper, uriInfo, method, null, model, parentId, clazzModel, clazzRef, acceptInlineOnUpdate);
         }
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
                 String id, String parentId, Class<? extends Id> clazzModel, Class<? extends Id> clazzRef) {
 
-            this(session, mapper, uriInfo, method, id, null, parentId, clazzModel, clazzRef);
+            this(session, mapper, uriInfo, method, id, null, parentId, clazzModel, clazzRef, false);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                String id, String parentId, Class<? extends Id> clazzModel, Class<? extends Id> clazzRef,
+                boolean acceptInlineOnUpdate) {
+
+            this(session, mapper, uriInfo, method, id, null, parentId, clazzModel, clazzRef, acceptInlineOnUpdate);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                String id, M model, String parentId, boolean acceptInlineOnUpdate) {
+
+            this(session, mapper, uriInfo, method, id, model, parentId, null, null, acceptInlineOnUpdate);
         }
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
                 String id, M model, String parentId) {
 
-            this(session, mapper, uriInfo, method, id, model, parentId, null, null);
+            this(session, mapper, uriInfo, method, id, model, parentId, null, null, false);
+        }
+
+        public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
+                M model, boolean acceptInlineOnUpdate) {
+            this(session, mapper, uriInfo, method, null, model, null, null, null, acceptInlineOnUpdate);
         }
 
         public ExtraUseCaseRequest(SensiNactSession session, ObjectMapper mapper, UriInfo uriInfo, String method,
                 M model) {
-            this(session, mapper, uriInfo, method, null, model, null, null, null);
+            this(session, mapper, uriInfo, method, null, model, null, null, null, false);
         }
 
         public ExtraUseCaseRequest {

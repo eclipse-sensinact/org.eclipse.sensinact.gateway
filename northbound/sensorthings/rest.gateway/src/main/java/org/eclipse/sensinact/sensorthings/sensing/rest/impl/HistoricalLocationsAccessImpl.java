@@ -28,11 +28,12 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.access.HistoricalLocation
 import org.eclipse.sensinact.sensorthings.sensing.rest.delete.HistoricalLocationsDelete;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.HistoricalLocationsDelegateSensinact;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.HistoricalLocationsDelegateSensorthings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.HistoricalLocationsUpdate;
 
 import jakarta.ws.rs.core.Response;;
 
 public class HistoricalLocationsAccessImpl extends AbstractAccess
-        implements HistoricalLocationsAccess, HistoricalLocationsDelete {
+        implements HistoricalLocationsAccess, HistoricalLocationsDelete, HistoricalLocationsUpdate {
     private HistoricalLocationsDelegateSensinact sensinactHandler;
     private HistoricalLocationsDelegateSensorthings sensorthigHandler;
 
@@ -50,12 +51,6 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
                     requestContext);
         return sensorthigHandler;
 
-    }
-
-    @Override
-    public Response deleteHistoricalLocation(ODataId id) {
-
-        return getSensorthingsHandler().deleteHistoricalLocation(id.value());
     }
 
     @Override
@@ -230,4 +225,19 @@ public class HistoricalLocationsAccessImpl extends AbstractAccess
         }
     }
 
+    @Override
+    public Response deleteHistoricalLocation(ODataId id) {
+        getSensorthingsHandler().deleteHistoricalLocation(id.value());
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response updateHistoricalLocation(ODataId id, HistoricalLocation hl) {
+        return getSensorthingsHandler().updateHistoricalLocation(id.value(), hl);
+    }
+
+    @Override
+    public Response patchHistoricalLocation(ODataId id, HistoricalLocation hl) {
+        return getSensorthingsHandler().updateHistoricalLocation(id.value(), hl);
+    }
 }
