@@ -180,7 +180,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {
         String observationId = request.id();
-        Instant stamp = DtoMapperSimple.getTimestampFromId(observationId);
+        Instant stamp = DtoToModelMapper.getTimestampFromId(observationId);
         String providerId = DtoMapperSimple.extractFirstIdSegment(observationId);
         if (!request.acceptInlineOnUpdate()) {
             checkNoInline(request);
@@ -254,7 +254,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<Expa
                 DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation");
         // allow to get old observatin
 
-        Instant timestamp = DtoMapperSimple.getTimestampFromId(observationId);
+        Instant timestamp = DtoToModelMapper.getTimestampFromId(observationId);
 
         Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
         if (isHistoryMemory() && cacheObs.getDto(request.id()) != null) {

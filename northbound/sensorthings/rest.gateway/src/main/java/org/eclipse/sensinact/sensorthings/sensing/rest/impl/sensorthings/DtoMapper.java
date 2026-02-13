@@ -244,6 +244,18 @@ public class DtoMapper {
 
     }
 
+    public static Instant getTimestampFromId(String id) {
+        int idx = id.lastIndexOf('~');
+        if (idx < 0 || idx == id.length() - 1) {
+            throw new BadRequestException("Invalid id");
+        }
+        try {
+            return Instant.ofEpochMilli(Long.parseLong(id.substring(idx + 1), 16));
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid id");
+        }
+    }
+
     public static Optional<ObservedProperty> toObservedProperty(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider) {

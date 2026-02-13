@@ -193,7 +193,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id2);
         ProviderSnapshot providerThing = validateAndGetProvider(provider);
-        DtoMapperSimple.getTimestampFromId(id2);
+        DtoMapper.getTimestampFromId(id2);
 
         try {
             Optional<HistoricalLocation> hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
@@ -217,7 +217,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
 
     public ResultList<Location> getThingHistoricalLocationLocations(String id, String id2) {
 
-        DtoMapperSimple.getTimestampFromId(id2);
+        DtoMapper.getTimestampFromId(id2);
         ResultList<Location> list = new ResultList<>(
                 null, null, getLocationIdsFromThing(getSession(), id).stream()
                         .map(idLoc -> validateAndGetProvider(idLoc)).map(p -> DtoMapper.toLocation(getSession(),

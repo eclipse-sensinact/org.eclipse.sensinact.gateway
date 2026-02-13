@@ -59,7 +59,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
     public FeatureOfInterest getFeatureOfInterest(String id) {
 
-        Instant timestamp = DtoMapperSimple.getTimestampFromId(id);
+        Instant timestamp = DtoMapper.getTimestampFromId(id);
         ExpandedObservation obs = null;
 
         if (isHistoryMemory() && getCacheFeatureOfInterest().getDto(id) != null) {

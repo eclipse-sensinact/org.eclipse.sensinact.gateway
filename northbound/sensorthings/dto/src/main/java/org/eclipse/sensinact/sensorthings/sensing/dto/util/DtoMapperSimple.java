@@ -17,7 +17,6 @@ import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage
 import java.lang.reflect.RecordComponent;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,47 +51,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.ws.rs.BadRequestException;
-
 public class DtoMapperSimple {
-
-    public class UnitOfMeasureValidator {
-
-        // Map symbol -> definition URI
-        private static final Map<String, String> VALID_UNITS = new HashMap<>();
-        static {
-            VALID_UNITS.put("°C", "DegreeCelsius");
-            VALID_UNITS.put("K", "Kelvin");
-            VALID_UNITS.put("lm", "Lumen");
-            VALID_UNITS.put("m", "Meter");
-            VALID_UNITS.put("kg", "Kilogram");
-            VALID_UNITS.put("s", "Second");
-            VALID_UNITS.put("Pa", "Pa");
-            VALID_UNITS.put("C", "Coulomb");
-
-            // add more units as needed
-        }
-
-        public static void checkConsistencySymbolDefinition(String symbol, String definition) {
-            String expectedDefinition = VALID_UNITS.get(symbol);
-            if (!definition.contains(expectedDefinition)) {
-                throw new BadRequestException(
-                        "symbol " + symbol + " definition " + definition + " expectedDefinition " + expectedDefinition);
-            }
-        }
-    }
-
-    public static Instant getTimestampFromId(String id) {
-        int idx = id.lastIndexOf('~');
-        if (idx < 0 || idx == id.length() - 1) {
-            throw new BadRequestException("Invalid id");
-        }
-        try {
-            return Instant.ofEpochMilli(Long.parseLong(id.substring(idx + 1), 16));
-        } catch (Exception e) {
-            throw new BadRequestException("Invalid id");
-        }
-    }
 
     private static final String DESCRIPTION = "description";
     private static final String FRIENDLY_NAME = "friendlyName";

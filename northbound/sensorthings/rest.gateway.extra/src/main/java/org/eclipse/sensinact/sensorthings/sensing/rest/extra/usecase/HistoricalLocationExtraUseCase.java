@@ -27,6 +27,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -68,7 +69,7 @@ public class HistoricalLocationExtraUseCase
         // delete value location for the thing
         String ThingId = DtoMapperSimple.extractFirstIdSegment(request.id());
 
-        Instant timestamp = DtoMapperSimple.getTimestampFromId(request.id());
+        Instant timestamp = DtoToModelMapper.getTimestampFromId(request.id());
         ResourceSnapshot resourceSnapshot = getResourceLocationFromThing(request, ThingId);
         Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
 

@@ -16,7 +16,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
-import static org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple.getTimestampFromId;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -60,7 +59,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     public HistoricalLocation getHistoricalLocation(String id) {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        Instant timestamp = getTimestampFromId(id);
+        Instant timestamp = DtoMapper.getTimestampFromId(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         ResourceSnapshot location = providerSnapshot.getResource(DtoMapperSimple.SERVICE_ADMIN,
@@ -86,7 +85,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
 
     public ResultList<Location> getHistoricalLocationLocations(String id) {
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        getTimestampFromId(id);
+        DtoMapper.getTimestampFromId(id);
 
         validateAndGetProvider(provider);
 
@@ -99,7 +98,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
 
     public Location getHistoricalLocationLocation(String id, String id2) {
         String provider = DtoMapperSimple.extractFirstIdSegment(id2);
-        getTimestampFromId(id);
+        DtoMapper.getTimestampFromId(id);
         String thingId = DtoMapperSimple.extractFirstIdSegment(id);
         if (!isLocationInThing(thingId, id2)) {
             throw new BadRequestException();
@@ -118,7 +117,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     public ResultList<Thing> getHistoricalLocationLocationThings(String id, String id2) {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        getTimestampFromId(id);
+        DtoMapper.getTimestampFromId(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
@@ -130,7 +129,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
 
         String thingId = DtoMapperSimple.extractFirstIdSegment(id);
 
-        getTimestampFromId(id);
+        DtoMapper.getTimestampFromId(id);
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot thingProvider = validateAndGetProvider(thingId);
@@ -152,7 +151,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     public Thing getHistoricalLocationThing(String id) {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        getTimestampFromId(id);
+        DtoMapper.getTimestampFromId(id);
 
         ProviderSnapshot providerThing = validateAndGetProvider(provider);
 
@@ -172,7 +171,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     public ResultList<Datastream> getHistoricalLocationThingDatastreams(String id) {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        getTimestampFromId(id);
+        DtoMapper.getTimestampFromId(id);
 
         return DatastreamsDelegateSensorthings.getDataStreams(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(DATASTREAMS), provider);
@@ -181,7 +180,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
     public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(String id) {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        getTimestampFromId(id);
+        DtoMapper.getTimestampFromId(id);
 
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);

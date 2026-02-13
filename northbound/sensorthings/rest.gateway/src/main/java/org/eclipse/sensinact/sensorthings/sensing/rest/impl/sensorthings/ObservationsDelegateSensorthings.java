@@ -77,7 +77,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         ResourceSnapshot resourceSnapshot = getObservationResourceSnapshot(id);
         // allow to get old observatin
 
-        Instant timestamp = DtoMapperSimple.getTimestampFromId(id);
+        Instant timestamp = DtoMapper.getTimestampFromId(id);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
         Optional<Observation> result = null;
@@ -185,7 +185,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
 
         ResourceSnapshot resourceSnapshot = getObservationResourceSnapshot(id);
 
-        Instant timestamp = DtoMapperSimple.getTimestampFromId(id);
+        Instant timestamp = DtoMapper.getTimestampFromId(id);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
         FeatureOfInterest result = null;
