@@ -174,8 +174,9 @@ public class OIDCTokenValidator {
                     this.reg = null;
                 }
             }
-            JwtParser parser = Jwts.parserBuilder().deserializeJsonWith(new JacksonDeserializer<>(mapper))
-                    .setSigningKeyResolver(new KeyResolver(loadKeys)).build();
+            JwtParser parser = Jwts.parser()
+                    .json(new JacksonDeserializer<>(mapper))
+                    .keyLocator(new KeyResolver(loadKeys)).build();
             ServiceRegistration<Authenticator> registration = ctx.registerService(Authenticator.class,
                     new Validator(configuration.realm(), parser), null);
 
@@ -241,13 +242,11 @@ public class OIDCTokenValidator {
 
         @Override
         public UserInfo authenticate(String user, String credential) {
-            return parser.parse(credential, new JwtHandlerAdapter<>() {
-
+            return parser.parse(credential).accept(new JwtHandlerAdapter<>() {
                 @Override
                 public UserInfo onClaimsJws(Jws<Claims> jws) {
                     return new JwsUserInfo(jws, j -> Set.of());
                 }
-
             });
         }
 

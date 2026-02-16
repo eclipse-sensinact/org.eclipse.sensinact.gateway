@@ -29,7 +29,7 @@ public class JwsUserInfo implements UserInfo {
     private final Set<String> groups;
 
     public JwsUserInfo(Jws<Claims> jws, Function<Jws<Claims>, Set<String>> groupMapper) {
-        this.subject = jws.getBody().getSubject();
+        this.subject = jws.getPayload().getSubject();
         this.groups = Collections.unmodifiableSet(groupMapper.apply(jws));
     }
 

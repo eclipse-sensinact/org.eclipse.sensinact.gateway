@@ -26,7 +26,6 @@ import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -52,9 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.sun.net.httpserver.HttpServer;
 
-import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.jackson.io.JacksonSerializer;
 
 class OIDCAuthenticatorIntegrationTest {
@@ -116,11 +113,10 @@ class OIDCAuthenticatorIntegrationTest {
         Date start = new Date(Instant.now().minus(Duration.ofHours(1)).toEpochMilli());
         Date end = new Date(Instant.now().plus(Duration.ofHours(1)).toEpochMilli());
 
-        Key key = keyPair.getPrivate();
-
-        String token = Jwts.builder().setSubject("testUser").setIssuedAt(start).setExpiration(end)
-                .setHeaderParam(JwsHeader.KEY_ID, KEY_ID).serializeToJsonWith(new JacksonSerializer<>(mapper))
-                .signWith(key, SignatureAlgorithm.RS512).compact();
+        String token = Jwts.builder().subject("testUser").issuedAt(start).expiration(end)
+                .header().keyId(KEY_ID).and()
+                .json(new JacksonSerializer<>(mapper))
+                .signWith(keyPair.getPrivate(), Jwts.SIG.RS512).compact();
 
         awaitServer(client);
 
