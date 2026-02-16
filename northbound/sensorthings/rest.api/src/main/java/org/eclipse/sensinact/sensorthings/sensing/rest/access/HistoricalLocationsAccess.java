@@ -121,7 +121,7 @@ public interface HistoricalLocationsAccess {
         return getHistoricalLocation(id);
     }
 
-    @Path("Locations({id2})/HistoricalLocations/$ref")
+    @Path("Locations({id2})/HistoricalLocation/$ref")
     @GET
     @RefFilter
     default public HistoricalLocation getHistoricalLocationLocationHistoricalLocationRef(@PathParam("id") ODataId id,

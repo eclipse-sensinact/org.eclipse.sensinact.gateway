@@ -17,13 +17,16 @@ import java.util.Map;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.AbstractIntegrationTest;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.DtoFactory;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.UtilsAssert;
 import org.junit.jupiter.api.Test;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class ObservationHistoryMemoryTest extends AstractIntegrationTestHistoryMemory {
+public class ObservationHistoryMemoryTest extends AbstractIntegrationTest {
 
     /**
      * test create observation through datastream observation endpoint
@@ -31,11 +34,15 @@ public class ObservationHistoryMemoryTest extends AstractIntegrationTestHistoryM
      * @throws Exception
      */
     @Test
+    @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "*", properties = {
+            @Property(key = "history.in.memory", value = "true") })
     public void testDeleteObservation() throws Exception {
         // given
+        waitSensorthingAppReady();
+
         String name = "testDeleteObservation";
 
-        ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
+        ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
         JsonNode json = getJsonResponseFromPost(thing, "Things", 201);
         String thingId = getIdFromJson(json);

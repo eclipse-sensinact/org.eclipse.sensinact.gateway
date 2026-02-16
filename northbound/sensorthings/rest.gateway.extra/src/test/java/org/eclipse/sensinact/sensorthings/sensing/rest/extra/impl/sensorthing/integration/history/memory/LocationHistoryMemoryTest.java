@@ -16,23 +16,30 @@ import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.AbstractIntegrationTest;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.DtoFactory;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.UtilsAssert;
 import org.junit.jupiter.api.Test;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Unit test for simple App.
  */
-public class LocationHistoryMemoryTest extends AstractIntegrationTestHistoryMemory {
+public class LocationHistoryMemoryTest extends AbstractIntegrationTest {
 
     /**
      * test delete historicalLocation
      */
     @Test
+    @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "*", properties = {
+            @Property(key = "history.in.memory", value = "true") })
     public void testDeleteHistocalLocation() throws Exception {
-        // given
+
+        waitSensorthingAppReady();
+
         String name = "testDeleteHistocalLocation";
         ExpandedThing thing = DtoFactory.getExpandedThing(name, "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));

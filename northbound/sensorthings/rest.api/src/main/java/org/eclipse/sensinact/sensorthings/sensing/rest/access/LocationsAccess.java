@@ -300,7 +300,7 @@ public interface LocationsAccess {
         return getLocationThingDatastreamObservations(id, id2, id3);
     }
 
-    @Path("Things({id2})/Datastreams({id3})/Observations")
+    @Path("Things({id2})/Datastreams({id3})/Observations/FeatureOfInterest")
     @GET
     public FeatureOfInterest getLocationThingDatastreamObservationFeatureOfInterest(@PathParam("id") ODataId id,
             @PathParam("id2") ODataId id2, @PathParam("id3") ODataId id3, @PathParam("id3") ODataId id4);
