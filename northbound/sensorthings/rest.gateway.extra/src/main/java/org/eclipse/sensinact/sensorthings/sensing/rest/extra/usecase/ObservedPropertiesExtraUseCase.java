@@ -46,7 +46,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * observedProperty
  */
-public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseDtoDelete<ObservedProperty, Object> {
+public class ObservedPropertiesExtraUseCase extends AbstractExtraUseCaseModelDelete<ObservedProperty, Object> {
 
     private final IDtoMemoryCache<ObservedProperty> cacheObservedProperty;
     private final IDtoMemoryCache<ExpandedObservation> obsCache;

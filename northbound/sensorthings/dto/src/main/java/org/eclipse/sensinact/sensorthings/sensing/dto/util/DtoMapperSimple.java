@@ -258,9 +258,6 @@ public class DtoMapperSimple {
         if (unit.symbol() == null) {
             throw new RuntimeException("symbol not found in  UnitOfMeasurement");
         }
-        // check consistency for unit of measure
-        // UnitOfMeasureValidator.checkConsistencySymbolDefinition(unit.symbol(),
-        // unit.definition());
 
     }
 

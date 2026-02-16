@@ -36,7 +36,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * FeatureOfInterest
  */
-public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<FeatureOfInterest, Object> {
+public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseModel<FeatureOfInterest, Object> {
 
     private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
     private final IDtoMemoryCache<ExpandedObservation> obsCache;

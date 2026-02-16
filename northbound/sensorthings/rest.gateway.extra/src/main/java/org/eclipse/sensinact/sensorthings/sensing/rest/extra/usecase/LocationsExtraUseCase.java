@@ -53,7 +53,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * object
  */
-public class LocationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedLocation, ProviderSnapshot> {
+public class LocationsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedLocation, ProviderSnapshot> {
 
     private final IDtoMemoryCache<Instant> cacheHl;
 

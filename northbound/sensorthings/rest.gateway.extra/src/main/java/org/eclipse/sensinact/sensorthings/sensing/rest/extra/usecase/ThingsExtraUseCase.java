@@ -53,7 +53,7 @@ import jakarta.ws.rs.ext.Providers;
 /**
  * UseCase that manage the create, update, delete use case for sensorthing Thing
  */
-public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedThing, ProviderSnapshot> {
+public class ThingsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedThing, ProviderSnapshot> {
 
     private final IDtoMemoryCache<Sensor> sensorCache;
     private final IDtoMemoryCache<ExpandedObservation> cacheObs;

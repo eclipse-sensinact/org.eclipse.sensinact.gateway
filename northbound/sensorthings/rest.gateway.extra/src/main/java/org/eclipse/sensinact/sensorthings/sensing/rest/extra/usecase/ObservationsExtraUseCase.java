@@ -51,7 +51,7 @@ import jakarta.ws.rs.ext.Providers;
  * observation
  */
 @DependsOnUseCases(value = { FeatureOfInterestExtraUseCase.class })
-public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedObservation, ServiceSnapshot> {
+public class ObservationsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedObservation, ServiceSnapshot> {
 
     private FeatureOfInterestExtraUseCase featureOfInterestUseCase;
     private IDtoMemoryCache<ExpandedObservation> cacheObs;

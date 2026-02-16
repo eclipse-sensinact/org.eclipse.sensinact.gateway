@@ -40,7 +40,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing Thing
  */
 public class HistoricalLocationExtraUseCase
-        extends AbstractExtraUseCaseDtoDelete<HistoricalLocation, ProviderSnapshot> {
+        extends AbstractExtraUseCaseModelDelete<HistoricalLocation, ProviderSnapshot> {
 
     IDtoMemoryCache<Instant> cacheHl;
 

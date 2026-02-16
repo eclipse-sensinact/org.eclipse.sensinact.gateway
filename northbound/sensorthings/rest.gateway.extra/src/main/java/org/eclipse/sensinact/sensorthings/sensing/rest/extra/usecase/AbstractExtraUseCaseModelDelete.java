@@ -39,11 +39,11 @@ import jakarta.ws.rs.ext.Providers;
  * @param <M>
  * @param <S>
  */
-public abstract class AbstractExtraUseCaseDtoDelete<M extends Id, S> extends AbstractExtraUseCaseDto<M, S> {
+public abstract class AbstractExtraUseCaseModelDelete<M extends Id, S> extends AbstractExtraUseCaseModel<M, S> {
 
     public abstract AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<M> request);
 
-    public AbstractExtraUseCaseDtoDelete(Providers providers, Application application) {
+    public AbstractExtraUseCaseModelDelete(Providers providers, Application application) {
         super(providers, application);
     }
 

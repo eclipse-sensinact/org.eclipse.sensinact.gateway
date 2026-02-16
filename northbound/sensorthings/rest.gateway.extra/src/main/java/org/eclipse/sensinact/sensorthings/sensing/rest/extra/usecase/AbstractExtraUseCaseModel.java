@@ -58,7 +58,7 @@ import jakarta.ws.rs.ext.Providers;
  * @param <M>
  * @param <S>
  */
-public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractExtraUseCase<M, S> {
+public abstract class AbstractExtraUseCaseModel<M extends Id, S> extends AbstractExtraUseCase<M, S> {
 
     public abstract List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<M> request);
 
@@ -278,7 +278,7 @@ public abstract class AbstractExtraUseCaseDto<M extends Id, S> extends AbstractE
         return observedArea;
     }
 
-    public AbstractExtraUseCaseDto(Providers providers, Application application) {
+    public AbstractExtraUseCaseModel(Providers providers, Application application) {
         super(providers, application);
         dataUpdate = resolve(providers, DataUpdate.class);
         providerUseCase = resolve(providers, IAccessProviderUseCase.class);
