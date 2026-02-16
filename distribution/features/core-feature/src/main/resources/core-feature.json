@@ -7,7 +7,7 @@
     { "id": "org.eclipse.sensinact.gateway.core:impl:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.core.models:provider:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.core:geo-json:${gateway.version}" },
-    { "id": "com.fasterxml.jackson.core:jackson-annotations:${jackson.version}" },
+    { "id": "com.fasterxml.jackson.core:jackson-annotations:${jackson.annotations.version}" },
     { "id": "com.fasterxml.jackson.core:jackson-core:${jackson.version}" },
     { "id": "com.fasterxml.jackson.core:jackson-databind:${jackson.version}" },
     { "id": "org.osgi:org.osgi.service.typedevent:1.0.0" },

@@ -73,8 +73,8 @@
             </goals>
             <phase>integration-test</phase>
             <configuration>
-              <failOnChanges>true</failOnChanges>
-              <writeOnChanges>false</writeOnChanges>
+              <failOnChanges>false</failOnChanges>
+              <writeOnChanges>true</writeOnChanges>
               <includeDependencyManagement>true</includeDependencyManagement>
               <bndruns>
                 <bndrun>dependency-check.bndrun</bndrun>

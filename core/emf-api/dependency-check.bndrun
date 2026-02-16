@@ -5,15 +5,20 @@
 # This blacklist ensures consistent resolution locally and in CI
 -runblacklist: bnd.identity;id='org.osgi.service.cm'
 
-# This is the test validation assertion. 
+# This will help us keep -runbundles sorted
+-runstartlevel: \
+	order=sortbynameversion,\
+	begin=-1
+
+# This is the test validation assertion.
 # We want to keep the API as clean of external dependencies as possible
-# There has been significant dependency leakage here, with the model 
+# There has been significant dependency leakage here, with the model
 # pulling in large amounts of implementation dependency. This should be
 # investigated.
 -runbundles: \
-	com.fasterxml.jackson.core.jackson-annotations;version='[2.18.4,2.18.5)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.18.4,2.18.5)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.18.4,2.18.5)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.21.0,2.21.1)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.21.0,2.21.1)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.21.0,2.21.1)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
 	org.eclipse.emf.common;version='[2.29.0,2.29.1)',\
