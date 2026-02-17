@@ -148,39 +148,29 @@
                 ${project.build.directory}/it/repository</localRepositoryDirectory>
               <artifactItems>
                 <artifactItem>
-                  <groupId>
-                    org.apache.felix</groupId>
+                  <groupId>org.apache.felix</groupId>
                   <artifactId>org.apache.felix.http.jetty</artifactId>
-                  <version>
-                    5.0.0</version>
+                  <version>5.0.0</version>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>
-                    org.apache.felix</groupId>
+                  <groupId>org.apache.felix</groupId>
                   <artifactId>org.apache.felix.http.servlet-api</artifactId>
-                  <version>
-                    2.1.0</version>
+                  <version>2.1.0</version>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>
-                    org.apache.felix</groupId>
+                  <groupId>org.apache.felix</groupId>
                   <artifactId>org.apache.felix.gogo.shell</artifactId>
-                  <version>
-                    1.1.4</version>
+                  <version>1.1.4</version>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>
-                    org.apache.felix</groupId>
+                  <groupId>org.apache.felix</groupId>
                   <artifactId>org.apache.felix.gogo.runtime</artifactId>
-                  <version>
-                    1.1.4</version>
+                  <version>1.1.6</version>
                 </artifactItem>
                 <artifactItem>
-                  <groupId>
-                    org.apache.felix</groupId>
+                  <groupId>org.apache.felix</groupId>
                   <artifactId>org.apache.felix.gogo.command</artifactId>
-                  <version>
-                    1.1.2</version>
+                  <version>1.1.2</version>
                 </artifactItem>
               </artifactItems>
             </configuration>

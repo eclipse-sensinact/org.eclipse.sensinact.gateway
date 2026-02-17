@@ -21,11 +21,6 @@
   <name>SensiNact Northbound :: Security :: Open Id Connect authentication validator</name>
   <description>A validator for Open Id Connect JWT</description>
 
-  <properties>
-    <jjwt.version>0.11.5</jjwt.version>
-  </properties>
-
-
   <dependencies>
     <dependency>
       <groupId>org.osgi</groupId>
