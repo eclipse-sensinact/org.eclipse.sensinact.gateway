@@ -90,7 +90,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jul-to-slf4j</artifactId>
-      <version>${slf4j.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <!-- OSGi -->
@@ -213,7 +213,6 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.apache.aries.tx-control</groupId>
       <artifactId>tx-control-service-local</artifactId>

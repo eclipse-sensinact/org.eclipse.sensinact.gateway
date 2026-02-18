@@ -155,7 +155,7 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
                         DtoMapperSimple.extractFirstIdSegment(obsId));
                 ResourceSnapshot resource = datastreamProvider.getResource(DtoMapperSimple.SERVICE_DATASTREAM,
                         "lastObservation");
-                Instant stamp = DtoMapper.getTimestampFromId(obsId);
+                Instant stamp = DtoMapperSimple.getTimestampFromId(obsId);
                 ExpandedObservation expObs = getCacheObservation().getDto(obsId);
 
                 return toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
@@ -192,8 +192,11 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         Stream<FeatureOfInterest> foisCache = Stream.empty();
         if (isHistoryMemory()) {
             foisCache = getCacheObservation().keySet().stream().map(obsId -> {
-
-                Instant stamp = DtoMapper.getTimestampFromId(obsId);
+                ProviderSnapshot datastreamProvider = validateAndGetProvider(
+                        DtoMapperSimple.extractFirstIdSegment(obsId));
+                ResourceSnapshot resource = datastreamProvider.getResource(DtoMapperSimple.SERVICE_DATASTREAM,
+                        "lastObservation");
+                Instant stamp = DtoMapperSimple.getTimestampFromId(obsId);
                 ExpandedObservation expObs = getCacheObservation().getDto(obsId);
 
                 return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),

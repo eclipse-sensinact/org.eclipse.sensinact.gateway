@@ -55,7 +55,7 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * datastream
  */
-public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedDataStream, ProviderSnapshot> {
+public class DatastreamsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedDataStream, ProviderSnapshot> {
 
     private final IDtoMemoryCache<Sensor> sensorCache;
 
@@ -89,13 +89,12 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
 
         ProviderSnapshot snapshot = providerUseCase.read(request.session(), idDatastream);
         if (snapshot != null) {
-            if (!isHistoryMemory()) {
-                removeCachedExpandedObservedProperty(request.model());
-                removeCachedExpandedSensor(request.model());
-                if (request.model().observations() != null) {
-                    request.model().observations().stream()
-                            .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
-                }
+
+            removeCachedExpandedObservedProperty(request.model());
+            removeCachedExpandedSensor(request.model());
+            if (request.model().observations() != null) {
+                request.model().observations().stream()
+                        .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
             }
             return new ExtraUseCaseResponse<ProviderSnapshot>(idDatastream, snapshot);
         }
@@ -315,14 +314,14 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
         observations.stream().forEach(u -> updateObservationMemoryHistory(obsCache, foiCache, request.mapper(), u));
 
         ProviderSnapshot provider = providerUseCase.read(request.session(), id);
-        if( !isHistoryMemory() ) {
-            removeCachedExpandedObservedProperty(request.model());
-            removeCachedExpandedSensor(request.model());
-            if (request.model().observations() != null) {
-                request.model().observations().stream()
-                        .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
-            }
+
+        removeCachedExpandedObservedProperty(request.model());
+        removeCachedExpandedSensor(request.model());
+        if (request.model().observations() != null) {
+            request.model().observations().stream()
+                    .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
         }
+
         return new ExtraUseCaseResponse<ProviderSnapshot>(id, provider);
 
     }

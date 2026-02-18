@@ -51,7 +51,7 @@ import jakarta.ws.rs.ext.Providers;
  * observation
  */
 @DependsOnUseCases(value = { FeatureOfInterestExtraUseCase.class })
-public class ObservationsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedObservation, ServiceSnapshot> {
+public class ObservationsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedObservation, ServiceSnapshot> {
 
     private FeatureOfInterestExtraUseCase featureOfInterestUseCase;
     private IDtoMemoryCache<ExpandedObservation> cacheObs;
@@ -180,7 +180,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseModelDelete<Ex
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {
         String observationId = request.id();
-        Instant stamp = DtoToModelMapper.getTimestampFromId(observationId);
+        Instant stamp = DtoMapperSimple.getTimestampFromId(observationId);
         String providerId = DtoMapperSimple.extractFirstIdSegment(observationId);
         if (!request.acceptInlineOnUpdate()) {
             checkNoInline(request);
@@ -254,7 +254,7 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseModelDelete<Ex
                 DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation");
         // allow to get old observatin
 
-        Instant timestamp = DtoToModelMapper.getTimestampFromId(observationId);
+        Instant timestamp = DtoMapperSimple.getTimestampFromId(observationId);
 
         Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
         if (isHistoryMemory() && cacheObs.getDto(request.id()) != null) {

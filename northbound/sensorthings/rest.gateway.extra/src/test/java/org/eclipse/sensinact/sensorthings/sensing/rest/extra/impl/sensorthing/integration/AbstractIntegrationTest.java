@@ -44,13 +44,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.Property.TemplateArgument;
 import org.osgi.test.common.annotation.Property.ValueSource;
+import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -81,7 +82,6 @@ public abstract class AbstractIntegrationTest {
 
     static final HttpClient client = HttpClient.newHttpClient();
     protected static ObjectMapper mapper = null;
-    protected Application app;
 
     public static ObjectMapper getMapper() {
         if (mapper == null) {
@@ -296,21 +296,31 @@ public abstract class AbstractIntegrationTest {
         return node.get("@iot.id").asText();
     }
 
-    public static String getIdFromJsonValues(JsonNode node, int index) {
-        return getIdFromJson(node.get("value").get(index));
-    }
-
     public static final String CONTENT_TYPE = "Content-Type";
 
     @BeforeEach
-    void start(@InjectBundleContext BundleContext bc, TestInfo info) throws Exception {
+    void start(@InjectBundleContext BundleContext bc,
+            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "?")) Configuration sensorthingsConfig,
+            TestInfo info) throws Exception {
 
-        assertApplication(bc, info);
+        updateConfigurationHistory(sensorthingsConfig);
 
-        waitSensorthingAppReady();
-    }
+        Class<?> test = info.getTestClass().get();
+        while (test.isMemberClass()) {
+            test = test.getEnclosingClass();
+        }
 
-    protected void waitSensorthingAppReady() throws IOException, InterruptedException {
+        ServiceTracker<Application, Application> tracker = new ServiceTracker<Application, Application>(bc,
+                bc.createFilter("(&(objectClass=jakarta.ws.rs.core.Application)(test.class=" + test.getName() + "))"),
+                null);
+
+        tracker.open();
+
+        Application app = tracker.waitForService(5000);
+        assertNotNull(app);
+
+        assertInstanceOf(Application.class, app);
+
         // Wait for the servlet to be ready
         boolean ready = false;
         for (int i = 0; i < 10; i++) {
@@ -330,23 +340,8 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
-    private void assertApplication(BundleContext bc, TestInfo info)
-            throws InvalidSyntaxException, InterruptedException {
-        Class<?> test = info.getTestClass().get();
-        while (test.isMemberClass()) {
-            test = test.getEnclosingClass();
-        }
-
-        ServiceTracker<Application, Application> tracker = new ServiceTracker<Application, Application>(bc,
-                bc.createFilter("(&(objectClass=jakarta.ws.rs.core.Application)(test.class=" + test.getName() + "))"),
-                null);
-
-        tracker.open();
-
-        app = tracker.waitForService(5000);
-        assertNotNull(app);
-
-        assertInstanceOf(Application.class, app);
+    protected void updateConfigurationHistory(Configuration sensorthingsConfig) throws IOException {
+        // nothin
     }
 
     @AfterEach

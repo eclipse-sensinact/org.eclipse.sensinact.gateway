@@ -15,6 +15,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.i
 /**
  * Unit test for simple App.
  */
-public class ObservationHistoryMemoryTest extends AstractIntegrationTestHistoryMemory {
+public class ThingHistoryMemoryTest extends AstractIntegrationTestHistoryMemory {
 
 }

@@ -59,7 +59,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
     public FeatureOfInterest getFeatureOfInterest(String id) {
 
-        Instant timestamp = DtoMapper.getTimestampFromId(id);
+        Instant timestamp = DtoMapperSimple.getTimestampFromId(id);
         ExpandedObservation obs = null;
 
         if (isHistoryMemory() && getCacheFeatureOfInterest().getDto(id) != null) {
@@ -67,7 +67,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
         } else {
             ResourceSnapshot resourceSnapshot = getObservationResourceSnapshot(id);
-            Instant stampResource = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
+            Instant stampResource = resourceSnapshot.getValue().getTimestamp();
 
             if (stampResource.equals(timestamp)) {
                 String val = (String) resourceSnapshot.getValue().getValue();
@@ -81,8 +81,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
                     String resource = resourceSnapshot.getName();
                     // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
                     // (timestamp)
-                    Instant timestampPlusOneMilli = timestamp.plusMillis(1).truncatedTo(ChronoUnit.MILLIS);
-                    ;
+                    Instant timestampPlusOneMilli = timestamp.plusMillis(1);
                     TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
                             Map.of("provider", provider, "service", service, "resource", resource, "time",
                                     timestampPlusOneMilli));
