@@ -94,21 +94,24 @@ public class PathHandler {
                 return new SensorPathHandler(provider, resource).handle(path);
             }
         } else {
-            if (resource == null || !resource.getName().equals("lastObservation")) {
-                return null;
+            ExpandedObservation obs = null;
+            if (resource != null && resource.getName().equals("lastObservation")) {
+                obs = DtoMapperSimple.parseExpandObservation(mapper, resource.getValue().getValue());
             }
-            ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(mapper, resource.getValue().getValue());
             switch (holder.getContext()) {
             case THINGS:
                 return new ThingPathHandlerSensorthings(pathContext).handle(path);
             case FEATURES_OF_INTEREST:
-
+                if (obs == null)
+                    return null;
                 return new FeatureOfInterestPathHandlerSensorthings(pathContext, obs).handle(path);
             case HISTORICAL_LOCATIONS:
                 return new HistoricalLocationPathHandlerSensorthings(pathContext).handle(path);
             case LOCATIONS:
                 return new LocationPathHandlerSensorthings(pathContext).handle(path);
             case OBSERVATIONS:
+                if (obs == null)
+                    return null;
                 return new ObservationPathHandlerSensorthings(pathContext, obs).handle(path);
             case DATASTREAMS:
                 return new DatastreamPathHandlerSensorthings(pathContext).handle(path);

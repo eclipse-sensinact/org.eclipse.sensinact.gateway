@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
@@ -84,30 +83,27 @@ public class ThingPathHandlerSensorthings extends AbstractPathHandlerSensorthing
     private Object subDatastreams(final String path) {
         ProviderSnapshot provider = pathContext.provider();
 
-        AnyMatch match = new AnyMatch(
-                getDatastreamsProviderFromThing(provider).stream()
-                        .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(),
-                                pathContext.resource(), pathContext.configProperties(), pathContext.cacheObs(),
-                                pathContext.cacheHl()))
-                        .flatMap(pc -> {
-                            Object result = new DatastreamPathHandlerSensorthings(pc).handle(path);
+        return getDatastreamsProviderFromThing(provider).stream()
+                .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
+                        pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
+                .flatMap(pc -> {
+                    Object result = new DatastreamPathHandlerSensorthings(pc).handle(path);
 
-                            if (result instanceof List<?>) {
-                                return ((List<?>) result).stream();
-                            } else if (result != null) {
-                                return Stream.of(result);
-                            } else {
-                                return Stream.empty();
-                            }
-                        }).collect(Collectors.toList()));
-        return match;
+                    if (result instanceof List<?>) {
+                        return ((List<?>) result).stream();
+                    } else if (result != null) {
+                        return Stream.of(result);
+                    } else {
+                        return Stream.empty();
+                    }
+                }).collect(Collectors.toList());
     }
 
     private Object subLocations(final String path) {
         ProviderSnapshot provider = pathContext.provider();
-        return new AnyMatch(getLocationsProviderFromThing(provider).stream()
+        return getLocationsProviderFromThing(provider).stream()
                 .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
                         pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
-                .map(pc -> new LocationPathHandlerSensorthings(pc).handle(path)).collect(Collectors.toList()));
+                .map(pc -> new LocationPathHandlerSensorthings(pc).handle(path)).collect(Collectors.toList());
     }
 }

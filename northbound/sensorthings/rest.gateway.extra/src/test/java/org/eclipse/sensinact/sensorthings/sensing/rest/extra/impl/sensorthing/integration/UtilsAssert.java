@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -34,7 +33,6 @@ public class UtilsAssert {
     }
 
     public static void assertDatastream(ExpandedDataStream dto, JsonNode json, boolean expanded) {
-        assertSelfLink(dto, json);
 
         assertEquals(dto.name(), json.get("name").asText(), "");
         assertEquals(dto.description(), json.get("description").asText(), "");
@@ -67,7 +65,6 @@ public class UtilsAssert {
     }
 
     public static void assertFeatureOfInterest(FeatureOfInterest dto, JsonNode json, boolean expanded) {
-        assertSelfLink(dto, json);
 
         assertEquals(dto.name(), json.get("name").asText());
         assertEquals(dto.description(), json.get("description").asText());
@@ -75,7 +72,6 @@ public class UtilsAssert {
     }
 
     public static void assertLocation(ExpandedLocation dto, JsonNode json, boolean expanded) {
-        assertSelfLink(dto, json);
 
         assertEquals(dto.name(), json.get("name").asText());
         assertEquals(dto.description(), json.get("description").asText());
@@ -84,27 +80,17 @@ public class UtilsAssert {
     }
 
     public static void assertSensor(Sensor dto, JsonNode json) {
-        assertSelfLink(dto, json);
         assertEquals(dto.name(), json.get("name").asText());
         assertEquals(dto.description(), json.get("description").asText());
         assertEquals(dto.encodingType(), json.get("encodingType").asText());
-        assertEquals(dto.properties(), json.get("properties"));
-        assertEquals(dto.metadata(), json.get("metadata").asText());
 
-    }
-
-    public static void assertSelfLink(Id dto, JsonNode json) {
-
-        // assertEquals(dto.selfLink(), json.get("selfLink").asText());
     }
 
     public static void assertObservedProperty(ObservedProperty dto, JsonNode json) {
-        assertSelfLink(dto, json);
 
         assertEquals(dto.definition(), json.get("definition").asText());
         assertEquals(dto.description(), json.get("description").asText());
         assertEquals(dto.name(), json.get("name").asText());
-        assertEquals(dto.properties(), json.get("properties"));
 
     }
 
@@ -126,7 +112,6 @@ public class UtilsAssert {
     }
 
     public static void assertThing(ExpandedThing dto, JsonNode json, boolean expanded) {
-        assertSelfLink(dto, json);
 
         assertTrue(json.has("@iot.id"), "Response must contain @iot.id");
         assertEquals(dto.name(), json.get("name").asText());

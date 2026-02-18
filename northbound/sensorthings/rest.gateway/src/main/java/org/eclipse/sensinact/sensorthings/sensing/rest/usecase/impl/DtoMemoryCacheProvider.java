@@ -32,7 +32,7 @@ import jakarta.ws.rs.ext.Provider;
 public class DtoMemoryCacheProvider implements ContextResolver<IDtoMemoryCache> {
 
     @Context
-    Application application;
+    public Application application;
 
     private Map<Class<?>, IDtoMemoryCache<?>> mapRepoCaches = new ConcurrentHashMap<Class<?>, IDtoMemoryCache<?>>();
 

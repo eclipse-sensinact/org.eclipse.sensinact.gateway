@@ -42,7 +42,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 
 @Component(configurationPid = "sensinact.sensorthings.northbound.rest")
@@ -109,16 +108,8 @@ public class SensorthingsFilterComponent implements IFilterParser, ISensorthings
 
     private volatile Map<String, Object> dynamicProps = new HashMap<>();
 
-    @Activate
-    @Modified
-    protected void update(Map<String, Object> properties) {
-        this.dynamicProps = properties;
-    }
-
     public boolean isHistoryMemory() {
-        return dynamicProps.containsKey("history.in.memory")
-                ? Boolean.parseBoolean(String.valueOf(dynamicProps.get("history.in.memory")))
-                : config.history_in_memory();
+        return config != null ? config.history_in_memory() : false;
     }
 
     @Override

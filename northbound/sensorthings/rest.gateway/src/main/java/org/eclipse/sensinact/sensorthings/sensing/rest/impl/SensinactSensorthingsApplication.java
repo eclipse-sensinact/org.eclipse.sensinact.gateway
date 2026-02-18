@@ -29,7 +29,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessServic
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.DtoMemoryCacheProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
@@ -91,18 +90,14 @@ public class SensinactSensorthingsApplication extends Application {
 
     @Override
     public Map<String, Object> getProperties() {
+        boolean defaultHistoryInMemory = config != null ? config.history_in_memory() : false;
+        int defaultHistoryMaxResult = config != null ? config.history_results_max() : 0;
 
-        boolean historyInMem = dynamicProps.containsKey("history.in.memory")
-                ? Boolean.parseBoolean(String.valueOf(dynamicProps.get("history.in.memory")))
-                : config.history_in_memory();
+        boolean historyInMem = defaultHistoryInMemory;
 
-        int resultMax = dynamicProps.containsKey("history.results.max")
-                ? Integer.parseInt(String.valueOf(dynamicProps.get("history.results.max")))
-                : config.history_results_max();
+        int resultMax = defaultHistoryMaxResult;
 
-        String provider = dynamicProps.containsKey("history.provider")
-                ? String.valueOf(dynamicProps.get("history.provider"))
-                : config.history_provider();
+        String provider = config.history_provider();
 
         Map<String, Object> props = new HashMap<>();
         props.put("session.manager", sessionManager);
@@ -115,14 +110,6 @@ public class SensinactSensorthingsApplication extends Application {
             props.put("sensinact.history.provider", provider);
         }
         return props;
-    }
-
-    private volatile Map<String, Object> dynamicProps = new HashMap<>();
-
-    @Activate
-    @Modified
-    protected void update(Map<String, Object> properties) {
-        this.dynamicProps = properties;
     }
 
     public SensiNactSessionManager getSessionManager() {

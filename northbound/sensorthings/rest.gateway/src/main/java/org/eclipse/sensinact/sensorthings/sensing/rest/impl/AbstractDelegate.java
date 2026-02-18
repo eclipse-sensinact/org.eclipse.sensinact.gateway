@@ -294,6 +294,20 @@ public abstract class AbstractDelegate {
 
     }
 
+    protected List<String> getDatastreamsIdsFromSensor(ProviderSnapshot provider) {
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIds = DtoMapperSimple.getResourceField(DtoMapperSimple.getSensorService(provider),
+                "datastreamIds", List.class);
+        return datastreamIds;
+    }
+
+    protected List<String> getDatastreamsIdsFromObservedProperty(ProviderSnapshot provider) {
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIds = DtoMapperSimple
+                .getResourceField(DtoMapperSimple.getObservedPropertyService(provider), "datastreamIds", List.class);
+        return datastreamIds;
+    }
+
     /**
      * Returns a user session
      */

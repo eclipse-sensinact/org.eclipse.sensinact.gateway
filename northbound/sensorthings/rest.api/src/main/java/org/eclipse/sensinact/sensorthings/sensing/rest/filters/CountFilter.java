@@ -46,12 +46,11 @@ public class CountFilter implements ContainerRequestFilter, ContainerResponseFil
         Object entity = responseContext.getEntity();
         if (entity instanceof ResultList) {
             ResultList<? extends Self> resultList = (ResultList<?>) entity;
-            if(resultList.count() != null && !addCount) {
-                responseContext.setEntity(new ResultList<>(null,
-                        resultList.nextLink(), resultList.value()));
+            if (resultList.count() != null && !addCount) {
+                responseContext.setEntity(new ResultList<>(resultList.nextLink(), resultList.value()));
             } else if (resultList.count() == null && addCount) {
-                responseContext.setEntity(new ResultList<>(resultList.value().size(),
-                        resultList.nextLink(), resultList.value()));
+                responseContext.setEntity(
+                        new ResultList<>(resultList.value().size(), resultList.nextLink(), resultList.value()));
             }
         }
     }

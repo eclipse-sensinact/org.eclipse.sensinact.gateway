@@ -13,10 +13,12 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.function.Function;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -63,19 +65,27 @@ public class FeatureOfInterestPathHandlerSensorthings extends AbstractPathHandle
         if (foi == null) {
             return null;
         }
+        String foiId = obs.featureOfInterest().id().toString();
+        ProviderSnapshot providerFoi = pathContext.session().providerSnapshot(foiId,
+                EnumSet.noneOf(SnapshotOption.class));
+        ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(providerFoi);
+        ServiceSnapshot service = DtoMapperSimple.getFeatureofInterestService(providerFoi);
+        if (service == null || serviceAdmin == null) {
+            return null;
+        }
         switch (path) {
         case "id":
         case "@iot.id":
 
-            return obs.id() + "~" + foi.id();
+            return providerFoi.getName();
         case "name":
-            return foi.name();
+            return DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class);
         case "description":
-            return foi.description();
+            return DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class);
         case "encodingType":
-            return foi.encodingType();
+            return DtoMapperSimple.getResourceField(service, "encodingType", String.class);
         case "feature":
-            return foi.feature();
+            return DtoMapperSimple.getResourceField(serviceAdmin, "location", String.class);
         default:
             throw new UnsupportedRuleException("Unexpected resource level field: " + path);
         }

@@ -78,7 +78,7 @@ public class FeaturesOfInterestDeletegateSensinact extends AbstractDelegate {
     static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider) {
-        return new ResultList<>(null, null, provider.getServices().stream().flatMap(s -> s.getResources().stream())
+        return new ResultList<>(provider.getServices().stream().flatMap(s -> s.getResources().stream())
                 .filter(ResourceSnapshot::isSet)
                 .map(r -> DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, filter, r))
                 .filter(Optional::isPresent).map(Optional::get).collect(toList()));

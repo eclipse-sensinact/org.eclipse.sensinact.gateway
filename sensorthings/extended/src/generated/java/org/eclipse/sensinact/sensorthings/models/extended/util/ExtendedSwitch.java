@@ -125,6 +125,51 @@ public class ExtendedSwitch<T> extends Switch<T> {
 				if (result == null) result = defaultCase(theEObject);
 				return result;
 			}
+			case ExtendedPackage.SENSOR_THING_OBSERVED_PROPERTY: {
+				SensorThingObservedProperty sensorThingObservedProperty = (SensorThingObservedProperty)theEObject;
+				T result = caseSensorThingObservedProperty(sensorThingObservedProperty);
+				if (result == null) result = caseDynamicProvider(sensorThingObservedProperty);
+				if (result == null) result = caseProvider(sensorThingObservedProperty);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ExtendedPackage.SENSOR_THING_SENSOR: {
+				SensorThingSensor sensorThingSensor = (SensorThingSensor)theEObject;
+				T result = caseSensorThingSensor(sensorThingSensor);
+				if (result == null) result = caseDynamicProvider(sensorThingSensor);
+				if (result == null) result = caseProvider(sensorThingSensor);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ExtendedPackage.OBSERVED_PROPERTY_SERVICE: {
+				ObservedPropertyService observedPropertyService = (ObservedPropertyService)theEObject;
+				T result = caseObservedPropertyService(observedPropertyService);
+				if (result == null) result = caseService(observedPropertyService);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ExtendedPackage.SENSOR_SERVICE: {
+				SensorService sensorService = (SensorService)theEObject;
+				T result = caseSensorService(sensorService);
+				if (result == null) result = caseService(sensorService);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ExtendedPackage.SENSOR_THING_FOI: {
+				SensorThingFoi sensorThingFoi = (SensorThingFoi)theEObject;
+				T result = caseSensorThingFoi(sensorThingFoi);
+				if (result == null) result = caseDynamicProvider(sensorThingFoi);
+				if (result == null) result = caseProvider(sensorThingFoi);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
+			case ExtendedPackage.FEATURE_THING_SERVICE: {
+				FeatureThingService featureThingService = (FeatureThingService)theEObject;
+				T result = caseFeatureThingService(featureThingService);
+				if (result == null) result = caseService(featureThingService);
+				if (result == null) result = defaultCase(theEObject);
+				return result;
+			}
 			default: return defaultCase(theEObject);
 		}
 	}
@@ -216,6 +261,96 @@ public class ExtendedSwitch<T> extends Switch<T> {
 	 * @generated
 	 */
 	public T caseSensorThingDatastream(SensorThingDatastream object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Sensor Thing Observed Property</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Sensor Thing Observed Property</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseSensorThingObservedProperty(SensorThingObservedProperty object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Sensor Thing Sensor</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Sensor Thing Sensor</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseSensorThingSensor(SensorThingSensor object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Observed Property Service</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Observed Property Service</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseObservedPropertyService(ObservedPropertyService object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Sensor Service</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Sensor Service</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseSensorService(SensorService object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Sensor Thing Foi</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Sensor Thing Foi</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseSensorThingFoi(SensorThingFoi object) {
+		return null;
+	}
+
+	/**
+	 * Returns the result of interpreting the object as an instance of '<em>Feature Thing Service</em>'.
+	 * <!-- begin-user-doc -->
+	 * This implementation returns null;
+	 * returning a non-null result will terminate the switch.
+	 * <!-- end-user-doc -->
+	 * @param object the target of the switch.
+	 * @return the result of interpreting the object as an instance of '<em>Feature Thing Service</em>'.
+	 * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+	 * @generated
+	 */
+	public T caseFeatureThingService(FeatureThingService object) {
 		return null;
 	}
 

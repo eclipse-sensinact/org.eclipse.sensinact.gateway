@@ -57,6 +57,26 @@ public class AbstractPathHandlerSensorthings {
         return pathContext.session().providerSnapshot(thingId, EnumSet.noneOf(SnapshotOption.class));
     }
 
+    public ProviderSnapshot getSensorProviderFromDatastream(ProviderSnapshot datastremaProvider) {
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(datastremaProvider);
+        if (service == null) {
+            return null;
+        }
+        String sensorId = DtoMapperSimple.getResourceField(service, "sensorId", String.class);
+
+        return pathContext.session().providerSnapshot(sensorId, EnumSet.noneOf(SnapshotOption.class));
+    }
+
+    public ProviderSnapshot getOpProviderFromDatastream(ProviderSnapshot datastremaProvider) {
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(datastremaProvider);
+        if (service == null) {
+            return null;
+        }
+        String opId = DtoMapperSimple.getResourceField(service, "observedPropertyId", String.class);
+
+        return pathContext.session().providerSnapshot(opId, EnumSet.noneOf(SnapshotOption.class));
+    }
+
     protected static int getMaxResult(PathContext pathContext) {
         if (pathContext.configProperties() != null
                 && pathContext.configProperties().containsKey(SENSINACT_HISTORY_MAX_RESULT)) {
@@ -77,6 +97,30 @@ public class AbstractPathHandlerSensorthings {
 
     public List<ProviderSnapshot> getDatastreamsProviderFromThing(ProviderSnapshot thingProvider) {
         ServiceSnapshot service = DtoMapperSimple.getThingService(thingProvider);
+        if (service == null) {
+            return List.of();
+        }
+        List<?> datastreamIds = DtoMapperSimple.getResourceField(service, "datastreamIds", List.class);
+
+        return datastreamIds.stream()
+                .map(id -> pathContext.session().providerSnapshot((String) id, EnumSet.noneOf(SnapshotOption.class)))
+                .toList();
+    }
+
+    public List<ProviderSnapshot> getDatastreamsProviderFromSensor(ProviderSnapshot sensorProvider) {
+        ServiceSnapshot service = DtoMapperSimple.getSensorService(sensorProvider);
+
+        if (service == null) {
+            return List.of();
+        }
+        List<?> datastreamIds = DtoMapperSimple.getResourceField(service, "datastreamIds", List.class);
+        return datastreamIds.stream()
+                .map(id -> pathContext.session().providerSnapshot((String) id, EnumSet.noneOf(SnapshotOption.class)))
+                .toList();
+    }
+
+    public List<ProviderSnapshot> getDatastreamsProviderFromOp(ProviderSnapshot opProvider) {
+        ServiceSnapshot service = DtoMapperSimple.getObservedPropertyService(opProvider);
         if (service == null) {
             return List.of();
         }

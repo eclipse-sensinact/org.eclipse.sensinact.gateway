@@ -421,7 +421,7 @@ class JsonMappingTest {
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/Things",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/Locations(206048)/HistoricalLocations");
 
-            ResultList<Location> list = new ResultList<>(1, null, List.of(location));
+            ResultList<Location> list = new ResultList<>(1, List.of(location));
 
             assertEquals(getObjectMapper().readTree(getFile("HistoricalLocations(206049)/Locations.json")),
                     getObjectMapper().valueToTree(list));
@@ -435,7 +435,7 @@ class JsonMappingTest {
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)/Locations",
                     "https://toronto-bike-snapshot.sensorup.com/v1.0/HistoricalLocations(206049)/Thing");
 
-            ResultList<HistoricalLocation> list = new ResultList<>(1, null, List.of(historicalLocation));
+            ResultList<HistoricalLocation> list = new ResultList<>(1, List.of(historicalLocation));
 
             assertEquals(getObjectMapper().readTree(getFile("Locations(206048)/HistoricalLocations.json")),
                     getObjectMapper().valueToTree(list));

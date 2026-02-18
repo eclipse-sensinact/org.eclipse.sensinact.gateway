@@ -77,18 +77,24 @@ public class DatastreamPathHandlerSensorthings extends AbstractPathHandlerSensor
 
     private Object subObservations(final String path) {
         List<ExpandedObservation> listHistory = getListExpandedObservationWithHistory(pathContext);
-        // return value of live and history to valid this provider if one of them match
-        // perdicate
         return listHistory.stream().map(o -> new ObservationPathHandlerSensorthings(pathContext, o).handle(path))
                 .toList();
     }
 
     private Object subObservedProperty(final String path) {
-        return new ObservedPropertyPathHandlerSensorthings(pathContext).handle(path);
+        PathContext subPathContext = new PathContext(pathContext.mapper(),
+                getOpProviderFromDatastream(pathContext.provider()), pathContext.session(), pathContext.resource(),
+                pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl());
+
+        return new ObservedPropertyPathHandlerSensorthings(subPathContext).handle(path);
     }
 
     private Object subSensor(final String path) {
-        return new SensorPathHandlerSensorthings(pathContext).handle(path);
+        PathContext subPathContext = new PathContext(pathContext.mapper(),
+                getSensorProviderFromDatastream(pathContext.provider()), pathContext.session(), pathContext.resource(),
+                pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl());
+
+        return new SensorPathHandlerSensorthings(subPathContext).handle(path);
     }
 
     private Object subThing(final String path) {

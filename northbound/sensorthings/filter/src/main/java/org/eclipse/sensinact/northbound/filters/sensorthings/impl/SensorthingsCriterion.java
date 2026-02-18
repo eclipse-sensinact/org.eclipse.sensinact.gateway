@@ -77,14 +77,6 @@ public class SensorthingsCriterion implements ICriterion {
         case HISTORICAL_LOCATIONS:
         case LOCATIONS:
         case THINGS:
-            return new ResourceValueFilter() {
-                @Override
-                public boolean test(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
-                    return predicate.test(new ResourceValueFilterInputHolder(context, session, provider, resources,
-                            configProperties, cacheObs, cacheHl));
-                }
-            };
-
         case DATASTREAMS:
         case OBSERVATIONS:
         case OBSERVED_PROPERTIES:
@@ -92,10 +84,11 @@ public class SensorthingsCriterion implements ICriterion {
             return new ResourceValueFilter() {
                 @Override
                 public boolean test(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
-                    return resources.stream().map(r -> {
+                    List<ResourceValueFilterInputHolder> matchs = resources.stream().map(r -> {
                         return new ResourceValueFilterInputHolder(context, session, provider, r, configProperties,
                                 cacheObs, cacheHl);
-                    }).anyMatch(predicate);
+                    }).toList();
+                    return matchs.stream().anyMatch(predicate);
                 }
             };
 

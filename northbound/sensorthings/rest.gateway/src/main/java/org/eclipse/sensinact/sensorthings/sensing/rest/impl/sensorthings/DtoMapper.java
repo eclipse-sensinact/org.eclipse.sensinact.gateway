@@ -164,12 +164,11 @@ public class DtoMapper {
         }
 
         if (expansions.shouldExpand("HistoricalLocations", thing)) {
-            ResultList<HistoricalLocation> list = new ResultList<>(null, null,
-                    locationIds.stream().map(idLoc -> validateAndGetProvider(userSession, idLoc))
-                            .filter(Objects::nonNull)
-                            .map(p -> toHistoricalLocation(userSession, mapper, uriInfo,
-                                    expansions.getExpansionSettings("HistoricalLocations"), filter, p))
-                            .flatMap(Optional::stream).toList());
+            ResultList<HistoricalLocation> list = new ResultList<>(locationIds.stream()
+                    .map(idLoc -> validateAndGetProvider(userSession, idLoc)).filter(Objects::nonNull)
+                    .map(p -> toHistoricalLocation(userSession, mapper, uriInfo,
+                            expansions.getExpansionSettings("HistoricalLocations"), filter, p))
+                    .flatMap(Optional::stream).toList());
             expansions.addExpansion("HistoricalLocations", thing, list);
 
         }
@@ -202,6 +201,11 @@ public class DtoMapper {
         String sensorLink = getLink(uriInfo, selfLink, "Sensor");
 
         String thingLink = getLink(uriInfo, selfLink, "Thing");
+        // get sensor
+        String sensorId = getResourceField(DtoMapperSimple.getDatastreamService(provider), "sensorId", String.class);
+        String observedPorpertyId = getResourceField(DtoMapperSimple.getDatastreamService(provider),
+                "observedPropertyId", String.class);
+
         Datastream datastream = DtoMapperSimple.toDatastream(provider, selfLink, observationsLink, observedPropertyLink,
                 sensorLink, thingLink);
         String thingId = getResourceField(DtoMapperSimple.getDatastreamService(provider), "thingId", String.class);
@@ -215,17 +219,18 @@ public class DtoMapper {
         }
 
         if (expansions.shouldExpand("ObservedProperty", datastream)) {
-            Optional<ObservedProperty> op = toObservedProperty(userSession, mapper, uriInfo,
-                    expansions.getExpansionSettings("ObservedProperty"), filter, provider);
-            if (op.isPresent())
-                expansions.addExpansion("ObservedProperty", datastream, op.get());
+
+            ObservedProperty op = toObservedProperty(userSession, mapper, uriInfo,
+                    expansions.getExpansionSettings("ObservedProperty"), filter,
+                    validateAndGetProvider(userSession, observedPorpertyId));
+            expansions.addExpansion("ObservedProperty", datastream, op);
         }
 
         if (expansions.shouldExpand("Sensor", datastream)) {
-            Optional<Sensor> sensor = toSensor(userSession, mapper, uriInfo, expansions.getExpansionSettings("Sensor"),
-                    filter, provider);
-            if (sensor.isPresent())
-                expansions.addExpansion("Sensor", datastream, sensor.get());
+
+            Sensor sensor = toSensor(userSession, mapper, uriInfo, expansions.getExpansionSettings("Sensor"), filter,
+                    validateAndGetProvider(userSession, sensorId));
+            expansions.addExpansion("Sensor", datastream, sensor);
         }
 
         if (expansions.shouldExpand("Thing", datastream)) {
@@ -237,35 +242,24 @@ public class DtoMapper {
         return Optional.of(datastream);
     }
 
-    public Optional<Sensor> toSensor(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
+    public Sensor toSensor(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
             ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
-        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
-        String sensorId = getResourceField(service, "sensorId", String.class);
 
-        if (sensorId == null) {
-            return Optional.empty();
-        }
-        String id = String.format("%s~%s", provider.getName(), sensorId);
+        String id = provider.getName();
         String sensorLink = null;
         String datastreamLink = null;
         if (uriInfo != null) {
             sensorLink = getLink(uriInfo, VERSION, "/Sensors({id})", id);
             datastreamLink = getLink(uriInfo, sensorLink, "Datastreams");
         }
-        return Optional.of(DtoMapperSimple.toSensor(provider, sensorLink, datastreamLink));
+        return DtoMapperSimple.toSensor(provider, sensorLink, datastreamLink);
 
     }
 
-    public Optional<ObservedProperty> toObservedProperty(SensiNactSession userSession, ObjectMapper mapper,
-            UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
-        String datastreamId = provider.getName();
-        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
+    public ObservedProperty toObservedProperty(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
+            ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
 
-        String observedPropertyId = getResourceField(service, "observedPropertyId", String.class);
-        if (observedPropertyId == null) {
-            return Optional.empty();
-        }
-        String id = String.format("%s~%s", datastreamId, observedPropertyId);
+        String id = provider.getName();
 
         String observedPropertyLink = null;
         String datastreamLink = null;
@@ -276,7 +270,7 @@ public class DtoMapper {
         ObservedProperty observedProperty = DtoMapperSimple.toObservedProperty(provider, observedPropertyLink,
                 datastreamLink);
 
-        return Optional.of(observedProperty);
+        return observedProperty;
     }
 
     public Optional<Observation> toObservation(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
@@ -365,8 +359,12 @@ public class DtoMapper {
 
         if (expansions.shouldExpand("FeatureOfInterest", observation)) {
             ExpandedObservation expObs = DtoMapperSimple.parseExpandObservation(mapper, resource.getValue().getValue());
-            expansions.addExpansion("FeatureOfInterest", observation, toFeatureOfInterest(userSession, mapper, uriInfo,
-                    expansions.getExpansionSettings("FeatureOfInterest"), filter, timestamp, expObs));
+            String foiId = expObs.featureOfInterest().id().toString();
+
+            expansions.addExpansion("FeatureOfInterest", observation,
+                    toFeatureOfInterest(userSession, mapper, uriInfo,
+                            expansions.getExpansionSettings("FeatureOfInterest"), filter,
+                            validateAndGetProvider(userSession, foiId)));
         }
         return Optional.of(observation);
     }
@@ -393,7 +391,7 @@ public class DtoMapper {
         if (expansions.shouldExpand("Things", location) && filterThing != null) {
             List<ProviderSnapshot> listProviderThing = userSession.filteredSnapshot(filterThing);
 
-            ResultList<Thing> list = new ResultList<>(null, null, listProviderThing.stream().map(
+            ResultList<Thing> list = new ResultList<>(listProviderThing.stream().map(
                     p -> toThing(userSession, mapper, uriInfo, expansions.getExpansionSettings("Thing"), filter, p))
                     .toList());
             expansions.addExpansion("Things", location, list);
@@ -427,7 +425,7 @@ public class DtoMapper {
 
         Optional<HistoricalLocation> optHl = toHistoricalLocation(userSession, mapper, uriInfo, expansions, filter,
                 providerThing, Optional.of(location));
-        return new ResultList<>(null, null, optHl.isEmpty() ? List.of() : List.of(optHl.get()));
+        return new ResultList<>(optHl.isEmpty() ? List.of() : List.of(optHl.get()));
 
     }
 
@@ -492,7 +490,7 @@ public class DtoMapper {
                     toThing(userSession, mapper, uriInfo, expansions.getExpansionSettings("Thing"), filter, provider));
         }
         if (expansions.shouldExpand("Locations", historicalLocation)) {
-            ResultList<Location> list = new ResultList<>(null, null, List.of(toLocation(userSession, mapper, uriInfo,
+            ResultList<Location> list = new ResultList<>(List.of(toLocation(userSession, mapper, uriInfo,
                     expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", historicalLocation, list);
         }
@@ -515,7 +513,7 @@ public class DtoMapper {
                     toThing(userSession, mapper, uriInfo, expansions.getExpansionSettings("Thing"), filter, provider));
         }
         if (expansions.shouldExpand("Locations", historicalLocation)) {
-            ResultList<Location> list = new ResultList<>(null, null, List.of(toLocation(userSession, mapper, uriInfo,
+            ResultList<Location> list = new ResultList<>(List.of(toLocation(userSession, mapper, uriInfo,
                     expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", historicalLocation, list);
         }
@@ -535,17 +533,12 @@ public class DtoMapper {
     }
 
     public FeatureOfInterest toFeatureOfInterest(SensiNactSession userSession, ObjectMapper mapper, UriInfo uriInfo,
-            ExpansionSettings expansions, ICriterion filter, Instant timestamp, ExpandedObservation obs) {
+            ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider) {
 
-        if (obs != null && obs.featureOfInterest() != null) {
-            String foiId = String.format("%s~%s~%s", obs.id(), obs.featureOfInterest().id(),
-                    Long.toString(timestamp.toEpochMilli(), 16));
+        String selfLink = getLink(uriInfo, VERSION, "FeaturesOfInterest({id})", provider.getName());
+        String observationLink = getLink(uriInfo, selfLink, "Observations");
+        return DtoMapperSimple.toFeatureOfInterest(provider, provider.getName(), selfLink, observationLink);
 
-            String selfLink = getLink(uriInfo, VERSION, "FeaturesOfInterest({id})", foiId);
-            String observationLink = getLink(uriInfo, selfLink, "Observations");
-            return DtoMapperSimple.toFeatureOfInterest(obs, foiId, selfLink, observationLink);
-        }
-        return null;
     }
 
 }

@@ -13,8 +13,9 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -25,6 +26,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.ws.rs.NotFoundException;
 
 /**
  * Unit test for simple App.
@@ -46,6 +49,32 @@ public class SensorTest extends AbstractIntegrationTest {
         // then
         UtilsAssert.assertSensor(sensor, json);
 
+    }
+
+    @Test
+    public void testCreateSensorAssignTo2Datastream() throws Exception {
+        // given
+        String name = "testCreateSensorAssignTo2Datastream";
+        Sensor sensor = DtoFactory.getSensor(name);
+        // when
+        JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
+        UtilsAssert.assertSensor(sensor, json);
+        String sensorId = getIdFromJson(json);
+
+        ExpandedThing thing = DtoFactory.getExpandedThing("testCreateDatastreamLinkObservedPropertyAlreadyExists",
+                "testThing existing Location", Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
+        json = getJsonResponseFromPost(thing, "Things", 201);
+        String thingId = getIdFromJson(json);
+
+        ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkSensor(name + "1",
+                DtoFactory.getRefId(thingId), DtoFactory.getRefId(sensorId));
+        json = getJsonResponseFromPost(datastream, "Datastreams?$expand=Sensor,Observations", 201);
+        ExpandedDataStream datastream2 = DtoFactory.getDatastreamMinimalLinkThingLinkSensor(name + "1",
+                DtoFactory.getRefId(thingId), DtoFactory.getRefId(sensorId));
+        json = getJsonResponseFromPost(datastream2, "Datastreams?$expand=Sensor,Observations", 201);
+
+        ServiceSnapshot service = serviceUseCase.read(session, sensorId, "sensor");
+        assertEquals(2, DtoMapperSimple.getResourceField(service, "datastreamIds", List.class).size());
     }
 
     /**
@@ -83,7 +112,6 @@ public class SensorTest extends AbstractIntegrationTest {
         // when
         getJsonResponseFromDelete(String.format("Sensors(%s)", sensorId), 200);
         // then
-        assertNull(sensorCache.getDto(sensorId));
     }
 
     /**
@@ -97,7 +125,6 @@ public class SensorTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
         String sensorId = getIdFromJson(json);
         UtilsAssert.assertSensor(sensor, json);
-        assertNotNull(sensorCache.getDto(sensorId));
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -113,19 +140,12 @@ public class SensorTest extends AbstractIntegrationTest {
         JsonNode jsonSensor = json.get("Sensor");
         String isSensorDatastream = getIdFromJson(jsonSensor);
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
-        assertNull(sensorCache.getDto(sensorId));
         // when
-        getJsonResponseFromDelete(String.format("Sensors(%s)", isSensorDatastream), 409);
+        getJsonResponseFromDelete(String.format("Sensors(%s)", isSensorDatastream), 200);
         // then
-        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorId", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorName", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorDescription", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorEncodingType", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorMetadata", Object.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorProperties", Map.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", String.class));
-
+        assertThrows(NotFoundException.class, () -> {
+            serviceUseCase.read(session, idDatastream, "datastream");
+        });
     }
 
     /**
@@ -139,7 +159,6 @@ public class SensorTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
         String sensorId = getIdFromJson(json);
         UtilsAssert.assertSensor(sensor, json);
-        assertNotNull(sensorCache.getDto(sensorId));
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -154,7 +173,6 @@ public class SensorTest extends AbstractIntegrationTest {
                 name + "1", DtoFactory.getRefId(thingId), sensor, null);
         // then
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
-        assertNull(sensorCache.getDto(sensorId));
 
     }
 
@@ -178,7 +196,6 @@ public class SensorTest extends AbstractIntegrationTest {
         // when
         getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", idSensor), 200);
         // then
-        assertEquals(name + "2", sensorCache.getDto(idSensor).name());
     }
 
     /**
@@ -194,7 +211,6 @@ public class SensorTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
         String sensorId = getIdFromJson(json);
         UtilsAssert.assertSensor(sensor, json);
-        assertNotNull(sensorCache.getDto(sensorId));
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -209,15 +225,12 @@ public class SensorTest extends AbstractIntegrationTest {
                 name + "1", DtoFactory.getRefId(thingId), sensor, null);
         String sensorIdDatastream = getIdFromJson(json.get("Sensor"));
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
-        assertNull(sensorCache.getDto(sensorId));
         // when
         Sensor sensorUpdate = DtoFactory.getSensor(name + "2");
         json = getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 200);
-        assertNull(sensorCache.getDto(sensorId));
         // then
-        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + "2", DtoMapperSimple.getResourceField(service, "sensorName", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", String.class));
+        ServiceSnapshot service = serviceUseCase.read(session, sensorIdDatastream, "admin");
+        assertEquals(name + "2", DtoMapperSimple.getResourceField(service, "friendlyName", String.class));
 
     }
 
@@ -241,7 +254,6 @@ public class SensorTest extends AbstractIntegrationTest {
         // when
         json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", idSensor), 200);
         // then
-        assertEquals(name + "2", sensorCache.getDto(idSensor).name());
 
     }
 
@@ -258,7 +270,6 @@ public class SensorTest extends AbstractIntegrationTest {
         JsonNode json = getJsonResponseFromPost(sensor, "Sensors", 201);
         String sensorId = getIdFromJson(json);
         UtilsAssert.assertSensor(sensor, json);
-        assertNotNull(sensorCache.getDto(sensorId));
 
         ExpandedThing thing = DtoFactory.getExpandedThing("alreadyExists", "testThing existing Location",
                 Map.of("manufacturer", "New Corp", "installationDate", "2025-11-25"));
@@ -273,15 +284,12 @@ public class SensorTest extends AbstractIntegrationTest {
                 name + "1", DtoFactory.getRefId(thingId), sensor, null);
         String sensorIdDatastream = getIdFromJson(json.get("Sensor"));
         UtilsAssert.assertDatastream(expectedDatastream, json, true);
-        assertNull(sensorCache.getDto(sensorId));
         // when
         Sensor sensorUpdate = DtoFactory.getSensor(name + "2", null, "testencodingType");
         json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 200);
-        assertNull(sensorCache.getDto(sensorId));
         // then
-        ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
-        assertEquals(name + "2", DtoMapperSimple.getResourceField(service, "sensorName", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "lastObservation", String.class));
+        ServiceSnapshot service = serviceUseCase.read(session, sensorIdDatastream, "admin");
+        assertEquals(name + "2", DtoMapperSimple.getResourceField(service, "friendlyName", String.class));
 
     }
 }

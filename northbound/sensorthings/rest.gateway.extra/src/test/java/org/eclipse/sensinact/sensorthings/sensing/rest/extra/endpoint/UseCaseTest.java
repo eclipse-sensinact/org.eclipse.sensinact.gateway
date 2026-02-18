@@ -15,14 +15,17 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mock.Strictness.LENIENT;
 
+import java.util.Map;
+
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.push.DataUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoCacheMemoryHistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMemoryCacheObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.DtoMemoryCacheProvider;
-import org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint.UseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.DatastreamsExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.FeatureOfInterestExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase;
@@ -43,10 +46,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
 @ExtendWith(MockitoExtension.class)
 class UseCaseTest {
+    @Mock
+    Application application;
 
     @Mock(strictness = LENIENT)
     Providers providers;
@@ -62,14 +68,20 @@ class UseCaseTest {
     void setup() {
         ucp = new UseCaseProvider();
         ucp.providers = providers;
+        ucp.application = application;
+
         Mockito.when(providers.<IExtraUseCase>getContextResolver(
                 Mockito.argThat(c -> c != null && IExtraUseCase.class.isAssignableFrom(c)), Mockito.any()))
                 .thenReturn(ucp);
 
         // Dependencies
+        Mockito.when(application.getProperties()).thenReturn(Map.of("cache.expanded.observation",
+                new DtoMemoryCacheObservation(), "cache.historical.location", new DtoCacheMemoryHistoricalLocation()));
+        DtoMemoryCacheProvider dtoMemoryCacheProvider = new DtoMemoryCacheProvider();
+        dtoMemoryCacheProvider.application = application;
         Mockito.when(providers.<IDtoMemoryCache>getContextResolver(
                 Mockito.argThat(c -> c != null && IDtoMemoryCache.class.isAssignableFrom(c)), Mockito.any()))
-                .thenReturn(new DtoMemoryCacheProvider());
+                .thenReturn(dtoMemoryCacheProvider);
         Mockito.when(providers.<DataUpdate>getContextResolver(
                 Mockito.argThat(c -> c != null && DataUpdate.class.isAssignableFrom(c)), Mockito.any()))
                 .thenReturn(new DataUpdateProvider(dataUpdate));

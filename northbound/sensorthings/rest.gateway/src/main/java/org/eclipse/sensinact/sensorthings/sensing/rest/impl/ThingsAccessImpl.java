@@ -423,7 +423,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
     public ResultList<Datastream> getThingDatastreamSensorDatastreams(ODataId id, ODataId id2) {
         Sensor sensor = getThingDatastreamSensor(id, id2);
         if (sensor != null) {
-            return new ResultList<Datastream>(null, null, List.of(getThingDatastream(id, id2)));
+            return new ResultList<Datastream>(List.of(getThingDatastream(id, id2)));
         }
         throw new NotFoundException();
     }
@@ -432,7 +432,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
     public ResultList<Datastream> getThingDatastreamObservedPropertyDatastreams(ODataId id, ODataId id2) {
         ObservedProperty observedProperty = getThingDatastreamObservedProperty(id, id2);
         if (observedProperty != null) {
-            return new ResultList<Datastream>(null, null, List.of(getThingDatastream(id, id2)));
+            return new ResultList<Datastream>(List.of(getThingDatastream(id, id2)));
         }
         throw new NotFoundException();
     }
@@ -521,7 +521,7 @@ public class ThingsAccessImpl extends AbstractAccess implements ThingsDelete, Th
         }
         List<? extends Location> locations = getThingHistoricalLocationLocations(id, id2).value().stream()
                 .filter(l -> l.id().equals(id3.value())).toList();
-        return new ResultList<Location>(null, null, locations);
+        return new ResultList<Location>(locations);
     }
 
     @Override

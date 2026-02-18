@@ -21,7 +21,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 
 import java.net.URI;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +81,7 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
         ResultList<Observation> observationList = RootResourceDelegateSensorthings.getObservationList(getSession(),
                 getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext,
                 provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter,
-                getHistoryProvider(), getMaxResult(25), getCacheObservationIfHistoryMemory());
+                getHistoryProvider(), getMaxResult(0), getCacheObservationIfHistoryMemory());
         return observationList;
     }
 
@@ -119,33 +118,37 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
         ResourceSnapshot resource = getObservationResourceSnapshot(id2);
-        Instant stamp = resource.getValue().getTimestamp();
 
         ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(getMapper(), resource.getValue().getValue());
         return getSensorThingDtoMapper().toFeatureOfInterest(getSession(), getMapper(), uriInfo, getExpansions(),
-                parseFilter(FEATURES_OF_INTEREST), stamp, obs);
+                parseFilter(FEATURES_OF_INTEREST), validateAndGetProvider(obs.featureOfInterest().id().toString()));
     }
 
     public ObservedProperty getDatastreamObservedProperty(String id) {
+        ProviderSnapshot providerDatastream = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(id));
+        String observedPropertyId = DtoMapperSimple.getResourceField(
+                DtoMapperSimple.getDatastreamService(providerDatastream), "observedPropertyId", String.class);
+        ProviderSnapshot providerObservedProperty = validateAndGetProvider(observedPropertyId);
 
-        String provider = DtoMapperSimple.extractFirstIdSegment(id);
         ObservedProperty o = getSensorThingDtoMapper().toObservedProperty(getSession(), getMapper(), uriInfo,
-                getExpansions(), parseFilter(OBSERVED_PROPERTIES), validateAndGetProvider(provider)).get();
+                getExpansions(), parseFilter(OBSERVED_PROPERTIES), providerObservedProperty);
 
         return o;
     }
 
     public ResultList<Datastream> getDatastreamObservedPropertyDatastreams(String id) {
 
-        return new ResultList<>(null, null, List.of(getDatastream(id)));
+        return new ResultList<>(List.of(getDatastream(id)));
     }
 
     public Sensor getDatastreamSensor(String id) {
 
-        String provider = DtoMapperSimple.extractFirstIdSegment(id);
-
+        ProviderSnapshot providerDatastream = validateAndGetProvider(DtoMapperSimple.extractFirstIdSegment(id));
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                "sensorId", String.class);
+        ProviderSnapshot providerSensor = validateAndGetProvider(sensorId);
         Sensor s = getSensorThingDtoMapper().toSensor(getSession(), getMapper(), uriInfo, getExpansions(),
-                parseFilter(SENSORS), validateAndGetProvider(provider)).get();
+                parseFilter(SENSORS), providerSensor);
 
         return s;
     }
@@ -199,14 +202,14 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
         listLocation = locationProviders.stream().map(p -> getSensorThingDtoMapper().toLocation(getSession(),
                 getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), p)).toList();
 
-        return new ResultList<>(null, null, listLocation);
+        return new ResultList<>(listLocation);
     }
 
     static ResultList<Datastream> getDataStreams(SensiNactSession userSession, DtoMapper dtoMapper, ObjectMapper mapper,
             UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter, String thingId) {
 
         List<ProviderSnapshot> datastreamProviders = getDatastreamProvidersFromThing(userSession, thingId);
-        return new ResultList<>(null, null, datastreamProviders.stream()
+        return new ResultList<>(datastreamProviders.stream()
                 .map(provider -> dtoMapper.toDatastream(userSession, mapper, uriInfo, expansions, filter, provider))
                 .filter(ds -> ds.isPresent()).map(ds -> ds.get()).toList());
     }
@@ -347,7 +350,7 @@ public class DatastreamsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
 
-        return new ResultList<>(null, null, getLocationThingsProvider(id2).stream().map(p -> getSensorThingDtoMapper()
+        return new ResultList<>(getLocationThingsProvider(id2).stream().map(p -> getSensorThingDtoMapper()
                 .toThing(getSession(), getMapper(), uriInfo, getExpansions(), parseFilter(THINGS), p)).toList());
 
     }

@@ -68,7 +68,8 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
         // Create providers
         int nbProviders = 4;
         for (int i = 0; i < nbProviders; i++) {
-            createDatastream("countTester_Datastream_" + (i + 1), "countTester_Thing_" + (i + 1));
+            createDatastream("countTester_Datastream_" + (i + 1), "countTester_Thing_" + (i + 1), "sensor_" + (i + 1),
+                    "op_" + (i + 1));
             createLocation("countTester_Location_" + (i + 1));
             createThing("countTester_Thing_" + (i + 1), List.of("countTester_Location_" + (i + 1)),
                     List.of("countTester_Datastream_" + (i + 1)));
@@ -129,10 +130,10 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
         sortedProviderIds.stream().filter(id -> id.startsWith(prefix)).forEach(id -> {
             String thingId = id + "-thing";
             String locationId = id + "-location";
-            createDatastream(id + "-datastreamA", thingId);
-            createDatastream(id + "-datastreamA" + 256, thingId);
-            createDatastream(id + "-datastreamB", thingId);
-            createDatastream(id + "-datastreamB" + 256, thingId);
+            createDatastream(id + "-datastreamA", thingId, id + "-sensorA", id + "-opA");
+            createDatastream(id + "-datastreamA" + 256, thingId, id + "-sensorA" + 256, id + "-opA" + 256);
+            createDatastream(id + "-datastreamB", thingId, id + "-sensorB", id + "-opB");
+            createDatastream(id + "-datastreamB" + 256, thingId, id + "-sensorB" + 256, id + "-opB" + 256);
             createLocation(locationId);
             createThing(thingId, List.of(locationId), List.of(id + "datastreamA", id + "datastreamA" + 256,
                     id + "datastreamB", id + "datastreamB" + 256));
@@ -186,7 +187,7 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
         final String providerDatastream = "expandTesterDatastream";
 
         createThing(provider, List.of(), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider, 42);
+        createDatastream(providerDatastream, provider, "sensor", "op", 42);
 
         // Parsing will fail if there is any other JSON property
         ResultList<? extends Self> resultList = utils.queryJson(String.format("/Things(%s)/Datastreams/$ref", provider),
@@ -215,14 +216,13 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
         final String provider = "propTester";
         final String providerDatastream = "propTesterDatastream";
         createThing(provider, List.of(), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider, value);
+        createDatastream(providerDatastream, provider, "sensor", "op", value);
 
-        ResultList<? extends Self> observations = utils
-                .queryJson(String.format("/FeaturesOfInterest(%s)/Observations/$ref",
-                        String.format("%s~%s~%s", providerDatastream, "test", "test")), RESULT_SELF);
-        String baseUrl = observations.value().stream()
-                .filter(s -> s.selfLink().contains(String.join("~", providerDatastream, "test"))).findFirst().get()
-                .selfLink();
+        ResultList<? extends Self> observations = utils.queryJson(String
+                .format("/FeaturesOfInterest(%s)/Observations/$ref", String.format("%s%s", providerDatastream, "test")),
+                RESULT_SELF);
+        String baseUrl = observations.value().stream().filter(s -> s.selfLink().contains(providerDatastream + "test"))
+                .findFirst().get().selfLink();
 
         String property = "resultTime";
         Map<?, ?> rawResult = utils.queryJson(baseUrl + "/" + property, Map.class);
@@ -242,7 +242,7 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
         final String providerDatastream = "selectTester-datastream";
 
         createThing(provider, List.of(), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider, 42);
+        createDatastream(providerDatastream, provider, "sensor", "op", 42);
 
         Set<String> selectedFields = Set.of("result", "resultTime");
         Map<?, ?> rawResultList = utils.queryJson("/Observations/?$select=" + String.join(",", selectedFields),
@@ -258,15 +258,16 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
     @Test
     void testSkipTop() throws IOException, InterruptedException {
         // Register the resources
-        final String svc = "sensor";
-        final String rcPrefix = "rc";
         final int nbRc = 5;
         final String provider = "skipTopFilter";
         List<String> datastreamIds = new ArrayList<String>();
         for (int i = 0; i < nbRc; i++) {
             final String providerDatastream = "skipTopFilter-datastream-" + i;
+            final String sensor = "skipTopFilter-datastream-sensor-" + i;
+            final String op = "skipTopFilter-datastream-op-" + i;
+
             datastreamIds.add(providerDatastream);
-            createDatastream(providerDatastream, provider, i);
+            createDatastream(providerDatastream, provider, sensor, op, i);
         }
         createThing(provider, List.of(), datastreamIds);
 
@@ -352,8 +353,8 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
                 String providerBelow = provider1 + "_" + i;
                 String providerAbove = provider2 + "_" + i;
 
-                createDatastream(providerBelow, thingId, i);
-                createDatastream(providerAbove, thingId, 40 + i);
+                createDatastream(providerBelow, thingId, providerBelow + "_sensor", providerBelow + "_op", i);
+                createDatastream(providerAbove, thingId, providerAbove + "_sensor", providerAbove + "_op", 40 + i);
                 providerDatastreamAbove.add(providerAbove);
                 providerDatastreamBelow.add(providerBelow);
                 below40PRefix.add(providerBelow);
@@ -388,7 +389,7 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
             assertTrue(allIds.contains(thingId), thingId + " not in result");
             assertFalse(allIds.contains(thingId2), thingId2 + " in result");
 
-            String idfoi = provider1 + "_2~test~test";
+            String idfoi = provider1 + "_2test";
             // Loop back on provider ID
             things = utils.queryJson(String.format("/Things?$filter=%s", URLEncoder.encode(
                     "Datastreams/Observations/FeatureOfInterest/id eq '" + idfoi + "'", StandardCharsets.UTF_8)),
@@ -399,9 +400,9 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
             assertFalse(allIds.contains(thingId2), thingId2 + " in result");
 
             // Sample query from the specifications
-            createDatastream("filterFOI_1", thingId2, 42,
+            createDatastream("filterFOI_1", thingId2, "sensor", "op", 42,
                     ZonedDateTime.of(2010, 6, 15, 21, 42, 0, 0, ZoneOffset.UTC).toInstant());
-            idfoi = "filterFOI_1~test~test";
+            idfoi = "filterFOI_1test";
             createThing("filterFOI_1_thing", List.of(), List.of("filterFOI_1"));
 
             things = utils.queryJson(String.format("/Things?$filter=%s",
@@ -476,7 +477,7 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
             }
 
             // Loop back on provider ID
-            String idfoi = provider1 + "_2~test~test";
+            String idfoi = provider1 + "_2test";
 
             items = utils.queryJson(
                     String.format("/Datastreams?$filter=%s", URLEncoder
@@ -514,14 +515,14 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
             List<String> allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() >= nbRc, "Not enough sensors returned");
             for (String below : below40PRefix) {
-                assertFalse(allIds.contains(below + "~test1"), below + " in result");
+                assertFalse(allIds.contains(below + "_sensor"), below + " in result");
             }
             for (String above : above40Prefix) {
-                assertTrue(allIds.contains(above + "~test1"), above + " not in result");
+                assertTrue(allIds.contains(above + "_sensor"), above + " not in result");
             }
 
             // Loop back on provider ID
-            String idfoi = provider1 + "_2~test~test";
+            String idfoi = provider1 + "_2test";
 
             items = utils.queryJson(String.format("/Sensors?$filter=%s", URLEncoder.encode(
                     "Datastreams/Observations/FeatureOfInterest/id eq '" + idfoi + "'", StandardCharsets.UTF_8)),
@@ -529,11 +530,11 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
             allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() >= 1, "Not enough sensors returned");
             for (String id : allIds) {
-                assertTrue(id.equals(provider1 + "_2~test1"), "Found: " + id);
+                assertTrue(id.equals(provider1 + "_2_sensor"), "Found: " + id);
             }
 
             // Loop back on resource ID
-            final String expectedId = String.join("~", provider1 + "_2", "test1");
+            final String expectedId = provider1 + "_2" + "_sensor";
             items = utils.queryJson(String.format("/Sensors?$filter=%s",
                     URLEncoder.encode("id eq '" + expectedId + "'", StandardCharsets.UTF_8)), RESULT_SENSORS);
             allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
@@ -555,26 +556,27 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
                     RESULT_OBS_PROPS);
             List<String> allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() >= nbRc, "Not enough ObservedProperties returned");
+
             for (String below : below40PRefix) {
-                assertFalse(allIds.contains(below + "~test2"), below + " in result");
+                assertFalse(allIds.contains(below + "_op"), below + " in result");
             }
             for (String above : above40Prefix) {
-                assertTrue(allIds.contains(above + "~test2"), above + " not in result");
+                assertTrue(allIds.contains(above + "_op"), above + " not in result");
             }
 
             // Loop back on provider ID
-            String idfoi = provider1 + "_2~test~test";
+            String idfoi = provider1 + "_2test";
             items = utils.queryJson(String.format("/ObservedProperties?$filter=%s", URLEncoder.encode(
                     "Datastreams/Observations/FeatureOfInterest/id eq '" + idfoi + "'", StandardCharsets.UTF_8)),
                     RESULT_OBS_PROPS);
             allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
             assertTrue(allIds.size() == 1, "Not enough ObservedProperties returned");
             for (String id : allIds) {
-                assertTrue(id.startsWith(provider1 + "_2~"), "Found: " + id);
+                assertTrue(id.startsWith(provider1 + "_2"), "Found: " + id);
             }
 
             // Loop back on resource ID
-            final String expectedId = String.join("~", provider1 + "_2", "test2");
+            final String expectedId = provider1 + "_2" + "_op";
             items = utils.queryJson(String.format("/ObservedProperties?$filter=%s",
                     URLEncoder.encode("id eq '" + expectedId + "'", StandardCharsets.UTF_8)), RESULT_OBS_PROPS);
             allIds = items.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
@@ -603,14 +605,13 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
             }
 
             // Loop back on provider ID
-            String idfoi = provider1 + "_2~test~test";
+            String idfoi = provider1 + "_2test";
 
             obs = utils.queryJson(
                     String.format("/Observations?$filter=%s", URLEncoder
                             .encode("result eq 'test' or phenomenonTime le " + Instant.now(), StandardCharsets.UTF_8)),
                     RESULT_OBSERVATIONS);
             allIds = obs.value().stream().map(s -> (String) s.id()).collect(Collectors.toList());
-            System.out.println(allIds.size());
             obs = utils.queryJson(
                     String.format("/Observations?$filter=%s",
                             URLEncoder.encode("FeatureOfInterest/id eq '" + idfoi + "'", StandardCharsets.UTF_8)),
@@ -646,8 +647,8 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
             String providerDatastream1 = providerDatastream + "-" + 1;
             String providerDatastream2 = providerDatastream + "-" + 2;
 
-            createDatastream(providerDatastream1, provider, 42);
-            createDatastream(providerDatastream2, provider, 24);
+            createDatastream(providerDatastream1, provider, "sensor1", "op1", 42);
+            createDatastream(providerDatastream2, provider, "sensor2", "op2", 24);
 
             createThing(provider, List.of(), List.of(providerDatastream1, providerDatastream2));
 
@@ -702,7 +703,7 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
             final String providerDatastream = "expandTesterDatastream";
 
             createThing(provider, List.of(), List.of(providerDatastream));
-            createDatastream(providerDatastream, provider);
+            createDatastream(providerDatastream, provider, "sensor", "op");
 
             Set<String> expandedFields = Set.of("Thing", "Sensor");
             Map<?, ?> rawDatastream = utils.queryJson(
@@ -716,7 +717,7 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
             Map<?, ?> rawSensor = (Map<?, ?>) rawDatastream.get("Sensor");
 
             assertNotNull(rawSensor);
-            assertEquals("expandTesterDatastream~test1", rawSensor.get("@iot.id"));
+            assertEquals("sensor", rawSensor.get("@iot.id"));
         }
     }
 }

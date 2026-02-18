@@ -88,6 +88,7 @@ public class ObservationPathHandlerSensorthings extends AbstractPathHandlerSenso
     }
 
     private Object subDatastream(final String path) {
+
         return new DatastreamPathHandlerSensorthings(pathContext).handle(path);
     }
 

@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -91,6 +93,7 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
 
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Predicate<ResourceValueFilterInputHolder> visitBoolcommonexpr(BoolcommonexprContext ctx) {
         // Get the leftmost element of the expression
@@ -166,37 +169,55 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
 
                 if (rightExpr != null && subPredicate != null) {
                     predicate = x -> {
-                        Object leftValue = leftExpr.apply(x);
-                        Object rightValue = rightExpr.apply(x);
-
-                        if (leftValue instanceof AnyMatch) {
-                            return ((AnyMatch) leftValue).compare(rightValue, comparatorRuleIndex);
-                        } else if (rightValue instanceof AnyMatch) {
-                            return ((AnyMatch) rightValue).compare(leftValue, comparatorRuleIndex, true);
+                        Object leftValues = leftExpr.apply(x);
+                        List<Object> leftValuesCol;
+                        if (leftValues instanceof List<?>) {
+                            leftValuesCol = (List<Object>) leftValues;
                         } else {
-                            if (leftValue instanceof Number && rightValue instanceof Number) {
-                                // Ensure both sides are ints or doubles
-                                if (leftValue instanceof Double || rightValue instanceof Double) {
-                                    leftValue = ((Number) leftValue).doubleValue();
-                                    rightValue = ((Number) rightValue).doubleValue();
-                                }
-                            } else {
-                                // Convert dates to Instant (to compare with resource timestamps)
-                                if (leftValue instanceof OffsetDateTime) {
-                                    leftValue = ((OffsetDateTime) leftValue).toInstant();
-                                }
-                                if (rightValue instanceof OffsetDateTime) {
-                                    rightValue = ((OffsetDateTime) rightValue).toInstant();
-                                }
-                            }
-
-                            try {
-                                return subPredicate.apply(leftValue, rightValue);
-                            } catch (ClassCastException e) {
-                                // Comparing different types
+                            if (leftValues == null) {
                                 return false;
                             }
+                            leftValuesCol = Collections.singletonList(leftValues);
                         }
+                        final Object rightValueApplied = rightExpr.apply(x);
+                        return leftValuesCol.stream().anyMatch(leftValue -> {
+                            Object rightValue = rightValueApplied;
+                            if (leftValue == null || rightValue == null) {
+                                try {
+                                    return subPredicate.apply(leftValue, rightValue);
+                                } catch (Exception e) {
+                                    return false;
+                                }
+                            }
+                            if (leftValue instanceof AnyMatch) {
+                                return ((AnyMatch) leftValue).compare(rightValue, comparatorRuleIndex);
+                            } else if (rightValue instanceof AnyMatch) {
+                                return ((AnyMatch) rightValue).compare(leftValue, comparatorRuleIndex, true);
+                            } else {
+                                if (leftValue instanceof Number && rightValue instanceof Number) {
+                                    // Ensure both sides are ints or doubles
+                                    if (leftValue instanceof Double || rightValue instanceof Double) {
+                                        leftValue = ((Number) leftValue).doubleValue();
+                                        rightValue = ((Number) rightValue).doubleValue();
+                                    }
+                                } else {
+                                    // Convert dates to Instant (to compare with resource timestamps)
+                                    if (leftValue instanceof OffsetDateTime) {
+                                        leftValue = ((OffsetDateTime) leftValue).toInstant();
+                                    }
+                                    if (rightValue instanceof OffsetDateTime) {
+                                        rightValue = ((OffsetDateTime) rightValue).toInstant();
+                                    }
+                                }
+
+                                try {
+                                    return subPredicate.apply(leftValue, rightValue);
+                                } catch (ClassCastException e) {
+                                    // Comparing different types
+                                    return false;
+                                }
+                            }
+                        });
                     };
                 }
             }

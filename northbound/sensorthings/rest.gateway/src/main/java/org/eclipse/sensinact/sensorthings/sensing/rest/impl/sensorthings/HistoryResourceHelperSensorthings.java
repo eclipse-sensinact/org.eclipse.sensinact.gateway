@@ -52,11 +52,12 @@ public class HistoryResourceHelperSensorthings {
             ICriterion filter, String historyProvider, int localResultLimit,
             IDtoMemoryCache<ExpandedObservation> cacheObs) {
         List<Observation> values = new ArrayList<>();
-        Optional<Observation> obsLive = dtoMapper.toObservation(userSession, mapper, uriInfo, expansions, filter,
-                resourceSnapshot);
-        if (obsLive.isPresent())
-            values.add(obsLive.get());
+
         if (cacheObs != null) {
+            Optional<Observation> obsLive = dtoMapper.toObservation(userSession, mapper, uriInfo, expansions, filter,
+                    resourceSnapshot);
+            if (obsLive.isPresent())
+                values.add(obsLive.get());
             cacheObs.keySet().stream()
                     .filter(obsId -> obsId.startsWith(resourceSnapshot.getService().getProvider().getName()))
                     .map(obsId -> {
@@ -69,7 +70,7 @@ public class HistoryResourceHelperSensorthings {
         }
 
         if (historyProvider == null) {
-            return new ResultList<>(null, null, values);
+            return new ResultList<>(values);
         }
 
         Integer maxResults = localResultLimit;
@@ -137,7 +138,7 @@ public class HistoryResourceHelperSensorthings {
         }
 
         if (historyProvider == null) {
-            return new ResultList<>(null, null, values);
+            return new ResultList<>(values);
         }
         AtomicLong totalCount = new AtomicLong(0);
 

@@ -35,10 +35,11 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.Datastream
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DatastreamsDelegateSensorthings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.update.DatastreamsUpdate;
 
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
 public class DatastreamsAccessImpl extends AbstractAccess
-    implements DatastreamsDelete, DatastreamsAccess, DatastreamsCreate, DatastreamsUpdate {
+        implements DatastreamsDelete, DatastreamsAccess, DatastreamsCreate, DatastreamsUpdate {
     private DatastreamsDelegateSensinact sensinactHandler;
     private DatastreamsDelegateSensorthings sensorthigHandler;
 
@@ -303,15 +304,17 @@ public class DatastreamsAccessImpl extends AbstractAccess
 
     @Override
     public Response deleteDatastreamSensorRef(ODataId id) {
-
-        return getSensorthingsHandler().deleteDatastreamSensorRef(id.value());
+        throw new WebApplicationException(409);
+        // return getSensorthingsHandler().deleteDatastreamSensorRef(id.value());
 
     }
 
     @Override
     public Response deleteDatastreamObservedPropertyRef(ODataId id) {
+        throw new WebApplicationException(409);
 
-        return getSensorthingsHandler().deleteDatastreamObservedPropertyRef(id.value());
+        // return
+        // getSensorthingsHandler().deleteDatastreamObservedPropertyRef(id.value());
 
     }
 

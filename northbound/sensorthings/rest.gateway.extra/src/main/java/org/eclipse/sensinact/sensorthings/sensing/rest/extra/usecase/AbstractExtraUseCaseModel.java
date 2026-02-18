@@ -13,21 +13,16 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.util.List;
-import java.util.Map;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.model.SensinactModelManager;
+import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
-import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
@@ -47,7 +42,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.HttpMethod;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Providers;
@@ -81,15 +75,12 @@ public abstract class AbstractExtraUseCaseModel<M extends Id, S> extends Abstrac
         }
     }
 
-    protected void updateObservationMemoryHistory(IDtoMemoryCache<ExpandedObservation> cacheObs,
-            IDtoMemoryCache<FeatureOfInterest> cacheFoi, ObjectMapper mapper, ResourceSnapshot resource) {
+    protected void updateObservationMemoryHistory(IDtoMemoryCache<ExpandedObservation> cacheObs, ObjectMapper mapper,
+            ResourceSnapshot resource) {
         if (resource != null) {
             ExpandedObservation oldObs = DtoMapperSimple.parseExpandObservation(mapper, resource.getValue().getValue());
             cacheObs.addDto(oldObs.id() + "~" + DtoMapperSimple.stampToId(resource.getValue().getTimestamp()), oldObs);
-            cacheFoi.addDto(
-                    oldObs.id() + "~" + oldObs.featureOfInterest().id() + "~"
-                            + DtoMapperSimple.stampToId(resource.getValue().getTimestamp()),
-                    oldObs.featureOfInterest());
+
         }
     }
 
@@ -128,46 +119,17 @@ public abstract class AbstractExtraUseCaseModel<M extends Id, S> extends Abstrac
         return DtoMapperSimple.toObservedProperty(provider, id, null, null);
     }
 
-    protected AbstractSensinactCommand<Map<String, TimedValue<?>>> getContextDeleteDatastreamProvider(
+    protected AbstractSensinactCommand<TimedValue<List<String>>> getContextDeleteObservedPropertyOrSensorProvider(
             ExtraUseCaseRequest<?> request) {
-        AbstractSensinactCommand<Map<String, TimedValue<?>>> parentCommand = new AbstractSensinactCommand<Map<String, TimedValue<?>>>() {
+        return new ResourceCommand<TimedValue<List<String>>>(request.id(), DtoMapperSimple.SERVICE_THING,
+                "datastreamIds") {
 
             @Override
-            protected Promise<Map<String, TimedValue<?>>> call(SensinactDigitalTwin twin,
-                    SensinactModelManager modelMgr, PromiseFactory pf) {
-                String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
-                SensinactProvider sp = twin.getProvider(providerId);
-
-                if (sp == null) {
-                    return pf.failed(new NotFoundException("provider for datastream " + request.id() + " not found"));
-                }
-
-                // Make sure all promises are Promise<TimedValue<?>>
-                @SuppressWarnings("unchecked")
-                Promise<TimedValue<?>> id = (Promise<TimedValue<?>>) (Promise<?>) sp
-                        .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "id").getValue(String.class);
-
-                @SuppressWarnings("unchecked")
-                Promise<TimedValue<?>> observedPropertyId = (Promise<TimedValue<?>>) (Promise<?>) sp
-                        .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId").getValue(String.class);
-
-                @SuppressWarnings("unchecked")
-                Promise<TimedValue<?>> sensorId = (Promise<TimedValue<?>>) (Promise<?>) sp
-                        .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "sensorId").getValue(String.class);
-                @SuppressWarnings("unchecked")
-                Promise<TimedValue<?>> lastObservation = (Promise<TimedValue<?>>) (Promise<?>) sp
-                        .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation").getValue(String.class);
-
-                // Combine all promises in a concrete list
-                List<Promise<TimedValue<?>>> promises = List.of(id, observedPropertyId, sensorId, lastObservation);
-
-                // pf.all now works
-                return pf.all(promises).map(list -> Map.of("id", list.get(0), "observedPropertyId", list.get(1),
-                        "sensorId", list.get(2), "lastObservation", list.get(3)));
-
+            protected Promise<TimedValue<List<String>>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMultiValue(String.class);
             }
+
         };
-        return parentCommand;
     }
 
     /**
@@ -178,7 +140,7 @@ public abstract class AbstractExtraUseCaseModel<M extends Id, S> extends Abstrac
      * @return
      */
     public ObservedProperty getCachedExpandedObservedProperty(ExtraUseCaseRequest<?> request,
-            IDtoMemoryCache<ObservedProperty> observedPropertyCache, ExpandedDataStream datastream) {
+            ExpandedDataStream datastream) {
         ObservedProperty observedProperty = null;
         // retrieve create observedPorperty
         if (datastream.observedProperty() != null) {
@@ -187,11 +149,9 @@ public abstract class AbstractExtraUseCaseModel<M extends Id, S> extends Abstrac
                 if (idObservedProperty == null) {
                     throw new BadRequestException(String.format("observedProperty id is null"));
                 }
-                if (isIdFromCache(idObservedProperty)) {
-                    observedProperty = observedPropertyCache.getDto(idObservedProperty);
-                } else {
-                    observedProperty = getObservedProperty(request, idObservedProperty);
-                }
+
+                observedProperty = getObservedProperty(request, idObservedProperty);
+
                 if (observedProperty == null) {
                     throw new BadRequestException(
                             String.format("observedProperty id %s doesn't exists", idObservedProperty));
@@ -217,8 +177,7 @@ public abstract class AbstractExtraUseCaseModel<M extends Id, S> extends Abstrac
      * @param datastream
      * @return
      */
-    protected Sensor getCachedExpandedSensor(ExtraUseCaseRequest<?> request, IDtoMemoryCache<Sensor> sensorCache,
-            ExpandedDataStream datastream) {
+    protected Sensor getCachedExpandedSensor(ExtraUseCaseRequest<?> request, ExpandedDataStream datastream) {
         Sensor sensor = null;
         // retrieve created sensor
         if (datastream.sensor() != null) {
@@ -227,11 +186,9 @@ public abstract class AbstractExtraUseCaseModel<M extends Id, S> extends Abstrac
                 if (idSensor == null) {
                     throw new BadRequestException(String.format("sensor id is null"));
                 }
-                if (isIdFromCache(idSensor)) {
-                    sensor = sensorCache.getDto(idSensor);
-                } else {
-                    sensor = getSensor(request, idSensor);
-                }
+
+                sensor = getSensor(request, idSensor);
+
                 if (sensor == null) {
                     throw new BadRequestException(String.format("sensor id %s doesn't exists", idSensor));
                 }
@@ -288,24 +245,4 @@ public abstract class AbstractExtraUseCaseModel<M extends Id, S> extends Abstrac
         gatewayThread = resolve(providers, GatewayThread.class);
     }
 
-    @SuppressWarnings("unchecked")
-    protected List<String> getDatastreamIds(ServiceSnapshot serviceThing) {
-        return DtoMapperSimple.getResourceField(serviceThing, "datastreamIds", List.class);
-
-    }
-
-    protected List<String> getLocationIds(ProviderSnapshot provider) {
-        return getLocationIds(DtoMapperSimple.getThingService(provider));
-
-    }
-
-    protected List<String> getDatastreamIds(ProviderSnapshot provider) {
-        return getDatastreamIds(DtoMapperSimple.getThingService(provider));
-    }
-
-    @SuppressWarnings("unchecked")
-    protected List<String> getLocationIds(ServiceSnapshot serviceThing) {
-        return DtoMapperSimple.getResourceField(serviceThing, "locationIds", List.class);
-
-    }
 }

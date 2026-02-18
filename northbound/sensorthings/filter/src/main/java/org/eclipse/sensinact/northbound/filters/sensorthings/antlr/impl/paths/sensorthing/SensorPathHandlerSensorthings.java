@@ -13,8 +13,11 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -33,7 +36,7 @@ public class SensorPathHandlerSensorthings extends AbstractPathHandlerSensorthin
     public Object handle(final String path) {
         ProviderSnapshot provider = pathContext.provider();
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
+        ServiceSnapshot service = DtoMapperSimple.getSensorService(provider);
         if (service == null) {
             return null;
         }
@@ -51,18 +54,16 @@ public class SensorPathHandlerSensorthings extends AbstractPathHandlerSensorthin
 
     public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
             final String path) {
+        ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
         switch (path) {
         case "id":
-            String id = DtoMapperSimple.getResourceField(service, "sensorId", String.class);
-            if (id != null)
-                return String.join("~", provider.getName(), id);
-            return null;
+            return provider.getName();
 
         case "name":
-            return DtoMapperSimple.getResourceField(service, "sensorName", String.class);
+            return DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class);
 
         case "description":
-            return DtoMapperSimple.getResourceField(service, "sensorDescription", String.class);
+            return DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class);
         case "encodingType":
             return DtoMapperSimple.getResourceField(service, "sensorEncodingType", String.class);
 
@@ -79,7 +80,19 @@ public class SensorPathHandlerSensorthings extends AbstractPathHandlerSensorthin
     }
 
     private Object subDatastreams(final String path) {
-        // Only one datastream per observed property
-        return new DatastreamPathHandlerSensorthings(pathContext).handle(path);
+        return getDatastreamsProviderFromSensor(pathContext.provider()).stream()
+                .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
+                        pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
+                .flatMap(pc -> {
+                    Object result = new DatastreamPathHandlerSensorthings(pc).handle(path);
+
+                    if (result instanceof List<?>) {
+                        return ((List<?>) result).stream();
+                    } else if (result != null) {
+                        return Stream.of(result);
+                    } else {
+                        return Stream.empty();
+                    }
+                }).collect(Collectors.toList());
     }
 }

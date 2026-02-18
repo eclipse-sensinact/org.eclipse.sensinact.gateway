@@ -89,6 +89,60 @@ public interface ExtendedFactory extends EFactory {
 	SensorThingDatastream createSensorThingDatastream();
 
 	/**
+	 * Returns a new object of class '<em>Sensor Thing Observed Property</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Sensor Thing Observed Property</em>'.
+	 * @generated
+	 */
+	SensorThingObservedProperty createSensorThingObservedProperty();
+
+	/**
+	 * Returns a new object of class '<em>Sensor Thing Sensor</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Sensor Thing Sensor</em>'.
+	 * @generated
+	 */
+	SensorThingSensor createSensorThingSensor();
+
+	/**
+	 * Returns a new object of class '<em>Observed Property Service</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Observed Property Service</em>'.
+	 * @generated
+	 */
+	ObservedPropertyService createObservedPropertyService();
+
+	/**
+	 * Returns a new object of class '<em>Sensor Service</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Sensor Service</em>'.
+	 * @generated
+	 */
+	SensorService createSensorService();
+
+	/**
+	 * Returns a new object of class '<em>Sensor Thing Foi</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Sensor Thing Foi</em>'.
+	 * @generated
+	 */
+	SensorThingFoi createSensorThingFoi();
+
+	/**
+	 * Returns a new object of class '<em>Feature Thing Service</em>'.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @return a new object of class '<em>Feature Thing Service</em>'.
+	 * @generated
+	 */
+	FeatureThingService createFeatureThingService();
+
+	/**
 	 * Returns the package supported by this factory.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->

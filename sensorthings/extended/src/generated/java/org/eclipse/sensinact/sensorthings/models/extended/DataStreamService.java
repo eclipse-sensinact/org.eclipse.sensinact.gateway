@@ -31,20 +31,11 @@ import org.osgi.annotation.versioning.ProviderType;
  * <ul>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getId <em>Id</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getTimestamp <em>Timestamp</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorName <em>Sensor Name</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorDescription <em>Sensor Description</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorEncodingType <em>Sensor Encoding Type</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getUnitName <em>Unit Name</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getUnitSymbol <em>Unit Symbol</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getUnitDefinition <em>Unit Definition</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyName <em>Observed Property Name</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyId <em>Observed Property Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyDescription <em>Observed Property Description</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyDefinition <em>Observed Property Definition</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorMetadata <em>Sensor Metadata</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorId <em>Sensor Id</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorProperties <em>Sensor Properties</em>}</li>
- *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyProperties <em>Observed Property Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getLastObservation <em>Last Observation</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservationType <em>Observation Type</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getThingId <em>Thing Id</em>}</li>
@@ -100,72 +91,6 @@ public interface DataStreamService extends Service {
 	 * @generated
 	 */
 	void setTimestamp(Instant value);
-
-	/**
-	 * Returns the value of the '<em><b>Sensor Name</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Sensor Name</em>' attribute.
-	 * @see #setSensorName(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_SensorName()
-	 * @model
-	 * @generated
-	 */
-	String getSensorName();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorName <em>Sensor Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Sensor Name</em>' attribute.
-	 * @see #getSensorName()
-	 * @generated
-	 */
-	void setSensorName(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Sensor Description</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Sensor Description</em>' attribute.
-	 * @see #setSensorDescription(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_SensorDescription()
-	 * @model
-	 * @generated
-	 */
-	String getSensorDescription();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorDescription <em>Sensor Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Sensor Description</em>' attribute.
-	 * @see #getSensorDescription()
-	 * @generated
-	 */
-	void setSensorDescription(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Sensor Encoding Type</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Sensor Encoding Type</em>' attribute.
-	 * @see #setSensorEncodingType(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_SensorEncodingType()
-	 * @model
-	 * @generated
-	 */
-	String getSensorEncodingType();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorEncodingType <em>Sensor Encoding Type</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Sensor Encoding Type</em>' attribute.
-	 * @see #getSensorEncodingType()
-	 * @generated
-	 */
-	void setSensorEncodingType(String value);
 
 	/**
 	 * Returns the value of the '<em><b>Unit Name</b></em>' attribute.
@@ -234,28 +159,6 @@ public interface DataStreamService extends Service {
 	void setUnitDefinition(String value);
 
 	/**
-	 * Returns the value of the '<em><b>Observed Property Name</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observed Property Name</em>' attribute.
-	 * @see #setObservedPropertyName(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservedPropertyName()
-	 * @model
-	 * @generated
-	 */
-	String getObservedPropertyName();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyName <em>Observed Property Name</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observed Property Name</em>' attribute.
-	 * @see #getObservedPropertyName()
-	 * @generated
-	 */
-	void setObservedPropertyName(String value);
-
-	/**
 	 * Returns the value of the '<em><b>Observed Property Id</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -278,72 +181,6 @@ public interface DataStreamService extends Service {
 	void setObservedPropertyId(String value);
 
 	/**
-	 * Returns the value of the '<em><b>Observed Property Description</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observed Property Description</em>' attribute.
-	 * @see #setObservedPropertyDescription(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservedPropertyDescription()
-	 * @model
-	 * @generated
-	 */
-	String getObservedPropertyDescription();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyDescription <em>Observed Property Description</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observed Property Description</em>' attribute.
-	 * @see #getObservedPropertyDescription()
-	 * @generated
-	 */
-	void setObservedPropertyDescription(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Observed Property Definition</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observed Property Definition</em>' attribute.
-	 * @see #setObservedPropertyDefinition(String)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservedPropertyDefinition()
-	 * @model
-	 * @generated
-	 */
-	String getObservedPropertyDefinition();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyDefinition <em>Observed Property Definition</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observed Property Definition</em>' attribute.
-	 * @see #getObservedPropertyDefinition()
-	 * @generated
-	 */
-	void setObservedPropertyDefinition(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Sensor Metadata</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Sensor Metadata</em>' attribute.
-	 * @see #setSensorMetadata(Object)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_SensorMetadata()
-	 * @model
-	 * @generated
-	 */
-	Object getSensorMetadata();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorMetadata <em>Sensor Metadata</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Sensor Metadata</em>' attribute.
-	 * @see #getSensorMetadata()
-	 * @generated
-	 */
-	void setSensorMetadata(Object value);
-
-	/**
 	 * Returns the value of the '<em><b>Sensor Id</b></em>' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -364,50 +201,6 @@ public interface DataStreamService extends Service {
 	 * @generated
 	 */
 	void setSensorId(String value);
-
-	/**
-	 * Returns the value of the '<em><b>Sensor Properties</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Sensor Properties</em>' attribute.
-	 * @see #setSensorProperties(Map)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_SensorProperties()
-	 * @model transient="true"
-	 * @generated
-	 */
-	Map<?, ?> getSensorProperties();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getSensorProperties <em>Sensor Properties</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Sensor Properties</em>' attribute.
-	 * @see #getSensorProperties()
-	 * @generated
-	 */
-	void setSensorProperties(Map<?, ?> value);
-
-	/**
-	 * Returns the value of the '<em><b>Observed Property Properties</b></em>' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @return the value of the '<em>Observed Property Properties</em>' attribute.
-	 * @see #setObservedPropertyProperties(Map)
-	 * @see org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage#getDataStreamService_ObservedPropertyProperties()
-	 * @model transient="true"
-	 * @generated
-	 */
-	Map<?, ?> getObservedPropertyProperties();
-
-	/**
-	 * Sets the value of the '{@link org.eclipse.sensinact.sensorthings.models.extended.DataStreamService#getObservedPropertyProperties <em>Observed Property Properties</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @param value the new value of the '<em>Observed Property Properties</em>' attribute.
-	 * @see #getObservedPropertyProperties()
-	 * @generated
-	 */
-	void setObservedPropertyProperties(Map<?, ?> value);
 
 	/**
 	 * Returns the value of the '<em><b>Last Observation</b></em>' attribute.

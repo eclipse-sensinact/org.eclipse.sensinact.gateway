@@ -134,7 +134,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseModelDelete<Expan
             listThingIds.stream().map(providerId -> {
                 ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
 
-                List<String> ids = getLocationIds(provider);
+                List<String> ids = DtoToModelMapper.getLocationIds(provider);
                 String locationId = request.id();
                 if (!ids.contains(locationId)) {
                     ids = Stream.concat(ids.stream(), Stream.of(locationId)).toList();

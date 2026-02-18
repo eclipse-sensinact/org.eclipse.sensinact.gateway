@@ -16,7 +16,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.extractFirstIdSegment;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +43,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
-import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 
@@ -59,31 +57,31 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
 
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
 
-        Optional<Sensor> s = getSensorThingDtoMapper().toSensor(getSession(), getMapper(), uriInfo, getExpansions(),
+        Sensor s = getSensorThingDtoMapper().toSensor(getSession(), getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.SENSORS), validateAndGetProvider(providerId));
-        if (s.isEmpty()) {
-            throw new NotFoundException();
-        }
-        return s.get();
+
+        return s;
     }
 
     public ResultList<Datastream> getSensorDatastreams(String id) {
-
-        ResultList<Datastream> list = new ResultList<>(null, null, List.of(getSensorDatastream(id, id)));
-        return list;
+        ProviderSnapshot provider = validateAndGetProvider(id);
+        List<String> datastreamIds = getDatastreamsIdsFromSensor(provider);
+        List<Datastream> list = datastreamIds.stream().map(idDatastream -> getSensorDatastream(id, idDatastream))
+                .toList();
+        return new ResultList<>(list);
     }
 
     public Datastream getSensorDatastream(String id, String id2) {
 
-        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
-        String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
+        ProviderSnapshot provider = validateAndGetProvider(id2);
 
-        if (!providerId.equals(providerId2)) {
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(provider), "sensorId",
+                String.class);
+        if (!sensorId.equals(id)) {
             throw new NotFoundException();
         }
-
         Optional<Datastream> d = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo,
-                getExpansions(), parseFilter(EFilterContext.DATASTREAMS), validateAndGetProvider(providerId2));
+                getExpansions(), parseFilter(EFilterContext.DATASTREAMS), validateAndGetProvider(id2));
         if (d.isEmpty()) {
             throw new NotFoundException();
         }
@@ -94,12 +92,14 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
 
     public ResultList<Observation> getSensorDatastreamObservations(String id, String id2) {
 
-        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!providerId.equals(providerId2)) {
+        ProviderSnapshot provider = validateAndGetProvider(providerId2);
+
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(provider), "sensorId",
+                String.class);
+        if (!sensorId.equals(id)) {
             throw new NotFoundException();
         }
-        ProviderSnapshot provider = validateAndGetProvider(providerId2);
         return RootResourceDelegateSensorthings.getObservationList(getSession(), getSensorThingDtoMapper(), getMapper(),
                 uriInfo, getExpansions(), provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"),
                 parseFilter(EFilterContext.OBSERVATIONS), getHistoryProvider(), getMaxResult(),
@@ -107,36 +107,46 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     }
 
     public ObservedProperty getSensorDatastreamObservedProperty(String id, String id2) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id2);
+        ProviderSnapshot providerDatastream = validateAndGetProvider(providerId);
+        String observedPropertyId = DtoMapperSimple.getResourceField(
+                DtoMapperSimple.getDatastreamService(providerDatastream), "observedPropertyId", String.class);
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                "sensorId", String.class);
 
-        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
-        String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!providerId.equals(providerId2)) {
+        if (!sensorId.equals(id)) {
             throw new NotFoundException();
         }
+        ObservedProperty o = getSensorThingDtoMapper().toObservedProperty(getSession(), getMapper(), uriInfo,
+                getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES),
+                validateAndGetProvider(observedPropertyId));
 
-        Optional<ObservedProperty> o = getSensorThingDtoMapper().toObservedProperty(getSession(), getMapper(), uriInfo,
-                getExpansions(), parseFilter(EFilterContext.OBSERVED_PROPERTIES), validateAndGetProvider(providerId2));
-        if (o.isEmpty())
-            throw new NotFoundException();
-
-        return o.get();
+        return o;
     }
 
     public Sensor getSensorDatastreamSensor(String id, String id2) {
-
-        String providerId = DtoMapperSimple.extractFirstIdSegment(id);
-        String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!providerId.equals(providerId2)) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id2);
+        ProviderSnapshot providerDatastream = validateAndGetProvider(providerId);
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                "sensorId", String.class);
+        if (!sensorId.equals(id)) {
             throw new NotFoundException();
         }
 
-        return getSensor(id);
+        return getSensor(sensorId);
     }
 
     public Thing getSensorDatastreamThing(String id, String id2) {
-        String thingId = getThingIdFromDatastream(id);
+        String thingId = getThingIdFromDatastream(id2);
+        ProviderSnapshot providerDatastream = validateAndGetProvider(id2);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(thingId);
 
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                "sensorId", String.class);
+
+        if (!sensorId.equals(id)) {
+            throw new NotFoundException();
+        }
         Thing t = getSensorThingDtoMapper().toThing(getSession(), getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.THINGS), providerSnapshot);
         if (!thingId.equals(t.id())) {
@@ -146,27 +156,28 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     }
 
     public ResultList<Datastream> getSensorDatastreamThingDatastreams(String value, String value2) {
+
+        ProviderSnapshot provider = validateAndGetProvider(value2);
+
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(provider), "sensorId",
+                String.class);
+        if (!sensorId.equals(value)) {
+            throw new NotFoundException();
+        }
         String ThingId = getThingIdFromDatastream(value2);
-        return new ResultList<Datastream>(null, null,
-                getDatastreamProvidersFromThing(getSession(), ThingId).stream().map(p -> getSensorThingDtoMapper()
-                        .toDatastream(getSession(), getMapper(), uriInfo, getExpansions(), null, p))
-                        .filter(ds -> ds.isPresent()).map(ds -> ds.get()).toList());
+        return new ResultList<Datastream>(getDatastreamProvidersFromThing(getSession(), ThingId).stream()
+                .map(p -> getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo, getExpansions(),
+                        null, p))
+                .filter(ds -> ds.isPresent()).map(ds -> ds.get()).toList());
     }
 
     public Response updateSensor(String id, Sensor sensor) {
 
-        Object result = getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id,
-                sensor);
-        Sensor createDto;
-        if (result instanceof ProviderSnapshot) {
-            ProviderSnapshot provider = (ProviderSnapshot) result;
-            createDto = getSensorThingDtoMapper().toSensor(getSession(), getMapper(), uriInfo, getExpansions(),
-                    parseFilter(EFilterContext.SENSORS), provider).get();
-        } else if (result instanceof Sensor) {
-            createDto = (Sensor) result;
-        } else {
-            throw new InternalServerErrorException();
-        }
+        ProviderSnapshot provider = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+                requestContext.getMethod(), id, sensor);
+
+        Sensor createDto = getSensorThingDtoMapper().toSensor(getSession(), getMapper(), uriInfo, getExpansions(),
+                parseFilter(EFilterContext.SENSORS), provider);
 
         return Response.ok().entity(createDto).build();
     }
@@ -206,7 +217,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     public ResultList<Location> getSensorDatastreamThingLocations(String value, String value2) {
         // same method in thing TODO refacto
         String ThingId = getThingIdFromDatastream(value2);
-        ResultList<Location> list = new ResultList<>(null, null, getLocationIdsFromThing(getSession(), ThingId)
+        ResultList<Location> list = new ResultList<>(getLocationIdsFromThing(getSession(), ThingId)
                 .stream().map(idLoc -> validateAndGetProvider(idLoc)).map(p -> getSensorThingDtoMapper()
                         .toLocation(getSession(), getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), p))
                 .toList());
@@ -215,15 +226,19 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     }
 
     public Observation getSensorDatastreamObservation(String value, String value2, String value3) {
-        String providerId = DtoMapperSimple.extractFirstIdSegment(value);
-        String providerId2 = DtoMapperSimple.extractFirstIdSegment(value2);
-
-        String providerObs = DtoMapperSimple.extractFirstIdSegment(value3);
-        if (!providerId.equals(providerId2) || !providerObs.equals(providerId)) {
+        String provider2 = extractFirstIdSegment(value2);
+        String provider3 = extractFirstIdSegment(value3);
+        if (!provider2.equals(provider3)) {
+            throw new NotFoundException();
+        }
+        ProviderSnapshot providerDatastream = validateAndGetProvider(provider2);
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                "sensorId", String.class);
+        if (!sensorId.equals(value)) {
             throw new NotFoundException();
         }
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(providerObs);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider3);
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
 
         Optional<Observation> o = getSensorThingDtoMapper().toObservation(getSession(), getMapper(), uriInfo,
@@ -234,11 +249,15 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
 
     public FeatureOfInterest getSensorDatastreamObservationFeatureOfInterest(String value, String value2,
             String value3) {
-        String providerId = DtoMapperSimple.extractFirstIdSegment(value);
-        String providerId2 = DtoMapperSimple.extractFirstIdSegment(value2);
-
-        String providerObs = DtoMapperSimple.extractFirstIdSegment(value3);
-        if (!providerId.equals(providerId2) || !providerObs.equals(providerId)) {
+        String provider2 = extractFirstIdSegment(value2);
+        String provider3 = extractFirstIdSegment(value3);
+        if (!provider2.equals(provider3)) {
+            throw new NotFoundException();
+        }
+        ProviderSnapshot providerDatastream = validateAndGetProvider(provider2);
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                "sensorId", String.class);
+        if (!sensorId.equals(value)) {
             throw new NotFoundException();
         }
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
@@ -247,27 +266,29 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
         if (val == null) {
             throw new NotFoundException();
         }
-        Instant stamp = resource.getValue().getTimestamp();
 
         ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(getMapper(), val);
         FeatureOfInterest o = getSensorThingDtoMapper().toFeatureOfInterest(getSession(), getMapper(), uriInfo,
-                getExpansions(), filter, stamp, obs);
+                getExpansions(), filter, validateAndGetProvider(obs.featureOfInterest().id().toString()));
 
         return o;
     }
 
     public ResultList<Observation> getSensorDatastreamObservationFeatureOfInterestObservations(String value,
             String value2, String value3) {
-        String provider = extractFirstIdSegment(value);
         String provider2 = extractFirstIdSegment(value2);
         String provider3 = extractFirstIdSegment(value3);
-
-        if (!provider.equals(provider2) || !provider3.equals(provider)) {
+        if (!provider2.equals(provider3)) {
+            throw new NotFoundException();
+        }
+        ProviderSnapshot providerDatastream = validateAndGetProvider(provider2);
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                "sensorId", String.class);
+        if (!sensorId.equals(value)) {
             throw new NotFoundException();
         }
         // refacto same method in datastream
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
-        ProviderSnapshot providerDatastream = validateAndGetProvider(provider3);
         ResultList<Observation> observationList = RootResourceDelegateSensorthings.getObservationList(getSession(),
                 getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext,
                 providerDatastream.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter,

@@ -21,7 +21,6 @@ import java.util.function.Function;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
@@ -85,10 +84,10 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
                 .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
                         .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
                 .map(s -> s.getProvider()).toList();
-        return new AnyMatch(thingProviders.stream()
+        return thingProviders.stream()
                 .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
                         pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
-                .map(pc -> new ThingPathHandlerSensorthings(pc).handle(path)).toList());
+                .map(pc -> new ThingPathHandlerSensorthings(pc).handle(path)).toList();
     }
 
     private Object subHistoricalLocations(final String path) {
@@ -99,11 +98,11 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
                 .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
                         .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
                 .map(s -> s.getProvider()).toList();
-        return new AnyMatch(thingProviders.stream()
+        return thingProviders.stream()
                 .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
                         pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
 
-                .map(pc -> new HistoricalLocationPathHandlerSensorthings(pc).handle(path)).toList());
+                .map(pc -> new HistoricalLocationPathHandlerSensorthings(pc).handle(path)).toList();
 
     }
 }

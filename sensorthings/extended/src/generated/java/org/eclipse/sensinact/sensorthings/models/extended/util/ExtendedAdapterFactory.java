@@ -106,6 +106,30 @@ public class ExtendedAdapterFactory extends AdapterFactoryImpl {
 				return createSensorThingDatastreamAdapter();
 			}
 			@Override
+			public Adapter caseSensorThingObservedProperty(SensorThingObservedProperty object) {
+				return createSensorThingObservedPropertyAdapter();
+			}
+			@Override
+			public Adapter caseSensorThingSensor(SensorThingSensor object) {
+				return createSensorThingSensorAdapter();
+			}
+			@Override
+			public Adapter caseObservedPropertyService(ObservedPropertyService object) {
+				return createObservedPropertyServiceAdapter();
+			}
+			@Override
+			public Adapter caseSensorService(SensorService object) {
+				return createSensorServiceAdapter();
+			}
+			@Override
+			public Adapter caseSensorThingFoi(SensorThingFoi object) {
+				return createSensorThingFoiAdapter();
+			}
+			@Override
+			public Adapter caseFeatureThingService(FeatureThingService object) {
+				return createFeatureThingServiceAdapter();
+			}
+			@Override
 			public Adapter caseProvider(Provider object) {
 				return createProviderAdapter();
 			}
@@ -218,6 +242,90 @@ public class ExtendedAdapterFactory extends AdapterFactoryImpl {
 	 * @generated
 	 */
 	public Adapter createSensorThingDatastreamAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingObservedProperty <em>Sensor Thing Observed Property</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.SensorThingObservedProperty
+	 * @generated
+	 */
+	public Adapter createSensorThingObservedPropertyAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingSensor <em>Sensor Thing Sensor</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.SensorThingSensor
+	 * @generated
+	 */
+	public Adapter createSensorThingSensorAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.sensorthings.models.extended.ObservedPropertyService <em>Observed Property Service</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.ObservedPropertyService
+	 * @generated
+	 */
+	public Adapter createObservedPropertyServiceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorService <em>Sensor Service</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.SensorService
+	 * @generated
+	 */
+	public Adapter createSensorServiceAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.sensorthings.models.extended.SensorThingFoi <em>Sensor Thing Foi</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.SensorThingFoi
+	 * @generated
+	 */
+	public Adapter createSensorThingFoiAdapter() {
+		return null;
+	}
+
+	/**
+	 * Creates a new adapter for an object of class '{@link org.eclipse.sensinact.sensorthings.models.extended.FeatureThingService <em>Feature Thing Service</em>}'.
+	 * <!-- begin-user-doc -->
+	 * This default implementation returns null so that we can easily ignore cases;
+	 * it's useful to ignore a case when inheritance will catch all the cases anyway.
+	 * <!-- end-user-doc -->
+	 * @return the new adapter.
+	 * @see org.eclipse.sensinact.sensorthings.models.extended.FeatureThingService
+	 * @generated
+	 */
+	public Adapter createFeatureThingServiceAdapter() {
 		return null;
 	}
 

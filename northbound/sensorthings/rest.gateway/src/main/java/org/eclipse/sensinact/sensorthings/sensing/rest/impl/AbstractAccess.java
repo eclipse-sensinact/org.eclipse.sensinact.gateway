@@ -26,8 +26,6 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
-import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
@@ -93,17 +91,6 @@ public abstract class AbstractAccess {
      */
     private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
         return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
-    }
-
-    @SuppressWarnings("unchecked")
-    protected IDtoMemoryCache<Sensor> getCacheSensor() {
-        return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE).getContext(Sensor.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected IDtoMemoryCache<ObservedProperty> getCacheObservedProperty() {
-        return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
-                .getContext(ObservedProperty.class);
     }
 
     @SuppressWarnings("unchecked")
