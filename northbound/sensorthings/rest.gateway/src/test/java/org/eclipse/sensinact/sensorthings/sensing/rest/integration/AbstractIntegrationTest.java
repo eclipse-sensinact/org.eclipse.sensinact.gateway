@@ -173,18 +173,17 @@ public class AbstractIntegrationTest {
     }
 
     protected FeatureOfInterest getFeatureOfInterest(String foiRefId) {
-        return new FeatureOfInterest(null, foiRefId, "test", null, "test", new Point(0, 0), null);
+        return new FeatureOfInterest(null, foiRefId, "test", null, "test", new Point(0, 0), null, null);
     }
 
     protected void createDatastream(String provider, String thingId, int value) {
-        createDatastream(provider, thingId, value, null);
+        createDatastream(provider, thingId, value, Instant.now());
     }
 
     protected void createObservation(String provider, String thingId, Object value, Instant valueInstant) {
 
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation",
-                getObservation(provider + "~test", value, getFeatureOfInterest(provider + "~test~test"), valueInstant),
-                valueInstant);
+                getObservation(provider + "~test", value, getFeatureOfInterest("test"), valueInstant), valueInstant);
 
     }
 
@@ -194,6 +193,8 @@ public class AbstractIntegrationTest {
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "id", provider,
                 valueInstant);
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "name", "test",
+                valueInstant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "observationType", "test",
                 valueInstant);
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "sensorId", "test1",
                 valueInstant);
@@ -239,7 +240,7 @@ public class AbstractIntegrationTest {
         ExpandedObservation obs = new ExpandedObservation(null, id,
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
-                null, null, null, null, foi);
+                null, null, null, null, foi, false);
         return toString(obs);
     }
 

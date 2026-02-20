@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings;
 
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.DATASTREAMS;
-import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
@@ -63,45 +62,67 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         // TODO Auto-generated constructor stub
     }
 
+    public Response updateObservation(String id, ExpandedObservation obs) {
+        getExtraDelegate().update(getSession(), getMapper(), uriInfo, requestContext.getMethod(), id, obs);
+
+        return Response.ok().build();
+    }
+
+    public Response patchObservation(String id, ExpandedObservation obs) {
+        return updateObservation(id, obs);
+    }
+
     public Observation getObservation(String id) {
 
         ResourceSnapshot resourceSnapshot = getObservationResourceSnapshot(id);
+        // allow to get old observatin
+
         Instant timestamp = DtoMapper.getTimestampFromId(id);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
         Optional<Observation> result = null;
         if (resourceSnapshot.isSet()) {
             Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
-            if (timestamp.isBefore(milliTimestamp)) {
-                String history = (String) application.getProperties().get("sensinact.history.provider");
-                if (history != null) {
-                    String provider = resourceSnapshot.getService().getProvider().getName();
-                    String service = resourceSnapshot.getService().getName();
-                    String resource = resourceSnapshot.getName();
-                    // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
-                    // (timestamp)
-                    Instant timestampPlusOneMilli = timestamp.plusMillis(1);
-                    TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
-                            Map.of("provider", provider, "service", service, "resource", resource, "time",
-                                    timestampPlusOneMilli));
-                    if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
-                        result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                                getExpansions(), criterion, resourceSnapshot, t);
-                    }
-                }
-            } else if (timestamp.equals(milliTimestamp)) {
+            if (isHistoryMemory() && getCacheObservation().getDto(id) != null) {
+                ExpandedObservation obs = getCacheObservation().getDto(id);
+
                 result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                        criterion, resourceSnapshot);
+                        criterion, resourceSnapshot, timestamp, obs);
+
+            } else {
+                if (timestamp.isBefore(milliTimestamp)) {
+                    String history = (String) application.getProperties().get("sensinact.history.provider");
+                    if (history != null) {
+                        String provider = resourceSnapshot.getService().getProvider().getName();
+                        String service = resourceSnapshot.getService().getName();
+                        String resource = resourceSnapshot.getName();
+                        // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
+                        // (timestamp)
+                        Instant timestampPlusOneMilli = timestamp.plusMillis(1);
+                        TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
+                                Map.of("provider", provider, "service", service, "resource", resource, "time",
+                                        timestampPlusOneMilli));
+                        if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
+                            result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+                                    getExpansions(), criterion, resourceSnapshot, t);
+                        }
+                    }
+                } else if (timestamp.equals(milliTimestamp)) {
+                    result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                            criterion, resourceSnapshot);
+                }
             }
+
         } else {
             result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(),
                     criterion, resourceSnapshot);
         }
 
-        if (result.isEmpty()) {
+        if (result == null || result.isEmpty()) {
             throw new NotFoundException();
         }
         return result.get();
+
     }
 
     public Datastream getObservationDatastream(String id) {
@@ -110,7 +131,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
 
         Datastream d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(DATASTREAMS), providerSnapshot);
+                parseFilter(DATASTREAMS), providerSnapshot).get();
 
         if (!datastreamId.equals(String.valueOf(d.id()))) {
             throw new NotFoundException();
@@ -133,7 +154,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
         return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(OBSERVED_PROPERTIES), providerSnapshot);
+                parseFilter(OBSERVED_PROPERTIES), providerSnapshot).get();
     }
 
     public Sensor getObservationDatastreamSensor(String id) {
@@ -143,7 +164,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
 
         Sensor s = DtoMapper.toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(SENSORS), providerSnapshot);
+                parseFilter(SENSORS), providerSnapshot).get();
 
         return s;
     }
@@ -162,11 +183,53 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
 
     public FeatureOfInterest getObservationFeatureOfInterest(String id) {
 
-        String datastreamId = DtoMapperSimple.extractFirstIdSegment(id);
+        ResourceSnapshot resourceSnapshot = getObservationResourceSnapshot(id);
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(datastreamId);
-        return DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(FEATURES_OF_INTEREST), providerSnapshot);
+        Instant timestamp = DtoMapper.getTimestampFromId(id);
+
+        ICriterion criterion = parseFilter(OBSERVATIONS);
+        FeatureOfInterest result = null;
+        if (resourceSnapshot.isSet()) {
+            Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
+            if (timestamp.isBefore(milliTimestamp)) {
+                if (isHistoryMemory() && getCacheObservation().getDto(id) != null) {
+                    ExpandedObservation obs = getCacheObservation().getDto(id);
+                    result = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
+                            getExpansions(), criterion, timestamp, obs);
+                } else {
+                    String history = (String) application.getProperties().get("sensinact.history.provider");
+                    if (history != null) {
+                        String provider = resourceSnapshot.getService().getProvider().getName();
+                        String service = resourceSnapshot.getService().getName();
+                        String resource = resourceSnapshot.getName();
+                        // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
+                        // (timestamp)
+                        Instant timestampPlusOneMilli = timestamp.plusMillis(1);
+                        TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
+                                Map.of("provider", provider, "service", service, "resource", resource, "time",
+                                        timestampPlusOneMilli));
+                        if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
+                            ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(getMapper(), t.getValue());
+                            result = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo,
+                                    getExpansions(), criterion, t.getTimestamp(), obs);
+                        }
+                    }
+                }
+            } else if (timestamp.equals(milliTimestamp)) {
+                ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(getMapper(),
+                        resourceSnapshot.getValue().getValue());
+
+                result = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        criterion, timestamp, obs);
+            }
+        } else {
+            throw new NotFoundException();
+        }
+
+        if (result == null) {
+            throw new NotFoundException();
+        }
+        return result;
     }
 
     // No history as it is *live* observation data not a data stream
@@ -194,7 +257,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), datastream, id,
                 ExpandedObservation.class, ExpandedDataStream.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response updateObservationFeatureOfInterestRef(String id, RefId foi) {
@@ -202,14 +265,14 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().updateRef(getSession(), getMapper(), uriInfo, requestContext.getMethod(), foi, id,
                 ExpandedObservation.class, FeatureOfInterest.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteObservation(String id) {
 
         getExtraDelegate().delete(getSession(), getMapper(), uriInfo, id, ExpandedObservation.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public Response deleteObservationFeatureOfInterest(String id) {
@@ -217,7 +280,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         getExtraDelegate().deleteRef(getSession(), getMapper(), uriInfo, id, ExpandedObservation.class,
                 FeatureOfInterest.class);
 
-        return Response.noContent().build();
+        return Response.ok().build();
     }
 
     public ResultList<Datastream> getObservationDatastreamThingDataastreams(String id) {
@@ -230,9 +293,10 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         ICriterion criterion = parseFilter(OBSERVATIONS);
 
         return new ResultList<Datastream>(null, null,
-                datastreamIds.stream().map(dsId -> validateAndGetProvider((String) dsId)).map(p -> DtoMapper
-                        .toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                        .toList());
+                datastreamIds.stream().map(dsId -> validateAndGetProvider((String) dsId))
+                        .map(p -> DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo,
+                                getExpansions(), criterion, p))
+                        .filter(ds -> ds.isPresent()).map(ds -> ds.get()).toList());
     }
 
     public ResultList<HistoricalLocation> getObservationDatastreamThingHistoricalLocations(String value) {
@@ -243,7 +307,8 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    getSession(), application, getMapper(), uriInfo, getExpansions(), filter, providerThing, 0);
+                    getSession(), application, getMapper(), uriInfo, getExpansions(), filter, providerThing,
+                    isHistoryMemory() ? getCacheHistoricalLocation() : null, 0);
             if (list.value().isEmpty()) {
                 list = DtoMapper.toHistoricalLocations(getSession(), application, getMapper(), uriInfo, getExpansions(),
                         filter, providerThing);

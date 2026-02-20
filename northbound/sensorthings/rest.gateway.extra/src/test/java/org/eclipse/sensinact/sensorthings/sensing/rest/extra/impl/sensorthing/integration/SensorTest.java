@@ -81,7 +81,7 @@ public class SensorTest extends AbstractIntegrationTest {
         String sensorId = getIdFromJson(json);
         UtilsAssert.assertSensor(sensor, json);
         // when
-        getJsonResponseFromDelete(String.format("Sensors(%s)", sensorId), 204);
+        getJsonResponseFromDelete(String.format("Sensors(%s)", sensorId), 200);
         // then
         assertNull(sensorCache.getDto(sensorId));
     }
@@ -176,7 +176,7 @@ public class SensorTest extends AbstractIntegrationTest {
         UtilsAssert.assertSensor(sensor, json);
         Sensor sensorUpdate = DtoFactory.getSensor(name + "2");
         // when
-        getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", idSensor), 204);
+        getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", idSensor), 200);
         // then
         assertEquals(name + "2", sensorCache.getDto(idSensor).name());
     }
@@ -212,7 +212,7 @@ public class SensorTest extends AbstractIntegrationTest {
         assertNull(sensorCache.getDto(sensorId));
         // when
         Sensor sensorUpdate = DtoFactory.getSensor(name + "2");
-        json = getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 204);
+        json = getJsonResponseFromPut(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 200);
         assertNull(sensorCache.getDto(sensorId));
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
@@ -239,7 +239,7 @@ public class SensorTest extends AbstractIntegrationTest {
         UtilsAssert.assertSensor(sensor, json);
         Sensor sensorUpdate = DtoFactory.getSensor(name + "2");
         // when
-        json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", idSensor), 204);
+        json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", idSensor), 200);
         // then
         assertEquals(name + "2", sensorCache.getDto(idSensor).name());
 
@@ -276,7 +276,7 @@ public class SensorTest extends AbstractIntegrationTest {
         assertNull(sensorCache.getDto(sensorId));
         // when
         Sensor sensorUpdate = DtoFactory.getSensor(name + "2", null, "testencodingType");
-        json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 204);
+        json = getJsonResponseFromPatch(sensorUpdate, String.format("Sensors(%s)", sensorIdDatastream), 200);
         assertNull(sensorCache.getDto(sensorId));
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");

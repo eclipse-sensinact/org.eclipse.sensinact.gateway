@@ -12,6 +12,8 @@
  */
 package org.eclipse.sensinact.sensorthings.models.extended.impl;
 
+import java.util.Map;
+
 import org.eclipse.emf.common.notify.Notification;
 
 import org.eclipse.emf.ecore.EClass;
@@ -33,6 +35,7 @@ import org.eclipse.sensinact.sensorthings.models.extended.SensorThingLocationSer
  * <ul>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getEncodingType <em>Encoding Type</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getId <em>Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.SensorThingLocationServiceImpl#getProperties <em>Properties</em>}</li>
  * </ul>
  *
  * @generated
@@ -77,6 +80,16 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 	 * @ordered
 	 */
 	protected String id = ID_EDEFAULT;
+
+	/**
+	 * The cached value of the '{@link #getProperties() <em>Properties</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getProperties()
+	 * @generated
+	 * @ordered
+	 */
+	protected Map<?, ?> properties;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -149,12 +162,37 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 	 * @generated
 	 */
 	@Override
+	public Map<?, ?> getProperties() {
+		return properties;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setProperties(Map<?, ?> newProperties) {
+		Map<?, ?> oldProperties = properties;
+		properties = newProperties;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__PROPERTIES, oldProperties, properties));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ENCODING_TYPE:
 				return getEncodingType();
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ID:
 				return getId();
+			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__PROPERTIES:
+				return getProperties();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -172,6 +210,9 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 				return;
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ID:
 				setId((String)newValue);
+				return;
+			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__PROPERTIES:
+				setProperties((Map<?, ?>)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -191,6 +232,9 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ID:
 				setId(ID_EDEFAULT);
 				return;
+			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__PROPERTIES:
+				setProperties((Map<?, ?>)null);
+				return;
 		}
 		super.eUnset(featureID);
 	}
@@ -207,6 +251,8 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 				return ENCODING_TYPE_EDEFAULT == null ? encodingType != null : !ENCODING_TYPE_EDEFAULT.equals(encodingType);
 			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__ID:
 				return ID_EDEFAULT == null ? id != null : !ID_EDEFAULT.equals(id);
+			case ExtendedPackage.SENSOR_THING_LOCATION_SERVICE__PROPERTIES:
+				return properties != null;
 		}
 		return super.eIsSet(featureID);
 	}
@@ -225,6 +271,8 @@ public class SensorThingLocationServiceImpl extends ServiceImpl implements Senso
 		result.append(encodingType);
 		result.append(", id: ");
 		result.append(id);
+		result.append(", properties: ");
+		result.append(properties);
 		result.append(')');
 		return result.toString();
 	}

@@ -49,7 +49,7 @@ public class DtoFactory {
     public static FeatureOfInterest getFeatureOfInterest(String name, String encodingType, GeoJsonObject feature) {
 
         return new FeatureOfInterest(null, null, name, "Geographic location of the weather station", encodingType,
-                feature, null);
+                feature, null, null);
     }
 
     public static ExpandedDataStream getDatastream(String name, String description, UnitOfMeasurement unit,
@@ -110,7 +110,15 @@ public class DtoFactory {
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
         Sensor sensor = getSensor("test");
         ObservedProperty op = getObservedProperty("Temperature");
-        return getDatastream(name, descriptikon, uom, "obsType", null, sensor, op, List.of(getObservation("test")));
+        return getDatastream(name, descriptikon, uom, obsType, null, sensor, op, List.of(getObservation("test")));
+
+    }
+
+    public static ExpandedDataStream getDatastream(String name, String descriptikon, String obsType) {
+        // Required
+        UnitOfMeasurement uom = getUnitOfMeasure("Celcius");
+
+        return getDatastream(name, descriptikon, uom, obsType, null, null, null, null);
 
     }
 
@@ -164,7 +172,7 @@ public class DtoFactory {
             FeatureOfInterest featureOfInterest) {
 
         return new ExpandedObservation(null, null, Instant.now(), Instant.now(), 5.0, "test", null, null, null, null,
-                null, datastreamRefId, featureOfInterest);
+                null, datastreamRefId, featureOfInterest, false);
 
     }
 
@@ -172,20 +180,20 @@ public class DtoFactory {
             RefId datastreamRefId, FeatureOfInterest featureOfInterest) {
 
         return new ExpandedObservation(null, "obs2", PhenomTime, null, result, "test", null, null, null, null, null,
-                datastreamRefId, featureOfInterest);
+                datastreamRefId, featureOfInterest, false);
 
     }
 
     public static ExpandedObservation getObservation(String name) {
         FeatureOfInterest foi = new FeatureOfInterest(null, null, name, "test", "test", new Point(-122.4194, 37.7749),
-                null);
+                null, null);
         return getObservationLinkDatastream(name, null, foi);
 
     }
 
     public static ExpandedObservation getObservationLinkFeatureOfInterest(String name, String foiRefId) {
         return getObservationWithFeatureOfInterest(name,
-                new FeatureOfInterest(null, getRefId(foiRefId), null, null, null, null, null));
+                new FeatureOfInterest(null, getRefId(foiRefId), null, null, null, null, null, null));
     }
 
     public static ExpandedObservation getObservationWithFeatureOfInterest(String name, FeatureOfInterest feature) {
@@ -195,7 +203,7 @@ public class DtoFactory {
 
     public static ExpandedLocation getIdLocation(Object RefId) {
 
-        return new ExpandedLocation(null, RefId, null, null, null, null, null, null, null);
+        return new ExpandedLocation(null, RefId, null, null, null, null, null, null, null, null);
     }
 
     public static ExpandedDataStream getIdDatastream(Object RefId) {
@@ -227,7 +235,8 @@ public class DtoFactory {
 
     public static ExpandedLocation getLocationLinkThing(String name, String encodingType, GeoJsonObject location,
             List<RefId> things) {
-        return new ExpandedLocation(null, null, name, "location1 test", encodingType, location, null, null, things);
+        return new ExpandedLocation(null, null, name, "location1 test", encodingType, location, null, null, null,
+                things);
     }
 
     public static ExpandedThing getExpandedThing(String name, String description, Map<String, Object> properties) {

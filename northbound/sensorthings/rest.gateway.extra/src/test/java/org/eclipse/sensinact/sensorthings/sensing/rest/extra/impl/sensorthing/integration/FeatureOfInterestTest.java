@@ -217,7 +217,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         FeatureOfInterest dtoFeatureOfInterestUpdate = DtoFactory.getFeatureOfInterest(name + "Update",
                 "application/vnd.geo+json", new Point(-122.4194, 37.7749));
 
-        json = getJsonResponseFromPut(dtoFeatureOfInterestUpdate, String.format("FeaturesOfInterest(%s)", idFoi), 204);
+        json = getJsonResponseFromPut(dtoFeatureOfInterestUpdate, String.format("FeaturesOfInterest(%s)", idFoi), 200);
         // then
         assertEquals(name + "Update", foiCache.getDto(idFoi).name());
 
@@ -264,7 +264,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         String idFoiUpdate = getIdFromJson(json);
 
         json = getJsonResponseFromPut(new RefId(idFoiUpdate),
-                String.format("Observations(%s)/FeatureOfInterest/$ref", idObservation), 204);
+                String.format("Observations(%s)/FeatureOfInterest/$ref", idObservation), 200);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(), service);
@@ -292,7 +292,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
                 "application/vnd.geo+json", new Point(-122.4194, 37.7749));
 
         json = getJsonResponseFromPatch(dtoFeatureOfInterestUpdate, String.format("FeaturesOfInterest(%s)", idFoi),
-                204);
+                200);
         // then
         assertEquals(name + "Update", foiCache.getDto(idFoi).name());
 
@@ -315,7 +315,7 @@ public class FeatureOfInterestTest extends AbstractIntegrationTest {
         String foiId = getIdFromJson(json);
         UtilsAssert.assertFeatureOfInterest(dtoFeatureOfInterest, json);
         // when
-        getJsonResponseFromDelete(String.format("FeaturesOfInterest(%s)", foiId), 204);
+        getJsonResponseFromDelete(String.format("FeaturesOfInterest(%s)", foiId), 200);
         // then
         assertNull(foiCache.getDto(foiId));
 

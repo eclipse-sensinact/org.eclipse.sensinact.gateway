@@ -44,6 +44,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
@@ -76,10 +77,11 @@ import jakarta.ws.rs.ext.Providers;
 @WithConfiguration(pid = "sensinact.session.manager", properties = {
         @Property(key = "auth.policy", value = "ALLOW_ALL"),
         @Property(key = "test.class", source = ValueSource.TestClass) })
-public class AbstractIntegrationTest {
+public abstract class AbstractIntegrationTest {
 
     static final HttpClient client = HttpClient.newHttpClient();
     protected static ObjectMapper mapper = null;
+    protected Application app;
 
     public static ObjectMapper getMapper() {
         if (mapper == null) {
@@ -294,27 +296,21 @@ public class AbstractIntegrationTest {
         return node.get("@iot.id").asText();
     }
 
+    public static String getIdFromJsonValues(JsonNode node, int index) {
+        return getIdFromJson(node.get("value").get(index));
+    }
+
     public static final String CONTENT_TYPE = "Content-Type";
 
     @BeforeEach
     void start(@InjectBundleContext BundleContext bc, TestInfo info) throws Exception {
 
-        Class<?> test = info.getTestClass().get();
-        while (test.isMemberClass()) {
-            test = test.getEnclosingClass();
-        }
+        assertApplication(bc, info);
 
-        ServiceTracker<Application, Application> tracker = new ServiceTracker<Application, Application>(bc,
-                bc.createFilter("(&(objectClass=jakarta.ws.rs.core.Application)(test.class=" + test.getName() + "))"),
-                null);
+        waitSensorthingAppReady();
+    }
 
-        tracker.open();
-
-        Application app = tracker.waitForService(5000);
-        assertNotNull(app);
-
-        assertInstanceOf(Application.class, app);
-
+    protected void waitSensorthingAppReady() throws IOException, InterruptedException {
         // Wait for the servlet to be ready
         boolean ready = false;
         for (int i = 0; i < 10; i++) {
@@ -332,6 +328,25 @@ public class AbstractIntegrationTest {
         if (!ready) {
             fail("SensorThings servlet didn't come up");
         }
+    }
+
+    private void assertApplication(BundleContext bc, TestInfo info)
+            throws InvalidSyntaxException, InterruptedException {
+        Class<?> test = info.getTestClass().get();
+        while (test.isMemberClass()) {
+            test = test.getEnclosingClass();
+        }
+
+        ServiceTracker<Application, Application> tracker = new ServiceTracker<Application, Application>(bc,
+                bc.createFilter("(&(objectClass=jakarta.ws.rs.core.Application)(test.class=" + test.getName() + "))"),
+                null);
+
+        tracker.open();
+
+        app = tracker.waitForService(5000);
+        assertNotNull(app);
+
+        assertInstanceOf(Application.class, app);
     }
 
     @AfterEach

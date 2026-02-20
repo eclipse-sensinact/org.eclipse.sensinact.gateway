@@ -47,7 +47,6 @@
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>rest.gateway</artifactId>
       <version>${project.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
@@ -91,7 +90,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jul-to-slf4j</artifactId>
-      <scope>test</scope>
+      <version>${slf4j.version}</version>
     </dependency>
 
     <!-- OSGi -->
@@ -146,6 +145,10 @@
     <dependency>
       <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
       <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>
 
     <!-- Jersey -->
@@ -210,6 +213,7 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.apache.aries.tx-control</groupId>
       <artifactId>tx-control-service-local</artifactId>
@@ -247,9 +251,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-        <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
-        <artifactId>dto</artifactId>
-        <version>${project.version}</version>
+      <groupId>
+        org.eclipse.sensinact.gateway.northbound.sensorthings
+      </groupId>
+      <artifactId>dto</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 

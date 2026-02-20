@@ -20,12 +20,13 @@ import java.util.Set;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
-import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.RootResourceDelegateSensorthings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessServiceUseCaseProvider;
+import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.DtoMemoryCacheProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
@@ -42,7 +43,11 @@ public class SensinactSensorthingsApplication extends Application {
 
         default NOT_SET;
 
-        int history_results_max() default 3000;
+        int history_results_max()
+
+        default 3000;
+
+        boolean history_in_memory() default false;
     }
 
     public static final String NOT_SET = "<<NOT_SET>>";
@@ -64,6 +69,7 @@ public class SensinactSensorthingsApplication extends Application {
                 SensorThingsFeature.class, ThrowableMapperProvider.class, SensinactSessionProvider.class,
                 SensorthingsFilterProvider.class, AccessProviderUseCaseProvider.class,
                 AccessResourceUseCaseProvider.class, AccessServiceUseCaseProvider.class, LoggingFilter.class,
+                DtoMemoryCacheProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections
@@ -77,14 +83,35 @@ public class SensinactSensorthingsApplication extends Application {
     @Override
     public Map<String, Object> getProperties() {
 
-        Map<String, Object> properties = NOT_SET.equals(config.history_provider())
-                ? new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
-                        "sensinact.history.result.limit", config.history_results_max()))
-                : new HashMap<String, Object>(Map.of("session.manager", sessionManager, "filter.parser", filterParser,
-                        "sensinact.history.provider", config.history_provider(), "sensinact.history.result.limit",
-                        config.history_results_max()));
+        boolean historyInMem = dynamicProps.containsKey("history.in.memory")
+                ? Boolean.parseBoolean(String.valueOf(dynamicProps.get("history.in.memory")))
+                : config.history_in_memory();
 
-        return properties;
+        int resultMax = dynamicProps.containsKey("history.results.max")
+                ? Integer.parseInt(String.valueOf(dynamicProps.get("history.results.max")))
+                : config.history_results_max();
+
+        String provider = dynamicProps.containsKey("history.provider")
+                ? String.valueOf(dynamicProps.get("history.provider"))
+                : config.history_provider();
+
+        Map<String, Object> props = new HashMap<>();
+        props.put("session.manager", sessionManager);
+        props.put("filter.parser", filterParser);
+        props.put("sensinact.history.in.memory", historyInMem);
+        props.put("sensinact.history.result.limit", resultMax);
+        if (!NOT_SET.equals(provider)) {
+            props.put("sensinact.history.provider", provider);
+        }
+        return props;
+    }
+
+    private volatile Map<String, Object> dynamicProps = new HashMap<>();
+
+    @Activate
+    @Modified
+    protected void update(Map<String, Object> properties) {
+        this.dynamicProps = properties;
     }
 
     public SensiNactSessionManager getSessionManager() {

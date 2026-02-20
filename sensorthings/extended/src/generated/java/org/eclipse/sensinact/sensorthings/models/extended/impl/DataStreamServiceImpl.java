@@ -52,7 +52,9 @@ import org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage;
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getSensorProperties <em>Sensor Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservedPropertyProperties <em>Observed Property Properties</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getLastObservation <em>Last Observation</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getObservationType <em>Observation Type</em>}</li>
  *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getThingId <em>Thing Id</em>}</li>
+ *   <li>{@link org.eclipse.sensinact.sensorthings.models.extended.impl.DataStreamServiceImpl#getProperties <em>Properties</em>}</li>
  * </ul>
  *
  * @generated
@@ -379,6 +381,26 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	protected String lastObservation = LAST_OBSERVATION_EDEFAULT;
 
 	/**
+	 * The default value of the '{@link #getObservationType() <em>Observation Type</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getObservationType()
+	 * @generated
+	 * @ordered
+	 */
+	protected static final String OBSERVATION_TYPE_EDEFAULT = null;
+
+	/**
+	 * The cached value of the '{@link #getObservationType() <em>Observation Type</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getObservationType()
+	 * @generated
+	 * @ordered
+	 */
+	protected String observationType = OBSERVATION_TYPE_EDEFAULT;
+
+	/**
 	 * The default value of the '{@link #getThingId() <em>Thing Id</em>}' attribute.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -397,6 +419,16 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @ordered
 	 */
 	protected String thingId = THING_ID_EDEFAULT;
+
+	/**
+	 * The cached value of the '{@link #getProperties() <em>Properties</em>}' attribute.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @see #getProperties()
+	 * @generated
+	 * @ordered
+	 */
+	protected Map<?, ?> properties;
 
 	/**
 	 * <!-- begin-user-doc -->
@@ -814,6 +846,29 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 	 * @generated
 	 */
 	@Override
+	public String getObservationType() {
+		return observationType;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setObservationType(String newObservationType) {
+		String oldObservationType = observationType;
+		observationType = newObservationType;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_TYPE, oldObservationType, observationType));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
 	public String getThingId() {
 		return thingId;
 	}
@@ -829,6 +884,29 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		thingId = newThingId;
 		if (eNotificationRequired())
 			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__THING_ID, oldThingId, thingId));
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public Map<?, ?> getProperties() {
+		return properties;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public void setProperties(Map<?, ?> newProperties) {
+		Map<?, ?> oldProperties = properties;
+		properties = newProperties;
+		if (eNotificationRequired())
+			eNotify(new ENotificationImpl(this, Notification.SET, ExtendedPackage.DATA_STREAM_SERVICE__PROPERTIES, oldProperties, properties));
 	}
 
 	/**
@@ -873,8 +951,12 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 				return getObservedPropertyProperties();
 			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
 				return getLastObservation();
+			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_TYPE:
+				return getObservationType();
 			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
 				return getThingId();
+			case ExtendedPackage.DATA_STREAM_SERVICE__PROPERTIES:
+				return getProperties();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
@@ -938,8 +1020,14 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
 				setLastObservation((String)newValue);
 				return;
+			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_TYPE:
+				setObservationType((String)newValue);
+				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
 				setThingId((String)newValue);
+				return;
+			case ExtendedPackage.DATA_STREAM_SERVICE__PROPERTIES:
+				setProperties((Map<?, ?>)newValue);
 				return;
 		}
 		super.eSet(featureID, newValue);
@@ -1004,8 +1092,14 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
 				setLastObservation(LAST_OBSERVATION_EDEFAULT);
 				return;
+			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_TYPE:
+				setObservationType(OBSERVATION_TYPE_EDEFAULT);
+				return;
 			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
 				setThingId(THING_ID_EDEFAULT);
+				return;
+			case ExtendedPackage.DATA_STREAM_SERVICE__PROPERTIES:
+				setProperties((Map<?, ?>)null);
 				return;
 		}
 		super.eUnset(featureID);
@@ -1053,8 +1147,12 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 				return observedPropertyProperties != null;
 			case ExtendedPackage.DATA_STREAM_SERVICE__LAST_OBSERVATION:
 				return LAST_OBSERVATION_EDEFAULT == null ? lastObservation != null : !LAST_OBSERVATION_EDEFAULT.equals(lastObservation);
+			case ExtendedPackage.DATA_STREAM_SERVICE__OBSERVATION_TYPE:
+				return OBSERVATION_TYPE_EDEFAULT == null ? observationType != null : !OBSERVATION_TYPE_EDEFAULT.equals(observationType);
 			case ExtendedPackage.DATA_STREAM_SERVICE__THING_ID:
 				return THING_ID_EDEFAULT == null ? thingId != null : !THING_ID_EDEFAULT.equals(thingId);
+			case ExtendedPackage.DATA_STREAM_SERVICE__PROPERTIES:
+				return properties != null;
 		}
 		return super.eIsSet(featureID);
 	}
@@ -1103,8 +1201,12 @@ public class DataStreamServiceImpl extends ServiceImpl implements DataStreamServ
 		result.append(observedPropertyProperties);
 		result.append(", lastObservation: ");
 		result.append(lastObservation);
+		result.append(", observationType: ");
+		result.append(observationType);
 		result.append(", thingId: ");
 		result.append(thingId);
+		result.append(", properties: ");
+		result.append(properties);
 		result.append(')');
 		return result.toString();
 	}

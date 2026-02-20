@@ -32,6 +32,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 @Service("admin")
 public record DatastreamUpdate(@Model EClass model, @Provider String providerId,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object id,
+        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String observationType,
+        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Map<String, Object> properties,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) String friendlyName,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description, @Timestamp Instant timestamp,
         @Data(onDuplicate = UPDATE_IF_DIFFERENT) GeoJsonObject location,
@@ -70,18 +72,20 @@ public record DatastreamUpdate(@Model EClass model, @Provider String providerId,
 
     }
 
-    public DatastreamUpdate(String providerId, Object id, String name, String description, Instant timestamp,
-            GeoJsonObject observedArea, String thingId, String sensorId, String sensorName, String sensorDescription,
-            String sensorEncodingType, Object sensorMetadata, Map<String, Object> sensorProperties,
+    public DatastreamUpdate(String providerId, Object id, String name, String description, String observationType,
+            Map<String, Object> properties, Instant timestamp, GeoJsonObject observedArea, String thingId,
+            String sensorId, String sensorName, String sensorDescription, String sensorEncodingType,
+            Object sensorMetadata, Map<String, Object> sensorProperties,
             // observed property
             String observedPropertyId, String observedPropertyName, String observedPropertyDescription,
             String observedPropertyDefinition, Map<String, Object> observedPropertyProperties,
             // unit
             String unitName, String unitSymbol, String unitDefinition, String lastObservsation) {
-        this(SENSOR_THING_DATASTREAM, providerId, id, name, description, timestamp, observedArea, thingId, sensorId,
-                sensorName, sensorDescription, sensorEncodingType, sensorMetadata, sensorProperties, observedPropertyId,
-                observedPropertyName, observedPropertyDescription, observedPropertyDefinition,
-                observedPropertyProperties, unitName, unitSymbol, unitDefinition, lastObservsation);
+        this(SENSOR_THING_DATASTREAM, providerId, id, observationType, properties, name, description, timestamp,
+                observedArea, thingId, sensorId, sensorName, sensorDescription, sensorEncodingType, sensorMetadata,
+                sensorProperties, observedPropertyId, observedPropertyName, observedPropertyDescription,
+                observedPropertyDefinition, observedPropertyProperties, unitName, unitSymbol, unitDefinition,
+                lastObservsation);
     }
 
 }

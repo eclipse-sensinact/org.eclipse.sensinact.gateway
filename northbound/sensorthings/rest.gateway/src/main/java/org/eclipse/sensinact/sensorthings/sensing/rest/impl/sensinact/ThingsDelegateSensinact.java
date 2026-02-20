@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact;
 
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.DATASTREAMS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
@@ -26,7 +27,9 @@ import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -283,6 +286,30 @@ public class ThingsDelegateSensinact extends AbstractDelegate {
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
         }
+    }
+
+    public FeatureOfInterest getThingDatastreamObservationFeatureOfInterest(String id, String id2, String id3) {
+        String provider = extractFirstIdSegment(id3);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+
+        FeatureOfInterest foi;
+        try {
+            foi = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                    parseFilter(FEATURES_OF_INTEREST), providerSnapshot);
+        } catch (IllegalArgumentException iae) {
+            throw new NotFoundException("No feature of interest with id");
+        }
+        if (!foi.id().equals(id)) {
+            throw new NotFoundException();
+        }
+        return foi;
+    }
+
+    public Datastream getThingDatastreamObservationDatastream(String id, String id2, String id3) {
+        String provider = extractFirstIdSegment(id3);
+        ResourceSnapshot r = validateAndGetResourceSnapshot(provider);
+        return DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), r,
+                parseFilter(THINGS));
     }
 
 }

@@ -15,7 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.i
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -30,8 +30,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
-import jakarta.ws.rs.NotFoundException;
 
 /**
  * Unit test for simple App.
@@ -201,9 +199,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         UtilsAssert.assertDatastream(dtoDatastream, json);
         // when
-        ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastreamMinimal(name + " Update", "Update", "Update");
+        ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastream(name + " Update", "Update", "Update");
 
-        getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
+        getJsonResponseFromPut(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 200);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idDatastream, "admin");
@@ -238,9 +236,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         UtilsAssert.assertDatastream(dtoDatastream, json);
         // when
-        ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastreamMinimal(null, "Update", "Update");
+        ExpandedDataStream dtoDatastreamUpdate = DtoFactory.getDatastream(null, "Update", "Update");
 
-        getJsonResponseFromPatch(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 204);
+        getJsonResponseFromPatch(dtoDatastreamUpdate, String.format("Datastreams(%s)", idDatastream), 200);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idDatastream, "admin");
@@ -291,21 +289,21 @@ public class DatastreamTest extends AbstractIntegrationTest {
         // thing
 
         json = getJsonResponseFromPut(new RefId(idThingUpdate),
-                String.format("Datastreams(%s)/Thing/$ref", idDatastream), 204);
+                String.format("Datastreams(%s)/Thing/$ref", idDatastream), 200);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals(idThingUpdate, DtoMapperSimple.getResourceField(service, "thingId", String.class));
 
         // sensor
         json = getJsonResponseFromPut(new RefId(idSensor), String.format("Datastreams(%s)/Sensor/$ref", idDatastream),
-                204);
+                200);
         // then
         service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals(idSensor, DtoMapperSimple.getResourceField(service, "sensorId", String.class));
 
         // observed property
         json = getJsonResponseFromPut(new RefId(idObservedProperty),
-                String.format("Datastreams(%s)/ObservedProperty/$ref", idDatastream), 204);
+                String.format("Datastreams(%s)/ObservedProperty/$ref", idDatastream), 200);
         // then
         service = serviceUseCase.read(session, idDatastream, "datastream");
         assertEquals(idObservedProperty, DtoMapperSimple.getResourceField(service, "observedPropertyId", String.class));
@@ -340,11 +338,20 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         // when
 
-        getJsonResponseFromDelete(String.format("Datastreams(%s)", idDatastream), 204);
+        getJsonResponseFromDelete(String.format("Datastreams(%s)", idDatastream), 200);
         // then
-        assertThrows(NotFoundException.class, () -> {
-            serviceUseCase.read(session, idDatastream, "datastream");
-        });
+        ServiceSnapshot serviceDatastream = serviceUseCase.read(session, idDatastream, "datastream");
+        ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idDatastream, "admin");
+
+        assertTrue(DtoMapperSimple.getResourceField(serviceDatastream, "id", String.class) == null,
+                "id datastream is not null");
+        assertTrue(DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class) == null,
+                "id datastream is not null");
+        assertTrue(DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class) == null,
+                "id datastream is not null");
+        assertTrue(DtoMapperSimple.getResourceField(serviceAdmin, "location", String.class) == null,
+                "id datastream is not null");
+
         ServiceSnapshot service = serviceUseCase.read(session, idJson, "thing");
         @SuppressWarnings("unchecked")
         List<String> datastreamIds = (List<String>) DtoMapperSimple.getResourceField(service, "datastreamIds",

@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -23,26 +24,29 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
-
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing
  * FeatureOfInterest
  */
-public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<FeatureOfInterest, Object> {
+public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseModel<FeatureOfInterest, Object> {
 
     private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
+    private final IDtoMemoryCache<ExpandedObservation> obsCache;
+    private ObservationsExtraUseCase observationExtraUseCase;
 
     @SuppressWarnings("unchecked")
-    public FeatureOfInterestExtraUseCase(Providers providers) {
-        super(providers);
+    public FeatureOfInterestExtraUseCase(Providers providers, Application application) {
+        super(providers, application);
         cacheFoi = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
-
+        obsCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservation.class);
     }
 
     public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<FeatureOfInterest> request) {
@@ -55,22 +59,39 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         String observationLink = getLink(request.uriInfo(), selfLink, "Observations");
         FeatureOfInterest createFoi = new FeatureOfInterest(selfLink, featureOfInterestId, featureOfInterest.name(),
                 featureOfInterest.description(), featureOfInterest.encodingType(), featureOfInterest.feature(),
-                observationLink);
+                featureOfInterest.properties(), observationLink);
         cacheFoi.addDto(featureOfInterestId, createFoi);
         return new ExtraUseCaseResponse<Object>(featureOfInterestId, createFoi);
 
     }
 
+    @Override
     public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<FeatureOfInterest> request) {
-
         if (cacheFoi.getDto(request.id()) != null) {
             cacheFoi.removeDto(request.id());
             return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
-
-        } else {
-            throw new WebApplicationException("FeatureOfInterest is mandatory for Observation",
-                    Response.Status.CONFLICT);
         }
+        String[] split = request.id().split("~");
+        if (split.length > 3) {
+            String idObs = String.format("%s~%s~%s", split[0], split[1], split[3]);
+            if (isHistoryMemory() && obsCache.getDto(idObs) != null) {
+                obsCache.removeDto(idObs);
+                return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
+            }
+            ExtraUseCaseRequest<ExpandedObservation> requestObs = new ExtraUseCaseRequest<ExpandedObservation>(
+                    request.session(), request.mapper(), request.uriInfo(), HttpMethod.DELETE, idObs);
+            ExtraUseCaseResponse<ServiceSnapshot> result = observationExtraUseCase.delete(requestObs);
+            if (result.success()) {
+                if (isHistoryMemory() && obsCache.getDto(idObs) != null) {
+                    obsCache.removeDto(idObs);
+                }
+                return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
+            }
+        }
+        if (isHistoryMemory())
+            throw new NotFoundException();
+        else
+            throw new WebApplicationException("foi is link to observation so it is immutable", 409);
 
     }
 
@@ -86,7 +107,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
         FeatureOfInterest receiveFoi = request.model();
         checkRequireField(request);
         FeatureOfInterest foiToUpdate = new FeatureOfInterest(null, foiId, receiveFoi.name(), receiveFoi.description(),
-                receiveFoi.encodingType(), receiveFoi.feature(), null);
+                receiveFoi.encodingType(), receiveFoi.feature(), receiveFoi.properties(), null);
         GeoJsonObject observedArea = getObservedArea(request.session(), providerId);
 
         ExpandedObservation lastObservation = getExpandedObservationFromService(request,
@@ -98,11 +119,16 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
 
     private FeatureOfInterest updateInMemoryFoi(ExtraUseCaseRequest<FeatureOfInterest> request, FeatureOfInterest foi) {
         FeatureOfInterest updateFoi = request.model();
-        FeatureOfInterest createFoi = new FeatureOfInterest(null, request.id(),
+        String selfLink = DtoToModelMapper.getLink(request.uriInfo(), DtoMapperSimple.VERSION,
+                "/FeaturesofInterest({id})", request.id());
+
+        String observationsLink = DtoToModelMapper.getLink(request.uriInfo(), selfLink, "/Observationos");
+        FeatureOfInterest createFoi = new FeatureOfInterest(selfLink, request.id(),
                 updateFoi.name() != null ? updateFoi.name() : foi.name(),
                 updateFoi.description() != null ? updateFoi.description() : foi.description(),
                 updateFoi.encodingType() != null ? updateFoi.encodingType() : foi.encodingType(),
-                updateFoi.feature() != null ? updateFoi.feature() : foi.feature(), null);
+                updateFoi.feature() != null ? updateFoi.feature() : foi.feature(),
+                updateFoi.properties() != null ? updateFoi.properties() : foi.properties(), observationsLink);
         cacheFoi.addDto(request.id(), createFoi);
         return createFoi;
     }
@@ -117,6 +143,7 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
             String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
 
             List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
+            ResourceSnapshot resource = getObservationForMemoryHistory(request.session(), providerId);
 
             // update/create provider
             try {
@@ -125,11 +152,19 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
             } catch (InvocationTargetException | InterruptedException e) {
                 throw new InternalServerErrorException(e);
             }
+            updateObservationMemoryHistory(obsCache, cacheFoi, request.mapper(), resource);
+
             ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
             if (serviceSnapshot == null) {
                 return new ExtraUseCaseResponse<Object>(false, "can't find sensor");
             }
-            return new ExtraUseCaseResponse<Object>(request.id(), serviceSnapshot);
+            ExpandedObservation obsUpdate = getExpandedObservationFromService(request, serviceSnapshot);
+            String selfLink = DtoToModelMapper.getLink(request.uriInfo(), DtoMapperSimple.VERSION,
+                    "/FeaturesOfInterest({})", (String) obsUpdate.featureOfInterest().id());
+            String observationsLink = DtoToModelMapper.getLink(request.uriInfo(), selfLink, "/Observations");
+
+            return new ExtraUseCaseResponse<Object>(request.id(), DtoMapperSimple.toFeatureOfInterest(obsUpdate,
+                    (String) obsUpdate.featureOfInterest().id(), selfLink, observationsLink));
 
         }
 
@@ -142,6 +177,10 @@ public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseDto<Featu
 
     public FeatureOfInterest getInMemoryFeatureOfInterest(String id) {
         return cacheFoi.getDto(id);
+    }
+
+    public void setObservationExtraUseCase(ObservationsExtraUseCase useCase) {
+        observationExtraUseCase = useCase;
     }
 
 }

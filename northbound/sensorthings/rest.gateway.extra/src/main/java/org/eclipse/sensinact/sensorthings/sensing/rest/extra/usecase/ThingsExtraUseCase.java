@@ -13,47 +13,63 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.DependentCommand;
 import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.DatastreamUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
 /**
  * UseCase that manage the create, update, delete use case for sensorthing Thing
  */
-public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedThing, ProviderSnapshot> {
+public class ThingsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedThing, ProviderSnapshot> {
 
     private final IDtoMemoryCache<Sensor> sensorCache;
+    private final IDtoMemoryCache<ExpandedObservation> cacheObs;
+    private final IDtoMemoryCache<Instant> cacheHl;
+    private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
 
     private final IDtoMemoryCache<ObservedProperty> observedPropertyCache;
 
     @SuppressWarnings("unchecked")
-    public ThingsExtraUseCase(Providers providers) {
-        super(providers);
+    public ThingsExtraUseCase(Providers providers, Application application) {
+        super(providers, application);
         sensorCache = resolve(providers, IDtoMemoryCache.class, Sensor.class);
         observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
+        cacheObs = resolve(providers, IDtoMemoryCache.class, ExpandedObservation.class);
+        cacheHl = resolve(providers, IDtoMemoryCache.class, Instant.class);
+        cacheFoi = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
@@ -92,9 +108,9 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
         }
         List<ExpandedDataStream> listDatastream = Optional.ofNullable(request.model().datastreams()).orElseGet(List::of)
                 .stream().map(ds -> {
-                    Sensor sensor = DatastreamsExtraUseCase.getCachedExpandedSensor(sensorCache, ds);
-                    ObservedProperty observedProperty = DatastreamsExtraUseCase
-                            .getCachedExpandedObservedProperty(observedPropertyCache, ds);
+                    Sensor sensor = getCachedExpandedSensor(request, sensorCache, ds);
+                    ObservedProperty observedProperty = getCachedExpandedObservedProperty(request,
+                            observedPropertyCache, ds);
                     if (!DtoMapperSimple.isRecordOnlyField(ds, "id")) {
                         checkRequireField(ds);
                         checkRequireLink(sensor, observedProperty);
@@ -106,13 +122,43 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
                             ds.sensorLink(), ds.thingLink(), ds.observations(), observedProperty, sensor, ds.obsLink(),
                             ds.thing());
                 }).toList();
+        List<Location> listNewLocation = Optional.ofNullable(request.model().locations()).orElseGet(List::of).stream()
+                .map(l -> {
+                    if (!DtoMapperSimple.isRecordOnlyField(l, "id")) {
+                        checkRequireField(l);
+                        return new Location(null, l.id(), l.name(), l.description(), l.encodingType(), l.location(),
+                                l.properties(), null, null);
+                    }
+                    ProviderSnapshot providerLocation = providerUseCase.read(request.session(), (String) l.id());
+                    return DtoMapperSimple.toLocation(request.mapper(), providerLocation, null, null, null);
 
-        return DtoToModelMapper.toThingUpdates(request, id, locationIds, datastreamIds, listDatastream);
+                }).toList();
+
+        return DtoToModelMapper.toThingUpdates(request, id, locationIds, datastreamIds, listDatastream,
+                listNewLocation);
+    }
+
+    private List<ResourceSnapshot> getObservationsForMemoryHistory(SensiNactSession session,
+            List<SensorThingsUpdate> listDtoModels) {
+        List<ResourceSnapshot> obsThingDatastream = null;
+        if (isHistoryMemory()) {
+            // get if exists last historical
+            obsThingDatastream = listDtoModels.stream().filter(update -> update instanceof DatastreamUpdate)
+                    .map(update -> getObservationForMemoryHistory(session, ((DatastreamUpdate) update).providerId()))
+                    .filter(Objects::nonNull).toList();
+        }
+        return obsThingDatastream;
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedThing> request) {
+        // ensure we don't have inline entities
+        if (!request.acceptInlineOnUpdate()) {
+            checkNoInline(request);
 
+        }
         List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
+        ResourceSnapshot resourceLocation = getHistoricalLocationForMemoryHistory(request);
+        List<ResourceSnapshot> obsThingDatastream = getObservationsForMemoryHistory(request.session(), listDtoModels);
 
         // update/create provider
         try {
@@ -120,8 +166,9 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
 
         } catch (InvocationTargetException | InterruptedException e) {
             throw new InternalServerErrorException(e);
-
         }
+        updateHistoricalLocationMemoryHistory(request, resourceLocation);
+        updateObservationHistoryMemory(request, obsThingDatastream);
 
         ProviderSnapshot snapshot = providerUseCase.read(request.session(), request.id());
         if (snapshot != null) {
@@ -129,6 +176,78 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
         }
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "not implemented");
 
+    }
+
+    private void updateObservationHistoryMemory(ExtraUseCaseRequest<ExpandedThing> request,
+            List<ResourceSnapshot> obsThingDatastream) {
+        if (obsThingDatastream != null)
+            obsThingDatastream.stream()
+                    .forEach(u -> updateObservationMemoryHistory(cacheObs, cacheFoi, request.mapper(), u));
+    }
+
+    private void updateHistoricalLocationMemoryHistory(ExtraUseCaseRequest<ExpandedThing> request,
+            ResourceSnapshot resourceLocation) {
+        System.out.println("update historical Cache");
+        if (resourceLocation != null) {
+            Instant stamp = resourceLocation.getValue().getTimestamp();
+            String idCache = request.id();
+            System.out.println("update historical Cache done " + idCache + "~" + DtoMapperSimple.stampToId(stamp));
+
+            cacheHl.addDto(idCache + "~" + DtoMapperSimple.stampToId(stamp), stamp);
+        }
+    }
+
+    private ResourceSnapshot getHistoricalLocationForMemoryHistory(ExtraUseCaseRequest<ExpandedThing> request) {
+        ResourceSnapshot provider = request.model().locations() != null && request.model().locations().size() > 0
+                ? getProviderThingIfLocationFieldExists(request.session(), request.id())
+                : null;
+        return provider;
+    }
+
+    private void checkNoInline(ExtraUseCaseRequest<ExpandedThing> request) {
+        if (request.model().datastreams() != null && !request.model().datastreams().stream()
+                .allMatch(ds -> DtoMapperSimple.isRecordOnlyField(ds, "id"))) {
+            throw new BadRequestException("datastream no expected for patch or update");
+        }
+        if (request.model().locations() != null
+                && !request.model().locations().stream().allMatch(l -> DtoMapperSimple.isRecordOnlyField(l, "id"))) {
+            throw new BadRequestException("locations no expected for patch or update");
+
+        }
+    }
+
+    protected DependentCommand<TimedValue<List<String>>, Map<String, TimedValue<String>>> getContextDeleteDatastreamProvider(
+            ExtraUseCaseRequest<?> request, AbstractSensinactCommand<TimedValue<List<String>>> datastreamIdCommand) {
+
+        return new DependentCommand<>(datastreamIdCommand) {
+
+            @Override
+            protected Promise<Map<String, TimedValue<String>>> call(Promise<TimedValue<List<String>>> parentResult,
+                    SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
+
+                try {
+                    List<String> datastreamIds = parentResult.getValue().getValue();
+
+                    List<Promise<Map.Entry<String, TimedValue<String>>>> promises = datastreamIds.stream().map(id -> {
+                        SensinactProvider sp = twin.getProvider(id);
+                        if (sp != null) {
+                            SensinactResource resource = sp.getResource(DtoMapperSimple.SERVICE_DATASTREAM,
+                                    "lastObservation");
+                            if (resource != null) {
+                                return resource.getValue(String.class).map(tv -> Map.entry(id, tv));
+                            }
+                        }
+                        return null;
+                    }).filter(Objects::nonNull).toList();
+
+                    return pf.all(promises).map(entries -> entries.stream()
+                            .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.failed(e);
+                }
+            }
+        };
     }
 
     @Override
@@ -143,29 +262,33 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseDtoDelete<ExpandedTh
             }
 
         };
-        return new DependentCommand<TimedValue<List<String>>, Void>(listDatastreamIds) {
+        DependentCommand<TimedValue<List<String>>, Map<String, TimedValue<String>>> depend = getContextDeleteDatastreamProvider(
+                request, listDatastreamIds);
+        return new DependentCommand<Map<String, TimedValue<String>>, List<Void>>(depend) {
             // delete datastreams and thing
             @Override
-            protected Promise<Void> call(Promise<TimedValue<List<String>>> parentResult, SensinactDigitalTwin twin,
-                    SensinactModelManager modelMgr, PromiseFactory pf) {
+            protected Promise<List<Void>> call(Promise<Map<String, TimedValue<String>>> parentResult,
+                    SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
                 SensinactProvider sp = twin.getProvider(request.id());
-                if (sp != null) {
-                    sp.delete();
-                }
 
-                List<String> datastreamIds;
                 try {
-                    datastreamIds = parentResult.getValue().getValue();
-
-                    if (datastreamIds != null) {
-                        datastreamIds.forEach(id -> {
-                            SensinactProvider spDatastream = twin.getProvider(id);
-                            if (sp != null) {
-                                spDatastream.delete();
-                            }
-                        });
+                    Map<String, TimedValue<String>> map = parentResult.getValue();
+                    List<Promise<Void>> list = map.keySet().stream().flatMap((String id) -> {
+                        Instant stamp = map.get(id).getTimestamp();
+                        ExpandedObservation obs = parseObservation(request.mapper(), map.get(id).getValue());
+                        if (obs != null) {
+                            ExpandedObservation obsDeleted = getObservationDeleted(obs);
+                            cacheObs.addDto(obsDeleted.id() + "~" + DtoMapperSimple.stampToId(stamp), obsDeleted);
+                        }
+                        return removeDatastream(twin, id).stream();
+                    }).toList();
+                    if (sp != null) {
+                        sp.delete();
+                        if (isHistoryMemory())
+                            cacheHl.removeDtoContain(request.id());
                     }
-                    return pf.resolved(null);
+                    return pf.all(list);
+
                 } catch (InvocationTargetException | InterruptedException e) {
                     return pf.failed(e);
                 }

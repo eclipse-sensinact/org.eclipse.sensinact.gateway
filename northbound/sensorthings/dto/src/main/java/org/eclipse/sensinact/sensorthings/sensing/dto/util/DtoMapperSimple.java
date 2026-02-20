@@ -66,6 +66,10 @@ public class DtoMapperSimple {
 
     public static String SERVICE_LOCATON = "location";
 
+    public static String stampToId(Instant stamp) {
+        return Long.toString(stamp.toEpochMilli(), 16);
+    }
+
     public static void checkRequireField(Sensor dto) {
         if (dto == null) {
             throw new RuntimeException("sensor not found in  Sensor");
@@ -83,6 +87,20 @@ public class DtoMapperSimple {
         return eNS_URI.equals(provider.getModelPackageUri());
     }
 
+    public static void checkConsistencyObservedProperty(String definition) {
+        // List of allowed or expected definitions for ObservedProperty
+        List<String> allowedDefinitions = List.of(
+                "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Temperature",
+                "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/LuminousFlux",
+                "http://www.qudt.org/qudt/owl/1.0.0/quantity/Instances.html/Humidity"
+        // add other definitions your implementation should support
+        );
+
+        if (!allowedDefinitions.contains(definition)) {
+            throw new RuntimeException("ObservedProperty definition not recognized: " + definition);
+        }
+    }
+
     public static void checkRequireField(ObservedProperty dto) {
         if (dto == null) {
             throw new RuntimeException("ObservedProperty not found in  ObservedProperty");
@@ -93,7 +111,7 @@ public class DtoMapperSimple {
         if (dto.definition() == null) {
             throw new RuntimeException("definition not found in  ObservedProperty");
         }
-
+        // checkConsistencyObservedProperty(dto.definition());
     }
 
     public static void checkRequireField(ExpandedObservation dto) {
@@ -180,6 +198,7 @@ public class DtoMapperSimple {
         if (datastream.observationType() == null) {
             throw new RuntimeException("observationType not found in  Datastream");
         }
+        checkRequireField(datastream.unitOfMeasurement());
 
     }
 
@@ -191,6 +210,7 @@ public class DtoMapperSimple {
         if (datastream.unitOfMeasurement() == null) {
             throw new RuntimeException("unit Of Measure not found in  Datastream");
         }
+        checkRequireField(datastream.unitOfMeasurement());
         if (datastream.observationType() == null) {
             throw new RuntimeException("observationType not found in  Datastream");
         }
@@ -381,17 +401,24 @@ public class DtoMapperSimple {
         final Instant time = t.map(TimedValue::getTimestamp).orElse(Instant.EPOCH);
         String id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
 
+        return toHistoricalLocation(id, time, selfLink, locationsLink, thingLink);
+
+    }
+
+    public static HistoricalLocation toHistoricalLocation(String id, Instant time, String selfLink,
+            String locationsLink, String thingLink) {
+
         return new HistoricalLocation(selfLink, id, time, locationsLink, thingLink);
 
     }
 
-    public static FeatureOfInterest toFeatureOfInterest(ProviderSnapshot provider, ExpandedObservation lastObservation,
-            String foiId, String selfLink, String observationLink) {
+    public static FeatureOfInterest toFeatureOfInterest(ExpandedObservation lastObservation, String foiId,
+            String selfLink, String observationLink) {
 
         FeatureOfInterest foiReaded = lastObservation.featureOfInterest();
 
         FeatureOfInterest foi = new FeatureOfInterest(selfLink, foiId, foiReaded.name(), foiReaded.description(),
-                foiReaded.encodingType(), foiReaded.feature(), observationLink);
+                foiReaded.encodingType(), foiReaded.feature(), foiReaded.properties(), observationLink);
 
         DtoMapperSimple.checkRequireField(foi);
 
@@ -402,10 +429,17 @@ public class DtoMapperSimple {
             String datastreamLink) {
         ServiceSnapshot service = getDatastreamService(provider);
         String datastreamId = provider.getName();
-
         String observedPropertyId = getResourceField(service, "observedPropertyId", String.class);
 
         String id = String.format("%s~%s", datastreamId, observedPropertyId);
+        return toObservedProperty(provider, id, observedPropertyLink, datastreamLink);
+
+    }
+
+    public static ObservedProperty toObservedProperty(ProviderSnapshot provider, String id, String observedPropertyLink,
+            String datastreamLink) {
+        ServiceSnapshot service = getDatastreamService(provider);
+
         String observedPropertyName = getResourceField(service, "observedPropertyName", String.class);
         String observedPropertyDescription = getResourceField(service, "observedPropertyDescription", String.class);
         String observedPropertyDefinition = getResourceField(service, "observedPropertyDefinition", String.class);
@@ -423,8 +457,14 @@ public class DtoMapperSimple {
     public static Sensor toSensor(ProviderSnapshot provider, String sensorLink, String datastreamLink) {
         ServiceSnapshot service = getDatastreamService(provider);
         String sensorId = String.format("%s~%s", provider.getName(),
-
                 getResourceField(service, "sensorId", String.class));
+
+        return toSensor(provider, sensorId, sensorLink, datastreamLink);
+    }
+
+    public static Sensor toSensor(ProviderSnapshot provider, String id, String sensorLink, String datastreamLink) {
+        ServiceSnapshot service = getDatastreamService(provider);
+
         String sensorName = getResourceField(service, "sensorName", String.class);
         String sensorDescription = getResourceField(service, "sensorDescription", String.class);
         String sensorEncodingType = getResourceField(service, "sensorEncodingType", String.class);
@@ -433,8 +473,8 @@ public class DtoMapperSimple {
         @SuppressWarnings("unchecked")
         Map<String, Object> sensorProperty = getResourceField(service, "sensorProperty", Map.class);
 
-        Sensor sensor = new Sensor(sensorLink, sensorId, sensorName, sensorDescription, sensorEncodingType,
-                sensorMetadata, sensorProperty, datastreamLink);
+        Sensor sensor = new Sensor(sensorLink, id, sensorName, sensorDescription, sensorEncodingType, sensorMetadata,
+                sensorProperty, datastreamLink);
 
         DtoMapperSimple.checkRequireField(sensor);
 
@@ -455,12 +495,6 @@ public class DtoMapperSimple {
         DtoMapperSimple.checkRequireField(thing);
 
         return thing;
-    }
-
-    public static Observation toObservation(ObjectMapper mapper, ResourceSnapshot resource, String selfLink,
-            String datastreamLink, String featureOfInterestLink) {
-        return toObservation(mapper, resource.getService().getProvider().getName(), null, selfLink, datastreamLink,
-                featureOfInterestLink);
     }
 
     public static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
@@ -527,8 +561,11 @@ public class DtoMapperSimple {
         String description = Objects.requireNonNullElse(
                 getResourceField(getAdminService(provider), DESCRIPTION, String.class), NO_DESCRIPTION);
 
+        @SuppressWarnings("unchecked")
+        Map<String, Object> properties = getResourceField(getLocationService(provider), "properties", Map.class);
+
         Location location = new Location(selfLink, id, name, description, ENCODING_TYPE_VND_GEO_JSON, object,
-                thingsLink, historicalLocationsLink);
+                properties, thingsLink, historicalLocationsLink);
         DtoMapperSimple.checkRequireField(location);
 
         return location;
@@ -543,25 +580,34 @@ public class DtoMapperSimple {
         if (val != null && val instanceof String) {
             ExpandedObservation obs = parseExpandObservation(mapper, val);
 
-            Observation observation = new Observation(selfLink, id, obs.phenomenonTime(), obs.resultTime(),
-                    obs.result(), obs.resultQuality(), obs.validTime(), obs.parameters(), datastreamLink,
-                    featureOfInterestLink);
-            DtoMapperSimple.checkRequireField(observation);
-            DtoMapperSimple.checkRequireLink(obs.featureOfInterest());
-
-            return observation;
+            return toObservation(id, selfLink, datastreamLink, featureOfInterestLink, obs);
 
         }
         return null;
     }
 
+    public static Observation toObservation(String id, String selfLink, String datastreamLink,
+            String featureOfInterestLink, ExpandedObservation obs) {
+        Observation observation = new Observation(selfLink, id, obs.phenomenonTime(), obs.resultTime(), obs.result(),
+                obs.resultQuality(), obs.validTime(), obs.parameters(), datastreamLink, featureOfInterestLink);
+        DtoMapperSimple.checkRequireField(observation);
+        DtoMapperSimple.checkRequireLink(obs.featureOfInterest());
+
+        return observation;
+    }
+
     public static ExpandedObservation getObservationFromService(ObjectMapper mapper, ServiceSnapshot service) {
         String obsStr = getResourceField(service, "lastObservation", String.class);
-        return parseExpandObservation(mapper, obsStr);
+        if (obsStr != null)
+            return parseExpandObservation(mapper, obsStr);
+        return null;
     }
 
     public static ExpandedObservation parseExpandObservation(ObjectMapper mapper, Object val) {
         ExpandedObservation obs;
+        if (val == null) {
+            return null;
+        }
         try {
             obs = mapper.readValue((String) val, ExpandedObservation.class);
         } catch (JsonProcessingException e) {
@@ -591,6 +637,7 @@ public class DtoMapperSimple {
         @SuppressWarnings("unchecked")
         Map<String, Object> metadata = getResourceField(getDatastreamService(provider), "properties", Map.class);
         UnitOfMeasurement unit = toUnitOfMeasure(provider);
+        String observationType = getResourceField(getDatastreamService(provider), "observationType", String.class);
 
         GeoJsonObject observedAreaRead = getResourceField(getAdminService(provider), LOCATION, GeoJsonObject.class);
         Polygon observedArea = getObservedArea(observedAreaRead);
@@ -600,9 +647,8 @@ public class DtoMapperSimple {
         ObservedProperty observedProperty = toObservedProperty(provider, null, null);
         UnitOfMeasurement unitOfMeasurement = toUnitOfMeasure(provider);
 
-        Datastream datastream = new Datastream(selfLink, provider.getName(), name, description,
-                "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
-                metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
+        Datastream datastream = new Datastream(selfLink, provider.getName(), name, description, observationType, unit,
+                observedArea, null, null, metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
 
         DtoMapperSimple.checkRequireField(datastream);
         DtoMapperSimple.checkRequireLink(unit, sensor, observedProperty, unitOfMeasurement, thingId);

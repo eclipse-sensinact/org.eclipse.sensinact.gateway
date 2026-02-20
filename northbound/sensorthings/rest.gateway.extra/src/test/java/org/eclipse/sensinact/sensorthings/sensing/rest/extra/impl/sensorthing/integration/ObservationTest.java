@@ -86,7 +86,7 @@ public class ObservationTest extends AbstractIntegrationTest {
         String idObservation = getIdFromJson(json);
         UtilsAssert.assertObservation(observsation, json);
         // when
-        getJsonResponseFromDelete(String.format("Observations(%s)", idObservation), 204);
+        getJsonResponseFromDelete(String.format("Observations(%s)", idObservation), 200);
         // then
         ServiceSnapshot service = serviceUseCase.read(session, datastreamId, "datastream");
         String lastObs = DtoMapperSimple.getResourceField(service, "lastObservation", String.class);
