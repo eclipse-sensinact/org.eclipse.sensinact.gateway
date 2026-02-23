@@ -66,24 +66,37 @@ public class WeatherStation {
   @Data
   public Double humidity;
 
+  @Service("weather")
+  @Data
+  public List<Double> windGusts;
+
 }
 ```
 
-This DTO defines a model called `WeatherStation`. It supplies the `Provider` id in the `provider` field, and defines two services `power` and `weather`. The `power` service has a `status` resource of type `Integer`, and the `weather` service has resources called `temperature` and `humidity` both of type `Double`.
+This DTO defines a model called `WeatherStation`. It supplies the `Provider` id in the `provider` field, and defines two services `power` and `weather`. The `power` service has a `status` resource of type `Integer`. The `weather` service has resources called `temperature` and `humidity`, both of type `Double`, and a resource called `windGusts` which is of type `List<Double>`
 
-In this approach the sensiNact core will automatically create a model for `provider1` if it doesn't already exist. The model will automatically be extended with a service called `service` and a resource called `resource` if needed, and then the resource will be set with a value of 42.
-
-In fact the process becomes more obvious if the `model` field of the `GenericDto` is set. This indicates the model that should be used for the provider and allows different providers to share the same model.
-
-```{important}
-All automatically created resources are set to be `UPDATABLE`, meaning that they can be updated by pushing data updates, but not using a `SET` operation.
-```
+In this approach the sensiNact core will use the annotated DTO to automatically create a model for `WeatherStation` if it doesn't already exist. The resources will all be typed according to the type of the corresponding field in the DTO. For `status`, `temperature` and `humidity` this is simply the type of the field, however for `windGusts` the generic type of the list (`Double`) is used and the resource is defined as [*multiple*](#multiple-resources).
 
 #### Modifying the model
 
 When using a code first approach the model can always be updated and dynamically expanded. This means that the sending a new custom dto will extend the model to include any new services or resources as needed.
 
 A significant advantage of the code-first model is that it is not as easy to make mistakes when pushing updates, as the schema for the resources is defined in a class. This reduces the likelihood that the model for the providers will be incorrectly extended.
+
+### Multiple resources
+
+A multiple resource is a resource that can have multiple values simultaneously. The type of the resource is defined by the type of the values that it contain, meaning that its type is *not* a list or array, but a scalar just like any other resource. The multiplicity of a resource can be introspected, however calling code can treat all resources in the same way.
+
+| Requested Type | Resource Type | Result |
+|----------------|---------------|--------|
+| Single | Single | Single value or `null`|
+| Multiple | Single | List containing Single value, or an empty List |
+| Single | Multiple | First value in the resource, or `null` |
+| Multiple | Multiple | A List of all the values |
+
+#### Updating multiple resources
+
+When a multiple resource is updated all of its values are updated simultaneously. There is no addition or merging, the updated value(s) are used to entirely replace the existing value(s). This means that the result after an update is independent of the pre-existing value, just as it is for any other resource.
 
 ### The explicit approach
 

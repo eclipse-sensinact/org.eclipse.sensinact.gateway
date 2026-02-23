@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -27,6 +28,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
@@ -123,7 +125,6 @@ public class LdapParserTest {
                         return this;
                     }
 
-                    @SuppressWarnings("unchecked")
                     @Override
                     public ResourceSnapshot getResource(String name) {
                         return getRc();
@@ -158,16 +159,20 @@ public class LdapParserTest {
                                 return "model1";
                             }
 
-                            @SuppressWarnings("unchecked")
                             @Override
                             public ServiceSnapshot getService(String name) {
                                 return getSvc();
                             }
 
-                            @SuppressWarnings("unchecked")
                             @Override
                             public ResourceSnapshot getResource(String service, String resource) {
                                 return getRc();
+                            }
+
+                            @Override
+                            public List<LinkedProviderSnapshot> getLinkedProviders() {
+                                // No linked provider support
+                                return List.of();
                             }
                         };
                     }
@@ -182,6 +187,17 @@ public class LdapParserTest {
             @Override
             public ValueType getValueType() {
                 return ValueType.UPDATABLE;
+            }
+
+            @Override
+            public List<Entry<String, Class<?>>> getArguments() {
+                // Not an Action resource
+                return null;
+            }
+
+            @Override
+            public boolean isMultiple() {
+                return value instanceof List;
             }
         };
     }

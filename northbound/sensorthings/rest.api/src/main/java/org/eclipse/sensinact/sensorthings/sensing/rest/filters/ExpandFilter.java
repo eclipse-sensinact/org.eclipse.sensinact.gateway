@@ -16,7 +16,6 @@ import static jakarta.ws.rs.Priorities.USER;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants.EXPAND_SETTINGS_STRING;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -50,7 +49,7 @@ public class ExpandFilter implements ContainerRequestFilter, ContainerResponseFi
 
         ExpansionSettingsImpl es = (ExpansionSettingsImpl) requestContext.getProperty(EXPAND_SETTINGS_STRING);
 
-        if(es == null || es.isEmpty()) {
+        if (es == null || es.isEmpty()) {
             return;
         }
 
@@ -62,8 +61,8 @@ public class ExpandFilter implements ContainerRequestFilter, ContainerResponseFi
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         List<String> fields = requestContext.getUriInfo().getQueryParameters().getOrDefault("$expand", List.of());
-        requestContext.setProperty(EXPAND_SETTINGS_STRING, new ExpansionSettingsImpl(
-                fields.stream().flatMap(s -> Arrays.stream(s.split(",")))));
+        requestContext.setProperty(EXPAND_SETTINGS_STRING,
+                new ExpansionSettingsImpl(fields.stream().flatMap(s -> ExpansionSettingsImpl.split(s))));
     }
 
 }

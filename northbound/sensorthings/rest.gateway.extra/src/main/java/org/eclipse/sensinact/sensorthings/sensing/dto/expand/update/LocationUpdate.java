@@ -1,0 +1,54 @@
+/*********************************************************************
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
+package org.eclipse.sensinact.sensorthings.sensing.dto.expand.update;
+
+import static org.eclipse.sensinact.core.annotation.dto.DuplicateAction.UPDATE_IF_DIFFERENT;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.sensinact.core.annotation.dto.Data;
+import org.eclipse.sensinact.core.annotation.dto.Model;
+import org.eclipse.sensinact.core.annotation.dto.Provider;
+import org.eclipse.sensinact.core.annotation.dto.Service;
+import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION;
+
+import java.util.Map;
+
+/**
+ * Update record for the Location of a SensorThing / Device
+ */
+@Service("admin")
+public record LocationUpdate(@Model EClass model, @Provider String providerId,
+        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object id,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String friendlyName,
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) String description,
+        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String encodingType,
+        @Service("location") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Map<String, Object> properties,
+
+        @Data(onDuplicate = UPDATE_IF_DIFFERENT) GeoJsonObject location) implements SensorThingsUpdate {
+
+    public LocationUpdate {
+        if (model == null) {
+            model = SENSOR_THING_LOCATION;
+        }
+        if (model != SENSOR_THING_LOCATION) {
+            throw new IllegalArgumentException("The model for the provider must be " + SENSOR_THING_LOCATION.getName());
+        }
+
+    }
+
+    public LocationUpdate(String providerId, Object id, String name, String description, String encodingType,
+            Map<String, Object> properties, GeoJsonObject location) {
+        this(SENSOR_THING_LOCATION, providerId, id, name, description, encodingType, properties, location);
+    }
+}

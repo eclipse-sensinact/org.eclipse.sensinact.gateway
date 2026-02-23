@@ -19,16 +19,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ResultList<T extends Self> {
-
-    @JsonInclude(NON_NULL)
-    @JsonProperty("@iot.count")
-    public Integer count;
-
-    @JsonInclude(NON_NULL)
-    @JsonProperty("@iot.nextLink")
-    public String nextLink;
-
-    public List<T> value;
-
+public record ResultList<T extends Self>(@JsonInclude(NON_NULL) @JsonProperty("@iot.count") Integer count,
+        @JsonInclude(NON_NULL) @JsonProperty("@iot.nextLink") String nextLink, List<? extends T> value) {
 }

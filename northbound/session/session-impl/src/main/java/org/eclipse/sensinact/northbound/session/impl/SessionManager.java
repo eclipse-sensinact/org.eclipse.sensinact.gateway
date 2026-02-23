@@ -17,6 +17,8 @@ import static java.util.stream.Collectors.toList;
 import static org.osgi.service.component.annotations.ReferenceCardinality.OPTIONAL;
 import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,7 +26,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.authorization.Authorizer;
@@ -35,6 +41,7 @@ import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionActivityChecker;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -42,41 +49,121 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.typedevent.TypedEventHandler;
 import org.osgi.service.typedevent.propertytypes.EventTopics;
+import org.osgi.util.promise.PromiseFactory;
+import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(configurationPid = "sensinact.session.manager", property = IMetricsGauge.NAME + "=sensinact.sessions")
+@Component(configurationPid = SessionManager.CONFIGURATION_PID, property = IMetricsGauge.NAME + "=sensinact.sessions")
 @EventTopics({ "LIFECYCLE/*", "METADATA/*", "DATA/*", "ACTION/*" })
 public class SessionManager
         implements SensiNactSessionManager, TypedEventHandler<ResourceNotification>, IMetricsGauge {
 
+    /**
+     * Session Manager OSGi Configuration Admin PID
+     */
+    public static final String CONFIGURATION_PID = "sensinact.session.manager";
+
     private static final Logger LOG = LoggerFactory.getLogger(SessionManager.class);
 
+    /**
+     * Gateway Thread
+     */
     @Reference
     GatewayThread thread;
 
+    /**
+     * Lock object for synchronizing access to the session maps
+     */
     private final Object lock = new Object();
 
+    /**
+     * Maps session ID to its session implementation
+     */
     private final Map<String, SensiNactSessionImpl> sessions = new HashMap<>();
 
+    /**
+     * Maps user ID to a set of session IDs
+     */
     private final Map<String, Set<String>> sessionsByUser = new HashMap<>();
 
+    /**
+     * Maps user ID to its default session ID
+     */
     private final Map<String, String> userDefaultSessionIds = new HashMap<>();
 
+    /**
+     * Authorization Engine
+     */
     private AuthorizationEngine authEngine;
 
+    /**
+     * Component activation flag
+     */
     private boolean active;
 
+    /**
+     * Component configuration
+     */
     private Config config;
 
+    /**
+     * Scheduler for session expiration checks
+     */
+    private ScheduledExecutorService activityCheckScheduler;
+
+    /**
+     * Promise factory for scheduling session expiration checks
+     */
+    private PromiseFactory promiseFactory;
+
+    /**
+     * Session lifespan extension upon positive activity check
+     */
+    private Duration sessionActivityExtension;
+
+    /**
+     * Threshold to trigger to the activity check
+     */
+    private Duration sessionActivityThreshold;
+
+    /**
+     * Definition of the component configuration properties
+     */
     public @interface Config {
+        /**
+         * Session expiry time in seconds (defaults to 10 minutes)
+         */
         int expiry() default 600;
+
+        /**
+         * Interval in seconds between two activity checks (defaults to 60 seconds)
+         */
+        int activity_check_interval() default 60;
+
+        /**
+         * Minimal interval in seconds between session expiration and activity check
+         * (defaults to 65 seconds).
+         * The activity check will not be scheduled if the expiry is greater than this
+         * threshold.
+         */
+        int activity_check_threshold() default 65;
+
+        /**
+         * Session lifespan extension in seconds upon positive activity check (defaults
+         * to expiry time)
+         */
+        int activity_check_extension() default -1;
+
+        /**
+         * Default authorization policy (defaults to {@link DefaultAuthPolicy#DENY_ALL})
+         */
         DefaultAuthPolicy auth_policy() default DefaultAuthPolicy.DENY_ALL;
     }
 
     @Reference(cardinality = OPTIONAL, policy = DYNAMIC)
     void setAuthorization(AuthorizationEngine auth) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Setting an external Authorization Engine. Existing sessions will be invalidated");
         }
         List<SensiNactSessionImpl> toInvalidate;
@@ -87,19 +174,19 @@ public class SessionManager
             sessionsByUser.clear();
             userDefaultSessionIds.clear();
         }
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("{} sessions will be invalidated", toInvalidate.size());
         }
         toInvalidate.forEach(SensiNactSession::expire);
     }
 
     void unsetAuthorization(AuthorizationEngine auth) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Removing an external Authorization Engine. Existing sessions will be invalidated");
         }
         List<SensiNactSessionImpl> toInvalidate;
         synchronized (lock) {
-            if(authEngine == auth) {
+            if (authEngine == auth) {
                 authEngine = null;
                 toInvalidate = new ArrayList<>(sessions.values());
                 sessions.clear();
@@ -109,7 +196,7 @@ public class SessionManager
                 toInvalidate = List.of();
             }
         }
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("{} sessions will be invalidated", toInvalidate.size());
         }
         toInvalidate.forEach(SensiNactSession::expire);
@@ -117,10 +204,50 @@ public class SessionManager
 
     @Activate
     void start(Config config) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Starting the Session Manager with session lifetime {} and default authorization policy {}",
-                    config.expiry(), config.auth_policy());
+        final int expiry = config.expiry();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Starting the Session Manager with session lifetime {}s and default authorization policy {}",
+                    expiry, config.auth_policy());
         }
+
+        // Start the scheduler for session expiration checks
+        sessionActivityExtension = null;
+        sessionActivityThreshold = null;
+        final long activityCheckPeriod = config.activity_check_interval();
+        if (expiry <= 0 || activityCheckPeriod <= 0) {
+            LOG.debug("Activity checker disabled");
+        } else if (activityCheckPeriod > expiry - 1) {
+            LOG.warn("Activity check interval too long ({}) compared to expiry ({}). Disabling it.",
+                    activityCheckPeriod, expiry);
+        } else {
+            // Initialize the activity checker
+            sessionActivityThreshold = Duration.ofSeconds(
+                    Math.max(config.activity_check_threshold(), activityCheckPeriod + 1));
+
+            long activityExtension = config.activity_check_extension();
+            if (activityExtension <= 0) {
+                LOG.debug("Using expiry time {}s as session activity extension", expiry);
+                activityExtension = expiry;
+            } else if (activityExtension < activityCheckPeriod) {
+                LOG.warn(
+                        "Session activity extension {}s is lower than activity check interval {}s. Using the latter as extension",
+                        activityExtension, activityCheckPeriod);
+                activityExtension = activityCheckPeriod;
+            }
+
+            sessionActivityExtension = Duration.ofSeconds(activityExtension);
+            LOG.debug(
+                    "Setting up activity check to run every {} seconds. Check threshold set to {}. Session extension set to {}",
+                    activityCheckPeriod, sessionActivityThreshold, sessionActivityExtension);
+
+            // Schedule the periodic activity check task
+            this.activityCheckScheduler = Executors.newScheduledThreadPool(4,
+                    r -> new Thread(r, "sensinact-session-activity-checker"));
+            this.promiseFactory = new PromiseFactory(this.activityCheckScheduler);
+            this.activityCheckScheduler.scheduleAtFixedRate(this::checkSessionsLiveness, activityCheckPeriod,
+                    activityCheckPeriod, TimeUnit.SECONDS);
+        }
+
         synchronized (lock) {
             active = true;
             this.config = config;
@@ -129,9 +256,16 @@ public class SessionManager
 
     @Deactivate
     void stop() {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Shutting down the session manager");
         }
+
+        // Stop the scheduler for session expiration checks
+        if (activityCheckScheduler != null) {
+            activityCheckScheduler.shutdownNow();
+            activityCheckScheduler = null;
+        }
+
         List<SensiNactSessionImpl> toInvalidate;
         synchronized (lock) {
             active = false;
@@ -139,6 +273,9 @@ public class SessionManager
             sessions.clear();
             sessionsByUser.clear();
             userDefaultSessionIds.clear();
+            sessionActivityExtension = null;
+            sessionActivityThreshold = null;
+            promiseFactory = null;
         }
         toInvalidate.forEach(SensiNactSession::expire);
     }
@@ -154,9 +291,83 @@ public class SessionManager
      * Only call when synchronized on lock
      */
     private void doCheck() {
-        if(!active) {
+        if (!active) {
             throw new IllegalStateException("The session manager is closed");
         }
+    }
+
+    /**
+     * Checks the liveness of all sessions with an activity checker
+     */
+    private void checkSessionsLiveness() {
+        final Duration extension = this.sessionActivityExtension;
+        if (extension == null) {
+            // Nothing to do
+            return;
+        }
+
+        final PromiseFactory promiseFactory;
+        final List<SensiNactSessionImpl> sessionsToCheck = new ArrayList<>();
+        synchronized (lock) {
+            doCheck();
+
+            try {
+                final Instant checkTime = Instant.now();
+
+                for (SensiNactSessionImpl session : List.copyOf(sessions.values())) {
+                    // Expiration checks update the sessions maps (removing expired sessions),
+                    // hence the use of an intermediate copy instead of a view
+                    Instant expiry = session.getExpiry();
+                    if (expiry != null
+                            && session.hasActivityChecker()
+                            && expiry.minus(sessionActivityThreshold).isBefore(checkTime)) {
+                        sessionsToCheck.add(session);
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Error collecting sessions to check", e);
+                return;
+            }
+
+            promiseFactory = this.promiseFactory;
+        }
+
+        if (sessionsToCheck.isEmpty() || promiseFactory == null) {
+            return;
+        }
+
+        sessionsToCheck
+                .forEach(s -> Optional.ofNullable(s.checkActivity(promiseFactory))
+                        .map(p -> p.recover(f -> {
+                            LOG.error("Failed Promise while checking activity of session {}", s.getSessionId(),
+                                    f.getFailure());
+                            return Boolean.FALSE;
+                        }))
+                        .orElse(Promises.resolved(false))
+                        .map(
+                                isActive -> {
+                                    if (!active) {
+                                        // Session manager is stopped, do nothing
+                                        return null;
+                                    }
+
+                                    if (s.isExpired()) {
+                                        // Session already expired, do "nothing" (the call might have triggered the
+                                        // expiration call chain)
+                                        return null;
+                                    }
+
+                                    if (isActive) {
+                                        try {
+                                            // Session is active and not expired, extend it
+                                            s.extend(extension);
+                                        } catch (Exception e) {
+                                            // Extension can fail if we were nanoseconds away from expiration
+                                            LOG.error("Error extending session {} expiry", s.getSessionId(), e);
+                                        }
+                                    }
+                                    return null;
+                                }));
     }
 
     @Override
@@ -166,7 +377,7 @@ public class SessionManager
         String userId = user.getUserId();
         String sessionId;
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Getting the default session for user {}", userId);
         }
 
@@ -182,7 +393,7 @@ public class SessionManager
         // Outside of lock to check/create the session
         if (session == null) {
             if (sessionId != null) {
-                if(LOG.isDebugEnabled()) {
+                if (LOG.isDebugEnabled()) {
                     LOG.debug("No default session {} for user {}. Creating a new session", sessionId, userId);
                 }
                 removeSession(userId, sessionId);
@@ -196,8 +407,9 @@ public class SessionManager
             }
 
             if (sessionId != null) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Another default session {} was created for user {}. That session will be used instead", sessionId, userId);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Another default session {} was created for user {}. That session will be used instead",
+                            sessionId, userId);
                 }
                 // Someone beat us to the punch
                 removeSession(userId, session.getSessionId());
@@ -205,33 +417,59 @@ public class SessionManager
                 return getDefaultSession(user);
             }
         } else if (session.isExpired()) {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("The default session {} for user {} has expired. Creating a new session", sessionId, userId);
             }
             removeSession(userId, sessionId);
             session = getDefaultSession(user);
         }
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Located default session {} for user {}", sessionId, userId);
         }
         return session;
     }
 
     /**
-     * @param userToken
-     * @param sessionId
+     * Removes and expires the session with the given ID for the given user ID
+     *
+     * @param userId    User ID
+     * @param sessionId Session ID
      */
     private void removeSession(String userId, String sessionId) {
-        if(LOG.isDebugEnabled()) {
+        removeSession(userId, sessionId, true);
+    }
+
+    /**
+     * Removes the session with the given ID for the given user ID. Expires it if
+     * requested.
+     *
+     * @param userId        User ID
+     * @param sessionId     Session ID
+     * @param expireSession Flag to expire the session upon removal
+     */
+    private void removeSession(String userId, String sessionId, boolean expireSession) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Clearing session {} for user {}", sessionId, userId);
         }
+
         synchronized (lock) {
-            doCheck();
+            if (!active) {
+                // Silent check as this method can be called by session upon component
+                // invalidation
+                return;
+            }
+
+            // Remove references to the session
             userDefaultSessionIds.remove(userId, sessionId);
             sessionsByUser.computeIfPresent(userId,
                     (k, v) -> v.stream().filter(s -> !s.equals(sessionId)).collect(toCollection(LinkedHashSet::new)));
-            sessions.remove(sessionId);
+            SensiNactSession session = sessions.remove(sessionId);
+
+            if (session != null && expireSession) {
+                // Expire the session
+                session.expire();
+            }
         }
     }
 
@@ -241,7 +479,7 @@ public class SessionManager
         SensiNactSessionImpl session = null;
         String userId = user.getUserId();
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Getting session {} for user {}", sessionId, userId);
         }
 
@@ -253,14 +491,14 @@ public class SessionManager
         }
 
         if (session != null && session.isExpired()) {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Session {} for user {} has expired", sessionId, userId);
             }
             removeSession(userId, sessionId);
             session = null;
         }
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Returning session {} for user {}", session == null ? null : sessionId, userId);
         }
         return session;
@@ -271,7 +509,7 @@ public class SessionManager
         Objects.requireNonNull(user);
         String userId = user.getUserId();
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Retrieving active session ids for user {}", userId);
         }
 
@@ -295,7 +533,7 @@ public class SessionManager
             }
         }
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("User {} has sessions {}", userId, ids);
         }
 
@@ -303,19 +541,21 @@ public class SessionManager
     }
 
     @Override
-    public SensiNactSession createNewSession(UserInfo user) {
+    public SensiNactSession createNewSession(UserInfo user, SensiNactSessionActivityChecker activityChecker) {
         Objects.requireNonNull(user);
 
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Creating a new session for user {}", user.getUserId());
         }
 
         final AuthorizationEngine auth;
         final DefaultAuthPolicy policy;
+        final Duration expiry;
         synchronized (lock) {
             doCheck();
             auth = authEngine;
             policy = config.auth_policy();
+            expiry = Duration.ofSeconds(config.expiry());
         }
 
         final AuthorizationEngine defaultAuthEngine = new DefaultSessionAuthorizationEngine(policy);
@@ -342,12 +582,16 @@ public class SessionManager
             }
         }
 
-        final SensiNactSessionImpl session = new SensiNactSessionImpl(user, preAuthorizer, authorizer, thread);
+        final SensiNactSessionImpl session = new SensiNactSessionImpl(user, preAuthorizer, authorizer, thread, expiry,
+                activityChecker);
         String sessionId = session.getSessionId();
+
+        // Add an expiration listener to clean up session when explicitly expired
+        session.addExpirationListener(this::handleExplicitSessionExpiration);
 
         boolean authChanged;
         synchronized (lock) {
-            if(auth == authEngine) {
+            if (auth == authEngine) {
                 authChanged = false;
                 sessionsByUser.merge(user.getUserId(), Set.of(sessionId),
                         (a, b) -> Stream.concat(b.stream(), a.stream()).collect(toCollection(LinkedHashSet::new)));
@@ -357,22 +601,31 @@ public class SessionManager
             }
         }
 
-        if(authChanged) {
-            if(LOG.isDebugEnabled()) {
+        if (authChanged) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("The Authorization Engine changed. Recreating the new session");
             }
-            return createNewSession(user);
+            return createNewSession(user, activityChecker);
         } else {
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Created a new session {} for user {}", sessionId, user.getUserId());
             }
             return session;
         }
     }
 
+    /**
+     * Removes the session from the manager
+     *
+     * @param session Explicitly closed session
+     */
+    private void handleExplicitSessionExpiration(final SensiNactSession session) {
+        removeSession(session.getUserInfo().getUserId(), session.getSessionId(), false);
+    }
+
     @Override
     public void notify(String topic, ResourceNotification event) {
-        if(LOG.isDebugEnabled()) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("Session Manager received a notification on topic {}", topic);
         }
         List<SensiNactSessionImpl> sessions;
@@ -384,7 +637,7 @@ public class SessionManager
                 try {
                     session.notify(topic, event);
                 } catch (Exception e) {
-                    LOG.error("Error notifiying session {} on topic {}", session.getSessionId(), topic);
+                    LOG.error("Error notifying session {} on topic {}", session.getSessionId(), topic);
                 }
             } else {
                 removeSession(session.getUserInfo().getUserId(), session.getSessionId());
@@ -408,7 +661,7 @@ public class SessionManager
     }
 
     @Override
-    public SensiNactSession createNewAnonymousSession() {
-        return createNewSession(UserInfo.ANONYMOUS);
+    public SensiNactSession createNewAnonymousSession(SensiNactSessionActivityChecker activityChecker) {
+        return createNewSession(UserInfo.ANONYMOUS, activityChecker);
     }
 }

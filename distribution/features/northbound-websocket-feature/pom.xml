@@ -7,9 +7,9 @@
   </parent>
 
   <artifactId>northbound-websocket-feature</artifactId>
-  <name>Eclipse sensiNact Northbound WebSocket API Feature</name>
-  <description>This project contains a feature providing a WebSocket API for sensiNact</description>
   <packaging>pom</packaging>
+  <name>SensiNact Distribution :: Features :: Northbound WebSocket</name>
+  <description>This project contains a feature providing a WebSocket API for sensiNact</description>
 
   <properties>
     <rest.version>${revision}${changelist}</rest.version>

@@ -35,7 +35,7 @@ import io.jsonwebtoken.JwsHeader;
 public class KeyResolverTest {
 
     @Mock
-    JwsHeader<?> header;
+    JwsHeader header;
 
     @ParameterizedTest
     @ValueSource(strings = { "example-key.json", "example-key2.json" })
@@ -53,7 +53,7 @@ public class KeyResolverTest {
             Mockito.when(header.getKeyId()).thenReturn(keyInfo.keyId);
             Mockito.when(header.getAlgorithm()).thenReturn(keyInfo.algorithm);
 
-            Key key = keyResolver.resolveSigningKey(header, "");
+            Key key = keyResolver.locate(header);
 
             assertNotNull(key);
             assertEquals(keyInfo.type, key.getAlgorithm());

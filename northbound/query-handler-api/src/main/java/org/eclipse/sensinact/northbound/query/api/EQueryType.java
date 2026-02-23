@@ -44,6 +44,11 @@ public enum EQueryType {
     GET_SNAPSHOT,
 
     /**
+     * Modify a provider link
+     */
+    LINK,
+
+    /**
      * Acts on a resource (path must describe a unique resource)
      */
     ACT,

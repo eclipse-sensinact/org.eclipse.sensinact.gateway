@@ -18,4 +18,8 @@ public class DataUpdateDto extends AbstractUpdateDto {
 
     public Object data;
 
+    /**
+     * Sets the upper bound for the resource
+     */
+    public int upperBound;
 }

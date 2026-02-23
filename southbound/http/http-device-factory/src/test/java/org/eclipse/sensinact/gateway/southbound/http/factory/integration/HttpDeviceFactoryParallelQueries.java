@@ -52,7 +52,10 @@ import org.osgi.test.common.annotation.config.WithConfiguration;
 /**
  * Tests the HTTP device factory behavior with parallel calls
  */
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "name", value = "test-session"),
+})
 public class HttpDeviceFactoryParallelQueries {
 
     static final String TEMPLATE = "Name,Value\n%s,%s\n";
@@ -61,7 +64,7 @@ public class HttpDeviceFactoryParallelQueries {
     static int httpPort1, httpPort2;
     static RequestHandler handler1, handler2;
 
-    @InjectService
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
     SensiNactSessionManager sessionManager;
     SensiNactSession session;
 

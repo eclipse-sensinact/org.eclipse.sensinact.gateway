@@ -67,6 +67,7 @@ public class PathUtils {
 
         case "resulttime":
         case "phenomenontime":
+        case "time":
         case "validtime":
             if (rcValue != null) {
                 return rcValue.getTimestamp();
@@ -93,7 +94,7 @@ public class PathUtils {
         }
     }
 
-    public static Object getProviderLevelField(final ProviderSnapshot provider, final List<ResourceSnapshot> resources,
+    public static Object getProviderLevelField(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources,
             final String path) {
         switch (path) {
         case "name":

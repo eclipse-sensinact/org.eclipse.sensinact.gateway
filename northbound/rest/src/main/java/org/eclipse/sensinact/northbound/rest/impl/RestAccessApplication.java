@@ -59,6 +59,7 @@ public class RestAccessApplication extends Application {
         return Set.of(
             StatusCodeFilter.class,
             SensinactSessionProvider.class,
+            SensinactSessionManagerProvider.class,
             QueryHandlerProvider.class,
             ObjectMapperProvider.class,
             JacksonJsonProvider.class,

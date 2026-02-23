@@ -31,6 +31,7 @@ import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.northbound.session.impl.SessionManager;
 import org.eclipse.sensinact.northbound.session.impl.TestUserInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +46,7 @@ import org.osgi.util.promise.PromiseFactory;
 /**
  * Tests the get/set behaviour of the Session
  */
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "AUTHENTICATED_ONLY"))
+@WithConfiguration(pid = SessionManager.CONFIGURATION_PID, properties = @Property(key = "auth.policy", value = "AUTHENTICATED_ONLY"))
 public class SensinactSessionTest {
 
     private static final UserInfo ANON = new TestUserInfo("<ANON>", false);

@@ -9,7 +9,7 @@
   <artifactId>rules</artifactId>
   <packaging>pom</packaging>
 
-  <name>Rules-based Southbound Connectors</name>
+  <name>SensiNact Southbound :: Rules</name>
   <description>This reactor contains a core rules layer and connectors that are used for integrating different rules engines</description>
 
   <modules>

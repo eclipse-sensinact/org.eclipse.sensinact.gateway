@@ -45,7 +45,7 @@ import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
-import org.eclipse.sensinact.southbound.sensorthings.model.sensorthings.SensorthingsPackage;
+import org.eclipse.sensinact.sensorthings.models.sensorthings.SensorthingsPackage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -59,7 +59,10 @@ import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.ComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "name", value = "test-session"),
+})
 class GatewayProxyIntegrationTest {
 
     private static final String FROST_URI_PROP = "frost.uri";
@@ -70,7 +73,7 @@ class GatewayProxyIntegrationTest {
 
     static HttpClient CLIENT;
 
-    @InjectService
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
     SensiNactSessionManager sessionManager;
     SensiNactSession session;
     BlockingQueue<ResourceDataNotification> queue;
@@ -84,7 +87,7 @@ class GatewayProxyIntegrationTest {
         CLIENT = HttpClient.newHttpClient();
 
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(GatewayProxyIntegrationTest.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader(DockerClientFactory.class.getClassLoader());
         try {
             try {
                 DockerClientFactory.lazyClient().versionCmd().exec();

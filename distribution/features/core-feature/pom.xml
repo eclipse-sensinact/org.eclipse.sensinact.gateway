@@ -18,9 +18,9 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>core-feature</artifactId>
-  <name>Eclipse sensiNact core Feature</name>
-  <description>This project contains a feature representing the core of sensiNact</description>
   <packaging>pom</packaging>
+  <name>SensiNact Distribution :: Features :: Core</name>
+  <description>This project contains a feature representing the core of sensiNact</description>
 
   <dependencies>
     <dependency>

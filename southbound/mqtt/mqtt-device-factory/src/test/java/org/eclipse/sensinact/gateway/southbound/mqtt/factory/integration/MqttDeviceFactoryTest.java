@@ -84,7 +84,10 @@ import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
  * Tests for the MQTT device factory
  */
 
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "name", value = "test-session"),
+})
 @Requirement(namespace = ServiceNamespace.SERVICE_NAMESPACE, filter = "(objectClass=org.eclipse.sensinact.northbound.session.SensiNactSessionManager)")
 public class MqttDeviceFactoryTest {
 
@@ -93,7 +96,7 @@ public class MqttDeviceFactoryTest {
     @InjectService
     GatewayThread thread;
 
-    @InjectService
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
     SensiNactSessionManager sessionManager;
     SensiNactSession session;
 

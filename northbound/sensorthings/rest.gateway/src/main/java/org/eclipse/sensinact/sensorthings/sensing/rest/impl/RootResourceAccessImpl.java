@@ -12,32 +12,11 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static java.util.stream.Collectors.toList;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toDatastream;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toFeatureOfInterest;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toHistoricalLocation;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toLocation;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toObservation;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toObservedProperty;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toSensor;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.toThing;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.eclipse.sensinact.core.snapshot.ICriterion;
-import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
-import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.filters.api.FilterParserException;
-import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
-import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -47,242 +26,178 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
-import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
-import org.eclipse.sensinact.sensorthings.sensing.rest.RootResourceAccess;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedHistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.RootResourceAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.create.RootResourceCreate;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.RootResourceDelegateSensinact;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.RootResourceDelegateSensorthings;
+import jakarta.ws.rs.core.Response;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+public class RootResourceAccessImpl extends AbstractAccess implements RootResourceAccess, RootResourceCreate {
+    private RootResourceDelegateSensinact sensinactHandler;
+    private RootResourceDelegateSensorthings sensorthigHandler;
 
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Application;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.UriInfo;
+    public RootResourceDelegateSensinact getSensinactHandler() {
+        if (sensinactHandler == null)
+            sensinactHandler = new RootResourceDelegateSensinact(uriInfo, providers, application, requestContext);
+        return sensinactHandler;
 
-public class RootResourceAccessImpl extends AbstractAccess implements RootResourceAccess {
-
-    private ISensorthingsFilterParser getFilterParser() {
-        return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
-    private ICriterion parseFilter(final EFilterContext context) throws WebApplicationException {
-        final String filterString = (String) requestContext.getProperty(IFilterConstants.PROP_FILTER_STRING);
-        if (filterString == null || filterString.isBlank()) {
-            return null;
-        }
+    public RootResourceDelegateSensorthings getSensorthingsHandler() {
+        if (sensorthigHandler == null)
+            sensorthigHandler = new RootResourceDelegateSensorthings(uriInfo, providers, application, requestContext);
+        return sensorthigHandler;
 
-        try {
-            return getFilterParser().parseFilter(filterString, context);
-        } catch (FilterParserException e) {
-            throw new BadRequestException("Error parsing filter", e);
-        }
     }
 
-    private List<ProviderSnapshot> listProviders(final EFilterContext context) {
-        final SensiNactSession userSession = getSession();
-        final ICriterion criterion = parseFilter(context);
-        final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers
-                    .stream().filter(p -> rcFilter.test(p, p.getServices().stream()
-                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
-                    .collect(Collectors.toList());
-        } else {
-            return providers;
-        }
+    @Override
+    public Response createDatastream(ExpandedDataStream datastream) {
+
+        return getSensorthingsHandler().createDatastream(datastream);
+
     }
 
-    private List<ResourceSnapshot> listSetResources(EFilterContext context) {
-        return listResources(context).stream().filter(ResourceSnapshot::isSet).collect(Collectors.toList());
+    @Override
+    public Response createFeaturesOfInterest(FeatureOfInterest featuresOfInterest) {
+
+        return getSensorthingsHandler().createFeaturesOfInterest(featuresOfInterest);
+
     }
 
-    private List<ResourceSnapshot> listResources(EFilterContext context) {
+    @Override
+    public Response createLocation(ExpandedLocation location) {
 
-        final SensiNactSession userSession = getSession();
-        final ICriterion criterion = parseFilter(context);
-        List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                    .filter(r -> rcFilter.test(r.getService().getProvider(), List.of(r))).collect(Collectors.toList());
-        } else {
-            return providers.stream().flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                    .collect(Collectors.toList());
-        }
+        return getSensorthingsHandler().createLocation(location);
+
     }
 
-    private static Optional<ResourceSnapshot> getResource(final ProviderSnapshot provider, final String svcName,
-            final String rcName) {
-        return provider.getServices().stream().filter(s -> s.getName().equals(svcName))
-                .flatMap(s -> s.getResources().stream()).filter(r -> r.getName().equals(rcName)).findFirst();
+    @Override
+    public Response createObservedProperties(ObservedProperty observedProperty) {
+
+        return getSensorthingsHandler().createObservedProperties(observedProperty);
+
     }
 
-    private boolean hasResourceSet(final ProviderSnapshot provider, final String svcName, final String rcName) {
-        if (provider == null) {
-            return false;
-        }
+    @Override
+    public Response createObservations(ExpandedObservation observation) {
+        return getSensorthingsHandler().createObservation(observation);
+    }
 
-        Optional<ResourceSnapshot> resource = getResource(provider, svcName, rcName);
-        if (resource.isEmpty()) {
-            return false;
-        }
+    @Override
+    public Response createHistoricalLocation(ExpandedHistoricalLocation historicalLocation) {
 
-        return resource.get().isSet();
+        return getSensorthingsHandler().createHistoricalLocation(historicalLocation);
+
+    }
+
+    @Override
+    public Response createSensors(Sensor sensor) {
+
+        return getSensorthingsHandler().createSensors(sensor);
+
+    }
+
+    @Override
+    public Response createThing(ExpandedThing thing) {
+
+        return getSensorthingsHandler().createThing(thing);
+
     }
 
     @Override
     public ResultList<Thing> getThings() {
-        ResultList<Thing> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.THINGS);
-        list.value = providers.stream()
-                .map(p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
-                .collect(toList());
-
-        return list;
+        ResultList<Thing> resultSensinact = getSensinactHandler().getThings();
+        ResultList<Thing> resultSensorthing = getSensorthingsHandler().getThings();
+        return new ResultList<Thing>(null, null,
+                Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
     }
 
     @Override
     public ResultList<Location> getLocations() {
-        ResultList<Location> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.LOCATIONS);
-        list.value = providers.stream()
-                .filter(p -> hasResourceSet(p, "admin", "location"))
-                .map(p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
-                .collect(toList());
-
-        return list;
+        ResultList<Location> resultSensinact = getSensinactHandler().getLocations();
+        ResultList<Location> resultSensorthing = getSensorthingsHandler().getLocations();
+        return new ResultList<Location>(null, null,
+                Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
     }
 
     @Override
     public ResultList<HistoricalLocation> getHistoricalLocations() {
-        ResultList<HistoricalLocation> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.HISTORICAL_LOCATIONS);
-        list.value = providers.stream()
-                .filter(p -> hasResourceSet(p, "admin", "location"))
-                .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
-                .collect(toList());
-        return list;
+        ResultList<HistoricalLocation> resultSensinact = getSensinactHandler().getHistoricalLocations();
+        ResultList<HistoricalLocation> resultSensorthing = getSensorthingsHandler().getHistoricalLocations();
+        return new ResultList<HistoricalLocation>(null, null,
+                Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
     }
 
     @Override
     public ResultList<Datastream> getDatastreams() {
-        ResultList<Datastream> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listSetResources(EFilterContext.DATASTREAMS);
-        list.value = resources.stream()
-                .map(r -> toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
-                .collect(toList());
-
-        return list;
+        ResultList<Datastream> resultSensinact = getSensinactHandler().getDatastreams();
+        ResultList<Datastream> resultSensorthing = getSensorthingsHandler().getDatastreams();
+        return new ResultList<Datastream>(null, null,
+                Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
     }
 
     @Override
     public ResultList<Sensor> getSensors() {
-        ResultList<Sensor> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listSetResources(EFilterContext.SENSORS);
-        list.value = resources.stream().
-                map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
-                .collect(toList());
+        ResultList<Sensor> resultSensinact = getSensinactHandler().getSensors();
+        ResultList<Sensor> resultSensorthing = getSensorthingsHandler().getSensors();
+        List<Sensor> cachesSensor = getCacheSensor().values();
 
-        return list;
+        Set<String> cacheIds = cachesSensor.stream().map(sc -> sc.id().toString()).collect(Collectors.toSet());
+
+        Stream<Sensor> listSensorthing = resultSensorthing.value().stream().map(s -> (Sensor) s)
+                .filter(s -> cacheIds.stream().noneMatch(cacheId -> s.id().toString().endsWith(cacheId)));
+
+        Stream<Sensor> list = Stream.concat(resultSensinact.value().stream(), listSensorthing);
+        list = Stream.concat(list, cachesSensor.stream());
+        return new ResultList<Sensor>(null, null, list.toList());
     }
 
-    // No history as it is *live* observation data not a data stream
     @Override
     public ResultList<Observation> getObservations() {
-        ResultList<Observation> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listSetResources(EFilterContext.OBSERVATIONS);
-        list.value = resources.stream()
-                .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
-                .collect(toList());
+        ResultList<Observation> resultSensinact = getSensinactHandler().getObservations();
+        ResultList<Observation> resultSensorthing = getSensorthingsHandler().getObservations();
+        Stream<Observation> result = Stream.concat(resultSensinact.value().stream(),
+                resultSensorthing.value().stream());
 
-        return list;
+        return new ResultList<Observation>(null, null, result.toList());
     }
 
     @Override
     public ResultList<ObservedProperty> getObservedProperties() {
-        ResultList<ObservedProperty> list = new ResultList<>();
 
-        List<ResourceSnapshot> resources = listSetResources(EFilterContext.OBSERVED_PROPERTIES);
-        list.value = resources.stream()
-                .map(r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), r))
-                .collect(toList());
+        ResultList<ObservedProperty> resultSensinact = getSensinactHandler().getObservedProperties();
+        ResultList<ObservedProperty> resultSensorthing = getSensorthingsHandler().getObservedProperties();
 
-        return list;
+        List<ObservedProperty> cacheObsProp = getCacheObservedProperty().values();
+
+        Set<String> cacheIds = cacheObsProp.stream().map(sc -> sc.id().toString()).collect(Collectors.toSet());
+
+        Stream<ObservedProperty> listSensorthing = resultSensorthing.value().stream().map(s -> (ObservedProperty) s)
+                .filter(s -> cacheIds.stream().noneMatch(cacheId -> s.id().toString().endsWith(cacheId)));
+
+        Stream<ObservedProperty> list = Stream.concat(resultSensinact.value().stream(), listSensorthing);
+        list = Stream.concat(list, cacheObsProp.stream());
+        return new ResultList<ObservedProperty>(null, null, list.toList());
     }
 
     @Override
     public ResultList<FeatureOfInterest> getFeaturesOfInterest() {
-        ResultList<FeatureOfInterest> list = new ResultList<>();
 
-        List<ProviderSnapshot> providers = listProviders(EFilterContext.FEATURES_OF_INTEREST);
-        list.value = providers.stream()
-                .map(p -> toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(), p))
-                .collect(toList());
-
-        return list;
-    }
-
-    @SuppressWarnings("unchecked")
-    static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
-            int localResultLimit) {
-
-        String provider = resourceSnapshot.getService().getProvider().getName();
-        String service = resourceSnapshot.getService().getName();
-        String resource = resourceSnapshot.getName();
-
-        ResultList<Observation> list = new ResultList<>();
-
-        String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
-        Integer maxResults = (Integer) application.getProperties().get("sensinact.history.result.limit");
-
-        if(localResultLimit > 0) {
-            maxResults = Math.min(localResultLimit, maxResults);
-        }
-
-        List<Observation> results = new ArrayList<>();
-
-        if (historyProvider != null) {
-            Long count = (Long) userSession.actOnResource(historyProvider, "history", "count",
-                    Map.of("provider", provider, "service", service, "resource", resource));
-
-            list.count = count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue();
-
-            Map<String, Object> params = new HashMap<>(
-                    Map.of("provider", provider, "service", service, "resource", resource));
-            Integer skip = Integer.valueOf(0);
-
-            List<TimedValue<?>> timed;
-            do {
-                params.put("skip", skip);
-
-                timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-
-                results.addAll(0, DtoMapper.toObservationList(userSession, application, mapper, uriInfo, expansions, resourceSnapshot, timed));
-
-                if (timed.isEmpty()) {
-                    break;
-                } else if (timed.size() == 500) {
-                    skip = results.size();
-                }
-
-            } while (results.size() < count && results.size() < maxResults);
-        }
-
-        if (results.isEmpty() && resourceSnapshot.isSet()) {
-            results.add(DtoMapper.toObservation(userSession, application, mapper, uriInfo, expansions, resourceSnapshot));
-        }
-
-        list.value = results;
-
-        return list;
+        ResultList<FeatureOfInterest> resultSensinact = getSensinactHandler().getFeaturesOfInterest();
+        ResultList<FeatureOfInterest> resultSensorthing = getSensorthingsHandler().getFeaturesOfInterest();
+        return new ResultList<FeatureOfInterest>(null, null,
+                Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
     }
 
 }

@@ -16,8 +16,11 @@ import java.util.List;
 
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.EQueryType;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO.SnapshotLinkOption;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat.Feature;
 
 /**
  *
@@ -30,6 +33,9 @@ public class QueryDescribeDTO extends AbstractQueryDTO {
     public String filter;
 
     public List<String> attrs;
+
+    @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
+    public List<SnapshotLinkOption> linkOptions;
 
     /**
      * Language of the filter to use

@@ -63,7 +63,10 @@ import org.osgi.test.common.annotation.config.WithConfiguration;
  * Tests the HTTP device factory with authentication
  */
 @Requirement(namespace = ServiceNamespace.SERVICE_NAMESPACE, filter = "(objectClass=org.eclipse.sensinact.northbound.session.SensiNactSessionManager)")
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "name", value = "test-session"),
+})
 public class HttpDeviceFactoryAuthTest {
 
     static QueuedThreadPool threadPool;
@@ -71,7 +74,7 @@ public class HttpDeviceFactoryAuthTest {
     static RequestHandler handler;
     static int httpPort;
 
-    @InjectService
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
     SensiNactSessionManager sessionManager;
     SensiNactSession session;
     BlockingQueue<ResourceDataNotification> queue;

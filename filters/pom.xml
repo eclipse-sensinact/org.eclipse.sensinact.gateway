@@ -20,7 +20,7 @@
   <groupId>org.eclipse.sensinact.gateway.filters</groupId>
   <artifactId>filters</artifactId>
   <packaging>pom</packaging>
-  <name>SensiNact Northbound Filters</name>
+  <name>SensiNact Filters</name>
   <modules>
     <module>filters.core</module>
     <module>ldap</module>

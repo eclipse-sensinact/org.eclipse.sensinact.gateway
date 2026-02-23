@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>action</artifactId>
-  <name>Example action</name>
+  <name>SensiNact Examples :: Action</name>
   <description>The action module contains examples showing how to define "action" resources using the whiteboard</description>
   <dependencies>
     <dependency>

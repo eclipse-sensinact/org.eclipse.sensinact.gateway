@@ -13,10 +13,10 @@
 package org.eclipse.sensinact.gateway.southbound.history.timescale.integration;
 
 import static java.time.Duration.ofDays;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.abort;
 
@@ -49,6 +49,7 @@ import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
+import org.eclipse.sensinact.gateway.test.testcontainers.postgres.RequirePostgresContainer;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -66,9 +67,10 @@ import org.osgi.util.promise.PromiseFactory;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.JdbcDatabaseContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+@RequirePostgresContainer
 public class TimescaleHistoryTest {
 
     private static final Instant TS_2012 = Instant.parse("2012-01-01T00:00:00.00Z");
@@ -80,7 +82,7 @@ public class TimescaleHistoryTest {
     @BeforeAll
     static void startContainer() throws Exception {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(TimescaleHistoryTest.class.getClassLoader());
+        Thread.currentThread().setContextClassLoader(DockerClientFactory.class.getClassLoader());
         try {
             try {
                 DockerClientFactory.lazyClient().versionCmd().exec();
@@ -88,7 +90,7 @@ public class TimescaleHistoryTest {
                 abort("No docker executable on the path, so tests will be skipped");
             }
 
-            container = new PostgreSQLContainer<>(DockerImageName.parse("timescale/timescaledb-ha")
+            container = new PostgreSQLContainer(DockerImageName.parse("timescale/timescaledb-ha")
                     .asCompatibleSubstituteFor("postgres").withTag("pg14-latest"));
             container.withDatabaseName("sensinactHistory");
             container.start();
@@ -220,6 +222,18 @@ public class TimescaleHistoryTest {
     private GenericDto getIgnorableDto(Double value, Instant timestamp) {
         GenericDto dto = getDto(value, timestamp);
         dto.provider = "ignoredProvider";
+        return dto;
+    }
+
+    private GenericDto getDtoWithSpecialDouble(Double value, Instant timestamp) {
+        GenericDto dto = new GenericDto();
+        dto.model = "SpecialValues";
+        dto.provider = "SpecialProvider";
+        dto.service = "SpecialService";
+        dto.resource = "SpecialResource";
+        dto.value = value;
+        dto.type = Double.class;
+        dto.timestamp = timestamp;
         return dto;
     }
 
@@ -638,6 +652,44 @@ public class TimescaleHistoryTest {
                 }
             }).getValue();
         }
+
+        @Test
+        void specialFloatingPointValues() throws Exception {
+            push.pushUpdate(getDtoWithSpecialDouble(Double.NEGATIVE_INFINITY, TS_2012)).getValue();
+            push.pushUpdate(getDtoWithSpecialDouble(Double.POSITIVE_INFINITY, TS_2013)).getValue();
+            push.pushUpdate(getDtoWithSpecialDouble(Double.NaN, TS_2014)).getValue();
+
+            waitForRowCount("sensinact.numeric_data", 3);
+
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "single") {
+
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    TimedValue<?> negInfResult = safeGet(
+                            resource.act(Map.of("provider", "SpecialProvider", "service", "SpecialService",
+                                    "resource", "SpecialResource", "time", TS_2012.atOffset(ZoneOffset.UTC)))
+                                    .map(TimedValue.class::cast));
+                    assertEquals(Double.NEGATIVE_INFINITY, negInfResult.getValue());
+                    assertEquals(TS_2012, negInfResult.getTimestamp());
+
+                    TimedValue<?> posInfResult = safeGet(
+                            resource.act(Map.of("provider", "SpecialProvider", "service", "SpecialService",
+                                    "resource", "SpecialResource", "time", TS_2013.atOffset(ZoneOffset.UTC)))
+                                    .map(TimedValue.class::cast));
+                    assertEquals(Double.POSITIVE_INFINITY, posInfResult.getValue());
+                    assertEquals(TS_2013, posInfResult.getTimestamp());
+
+                    TimedValue<?> nanResult = safeGet(
+                            resource.act(Map.of("provider", "SpecialProvider", "service", "SpecialService",
+                                    "resource", "SpecialResource", "time", TS_2014.atOffset(ZoneOffset.UTC)))
+                                    .map(TimedValue.class::cast));
+                    assertTrue(Double.isNaN((Double) nanResult.getValue()));
+                    assertEquals(TS_2014, nanResult.getTimestamp());
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
     }
 
     @Nested
@@ -803,6 +855,40 @@ public class TimescaleHistoryTest {
                     assertEquals(new Point(11.59087, 50.9011834), result.get(1).getValue());
                     assertEquals(TS_2014, result.get(1).getTimestamp());
 
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
+
+        @Test
+        void specialFloatingPointValuesRange() throws Exception {
+            push.pushUpdate(getDtoWithSpecialDouble(Double.NEGATIVE_INFINITY, TS_2012)).getValue();
+            push.pushUpdate(getDtoWithSpecialDouble(Double.POSITIVE_INFINITY, TS_2013)).getValue();
+            push.pushUpdate(getDtoWithSpecialDouble(Double.NaN, TS_2014)).getValue();
+
+            waitForRowCount("sensinact.numeric_data", 3);
+
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
+
+                @SuppressWarnings("unchecked")
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    List<TimedValue<?>> result = safeGet(resource
+                            .act(Map.of("provider", "SpecialProvider", "service", "SpecialService",
+                                    "resource", "SpecialResource", "fromTime", TS_2012.atOffset(ZoneOffset.UTC),
+                                    "toTime", TS_2014.atOffset(ZoneOffset.UTC)))
+                            .map(List.class::cast));
+                    assertEquals(3, result.size());
+
+                    assertEquals(Double.NEGATIVE_INFINITY, result.get(0).getValue());
+                    assertEquals(TS_2012, result.get(0).getTimestamp());
+
+                    assertEquals(Double.POSITIVE_INFINITY, result.get(1).getValue());
+                    assertEquals(TS_2013, result.get(1).getTimestamp());
+
+                    assertTrue(Double.isNaN((Double) result.get(2).getValue()));
+                    assertEquals(TS_2014, result.get(2).getTimestamp());
                     return pf.resolved(null);
                 }
             }).getValue();
@@ -1143,6 +1229,135 @@ public class TimescaleHistoryTest {
                     // No start or end
                     result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "Magic"))
                             .map(Long.class::cast));
+                    assertEquals(1000, result);
+
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
+
+        private double scale (int start, int delta, int scaleFactor) {
+            return ((double) (start + delta)) / (double) scaleFactor;
+        }
+
+        @Test
+        void manyGeoData() throws Exception {
+
+            final int latStart = -500;
+            final int lngStart = -1000;
+            for (int i = 0; i < 1000; i++) {
+                push.pushUpdate(getDto(new Point(scale(lngStart, 2 * i, 10), scale(latStart, i, 10)),
+                        TS_2012.plus(ofDays(i)))).getValue();
+            }
+
+            waitForRowCount("sensinact.geo_data", 1000);
+
+
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
+
+                @SuppressWarnings("unchecked")
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    // If equal, return the value
+                    List<TimedValue<?>> result = safeGet(resource
+                            .act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation", "fromTime",
+                                    TS_2012.atOffset(ZoneOffset.UTC), "toTime", TS_2013.atOffset(ZoneOffset.UTC)))
+                            .map(List.class::cast));
+                    assertEquals(367, result.size());
+                    for (int i = 0; i < 367; i++) {
+                        assertEquals(new Point(scale(lngStart, 2 * i, 10), scale(latStart, i, 10)), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(i)), result.get(i).getTimestamp());
+                    }
+
+                    // same query, skip 50
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
+                            "GeoLocation", "fromTime", TS_2012.atOffset(ZoneOffset.UTC), "toTime",
+                            TS_2013.atOffset(ZoneOffset.UTC), "skip", 50)).map(List.class::cast));
+                    assertEquals(317, result.size());
+                    for (int i = 0; i < 317; i++) {
+                        assertEquals(new Point(scale(lngStart, 2 * (i + 50), 10), scale(latStart, i + 50, 10)), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(i + 50)), result.get(i).getTimestamp());
+                    }
+
+                    // No Limit
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
+                            "GeoLocation", "fromTime", TS_2012.plus(ofDays(1)).atOffset(ZoneOffset.UTC)))
+                            .map(List.class::cast));
+                    assertEquals(501, result.size());
+                    for (int i = 0; i < 500; i++) {
+                        assertEquals(new Point(scale(lngStart, 2 * (i + 1), 10), scale(latStart, (i + 1), 10)), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(i + 1)), result.get(i).getTimestamp());
+                    }
+                    assertNull(result.get(500).getTimestamp());
+                    assertNull(result.get(500).getValue());
+
+                    // No start - get the latest 500 before the to time
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
+                            "GeoLocation", "toTime", TS_2014.atOffset(ZoneOffset.UTC))).map(List.class::cast));
+                    assertEquals(500, result.size());
+                    long valueAt2014 = TS_2012.until(TS_2014, ChronoUnit.DAYS);
+                    for (int i = 0; i < 500; i++) {
+                        int delta = (int) valueAt2014 - 499 + i;
+                        assertEquals(new Point(scale(lngStart, 2 * delta, 10), scale(latStart, delta, 10)), result.get(i).getValue());
+                        assertEquals(TS_2014.minus(ofDays(499 - i)), result.get(i).getTimestamp());
+                    }
+
+                    // No start or end - get the latest 500
+                    result = safeGet(
+                            resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation"))
+                                    .map(List.class::cast));
+                    assertEquals(500, result.size());
+
+                    for (int i = 0; i < 500; i++) {
+                        assertEquals(new Point(scale(lngStart, 2* (500 + i), 10), scale(latStart, 500 + i, 10)), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(500 + i)), result.get(i).getTimestamp());
+                    }
+
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
+
+        @Test
+        void manyGeoCount() throws Exception {
+
+            double latStart = -50.0d;
+            double lngStart = -100.0d;
+            for (int i = 0; i < 1000; i++) {
+                push.pushUpdate(getDto(new Point(lngStart + 0.2d * i, latStart + 0.1d * i),
+                        TS_2012.plus(ofDays(i)))).getValue();
+            }
+
+            waitForRowCount("sensinact.geo_data", 1000);
+
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "count") {
+
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    // If equal, return the value
+                    Long result = safeGet(resource
+                            .act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation", "fromTime",
+                                    TS_2012.atOffset(ZoneOffset.UTC), "toTime", TS_2013.atOffset(ZoneOffset.UTC)))
+                            .map(Long.class::cast));
+                    assertEquals(367, result);
+
+                    // No Limit
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
+                            "GeoLocation", "fromTime", TS_2012.plus(ofDays(1)).atOffset(ZoneOffset.UTC)))
+                            .map(Long.class::cast));
+                    assertEquals(999, result);
+
+                    // No start - get the latest 500 before the to time
+                    result = safeGet(resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource",
+                            "GeoLocation", "toTime", TS_2014.atOffset(ZoneOffset.UTC))).map(Long.class::cast));
+                    assertEquals(366 + 365 + 1, result);
+
+                    // No start or end - get the latest 500
+                    result = safeGet(
+                            resource.act(Map.of("provider", "Bobbidi", "service", "Boo", "resource", "GeoLocation"))
+                                    .map(Long.class::cast));
                     assertEquals(1000, result);
 
                     return pf.resolved(null);

@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>query-handler-impl</artifactId>
-  <name>SensiNact Northbound Query Handler Implementation</name>
+  <name>SensiNact Northbound :: Query Handler Implementation</name>
   <description>Northbound Query Handler Implementation</description>
 
   <dependencies>

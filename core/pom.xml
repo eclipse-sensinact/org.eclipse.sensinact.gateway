@@ -20,7 +20,7 @@
   <groupId>org.eclipse.sensinact.gateway.core</groupId>
   <artifactId>core</artifactId>
   <packaging>pom</packaging>
-  <name>Eclipse sensiNact core components</name>
+  <name>SensiNact Core</name>
 
   <modules>
     <module>annotation</module>

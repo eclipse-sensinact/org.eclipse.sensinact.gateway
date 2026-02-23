@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>websocket</artifactId>
-  <name>SensiNact Northbound WebSocket</name>
+  <name>SensiNact Northbound :: WebSocket</name>
   <description>Northbound WebSocket access to sensiNact</description>
 
   <properties>

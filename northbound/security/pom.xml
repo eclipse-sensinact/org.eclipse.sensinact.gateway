@@ -21,7 +21,7 @@
   <artifactId>security</artifactId>
   <packaging>pom</packaging>
 
-  <name>Northbound Security Providers</name>
+  <name>SensiNact Northbound :: Security</name>
   <description>This reactor contains northbound security providers that are used to provide user authentication</description>
 
   <modules>

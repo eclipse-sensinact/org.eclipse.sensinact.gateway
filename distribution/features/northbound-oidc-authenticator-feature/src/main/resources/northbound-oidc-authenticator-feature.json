@@ -8,9 +8,9 @@
     { "id": "org.eclipse.jetty:jetty-http:11.0.13" },
     { "id": "org.eclipse.jetty:jetty-io:11.0.13" },
     { "id": "org.eclipse.jetty:jetty-util:11.0.13" },
-    { "id": "io.jsonwebtoken:jjwt-api:0.11.5" },
-    { "id": "io.jsonwebtoken:jjwt-impl:0.11.5" },
-    { "id": "io.jsonwebtoken:jjwt-jackson:0.11.5" }
+    { "id": "io.jsonwebtoken:jjwt-api:${jjwt.version}" },
+    { "id": "io.jsonwebtoken:jjwt-impl:${jjwt.version}" },
+    { "id": "io.jsonwebtoken:jjwt-jackson:${jjwt.version}" }
   ],
   "extensions": {
     "sensinact.feature.depends": {

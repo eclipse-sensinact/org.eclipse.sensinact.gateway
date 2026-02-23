@@ -45,41 +45,40 @@ public class TimeIntervalDeserializer extends JsonDeserializer<TimeInterval> {
         String first = value.substring(0, slash);
         String second = value.substring(slash + 1, value.length());
 
-        TimeInterval ti = new TimeInterval();
+        TimeInterval ti;
         if(first.startsWith("P")) {
             if(second.startsWith("P")) {
-                failFormat(p, value);
+                throw failFormat(p, value);
             } else {
                 try {
                     Duration d = Duration.parse(first);
-                    ti.end = Instant.parse(second);
-                    ti.start = ti.end.minus(d);
+                    Instant end = Instant.parse(second);
+                    ti = new TimeInterval(end.minus(d), end);
                 } catch (Exception e) {
-                    failFormat(p, value);
+                    throw failFormat(p, value);
                 }
             }
         } else if(second.startsWith("P")) {
             try {
+                Instant start = Instant.parse(first);
                 Duration d = Duration.parse(second);
-                ti.start = Instant.parse(first);
-                ti.end = ti.start.plus(d);
+                ti = new TimeInterval(start, start.plus(d));
             } catch (Exception e) {
-                failFormat(p, value);
+                throw failFormat(p, value);
             }
         } else {
             try {
-                ti.start = Instant.parse(first);
-                ti.end = Instant.parse(second);
+                ti = new TimeInterval(Instant.parse(first), Instant.parse(second));
             } catch (Exception e) {
-                failFormat(p, value);
+                throw failFormat(p, value);
             }
         }
 
         return ti;
     }
 
-    void failFormat(JsonParser p, String value) throws InvalidFormatException {
-        throw new InvalidFormatException(p, "Must be serialized as an ISO 8601 Time Interval String",
+    InvalidFormatException failFormat(JsonParser p, String value) {
+        return new InvalidFormatException(p, "Must be serialized as an ISO 8601 Time Interval String",
                 value, TimeInterval.class);
     }
 }

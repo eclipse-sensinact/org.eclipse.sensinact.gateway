@@ -12,9 +12,15 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.impl;
 
+import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDERS_FULL;
+import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDER_IDS;
+import static org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO.SnapshotLinkOption.ID_ONLY;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,22 +29,18 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.model.ResourceType;
-import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.model.ValueType;
+import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
-import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.snapshot.Snapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.filters.api.FilterCommandHelper;
-import org.eclipse.sensinact.filters.api.FilterException;
 import org.eclipse.sensinact.filters.api.IFilterHandler;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
@@ -52,9 +54,11 @@ import org.eclipse.sensinact.northbound.query.dto.SensinactPath;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryActDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryGetDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QueryLinkDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO.SnapshotLinkOption;
 import org.eclipse.sensinact.northbound.query.dto.result.AccessMethodDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.AccessMethodParameterDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.CompleteProviderDescriptionDTO;
@@ -72,6 +76,7 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ShortResourceDescriptionDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.SnapshotLinkedProviderDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.SnapshotProviderDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.SnapshotResourceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.SnapshotServiceDTO;
@@ -85,9 +90,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.util.promise.Promise;
-import org.osgi.util.promise.PromiseFactory;
-import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,14 +106,11 @@ public class QueryHandler implements IQueryHandler {
      */
     private static final String DEFAULT_FILTER_LANGUAGE = "ldap";
 
-    /**
-     * SensiNact gateway thread
-     */
-    @Reference
-    GatewayThread gatewayThread;
-
     @Reference
     ResourceSelectorFilterFactory resourceSelectorFilterFactory;
+
+    @Reference
+    DataUpdate push;
 
     /**
      * Current filter handler
@@ -161,6 +160,10 @@ public class QueryHandler implements IQueryHandler {
                 result = handleSnapshot(userSession, (QuerySnapshotDTO) query);
                 break;
 
+            case LINK:
+                result = handleLink(userSession, (QueryLinkDTO) query);
+                break;
+
             default:
                 result = new ErrorResultDTO(501, "Operation not implemented");
                 break;
@@ -200,7 +203,7 @@ public class QueryHandler implements IQueryHandler {
                     return filterHandler.parseFilter(filterLanguage != null ? filterLanguage : DEFAULT_FILTER_LANGUAGE,
                             filter);
                 } catch (Throwable t) {
-                    throw new StatusException(500, "Error parsing filter: " + t.getMessage());
+                    throw new StatusException(500, "Error parsing filter: " + t.getMessage(), t);
                 }
         }
     }
@@ -315,8 +318,8 @@ public class QueryHandler implements IQueryHandler {
      */
     private AbstractResultDTO handleSet(final SensiNactSession userSession, final QuerySetDTO dto) {
         final SensinactPath path = dto.uri;
-        if (!path.targetsSpecificResource() && !path.targetsSpecificMetadata()) {
-            return new ErrorResultDTO(405, "Can only set a resource or its metadata");
+        if (!path.targetsSpecificProvider() && !path.targetsSpecificResource() && !path.targetsSpecificMetadata()) {
+            return new ErrorResultDTO(405, "Can only set a provider, a resource or its metadata");
         }
 
         final TypedResponse<ResponseSetDTO> result = new TypedResponse<>(EResultType.SET_RESPONSE);
@@ -329,6 +332,9 @@ public class QueryHandler implements IQueryHandler {
         if (path.targetsSpecificResource()) {
             response.name = path.resource;
             userSession.setResourceValue(path.provider, path.service, path.resource, newValue, timestamp);
+        } else if (path.targetsSpecificProvider()) {
+            response.name = path.provider;
+            userSession.setProvider(path.provider, (Map<String, Object>) newValue, push);
         } else {
             response.name = path.resource + "/" + path.metadata;
             userSession.setResourceMetadata(path.provider, path.service, path.resource, path.metadata, newValue);
@@ -370,6 +376,34 @@ public class QueryHandler implements IQueryHandler {
     }
 
     /**
+     * Handles a call to Link
+     *
+     * @param userSession Caller session
+     * @param dto         Query description
+     * @return Result DTO
+     */
+    private AbstractResultDTO handleLink(final SensiNactSession userSession, final QueryLinkDTO dto) {
+        final SensinactPath path = dto.uri;
+        if (!path.targetsSpecificProvider()) {
+            return new ErrorResultDTO(405, "Link can only be used on providers");
+        }
+
+        ProviderDescription pd;
+        switch(dto.action) {
+        case ADD:
+            pd = userSession.linkProviders(path.provider, dto.child);
+            break;
+        case REMOVE:
+            pd = userSession.unlinkProviders(path.provider, dto.child);
+            break;
+        default:
+            return new ErrorResultDTO(400, "Unknown link action");
+        }
+
+        return toDescribeProviderResponse(pd);
+    }
+
+    /**
      * Executes the given parser
      *
      * @param filter         Filter string
@@ -377,9 +411,10 @@ public class QueryHandler implements IQueryHandler {
      * @return Matching snapshot
      * @throws StatusException Error parsing or executing filter
      */
-    private Collection<ProviderSnapshot> executeFilter(final String filter, final String filterLanguage)
+    private Collection<ProviderSnapshot> executeFilter(SensiNactSession session, final String filter, final String filterLanguage,
+            List<SnapshotLinkOption> linkOptions)
             throws StatusException {
-        return executeFilter(parseFilter(filter, filterLanguage));
+        return executeFilter(session, parseFilter(filter, filterLanguage), linkOptions);
     }
 
     /**
@@ -389,12 +424,32 @@ public class QueryHandler implements IQueryHandler {
      * @return Matching snapshot
      * @throws StatusException Error parsing or executing filter
      */
-    private Collection<ProviderSnapshot> executeFilter(final ICriterion filter) throws StatusException {
+    private Collection<ProviderSnapshot> executeFilter(SensiNactSession session, final ICriterion filter,
+            List<SnapshotLinkOption> linkOptions) throws StatusException {
         try {
-            return FilterCommandHelper.executeFilter(gatewayThread, filter);
-        } catch (FilterException e) {
-            throw new StatusException(500, "Error executing filter: " + e.getMessage());
+            EnumSet<SnapshotLinkOption> options = safeLinkOptions(linkOptions);
+            EnumSet<SnapshotLinkOption> requiresFull = EnumSet.complementOf(EnumSet.of(ID_ONLY));
+
+            EnumSet<SnapshotOption> sessionOptions;
+            if(Collections.disjoint(options, requiresFull)) {
+                if(options.contains(ID_ONLY)) {
+                    sessionOptions = EnumSet.of(INCLUDE_LINKED_PROVIDER_IDS);
+                } else {
+                    sessionOptions = EnumSet.noneOf(SnapshotOption.class);
+                }
+            } else {
+                sessionOptions = EnumSet.of(INCLUDE_LINKED_PROVIDERS_FULL);
+            }
+
+            return session.filteredSnapshot(filter, sessionOptions);
+        } catch (Exception e) {
+            throw new StatusException(500, "Error executing filter: " + e.getMessage(), e);
         }
+    }
+
+    private EnumSet<SnapshotLinkOption> safeLinkOptions(List<SnapshotLinkOption> linkOptions) {
+        return linkOptions == null || linkOptions.isEmpty() ?
+                EnumSet.noneOf(SnapshotLinkOption.class) : EnumSet.copyOf(linkOptions);
     }
 
     /**
@@ -414,42 +469,68 @@ public class QueryHandler implements IQueryHandler {
 
         for (var filter : query.filter) {
             ICriterion criterion = resourceSelectorFilterFactory.parseResourceSelector(filter);
-            for (var providerSnapshot : executeFilter(criterion)) {
+            for (var providerSnapshot : executeFilter(userSession, criterion, query.linkOptions)) {
+                SnapshotProviderDTO providerDTO = result.providers
+                        .computeIfAbsent(providerSnapshot.getName(), (name) -> {
+                            var dto = new SnapshotProviderDTO();
+                            dto.name = providerSnapshot.getName();
+                            dto.modelName = providerSnapshot.getModelName();
+                            dto.services = new HashMap<>();
+                            return dto;
+                        });
+                providerDTO.linkedProviders = handleLinkedProviders(providerSnapshot.getLinkedProviders(), query.linkOptions);
                 for (var serviceSnapshot : providerSnapshot.getServices()) {
+                    SnapshotServiceDTO serviceDTO = providerDTO.services
+                            .computeIfAbsent(serviceSnapshot.getName(), (name) -> {
+                                var dto = new SnapshotServiceDTO();
+                                dto.name = serviceSnapshot.getName();
+                                dto.resources = new HashMap<>();
+                                return dto;
+                            });
                     for (var resourceSnapshot : serviceSnapshot.getResources()) {
-                        if (resourceSnapshot.getValue() != null) {
-                            SnapshotProviderDTO providerDTO = result.providers
-                                    .computeIfAbsent(providerSnapshot.getName(), (name) -> {
-                                        var dto = new SnapshotProviderDTO();
-                                        dto.name = providerSnapshot.getName();
-                                        dto.modelName = providerSnapshot.getModelName();
-                                        dto.services = new HashMap<>();
-                                        return dto;
-                                    });
-                            SnapshotServiceDTO serviceDTO = providerDTO.services
-                                    .computeIfAbsent(serviceSnapshot.getName(), (name) -> {
-                                        var dto = new SnapshotServiceDTO();
-                                        dto.name = serviceSnapshot.getName();
-                                        dto.resources = new HashMap<>();
-                                        return dto;
-                                    });
-                            SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
-                            resourceDTO.name = resourceSnapshot.getName();
-                            resourceDTO.type = resourceSnapshot.getType().getName();
-                            resourceDTO.timestamp = Optional.ofNullable(resourceSnapshot.getValue().getTimestamp())
-                                    .map(Instant::toEpochMilli).orElse(0L);
-                            resourceDTO.value = resourceSnapshot.getValue().getValue();
-                            if (query.includeMetadata) {
-                                resourceDTO.attributes = generateMetadataDescriptions(resourceSnapshot.getMetadata());
-                            }
-                            serviceDTO.resources.put(resourceSnapshot.getName(), resourceDTO);
+                        SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
+                        resourceDTO.name = resourceSnapshot.getName();
+                        resourceDTO.type = resourceSnapshot.getType().getName();
+                        Optional<TimedValue<?>> value = Optional.ofNullable(resourceSnapshot.getValue());
+                        resourceDTO.timestamp = value.map(TimedValue::getTimestamp).map(Instant::toEpochMilli)
+                                .orElse(0L);
+                        resourceDTO.value = value.map(TimedValue::getValue).orElse(null);
+                        if (query.includeMetadata) {
+                            resourceDTO.attributes = generateMetadataDescriptions(resourceSnapshot.getMetadata());
                         }
+                        serviceDTO.resources.put(resourceSnapshot.getName(), resourceDTO);
                     }
                 }
             }
         }
 
         return result;
+    }
+
+    private List<SnapshotLinkedProviderDTO> handleLinkedProviders(List<LinkedProviderSnapshot> linkedProviders,
+            List<SnapshotLinkOption> linkOptions) {
+        EnumSet<SnapshotLinkOption> options = safeLinkOptions(linkOptions);
+        return linkedProviders.stream()
+            .map(lp -> {
+                var dto = new SnapshotLinkedProviderDTO();
+                dto.name = lp.getName();
+                if(options.contains(SnapshotLinkOption.FRIENDLY_NAME) || options.contains(SnapshotLinkOption.FULL)) {
+                    dto.friendlyName = lp.getFriendlyName();
+                }
+                if(options.contains(SnapshotLinkOption.DESCRIPTION) || options.contains(SnapshotLinkOption.FULL)) {
+                    dto.description = lp.getDescription();
+                }
+                if(options.contains(SnapshotLinkOption.ICON) || options.contains(SnapshotLinkOption.FULL)) {
+                    dto.icon = lp.getIcon();
+                }
+                if(options.contains(SnapshotLinkOption.LOCATION) || options.contains(SnapshotLinkOption.FULL)) {
+                    dto.location = lp.getLocation();
+                }
+                if(options.contains(SnapshotLinkOption.MODEL) || options.contains(SnapshotLinkOption.FULL)) {
+                    dto.modelName = lp.getModelName();
+                }
+                return dto;
+            }).toList();
     }
 
     /**
@@ -467,7 +548,7 @@ public class QueryHandler implements IQueryHandler {
             // Use a filter
             final Collection<ProviderSnapshot> filteredSnapshot;
             try {
-                filteredSnapshot = executeFilter(query.filter, query.filterLanguage);
+                filteredSnapshot = executeFilter(userSession, query.filter, query.filterLanguage, List.of());
             } catch (StatusException e) {
                 return e.toErrorResult();
             }
@@ -511,7 +592,7 @@ public class QueryHandler implements IQueryHandler {
             final UpdatableCriterion updatedCriterion = new UpdatableCriterion(parsedFilter);
             updatedCriterion.addProviderFilter(p -> providerId.equals(p.getName()));
             try {
-                filteredSnapshot = FilterCommandHelper.executeFilter(gatewayThread, updatedCriterion);
+                filteredSnapshot = userSession.filteredSnapshot(parsedFilter);
             } catch (final Throwable t) {
                 return new ErrorResultDTO(500, "Error executing filter: " + t.getMessage());
             }
@@ -521,7 +602,7 @@ public class QueryHandler implements IQueryHandler {
             } else {
                 final ProviderSnapshot provider = filteredSnapshot.iterator().next();
                 final ResourceValueFilter resourceValueFilter = updatedCriterion.getResourceValueFilter();
-                final List<ServiceSnapshot> services;
+                final List<? extends ServiceSnapshot> services;
                 if (resourceValueFilter != null) {
                     services = provider.getServices().stream()
                             .filter(s -> resourceValueFilter.test(provider, s.getResources()))
@@ -569,7 +650,7 @@ public class QueryHandler implements IQueryHandler {
             final UpdatableCriterion updatedCriterion = new UpdatableCriterion(parsedFilter);
             updatedCriterion.addProviderFilter(p -> providerId.equals(p.getName()));
             try {
-                filteredSnapshot = FilterCommandHelper.executeFilter(gatewayThread, updatedCriterion);
+                filteredSnapshot = userSession.filteredSnapshot(parsedFilter);
             } catch (final Throwable t) {
                 return new ErrorResultDTO(500, "Error executing filter: " + t.getMessage());
             }
@@ -579,13 +660,13 @@ public class QueryHandler implements IQueryHandler {
             } else {
                 final ProviderSnapshot provider = filteredSnapshot.iterator().next();
                 // The admin service is
-                final Optional<ServiceSnapshot> service = provider.getServices().stream()
+                final Optional<? extends ServiceSnapshot> service = provider.getServices().stream()
                         .filter(s -> serviceId.equals(s.getName())).findFirst();
                 if (service.isEmpty()) {
                     result.resources = List.of();
                 } else {
                     final ResourceValueFilter resourceValueFilter = updatedCriterion.getResourceValueFilter();
-                    final List<ResourceSnapshot> resources;
+                    final List<? extends ResourceSnapshot> resources;
                     if (resourceValueFilter != null) {
                         resources = service.get().getResources().stream()
                                 .filter(r -> resourceValueFilter.test(provider, List.of(r)))
@@ -625,7 +706,7 @@ public class QueryHandler implements IQueryHandler {
      * @param resource Resource to describe
      * @return Access methods descriptions
      */
-    private List<AccessMethodDTO> generateAccessMethodsDescriptions(final SensinactResource resource) {
+    private List<AccessMethodDTO> generateAccessMethodsDescriptions(final ResourceSnapshot resource) {
         final List<AccessMethodDTO> methods = new ArrayList<>();
         if (resource.getResourceType() == ResourceType.ACTION) {
             // Only an action is available
@@ -715,13 +796,14 @@ public class QueryHandler implements IQueryHandler {
         if (query.filter != null && !query.filter.isBlank()) {
             // Use a filter
             try {
-                providers = executeFilter(query.filter, query.filterLanguage);
+                providers = executeFilter(userSession, query.filter, query.filterLanguage,
+                        query.linkOptions == null ? List.of() : query.linkOptions);
             } catch (StatusException e) {
                 return e.toErrorResult();
             }
         } else {
             // Direct listing
-            providers = userSession.filteredSnapshot(null);
+            providers = executeFilter(userSession, null, query.linkOptions == null ? List.of() : query.linkOptions);
         }
 
         final ResultDescribeProvidersDTO result = new ResultDescribeProvidersDTO();
@@ -774,6 +856,7 @@ public class QueryHandler implements IQueryHandler {
 
             providerDto.services = provider.getServices().stream().map(this::completeServiceDescription)
                     .collect(Collectors.toList());
+            providerDto.linkedProviders = provider.getLinkedProviders().stream().map(Snapshot::getName).toList();
             result.providers.add(providerDto);
         }
 
@@ -789,17 +872,19 @@ public class QueryHandler implements IQueryHandler {
      */
     private AbstractResultDTO describeProvider(final SensiNactSession userSession, final String providerId)
             throws Exception {
+        return toDescribeProviderResponse(userSession.describeProvider(providerId));
+    }
 
-        final ProviderDescription provider = userSession.describeProvider(providerId);
+    private AbstractResultDTO toDescribeProviderResponse(final ProviderDescription provider) {
         if (provider == null) {
             return new ErrorResultDTO(404, "Unknown provider");
         }
-
         final TypedResponse<ResponseDescribeProviderDTO> result = new TypedResponse<>(EResultType.DESCRIBE_PROVIDER);
         result.statusCode = 200;
         result.response = new ResponseDescribeProviderDTO();
         result.response.name = provider.provider;
         result.response.services = provider.services;
+        result.response.linkedProviders = provider.linkedProviders;
         return result;
     }
 
@@ -837,13 +922,7 @@ public class QueryHandler implements IQueryHandler {
     private AbstractResultDTO describeService(final SensiNactSession userSession, final String providerId,
             final String serviceId) throws Exception {
 
-        final ServiceSnapshot svcSnapshot = gatewayThread.execute(new AbstractSensinactCommand<ServiceSnapshot>() {
-            @Override
-            protected Promise<ServiceSnapshot> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
-                    PromiseFactory pf) {
-                return pf.resolved(twin.snapshotService(providerId, serviceId));
-            }
-        }).getValue();
+        final ServiceSnapshot svcSnapshot = userSession.serviceSnapshot(providerId, serviceId);
 
         if (svcSnapshot == null) {
             return new ErrorResultDTO(404, "Service not found");
@@ -866,25 +945,22 @@ public class QueryHandler implements IQueryHandler {
      */
     private AbstractResultDTO describeResource(final SensiNactSession userSession, final String providerId,
             final String serviceId, final String resourceId) throws Exception {
-        return gatewayThread
-                .execute(new ResourceCommand<ResponseDescribeResourceDTO>(providerId, serviceId, resourceId) {
-                    @Override
-                    protected Promise<ResponseDescribeResourceDTO> call(SensinactResource resource, PromiseFactory pf) {
-                        final ResponseDescribeResourceDTO dto = new ResponseDescribeResourceDTO();
-                        dto.name = resource.getName();
-                        dto.type = resource.getResourceType();
-                        dto.accessMethods = generateAccessMethodsDescriptions(resource);
-                        return resource.getMetadataValues().then(metadata -> {
-                            dto.attributes = generateMetadataDescriptions(metadata.getValue());
-                            return pf.resolved(dto);
-                        });
-                    }
-                }).then((d) -> {
-                    final TypedResponse<ResponseDescribeResourceDTO> result = new TypedResponse<>(
-                            EResultType.DESCRIBE_RESOURCE);
-                    result.statusCode = 200;
-                    result.response = d.getValue();
-                    return Promises.resolved((AbstractResultDTO) result);
-                }).fallbackTo(Promises.resolved(new ErrorResultDTO(404, "Resource not set"))).getValue();
+        ResourceSnapshot rs = userSession.resourceSnapshot(providerId, serviceId, resourceId);
+
+        if(rs == null) {
+            return new ErrorResultDTO(404, "Resource not found");
+        } else {
+            ResponseDescribeResourceDTO dto = new ResponseDescribeResourceDTO();
+            dto.name = rs.getName();
+            dto.type = rs.getResourceType();
+            dto.accessMethods = generateAccessMethodsDescriptions(rs);
+            dto.attributes = generateMetadataDescriptions(rs.getMetadata());
+
+            TypedResponse<ResponseDescribeResourceDTO> result = new TypedResponse<>(
+                    EResultType.DESCRIBE_RESOURCE);
+            result.statusCode = 200;
+            result.response = dto;
+            return result;
+        }
     }
 }

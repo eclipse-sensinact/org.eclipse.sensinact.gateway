@@ -18,6 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>sensing.rest</artifactId>
+  <name>SensiNact Southbound :: SensorThings :: Sensing REST</name>
 
   <dependencies>
     <dependency>
@@ -46,6 +47,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
+      <artifactId>models</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.geckoprojects.emf</groupId>
       <artifactId>org.gecko.emf.osgi.component.minimal</artifactId>
     </dependency>
@@ -58,16 +64,14 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>testcontainers</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>junit-jupiter</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>impl</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.test</groupId>
+      <artifactId>testcontainers.bundle</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
@@ -82,39 +86,6 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-testing-maven-plugin</artifactId>
-      </plugin>
-      <!-- Generating model classes -->
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-generate-maven-plugin</artifactId>
-        <version>${bnd.version}</version>
-        <configuration>
-          <externalPlugins>
-            <dependency>
-              <groupId>org.geckoprojects.emf</groupId>
-              <artifactId>org.gecko.emf.osgi.codegen</artifactId>
-            </dependency>
-          </externalPlugins>
-          <steps>
-            <step>
-              <trigger>src/main/resources/model/sensorthings.genmodel</trigger>
-              <generateCommand>geckoEMF</generateCommand>
-              <output>src/main/java</output>
-              <clear>false</clear>
-              <properties>
-                <genmodel>src/main/resources/model/sensorthings.genmodel</genmodel>
-              </properties>
-            </step>
-          </steps>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>

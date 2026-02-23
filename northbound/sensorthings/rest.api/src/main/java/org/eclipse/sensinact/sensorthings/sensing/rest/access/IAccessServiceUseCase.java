@@ -1,0 +1,40 @@
+/*********************************************************************
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*   Kentyou - initial implementation
+**********************************************************************/
+package org.eclipse.sensinact.sensorthings.sensing.rest.access;
+
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+
+public interface IAccessServiceUseCase {
+
+    /**
+     * return the service snapshot identified by the id that is a string composed by
+     * providerId, serviceId separate by character ~
+     *
+     * @param session
+     * @param id
+     * @return
+     */
+    public ServiceSnapshot read(SensiNactSession session, String id);
+
+    /**
+     * return the service snapshot identified by providerId and serviceId
+     *
+     * @param session
+     * @param providerId
+     * @param serviceId
+     * @return
+     */
+    public ServiceSnapshot read(SensiNactSession session, String providerId, String serviceId);
+
+}

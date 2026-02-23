@@ -13,10 +13,13 @@
 package org.eclipse.sensinact.core.notification.impl;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
+import org.eclipse.sensinact.core.notification.LinkedProviderNotification;
+import org.eclipse.sensinact.core.notification.LinkedProviderNotification.Action;
 import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
@@ -62,6 +65,12 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
             String resource, Instant timestamp) {
         return new ResourceActionNotification(modelPackageUri, model, provider, service,
                 resource, timestamp);
+    }
+
+    protected LinkedProviderNotification createLinkedProviderNotification(String modelPackageUri, String model, String provider, String child,
+            Action action, List<String> linkedProviders, Instant timestamp) {
+        return new LinkedProviderNotification(modelPackageUri, model, provider, child,
+                action, linkedProviders, timestamp);
     }
 
     @Override

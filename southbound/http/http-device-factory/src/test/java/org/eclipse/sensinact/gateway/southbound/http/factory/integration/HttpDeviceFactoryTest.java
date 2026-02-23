@@ -73,7 +73,10 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * Tests the HTTP device factory
  */
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "name", value = "test-session"),
+})
 public class HttpDeviceFactoryTest {
 
     static QueuedThreadPool threadPool;
@@ -84,7 +87,7 @@ public class HttpDeviceFactoryTest {
     static List<String> requestBodyList;
     final ObjectMapper mapper = new ObjectMapper();
 
-    @InjectService
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
     SensiNactSessionManager sessionManager;
     SensiNactSession session;
     BlockingQueue<ResourceDataNotification> queue, queue2;

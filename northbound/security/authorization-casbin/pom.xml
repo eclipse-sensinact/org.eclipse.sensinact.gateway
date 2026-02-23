@@ -20,7 +20,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>authorization-casbin</artifactId>
-  <name>SensiNact Casbin-based Authorization</name>
+  <name>SensiNact Northbound :: Security :: Casbin-based Authorization</name>
   <description>An authorization engine based on Casbin</description>
 
   <properties>

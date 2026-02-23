@@ -17,6 +17,7 @@ import java.time.Instant;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
+import org.eclipse.sensinact.core.annotation.dto.AnnotationConstants;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.push.dto.BaseValueDto;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
@@ -29,6 +30,14 @@ public final class EMFGenericDto extends BaseValueDto {
 
     /** The {@link EClass} of the provider */
     public EClass modelEClass;
+
+    /**
+     * The name of the {@link EClass} of a service. This must be set, when updating
+     * a {@link DynamicProvider}, where a service might not be available yet, it is
+     * an alternative to the serviceEClass and will be overwritten by the
+     * serviceEClass is set..
+     */
+    public String serviceEClassName;
 
     /**
      * The {@link EClass} of a service. This must be set, when updating a
@@ -45,6 +54,22 @@ public final class EMFGenericDto extends BaseValueDto {
     public Class<?> type;
 
     public Object value;
+
+    /**
+     * The upper bound for the resource data. If not set then the resource bounds
+     * will be set based on the type of {@link #value}. Specifically:
+     *
+     * <ul>
+     *   <li> An array type = -1</li>
+     *   <li> <code>List</code>, <code>Set</code>, <code>Collection</code> = -1</li>
+     *   <li> All other types = 1</li>
+     * <ul>
+     *
+     * A bound of <code>-1</code> means no upper limit. A bound of <code>1</code> means
+     * that the resource value is unary.
+     * @return
+     */
+    public int upperBound = AnnotationConstants.NO_UPPER_BOUND_SET;
 
     /**
      * The timestamp for the data. If null then Instant.now will be used.

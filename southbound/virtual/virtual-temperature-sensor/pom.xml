@@ -6,6 +6,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>virtual-temperature-sensor</artifactId>
+  <name>SensiNact Southbound :: Virtual :: Temperature Sensor</name>
 
   <dependencies>
     <dependency>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+/*********************************************************************
+* Copyright (c) 2025 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://web.resource.org/cc/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" baseProfile="full" width="300px" height="300px" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet" id="svg_document" style="zoom: 1;"><!-- Created with macSVG - https://macsvg.org/ - https://github.com/dsward2/macsvg/ --><title id="svg_document_title">Untitled.svg</title><defs id="svg_document_defs"></defs><g id="main_group"></g><circle stroke="royalblue" id="circle1" cy="70px" stroke-width="3px" fill="cornflowerblue" r="2px" cx="40px" transform=""></circle><circle stroke="royalblue" id="circle2" cy="70px" stroke-width="3px" fill="cornflowerblue" r="40px" cx="220px" transform=""></circle><line stroke="royalblue" y1="200px" id="line2" x1="32px" stroke-width="3px" y2="244px" x2="93px" transform=""></line><line stroke="royalblue" y1="157px" stroke-width="3px" x1="199px" id="line1" y2="201px" x2="260px" transform=""></line><circle stroke="royalblue" transform="" stroke-width="3px" id="circle3" cy="190px" fill="cornflowerblue" r="40px" cx="176px"></circle><circle stroke="royalblue" stroke-width="3px" cy="235px" id="circle4" fill="cornflowerblue" r="40px" cx="238px" transform=""></circle><line stroke="royalblue" y1="223px" stroke-width="3px" x1="155px" id="line3" y2="267px" x2="216px" transform=""></line><polygon points="197,158 150,218 217,266 263,204" stroke="#000000" id="polygon1" stroke-width="0px" fill="cornflowerblue" transform=""></polygon><text stroke="none" style="outline-style:none;" id="text1" stroke-width="1px" x="104px" text-rendering="geometricPrecision" font-family="Helvetica" fill="#000000" font-size="32px" y="81px" transform="" text-anchor="middle">➡️</text><text stroke="none" style="outline-style:none;" id="text2" stroke-width="1px" x="104px" text-rendering="geometricPrecision" font-family="Helvetica" fill="#000000" font-size="32px" y="218px" transform="" text-anchor="middle">➡️</text></svg>

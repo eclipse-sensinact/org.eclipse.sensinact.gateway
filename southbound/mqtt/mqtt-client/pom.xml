@@ -20,7 +20,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>mqtt-client</artifactId>
-  <name>Sensinact Southbound MQTT :: Client</name>
+  <name>SensiNact Southbound :: MQTT :: Client</name>
   <description>MQTT client</description>
 
   <properties>

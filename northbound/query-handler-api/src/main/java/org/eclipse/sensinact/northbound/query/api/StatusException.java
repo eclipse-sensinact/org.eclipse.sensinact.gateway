@@ -34,6 +34,11 @@ public class StatusException extends Exception {
         this.statusCode = statusCode;
     }
 
+    public StatusException(int statusCode, final String message, Throwable cause) {
+        super(message, cause);
+        this.statusCode = statusCode;
+    }
+
     /**
      * Converts the exception to an error result
      */

@@ -36,6 +36,6 @@ public interface WhiteboardGet<T> extends WhiteboardHandler {
      * @param cachedValue     Previously cached value
      * @return A promise, created with the promise factory
      */
-    Promise<TimedValue<T>> pullValue(PromiseFactory promiseFactory, String modelPackageUri, String model,
-            String provider, String service, String resource, Class<T> resourceType, TimedValue<T> cachedValue);
+    Promise<TimedValue<?>> pullValue(PromiseFactory promiseFactory, String modelPackageUri, String model,
+            String provider, String service, String resource, Class<T> resourceType, TimedValue<?> cachedValue);
 }

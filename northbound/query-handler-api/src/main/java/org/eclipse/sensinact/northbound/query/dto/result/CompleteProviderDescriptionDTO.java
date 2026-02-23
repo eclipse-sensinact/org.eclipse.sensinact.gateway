@@ -49,4 +49,10 @@ public class CompleteProviderDescriptionDTO {
      * List of services
      */
     public List<ResponseDescribeServiceDTO> services;
+
+    /**
+     * Provider friendly name, if available
+     */
+    @JsonInclude(NON_NULL)
+    public List<String> linkedProviders;
 }

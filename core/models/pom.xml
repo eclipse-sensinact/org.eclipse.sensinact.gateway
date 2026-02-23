@@ -20,7 +20,7 @@
   <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
   <artifactId>models</artifactId>
   <packaging>pom</packaging>
-  <name>Eclipse sensiNact model components</name>
+  <name>SensiNact Core :: Models</name>
 
   <modules>
     <module>provider</module>

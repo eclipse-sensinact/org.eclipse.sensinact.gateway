@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="Copyright (c) 2025 Contributors to the Eclipse Foundation.&#xA;&#xA;This program and the accompanying materials are made&#xA;available under the terms of the Eclipse Public License 2.0&#xA;which is available at https://www.eclipse.org/legal/epl-2.0/&#xA;&#xA;SPDX-License-Identifier: EPL-2.0&#xA;&#xA;Contributors:&#xA;  Kentyou - initial API and implementation "
+    modelDirectory="/org.eclipse.sensinact.gateway.sensorthings.sensing.rest/src/main/java"
+    modelPluginID="org.eclipse.sensinact.gateway.sensorthings.models"
+    modelName="SensorThings" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    importerID="org.eclipse.emf.importer.ecore" complianceLevel="17.0" copyrightFields="false"
+    usedGenPackages="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.genmodel#//provider ../../../../../org.eclipse.emf.ecore/model/Ecore.genmodel#//ecore"
+    operationReflection="true" importOrganizing="true" oSGiCompatible="true">
+  <foreignModel>sensorthings.ecore</foreignModel>
+  <genPackages prefix="Sensorthings" basePackage="org.eclipse.sensinact.sensorthings.models"
+      disposableProviderFactory="true" ecorePackage="sensorthings.ecore#/">
+    <genClasses ecoreClass="sensorthings.ecore#//SensorThingsDevice">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference sensorthings.ecore#//SensorThingsDevice/thing"/>
+    </genClasses>
+    <genClasses ecoreClass="sensorthings.ecore#//SensorThingsService">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.ecore#//SensorThingsService/id"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.ecore#//SensorThingsService/description"/>
+    </genClasses>
+    <genClasses ecoreClass="sensorthings.ecore#//DataStreamService">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.ecore#//DataStreamService/sensorThingsId"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.ecore#//DataStreamService/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.ecore#//DataStreamService/description"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.ecore#//DataStreamService/latestObservation"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.ecore#//DataStreamService/unit"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.ecore#//DataStreamService/sensor"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute sensorthings.ecore#//DataStreamService/observedProperty"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

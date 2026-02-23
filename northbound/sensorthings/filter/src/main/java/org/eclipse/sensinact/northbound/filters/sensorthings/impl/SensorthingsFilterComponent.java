@@ -33,11 +33,30 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.BoolcommonexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.BoolCommonExprVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.ResourceValueFilterInputHolder;
+import org.eclipse.sensinact.northbound.security.api.UserInfo;
+import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 @Component
-@FiltersSupported({OGC_FILTER, SENSORTHINGS_FILTER})
+@FiltersSupported({ OGC_FILTER, SENSORTHINGS_FILTER })
 public class SensorthingsFilterComponent implements IFilterParser, ISensorthingsFilterParser {
+
+    @Reference
+    SensiNactSessionManager sessionManager;
+
+    SensiNactSession session;
+
+    public SensiNactSession getSession() {
+        if (session == null || session.isExpired())
+            session = sessionManager.getDefaultSession(UserInfo.ANONYMOUS);
+        return session;
+    }
+
+    public void setSession(SensiNactSession session) {
+        this.session = session;
+    }
 
     @Override
     public ICriterion parseFilter(String query, String queryLanguage, Map<String, Object> parameters)
@@ -77,6 +96,6 @@ public class SensorthingsFilterComponent implements IFilterParser, ISensorthings
         }
 
         // Return the ICriterion
-        return new SensorthingsCriterion(filterContext, predicate);
+        return new SensorthingsCriterion(filterContext, getSession(), predicate);
     }
 }

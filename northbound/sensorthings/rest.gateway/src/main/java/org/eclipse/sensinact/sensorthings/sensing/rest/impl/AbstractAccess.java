@@ -13,24 +13,38 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
 
+import java.util.EnumSet;
 import java.util.Optional;
 
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
+import org.eclipse.sensinact.filters.api.FilterParserException;
+import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
+import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Providers;
 
 public abstract class AbstractAccess {
@@ -61,18 +75,66 @@ public abstract class AbstractAccess {
         return providers.getContextResolver(ObjectMapper.class, MediaType.APPLICATION_JSON_TYPE).getContext(null);
     }
 
+    /**
+     * return the expansion session for managing expand
+     *
+     * @return
+     */
     protected ExpansionSettings getExpansions() {
-        ExpansionSettings es = (ExpansionSettings) requestContext
-                .getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
+        ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
         return es == null ? EMPTY : es;
     }
 
+    /**
+     * return the Provider link to the id
+     *
+     * @param id
+     * @return
+     */
     private Optional<ProviderSnapshot> getProviderSnapshot(String id) {
-        return getSession().filteredSnapshot(new SnapshotFilter(id)).stream().findFirst();
+        return Optional.ofNullable(getSession().providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)));
     }
 
+    @SuppressWarnings("unchecked")
+    protected IDtoMemoryCache<Sensor> getCacheSensor() {
+        return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE).getContext(Sensor.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected IDtoMemoryCache<ObservedProperty> getCacheObservedProperty() {
+        return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
+                .getContext(ObservedProperty.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected IDtoMemoryCache<FeatureOfInterest> getCacheFeatureOfInterest() {
+        return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
+                .getContext(FeatureOfInterest.class);
+    }
+
+    /**
+     * return the service ExtraDelegate that manage the extra (POST,PUT,DELETE) on
+     * sensorthing entity
+     *
+     * @return
+     */
+    protected IExtraDelegate getExtraDelegate() {
+        ContextResolver<IExtraDelegate> contextResolver = providers.getContextResolver(IExtraDelegate.class,
+                MediaType.WILDCARD_TYPE);
+        if (contextResolver == null || contextResolver.getContext(null) == null) {
+            throw new WebApplicationException("operation PUT/POST/DELET not available", 405);
+        }
+        return contextResolver.getContext(null);
+
+    }
+
+    /**
+     * validate and get provider link to the id
+     *
+     * @param id
+     * @return
+     */
     protected ProviderSnapshot validateAndGetProvider(String id) {
-        DtoMapper.validatedProviderId(id);
 
         Optional<ProviderSnapshot> providerSnapshot = getProviderSnapshot(id);
 
@@ -82,19 +144,54 @@ public abstract class AbstractAccess {
         return providerSnapshot.get();
     }
 
+    /**
+     * validate and get the resource link to the id
+     *
+     * @param id
+     * @return
+     */
     protected ResourceSnapshot validateAndGetResourceSnapshot(String id) {
-        String provider = extractFirstIdSegment(id);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        String service = extractFirstIdSegment(id.substring(provider.length() + 1));
-        String resource = extractFirstIdSegment(id.substring(provider.length() + service.length() + 2));
+        String service = DtoMapperSimple.extractSecondIdSegment(id);
+        String resource = DtoMapperSimple.extractThirdIdSegment(id);
 
         ResourceSnapshot resourceSnapshot = providerSnapshot.getResource(service, resource);
 
-        if(resourceSnapshot == null) {
+        if (resourceSnapshot == null) {
             throw new NotFoundException();
         }
         return resourceSnapshot;
+    }
+
+    /**
+     * get filterParser
+     *
+     * @return
+     */
+    private ISensorthingsFilterParser getFilterParser() {
+        return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
+    }
+
+    /**
+     * return criterion for filtering regarding the context
+     *
+     * @param context
+     * @return
+     * @throws WebApplicationException
+     */
+    protected ICriterion parseFilter(final EFilterContext context) throws WebApplicationException {
+        final String filterString = (String) requestContext.getProperty(IFilterConstants.PROP_FILTER_STRING);
+        if (filterString == null || filterString.isBlank()) {
+            return null;
+        }
+
+        try {
+            return getFilterParser().parseFilter(filterString, context);
+        } catch (FilterParserException e) {
+            throw new BadRequestException("Error parsing filter", e);
+        }
     }
 }

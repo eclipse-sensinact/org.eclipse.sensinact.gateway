@@ -109,6 +109,14 @@ public class TestUtils {
      */
     public <T> T queryJson(final String path, final Object body, final Class<T> resultType)
             throws IOException, InterruptedException {
+        return queryJson(path, "POST", body, resultType);
+    }
+
+    /**
+     * Executes a POST request and returns its parsed content
+     */
+    public <T> T queryJson(final String path, String method, final Object body, final Class<T> resultType)
+            throws IOException, InterruptedException {
         // Normalize URI
         final URI targetUri;
         if (path.startsWith("/")) {
@@ -118,7 +126,8 @@ public class TestUtils {
         }
 
         final HttpRequest req = HttpRequest.newBuilder(targetUri).header("Content-Type", "application/json")
-                .POST(BodyPublishers.ofString(mapper.writeValueAsString(body))).build();
+                .method(method, body == null ? BodyPublishers.noBody() :
+                    BodyPublishers.ofString(mapper.writeValueAsString(body))).build();
         final HttpResponse<InputStream> response = client.send(req, (x) -> BodySubscribers.ofInputStream());
         return mapper.createParser(response.body()).readValueAs(resultType);
     }

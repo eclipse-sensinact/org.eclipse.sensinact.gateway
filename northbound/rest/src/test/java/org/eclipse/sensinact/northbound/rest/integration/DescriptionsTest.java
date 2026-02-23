@@ -15,6 +15,7 @@ package org.eclipse.sensinact.northbound.rest.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -60,17 +61,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.ws.rs.core.Application;
 
 @WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.northbound.rest", location = "?", properties = {
+        @Property(key = "allow.anonymous", value = "true"),
+        @Property(key = "foo", value = "bar") })
 public class DescriptionsTest {
 
     @BeforeEach
-    public void await(
-            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.northbound.rest", location = "?", properties = {
-                    @Property(key = "allow.anonymous", value = "true"),
-                    @Property(key = "foo", value = "bar") })) Configuration cm,
-            @InjectService(filter = "(foo=bar)", cardinality = 0) ServiceAware<Application> a)
+    public void await(@InjectService(filter = "(foo=bar)", cardinality = 0) ServiceAware<Application> a)
             throws InterruptedException {
         a.waitForService(5000);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             try {
                 if (utils.queryStatus("/").statusCode() == 200)
                     return;
@@ -78,15 +78,9 @@ public class DescriptionsTest {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            Thread.sleep(200);
+            Thread.sleep(100);
         }
         throw new AssertionFailedError("REST API did not appear");
-    }
-
-    @AfterEach
-    public void clear(@InjectConfiguration("sensinact.northbound.rest") Configuration cm) throws Exception {
-        cm.delete();
-        Thread.sleep(500);
     }
 
     private static final String PROVIDER = "RestDescriptionProvider";
@@ -284,6 +278,8 @@ public class DescriptionsTest {
         // Register the resource
         GenericDto dto = utils.makeDto(PROVIDER, SERVICE, RESOURCE, VALUE, Integer.class);
         push.pushUpdate(dto).getValue();
+        dto = utils.makeDto(PROVIDER_2, SERVICE, RESOURCE, VALUE, Integer.class);
+        push.pushUpdate(dto).getValue();
 
         // Check the list of providers
         TypedResponse<?> result = utils.queryJson("/providers/" + PROVIDER, TypedResponse.class);
@@ -291,6 +287,24 @@ public class DescriptionsTest {
         ResponseDescribeProviderDTO descr = utils.convert(result, ResponseDescribeProviderDTO.class);
         assertEquals(PROVIDER, descr.name);
         assertEquals(Set.of("admin", SERVICE), Set.copyOf(descr.services));
+        assertEquals(List.of(), descr.linkedProviders);
+
+        // Link a provider
+        result = utils.queryJson("/providers/" + PROVIDER + "/link/" + PROVIDER_2, null, TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.DESCRIBE_PROVIDER, PROVIDER);
+        descr = utils.convert(result, ResponseDescribeProviderDTO.class);
+        assertEquals(PROVIDER, descr.name);
+        assertEquals(Set.of("admin", SERVICE), Set.copyOf(descr.services));
+        assertEquals(List.of(PROVIDER_2), descr.linkedProviders);
+
+        // Unlink a provider
+        result = utils.queryJson("/providers/" + PROVIDER + "/link/" + PROVIDER_2,
+                "DELETE", null, TypedResponse.class);
+        utils.assertResultSuccess(result, EResultType.DESCRIBE_PROVIDER, PROVIDER);
+        descr = utils.convert(result, ResponseDescribeProviderDTO.class);
+        assertEquals(PROVIDER, descr.name);
+        assertEquals(Set.of("admin", SERVICE), Set.copyOf(descr.services));
+        assertEquals(List.of(), descr.linkedProviders);
     }
 
     /**

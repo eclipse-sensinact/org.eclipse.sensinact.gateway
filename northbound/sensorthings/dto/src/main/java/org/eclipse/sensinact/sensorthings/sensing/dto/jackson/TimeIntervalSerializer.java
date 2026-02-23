@@ -24,7 +24,7 @@ public class TimeIntervalSerializer extends JsonSerializer<TimeInterval> {
 
     @Override
     public void serialize(TimeInterval value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        gen.writeString(value.start.toString() + "/" + value.end.toString());
+        gen.writeString(value.start().toString() + "/" + value.end().toString());
     }
 
 }

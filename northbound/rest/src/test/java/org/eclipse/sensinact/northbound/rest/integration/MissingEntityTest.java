@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.util.List;
 
@@ -55,8 +56,12 @@ public class MissingEntityTest {
         a.waitForService(5000);
         for (int i = 0; i < 10; i++) {
             try {
-                if (utils.queryStatus("/").statusCode() == 200)
+                HttpResponse<?> queryStatus = utils.queryStatus("/");
+                if (queryStatus.statusCode() == 200)
                     return;
+                else
+                    System.err.println(String.format("Response: %d - %s",
+                            queryStatus.statusCode(), queryStatus.body()));
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

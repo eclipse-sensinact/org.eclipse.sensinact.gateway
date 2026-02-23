@@ -289,9 +289,9 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
     }
 
     @Override
-    public Promise<TimedValue<Object>> pushValue(PromiseFactory pf, String modelPackageUri, String model,
+    public Promise<TimedValue<?>> pushValue(PromiseFactory pf, String modelPackageUri, String model,
             String provider, String service, String resource, Class<Object> resourceType,
-            TimedValue<Object> cachedValue, TimedValue<Object> newValue) {
+            TimedValue<?> cachedValue, TimedValue<?> newValue) {
 
         final PropertyAffordance property = thing.properties.get(resource);
         if (property == null) {
@@ -339,7 +339,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
             return pf.failed(e);
         }
 
-        final Deferred<TimedValue<Object>> promise = pf.deferred();
+        final Deferred<TimedValue<?>> promise = pf.deferred();
         request.send(new BufferingResponseListener() {
             @Override
             public void onComplete(Result result) {
@@ -385,9 +385,9 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
     }
 
     @Override
-    public Promise<TimedValue<Object>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
+    public Promise<TimedValue<?>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
             String provider, String service, String resource, Class<Object> resourceType,
-            TimedValue<Object> cachedValue) {
+            TimedValue<?> cachedValue) {
 
         final PropertyAffordance property = thing.properties.get(resource);
         if (property == null) {
@@ -421,7 +421,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
 
         final Class<?> resultClass = Utils.classFromType(property.schema.type);
 
-        final Deferred<TimedValue<Object>> promise = pf.deferred();
+        final Deferred<TimedValue<?>> promise = pf.deferred();
         request.send(new BufferingResponseListener() {
             @Override
             public void onComplete(Result result) {

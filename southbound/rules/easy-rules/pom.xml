@@ -9,7 +9,7 @@
   <artifactId>easy-rules</artifactId>
   <packaging>pom</packaging>
 
-  <name>Easy Rules Southbound Connectors</name>
+  <name>SensiNact Southbound :: Rules :: Easy Rules</name>
   <description>This reactor contains the integration of Easy Rules into Eclipse sensiNact</description>
 
   <modules>

@@ -20,10 +20,12 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection;
+import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection.MatchType;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Feature;
 import org.eclipse.sensinact.gateway.geojson.FeatureCollection;
@@ -163,25 +165,31 @@ public class LocationSelectionCriterion {
         // in the gateway, and for every subsequent update
         RELATE_OPERATOR.accelerateGeometry(target, null, enumMedium);
 
-        final Geometry targetValue = target;
+        Predicate<GeoJsonObject> filter = Objects::nonNull;
+        return filter.and(getGeometryFilter(ls.type(), target));
+    }
 
-        return switch(ls.type()) {
+    private static Predicate<GeoJsonObject> getGeometryFilter(MatchType type, final Geometry targetValue) {
+        Predicate<Geometry> locationCheck = switch(type) {
             case CONTAINS:
-                yield l -> RELATE_OPERATOR.execute(toEsriGeometry(l), targetValue, WGS84_COORDS, CONTAINS, null);
+                yield l -> RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, CONTAINS, null);
             case DISJOINT:
-                yield l -> RELATE_OPERATOR.execute(toEsriGeometry(l), targetValue, WGS84_COORDS, DISJOINT, null);
+                yield l -> RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, DISJOINT, null);
             case INTERSECTS:
                 yield l -> {
-                    Geometry g = toEsriGeometry(l);
-                    return RELATE_OPERATOR.execute(g, targetValue, WGS84_COORDS, INTERSECTS_1, null) ||
-                            RELATE_OPERATOR.execute(g, targetValue, WGS84_COORDS, INTERSECTS_2, null) ||
-                            RELATE_OPERATOR.execute(g, targetValue, WGS84_COORDS, INTERSECTS_3, null) ||
-                            RELATE_OPERATOR.execute(g, targetValue, WGS84_COORDS, INTERSECTS_4, null);
+                    return RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_1, null) ||
+                            RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_2, null) ||
+                            RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_3, null) ||
+                            RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_4, null);
                 };
             case WITHIN:
-                yield l -> RELATE_OPERATOR.execute(toEsriGeometry(l), targetValue, WGS84_COORDS, WITHIN, null);
+                yield l -> RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, WITHIN, null);
             default:
-                throw new IllegalArgumentException("Unknown match type " + ls.type());
+                throw new IllegalArgumentException("Unknown match type " + type);
+        };
+        return l -> {
+            Geometry g = toEsriGeometry(l);
+            return !g.isEmpty() && locationCheck.test(g);
         };
     }
 

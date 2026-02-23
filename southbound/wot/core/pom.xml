@@ -21,7 +21,7 @@
   </parent>
   <artifactId>wot-core</artifactId>
 
-  <name>Web of Things southbound Core</name>
+  <name>SensiNact Southbound :: Web of Things :: Core</name>
   <description>Access Things through HTTP</description>
 
   <dependencies>

@@ -32,5 +32,12 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute testdata.ecore#//TestResource/bar"/>
     </genClasses>
     <genClasses ecoreClass="testdata.ecore#//TestModelWithAnnotation"/>
+    <genClasses ecoreClass="testdata.ecore#//TestManyAttributeSensor">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference testdata.ecore#//TestManyAttributeSensor/svc"/>
+    </genClasses>
+    <genClasses ecoreClass="testdata.ecore#//ManyAttributeService">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute testdata.ecore#//ManyAttributeService/strings"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute testdata.ecore#//ManyAttributeService/longs"/>
+    </genClasses>
   </genPackages>
 </genmodel:GenModel>

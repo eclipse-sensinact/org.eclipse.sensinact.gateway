@@ -21,7 +21,7 @@
   <artifactId>http-parent</artifactId>
   <packaging>pom</packaging>
 
-  <name>Southbound HTTP :: Parent</name>
+  <name>SensiNact Southbound :: HTTP</name>
   <description>Parent project of sensiNact southbound HTTP bundles</description>
 
   <modules>

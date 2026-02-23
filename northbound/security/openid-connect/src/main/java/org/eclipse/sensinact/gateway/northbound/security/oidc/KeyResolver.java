@@ -26,9 +26,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
+import java.util.Base64.Decoder;
 import java.util.List;
 import java.util.Map;
-import java.util.Base64.Decoder;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -37,14 +38,13 @@ import org.eclipse.sensinact.gateway.northbound.security.oidc.Certificates.KeyIn
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwsHeader;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SigningKeyResolver;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Locator;
+import io.jsonwebtoken.ProtectedHeader;
 
-class KeyResolver implements SigningKeyResolver {
+class KeyResolver implements Locator<Key> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SigningKeyResolver.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KeyResolver.class);
 
     private final List<KeyInfo> keys;
     private final Map<String, Key> cachedKeys = new ConcurrentHashMap<>();
@@ -54,40 +54,43 @@ class KeyResolver implements SigningKeyResolver {
     }
 
     @Override
-    public Key resolveSigningKey(@SuppressWarnings("rawtypes") JwsHeader header, Claims claims) {
-        return fromCache(header);
+    public Key locate(Header header) {
+        Objects.requireNonNull(header, "Null JWT header");
+        if (header instanceof ProtectedHeader ph) {
+            return fromCache(ph);
+        }
+        return null;
     }
 
-    private Key fromCache(JwsHeader<?> header) {
+    private Key fromCache(ProtectedHeader header) {
         return cachedKeys.computeIfAbsent(header.getKeyId(), k -> createKey(k, header.getAlgorithm()));
     }
 
     private Key createKey(String id, String algorithm) {
         return keys.stream().filter(k -> id.equalsIgnoreCase(k.getKeyId())).findFirst()
-                .map(k -> toKey(SignatureAlgorithm.forName(algorithm), k)).orElse(null);
+                .map(k -> toKey(algorithm, k)).orElse(null);
     }
 
-    private Key toKey(SignatureAlgorithm alg, KeyInfo ki) {
+    private Key toKey(String alg, KeyInfo ki) {
         try {
             switch (alg) {
-            case NONE:
-            default:
-                return null;
-            case ES256:
-            case ES384:
-            case ES512:
-                return toECKey(ki);
-            case HS256:
-            case HS384:
-            case HS512:
-                return toSecretKey(ki);
-            case PS256:
-            case PS384:
-            case PS512:
-            case RS256:
-            case RS384:
-            case RS512:
-                return toRSAKey(ki);
+                default:
+                    return null;
+                case "ES256":
+                case "ES384":
+                case "ES512":
+                    return toECKey(ki);
+                case "HS256":
+                case "HS384":
+                case "HS512":
+                    return toSecretKey(ki);
+                case "PS256":
+                case "PS384":
+                case "PS512":
+                case "RS256":
+                case "RS384":
+                case "RS512":
+                    return toRSAKey(ki);
             }
         } catch (IllegalArgumentException | GeneralSecurityException gse) {
             LOG.error("Failed to create verification key for {}", ki.getKeyId(), gse);
@@ -117,7 +120,7 @@ class KeyResolver implements SigningKeyResolver {
     private Key toSecretKey(KeyInfo ki) throws InvalidKeySpecException, NoSuchAlgorithmException {
         Decoder decoder = Base64.getUrlDecoder();
         return new SecretKeySpec(decoder.decode(ki.getSymmetricKey()),
-                SignatureAlgorithm.forName(ki.getAlgorithm()).getJcaName());
+                ki.getAlgorithm().replace("HS", "HmacSHA"));
     }
 
     private Key toRSAKey(KeyInfo ki) throws InvalidKeySpecException, NoSuchAlgorithmException {
@@ -128,10 +131,4 @@ class KeyResolver implements SigningKeyResolver {
 
         return KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
     }
-
-    @Override
-    public Key resolveSigningKey(@SuppressWarnings("rawtypes") JwsHeader header, String plaintext) {
-        return fromCache(header);
-    }
-
 }

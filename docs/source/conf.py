@@ -29,7 +29,10 @@ release = "0.0.2"
 
 root_doc = "root-toc"
 
-extensions = ["myst_parser"]
+extensions = [
+    "myst_parser",
+    "sphinxcontrib.rsvgconverter",
+]
 
 templates_path = ["_templates"]
 exclude_patterns = ["Thumbs.db", ".DS_Store"]

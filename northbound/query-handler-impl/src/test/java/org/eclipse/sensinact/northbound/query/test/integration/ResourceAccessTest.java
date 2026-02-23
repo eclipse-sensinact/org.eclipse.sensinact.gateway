@@ -54,7 +54,10 @@ import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "name", value = "test-session"),
+})
 public class ResourceAccessTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
@@ -79,7 +82,7 @@ public class ResourceAccessTest {
     final TestUtils utils = new TestUtils();
 
     @BeforeEach
-    void start(@InjectService SensiNactSessionManager sessionManager) throws Exception {
+    void start(@InjectService(filter = "(name=test-session)", timeout = 1000) SensiNactSessionManager sessionManager) throws Exception {
         session = sessionManager.getDefaultSession(USER);
     }
 

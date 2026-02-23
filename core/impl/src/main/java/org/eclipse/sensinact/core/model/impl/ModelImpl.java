@@ -80,15 +80,21 @@ public class ModelImpl extends CommandScopedImpl implements EMFModel {
 
     @Override
     public EMFServiceBuilder<EMFService> createService(String service) {
+        return createService(service, service);
+    }
+
+    @Override
+    public EMFServiceBuilder<EMFService> createService(String service, String serviceModelName) {
+        String serviceModelNameToUse = serviceModelName == null ? service : serviceModelName;
         checkValid();
         if (isFrozen()) {
             throw new IllegalStateException("Model " + name + " is frozen and can't be modified.");
         }
-        return new ServiceBuilderImpl<>(active, null, this, service, nexusImpl);
+        return new ServiceBuilderImpl<>(active, null, this, service, serviceModelNameToUse, nexusImpl);
     }
 
     @Override
-    public EMFService createDynamicService(String svc, EClass svcEClass) {
+    public EMFService createServiceWithEClass(String svc, EClass svcEClass) {
         return new ServiceImpl(active, this, svc, svcEClass, nexusImpl);
     }
 
@@ -108,7 +114,7 @@ public class ModelImpl extends CommandScopedImpl implements EMFModel {
     @Override
     protected void checkValid() {
         super.checkValid();
-        if(!nexusImpl.registered(eClass)) {
+        if (!nexusImpl.registered(eClass)) {
             throw new IllegalStateException("This model has been deleted");
         }
     }

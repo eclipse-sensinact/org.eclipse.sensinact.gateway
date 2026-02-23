@@ -52,11 +52,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
-import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
 
@@ -65,17 +63,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.ws.rs.core.Application;
 
 @WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.northbound.rest", location = "?", properties = {
+        @Property(key = "allow.anonymous", value = "true"),
+        @Property(key = "foobar", value = "fizz") })
 public class ResourceAccessTest {
 
     @BeforeEach
-    public void await(
-            @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.northbound.rest", location = "?", properties = {
-                    @Property(key = "allow.anonymous", value = "true"),
-                    @Property(key = "foobar", value = "fizz") })) Configuration cm,
-            @InjectService(filter = "(foobar=fizz)", cardinality = 0) ServiceAware<Application> a)
+    public void await(@InjectService(filter = "(foobar=fizz)", cardinality = 0) ServiceAware<Application> a)
             throws InterruptedException {
         a.waitForService(5000);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 20; i++) {
             try {
                 if (utils.queryStatus("/").statusCode() == 200)
                     return;
@@ -83,7 +80,7 @@ public class ResourceAccessTest {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            Thread.sleep(200);
+            Thread.sleep(100);
         }
         throw new AssertionFailedError("REST API did not appear");
     }

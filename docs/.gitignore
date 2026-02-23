@@ -3,4 +3,10 @@ _build/
 build/
 
 # Python virtual environment
+.venv/
 venv/
+
+# uv
+.python-version
+pyproject.toml
+uv.lock

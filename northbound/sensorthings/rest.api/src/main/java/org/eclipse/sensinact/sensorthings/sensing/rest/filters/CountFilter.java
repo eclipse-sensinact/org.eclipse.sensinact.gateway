@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -44,11 +45,13 @@ public class CountFilter implements ContainerRequestFilter, ContainerResponseFil
 
         Object entity = responseContext.getEntity();
         if (entity instanceof ResultList) {
-            ResultList<?> resultList = (ResultList<?>) entity;
-            if(!addCount) {
-                resultList.count = null;
-            } else if (resultList.count == null) {
-                resultList.count = resultList.value.size();
+            ResultList<? extends Self> resultList = (ResultList<?>) entity;
+            if(resultList.count() != null && !addCount) {
+                responseContext.setEntity(new ResultList<>(null,
+                        resultList.nextLink(), resultList.value()));
+            } else if (resultList.count() == null && addCount) {
+                responseContext.setEntity(new ResultList<>(resultList.value().size(),
+                        resultList.nextLink(), resultList.value()));
             }
         }
     }

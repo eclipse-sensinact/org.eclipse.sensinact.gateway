@@ -34,15 +34,15 @@ public abstract class AbstractDescriptiveReadOnly<T> implements WhiteboardGet<T>
     }
 
     @Override
-    public Promise<TimedValue<T>> pullValue(PromiseFactory pf, String modelPackageUri, String model, String provider,
-            String service, String resource, Class<T> resourceType, TimedValue<T> cachedValue) {
-        Promise<TimedValue<T>> p = doPullValue(pf, modelPackageUri, model, provider, service, resource, cachedValue);
+    public Promise<TimedValue<?>> pullValue(PromiseFactory pf, String modelPackageUri, String model, String provider,
+            String service, String resource, Class<T> resourceType, TimedValue<?> cachedValue) {
+        Promise<TimedValue<?>> p = doPullValue(pf, modelPackageUri, model, provider, service, resource, cachedValue);
         if (p == null) {
             return pf.failed(new NullPointerException(getClass().getName() + " returned a null promise"));
         }
         return p;
     }
 
-    protected abstract Promise<TimedValue<T>> doPullValue(PromiseFactory promiseFactory, String modelPackageUri,
-            String model, String provider, String service, String resource, TimedValue<T> cachedValue);
+    protected abstract Promise<TimedValue<?>> doPullValue(PromiseFactory promiseFactory, String modelPackageUri,
+            String model, String provider, String service, String resource, TimedValue<?> cachedValue);
 }

@@ -7,9 +7,9 @@
   </parent>
 
   <artifactId>northbound-rest-feature</artifactId>
-  <name>Eclipse sensiNact Northbound REST API Feature</name>
-  <description>This project contains a feature providing a REST API for sensiNact</description>
   <packaging>pom</packaging>
+  <name>SensiNact Distribution :: Features :: Northbound REST</name>
+  <description>This project contains a feature providing a REST API for sensiNact</description>
 
   <properties>
     <rest.version>${revision}${changelist}</rest.version>

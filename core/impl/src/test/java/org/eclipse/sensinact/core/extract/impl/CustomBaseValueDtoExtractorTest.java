@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.core.extract.impl;
 
 import static java.util.Collections.singletonMap;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -88,6 +89,21 @@ public class CustomBaseValueDtoExtractorTest {
         public Long time;
     }
 
+    public static class MultiDto extends BaseValueDto {
+        @Data
+        public List<String> foo;
+
+        @Provider(PROVIDER_2)
+        @Service(SERVICE_2)
+        @Resource(RESOURCE_2)
+        @Data
+        public Integer[] bar;
+
+        @Resource("configured")
+        @Data(upperBound = 3)
+        public String foobar;
+    }
+
     /**
      * Tests for a {@link BaseValueDto} dto subclass with a single data field
      */
@@ -115,6 +131,7 @@ public class CustomBaseValueDtoExtractorTest {
 
             assertEquals(VALUE_2, dud.data);
             assertEquals(String.class, dud.type);
+            assertEquals(1, dud.upperBound);
             assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
 
             extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
@@ -345,6 +362,81 @@ public class CustomBaseValueDtoExtractorTest {
 
         }
 
+    }
+    /**
+     * Tests for a {@link BaseValueDto} dto subclass with a single data field
+     */
+    @Nested
+    public class MultiValueDtoTests {
+
+        @Test
+        void multiDto() {
+            MultiDto dto = new MultiDto();
+            populate(dto);
+
+            dto.foo = List.of(VALUE_2);
+            dto.bar = new Integer[] {VALUE};
+            dto.foobar = "max";
+
+            List<? extends AbstractUpdateDto> updates = extractor(MultiDto.class).getUpdates(dto);
+
+            assertEquals(4, updates.size());
+
+            AbstractUpdateDto extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE.equals(d.resource))
+                    .findFirst().get();
+
+            checkCommonFields(extracted);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            DataUpdateDto dud = (DataUpdateDto) extracted;
+
+            assertEquals(List.of(VALUE_2), dud.data);
+            assertEquals(String.class, dud.type);
+            assertEquals(-1, dud.upperBound);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> RESOURCE_2.equals(d.resource))
+                    .findFirst().get();
+
+            checkCommonFields(extracted, false);
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            dud = (DataUpdateDto) extracted;
+
+            assertArrayEquals(new Integer[] {VALUE}, (Object[]) dud.data);
+            assertEquals(Integer.class, dud.type);
+            assertEquals(-1, dud.upperBound);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(DataUpdateDto.class::isInstance)
+                    .filter(d -> "configured".equals(d.resource))
+                    .findFirst().get();
+
+            assertTrue(extracted instanceof DataUpdateDto, "Not a data update dto " + extracted.getClass());
+
+            dud = (DataUpdateDto) extracted;
+
+            assertEquals("max", dud.data);
+            assertEquals(String.class, dud.type);
+            assertEquals(3, dud.upperBound);
+            assertEquals(DuplicateAction.UPDATE_ALWAYS, dud.actionOnDuplicate);
+
+            extracted = updates.stream().filter(MetadataUpdateDto.class::isInstance).findFirst().get();
+
+            checkCommonFields(extracted);
+            assertTrue(extracted instanceof MetadataUpdateDto, "Not a metadata update dto " + extracted.getClass());
+
+            MetadataUpdateDto dud2 = (MetadataUpdateDto) extracted;
+
+            assertEquals(singletonMap(METADATA_KEY, METADATA_VALUE), dud2.metadata);
+            assertTrue(dud2.removeNullValues, "Null values should be removed");
+            assertFalse(dud2.removeMissingValues, "Missing values should be kept");
+            assertEquals(DuplicateAction.UPDATE_IF_DIFFERENT, dud2.actionOnDuplicate);
+        }
     }
 
     DataExtractor extractor(Class<?> clazz) {

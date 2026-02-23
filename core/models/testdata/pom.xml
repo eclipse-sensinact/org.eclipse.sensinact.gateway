@@ -21,7 +21,7 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>testdata</artifactId>
-  <name>SensiNact internal Testdata Model</name>
+  <name>SensiNact Core :: Models :: Testdata</name>
   <description>The model for sensinact gateway core testdata.</description>
   <!-- No integration tests -->
   <properties>

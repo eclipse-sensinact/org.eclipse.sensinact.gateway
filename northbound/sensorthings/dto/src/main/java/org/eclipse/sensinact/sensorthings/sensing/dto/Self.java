@@ -14,9 +14,9 @@ package org.eclipse.sensinact.sensorthings.sensing.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Self {
+public interface Self {
 
     @JsonProperty("@iot.selfLink")
-    public String selfLink;
+    public String selfLink();
 
 }

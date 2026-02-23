@@ -26,6 +26,7 @@ import org.eclipse.sensinact.gateway.geojson.Coordinates;
 import org.eclipse.sensinact.gateway.geojson.Feature;
 import org.eclipse.sensinact.gateway.geojson.FeatureCollection;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.gateway.geojson.Geometry;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.geojson.Polygon;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.NotFoundException;
@@ -46,14 +47,15 @@ public class DtoMapper {
 
     private static final String NO_DESCRIPTION = "No description";
 
-    private static Optional<ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider, String resource) {
+    private static Optional<? extends ResourceSnapshot> getProviderAdminField(ProviderSnapshot provider,
+            String resource) {
         ServiceSnapshot adminSvc = provider.getServices().stream().filter(s -> "admin".equals(s.getName())).findFirst()
                 .get();
         return adminSvc.getResources().stream().filter(r -> resource.equals(r.getName())).findFirst();
     }
 
     private static Optional<Object> getProviderAdminFieldValue(ProviderSnapshot provider, String resource) {
-        Optional<ResourceSnapshot> rc = getProviderAdminField(provider, resource);
+        Optional<? extends ResourceSnapshot> rc = getProviderAdminField(provider, resource);
         if (rc.isPresent()) {
             TimedValue<?> value = rc.get().getValue();
             if (value != null) {
@@ -68,16 +70,16 @@ public class DtoMapper {
     }
 
     private static String toString(Feature f, String propName) {
-        Map<String,Object> properties = f.properties();
+        Map<String, Object> properties = f.properties();
         return properties == null ? null : toString(properties.get(propName));
     }
 
     public static Thing toThing(ProviderSnapshot provider) {
         final String providerName = provider.getName();
-        Thing thing = new Thing();
-        thing.id = providerName;
-        thing.name = toString(getProviderAdminFieldValue(provider, "friendlyName").orElse(providerName));
-        thing.description = toString(getProviderAdminFieldValue(provider, "description").orElse(NO_DESCRIPTION));
+        Thing thing = new Thing(null, providerName,
+                toString(getProviderAdminFieldValue(provider, "friendlyName").orElse(providerName)),
+                toString(getProviderAdminFieldValue(provider, "description").orElse(NO_DESCRIPTION)), null, null, null,
+                null);
         return thing;
     }
 
@@ -87,36 +89,28 @@ public class DtoMapper {
             return toString(f, propName);
         } else if (location instanceof FeatureCollection) {
             FeatureCollection fc = (FeatureCollection) location;
-            return fc.features().stream().map(f -> toString(f, propName)).filter(p -> p != null)
-                    .findFirst().orElse(null);
+            return fc.features().stream().map(f -> toString(f, propName)).filter(p -> p != null).findFirst()
+                    .orElse(null);
         }
         return null;
     }
 
     public static Location toLocation(ObjectMapper mapper, ProviderSnapshot provider) {
-        Location location = new Location();
-
         final String providerName = provider.getName();
         final TimedValue<GeoJsonObject> rcLocation = getLocation(provider, mapper, false);
         final Instant time = rcLocation.getTimestamp();
         final GeoJsonObject object = rcLocation.getValue();
 
-        location.id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
+        String id = String.format("%s~%s", providerName, Long.toString(time.toEpochMilli(), 16));
 
-        String friendlyName = getProperty(object, "name");
-        location.name = Objects.requireNonNullElse(friendlyName, providerName);
+        String name = Objects.requireNonNullElse(getProperty(object, "name"), providerName);
 
-        String description = getProperty(object, "description");
-        location.description = Objects.requireNonNullElse(description, NO_DESCRIPTION);
+        String description = Objects.requireNonNullElse(getProperty(object, "description"), NO_DESCRIPTION);
 
-        location.encodingType = "application/vnd.geo+json";
-        location.location = object;
-        return location;
+        return new Location(null, id, name, description, "application/vnd.geo+json", object, null, null, null);
     }
 
     public static HistoricalLocation toHistoricalLocation(ObjectMapper mapper, ProviderSnapshot provider) {
-        HistoricalLocation historicalLocation = new HistoricalLocation();
-
         final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, true);
         final Instant time;
         if (location.getTimestamp() == null) {
@@ -124,10 +118,8 @@ public class DtoMapper {
         } else {
             time = location.getTimestamp();
         }
-
-        historicalLocation.id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
-        historicalLocation.time = time;
-        return historicalLocation;
+        String id = String.format("%s~%s", provider.getName(), Long.toString(time.toEpochMilli(), 16));
+        return new HistoricalLocation(null, id, time, null, null);
     }
 
     private static Polygon getObservedArea(GeoJsonObject object) {
@@ -147,29 +139,22 @@ public class DtoMapper {
             throw new NotFoundException();
         }
 
-        Datastream datastream = new Datastream();
-
         final ProviderSnapshot provider = resource.getService().getProvider();
         final Map<String, Object> metadata = resource.getMetadata();
 
-        datastream.id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(),
-                resource.getName());
+        String id = String.format("%s~%s~%s", provider.getName(), resource.getService().getName(), resource.getName());
 
-        datastream.name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
-        datastream.description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
+        String name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
+        String description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
 
-        // TODO can we make this more fine-grained
-        datastream.observationType = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
+        UnitOfMeasurement unit = new UnitOfMeasurement(Objects.toString(metadata.get("sensorthings.unit.name"), null),
+                Objects.toString(metadata.get("unit"), null),
+                Objects.toString(metadata.get("sensorthings.unit.definition"), null));
 
-        UnitOfMeasurement unit = new UnitOfMeasurement();
-        unit.symbol = Objects.toString(metadata.get("unit"), null);
-        unit.name = Objects.toString(metadata.get("sensorthings.unit.name"), null);
-        unit.definition = Objects.toString(metadata.get("sensorthings.unit.definition"), null);
-        datastream.unitOfMeasurement = unit;
-
-        datastream.observedArea = getObservedArea(getLocation(provider, mapper, false).getValue());
-        datastream.properties = metadata;
-        return datastream;
+        Geometry observedArea = getObservedArea(getLocation(provider, mapper, false).getValue());
+        return new Datastream(null, id, name, description,
+                "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
+                metadata, null, null, null, null);
     }
 
     public static Sensor toSensor(ResourceSnapshot resource) throws NotFoundException {
@@ -177,55 +162,45 @@ public class DtoMapper {
             throw new NotFoundException();
         }
 
-        Sensor sensor = new Sensor();
-
         final String provider = resource.getService().getProvider().getName();
         final Map<String, Object> metadata = resource.getMetadata();
 
-        sensor.id = String.format("%s~%s~%s", provider, resource.getService().getName(), resource.getName());
+        String id = String.format("%s~%s~%s", provider, resource.getService().getName(), resource.getName());
 
-        sensor.name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
-        sensor.description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
-        sensor.properties = metadata;
+        String name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
+        String description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
 
-        sensor.metadata = metadata.getOrDefault("sensorthings.sensor.metadata", "No metadata");
-        sensor.encodingType = toString(metadata.getOrDefault("sensorthings.sensor.encodingType", "text/plain"));
-        return sensor;
+        String encodingType = toString(metadata.getOrDefault("sensorthings.sensor.encodingType", "text/plain"));
+        return new Sensor(null, id, name, description, encodingType,
+                metadata.getOrDefault("sensorthings.sensor.metadata", "No metadata"), metadata, null);
     }
 
     public static Observation toObservation(String provider, String service, String resource, TimedValue<?> tv) {
-        Observation observation = new Observation();
-
-        observation.id = String.format("%s~%s~%s~%s", provider, service, resource,
+        String id = String.format("%s~%s~%s~%s", provider, service, resource,
                 Long.toString(tv.getTimestamp().toEpochMilli(), 16));
 
-        observation.resultTime = tv.getTimestamp();
-        observation.result = tv.getValue();
-        observation.phenomenonTime = tv.getTimestamp();
-        return observation;
+        Instant timestamp = tv.getTimestamp();
+        return new Observation(null, id, timestamp, timestamp, tv.getValue(), null, null, null, null, null);
     }
 
     public static ObservedProperty toObservedProperty(ResourceSnapshot resource) {
-        ObservedProperty observedProperty = new ObservedProperty();
-
         final Map<String, Object> metadata = resource.getMetadata();
 
-        observedProperty.id = String.format("%s~%s~%s", resource.getService().getProvider().getName(),
+        String id = String.format("%s~%s~%s", resource.getService().getProvider().getName(),
                 resource.getService().getName(), resource.getName());
 
-        observedProperty.name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
-        observedProperty.description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
-        observedProperty.properties = metadata;
-
-        observedProperty.definition = toString(
+        String name = toString(metadata.getOrDefault("friendlyName", resource.getName()));
+        String description = toString(metadata.getOrDefault("description", NO_DESCRIPTION));
+        String definition = toString(
                 metadata.getOrDefault("sensorthings.observedproperty.definition", "No definition"));
-        return observedProperty;
+
+        return new ObservedProperty(null, id, name, description, definition, metadata, null);
     }
 
     private static TimedValue<GeoJsonObject> getLocation(ProviderSnapshot provider, ObjectMapper mapper,
             boolean allowNull) {
 
-        final Optional<ResourceSnapshot> locationResource = getProviderAdminField(provider, "location");
+        final Optional<? extends ResourceSnapshot> locationResource = getProviderAdminField(provider, "location");
 
         final Instant time;
         final Object rawValue;
@@ -271,23 +246,16 @@ public class DtoMapper {
     }
 
     public static FeatureOfInterest toFeatureOfInterest(ObjectMapper mapper, ProviderSnapshot provider) {
-        FeatureOfInterest featureOfInterest = new FeatureOfInterest();
-
         final String providerName = provider.getName();
 
         final TimedValue<GeoJsonObject> location = getLocation(provider, mapper, false);
         final GeoJsonObject object = location.getValue();
 
-        featureOfInterest.id = providerName;
+        String name = Objects.requireNonNullElse(getProperty(object, "name"), providerName);
 
-        String friendlyName = getProperty(object, "name");
-        featureOfInterest.name = Objects.requireNonNullElse(friendlyName, providerName);
+        String description = Objects.requireNonNullElse(getProperty(object, "description"), NO_DESCRIPTION);
 
-        String description = getProperty(object, "description");
-        featureOfInterest.description = Objects.requireNonNullElse(description, NO_DESCRIPTION);
-
-        featureOfInterest.encodingType = "application/vnd.geo+json";
-        featureOfInterest.feature = object;
-        return featureOfInterest;
+        return new FeatureOfInterest(null, providerName, name, description, "application/vnd.geo+json", object, null,
+                null);
     }
 }

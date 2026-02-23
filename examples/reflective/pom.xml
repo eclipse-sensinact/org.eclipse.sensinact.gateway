@@ -23,7 +23,7 @@ SPDX-License-Identifier: EPL-2.0
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>reflective</artifactId>
-  <name>Example reflective</name>
+  <name>SensiNact Examples :: Reflective</name>
   <description>The reflective module contains examples showing how to define a
     model using method calls</description>
 

@@ -13,7 +13,9 @@
 
 package org.eclipse.sensinact.core.snapshot;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
@@ -32,13 +34,20 @@ public interface ResourceSnapshot extends Snapshot {
     boolean isSet();
 
     /**
+     * Whether the value for this resource snapshot is multi-valued and so the
+     * value is wrapped in a {@link List}.
+     * @return <code>true</code> if this resource is multi-valued
+     */
+    boolean isMultiple();
+
+    /**
      * Returns the class of the value this resource holds. (Object for any)
      */
     Class<?> getType();
 
     /**
      * Returns the (cached) value of the resource at the time of the snapshot. Can
-     * be null if the value was never set.
+     * be an empty timed value if the value was never set.
      */
     TimedValue<?> getValue();
 
@@ -51,6 +60,12 @@ public interface ResourceSnapshot extends Snapshot {
      * Returns the kind of resource, see {@link ResourceType}
      */
     ResourceType getResourceType();
+
+    /**
+     * Returns the arguments for an Action resource, or <code>null</code> otherwise
+     * @return
+     */
+    List<Entry<String, Class<?>>> getArguments();
 
     /**
      * Returns the value type, <em>i.e.</em> the kind of access it allows. See

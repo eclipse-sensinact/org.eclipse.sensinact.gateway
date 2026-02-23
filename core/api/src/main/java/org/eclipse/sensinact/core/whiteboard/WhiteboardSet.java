@@ -38,7 +38,7 @@ public interface WhiteboardSet<T> extends WhiteboardGet<T> {
      * @param newValue        New value
      * @return A promise, created with the promise factory
      */
-    Promise<TimedValue<T>> pushValue(PromiseFactory promiseFactory, String modelPackageUri, String model,
-            String provider, String service, String resource, Class<T> resourceType, TimedValue<T> cachedValue,
-            TimedValue<T> newValue);
+    Promise<TimedValue<?>> pushValue(PromiseFactory promiseFactory, String modelPackageUri, String model,
+            String provider, String service, String resource, Class<T> resourceType, TimedValue<?> cachedValue,
+            TimedValue<?> newValue);
 }

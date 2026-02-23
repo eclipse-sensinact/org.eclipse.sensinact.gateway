@@ -21,7 +21,7 @@
   <artifactId>device-factory</artifactId>
   <packaging>pom</packaging>
 
-  <name>Southbound Device Factory :: Parent</name>
+  <name>SensiNact Southbound :: Device Factory</name>
   <description>Parent project of sensiNact device factory bundles</description>
 
   <modules>

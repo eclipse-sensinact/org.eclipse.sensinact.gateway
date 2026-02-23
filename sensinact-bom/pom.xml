@@ -19,7 +19,7 @@
   </parent>
   <artifactId>sensinact-bom</artifactId>
   <packaging>pom</packaging>
-  <name>Eclipse sensiNact Bill of Materials</name>
+  <name>SensiNact Bill of Materials</name>
   <description>Eclipse sensiNact Bill of Materials contains all modules of the core, north- and south-bound. Examples are not part ot the BOM.</description>
 
   <properties>

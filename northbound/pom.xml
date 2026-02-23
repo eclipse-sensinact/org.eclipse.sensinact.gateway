@@ -21,7 +21,7 @@
   <artifactId>northbound</artifactId>
   <packaging>pom</packaging>
 
-  <name>Northbound Connectors</name>
+  <name>SensiNact Northbound</name>
   <description>This reactor contains northbound connectors that are used to interact with sensiNact</description>
 
   <properties>

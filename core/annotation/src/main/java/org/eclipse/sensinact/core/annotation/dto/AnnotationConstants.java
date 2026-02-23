@@ -19,4 +19,11 @@ public final class AnnotationConstants {
 
     public static final String NOT_SET = "<<NOT_SET>>";
 
+    /**
+     * This marker value is used to indicate that no upper bound
+     * has been set in the annotation, and that inference should
+     * be used to determine whether this resource is multi-valued.
+     */
+    public static final int NO_UPPER_BOUND_SET = -3;
+
 }

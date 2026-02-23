@@ -19,18 +19,9 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Thing extends NameDescription {
-
-    @JsonInclude(NON_NULL)
-    public Map<String, Object> properties;
-
-    @JsonProperty("Datastreams@iot.navigationLink")
-    public String datastreamsLink;
-
-    @JsonProperty("HistoricalLocations@iot.navigationLink")
-    public String historicalLocationsLink;
-
-    @JsonProperty("Locations@iot.navigationLink")
-    public String locationsLink;
-
+public record Thing(String selfLink, Object id, String name, String description,
+        @JsonInclude(NON_NULL) Map<String, Object> properties,
+        @JsonProperty("Datastreams@iot.navigationLink") String datastreamsLink,
+        @JsonProperty("HistoricalLocations@iot.navigationLink") String historicalLocationsLink,
+        @JsonProperty("Locations@iot.navigationLink") String locationsLink) implements NameDescription {
 }

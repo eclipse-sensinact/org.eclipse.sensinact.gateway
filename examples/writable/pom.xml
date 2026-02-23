@@ -8,7 +8,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>writable</artifactId>
-  <name>Example writable</name>
+  <name>SensiNact Examples :: Writable</name>
   <description>The writable module contains examples showing how to set data in
     a device</description>
 

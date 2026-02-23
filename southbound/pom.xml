@@ -21,7 +21,7 @@
   <artifactId>southbound</artifactId>
   <packaging>pom</packaging>
 
-  <name>Southbound Connectors</name>
+  <name>SensiNact Southbound</name>
   <description>This reactor contains southbound connectors that are used to gather data from various protocols</description>
 
   <modules>

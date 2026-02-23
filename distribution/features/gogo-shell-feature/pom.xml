@@ -7,9 +7,9 @@
   </parent>
 
   <artifactId>gogo-shell-feature</artifactId>
-  <name>Eclipse sensiNact Gogo Shell Feature</name>
-  <description>This project contains a feature providing Apache Felix Gogo Shell</description>
   <packaging>pom</packaging>
+  <name>SensiNact Distribution :: Features :: Gogo Shell</name>
+  <description>This project contains a feature providing Apache Felix Gogo Shell</description>
 
   <dependencies>
     <dependency>
@@ -20,7 +20,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.gogo.runtime</artifactId>
-      <version>1.1.4</version>
+      <version>1.1.6</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+/*********************************************************************
+* Copyright (c) 2025 Kentyou and others
+*
+* This program and the accompanying materials are made
+* available under the terms of the Eclipse Public License 2.0
+* which is available at https://www.eclipse.org/legal/epl-2.0/
+*
+* SPDX-License-Identifier: EPL-2.0
+**********************************************************************/
+-->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://web.resource.org/cc/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" baseProfile="full" width="300px" height="300px" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet" id="svg_document" style="zoom: 1;"><!-- Created with macSVG - https://macsvg.org/ - https://github.com/dsward2/macsvg/ --><title id="svg_document_title">Untitled.svg</title><defs id="svg_document_defs"></defs><g id="main_group"></g><polygon points="46,123 170,40 286,124 119,228 35,211 " stroke="brown" id="polygon1" stroke-width="3px" fill="lightcoral" transform=""></polygon><circle stroke="royalblue" id="circle1" stroke-width="3px" cy="195px" fill="cornflowerblue" r="2px" cx="170px" transform=""></circle><line stroke="#000000" y1="55px" id="line1" x1="189px" stroke-width="3px" y2="55px" x2="189px" transform=""></line><line stroke="royalblue" y1="59.000000px" id="line2" x1="196.000000px" stroke-width="3px" y2="103.000000px" x2="257.000000px" transform=""></line></svg>

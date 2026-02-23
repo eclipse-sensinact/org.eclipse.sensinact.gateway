@@ -48,6 +48,7 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryUnsubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultSubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultUnsubscribeDTO;
+import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
@@ -58,13 +59,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WithConfiguration(pid = "sensinact.northbound.websocket", properties = @Property(key = "allow.anonymous", value = "true"))
-@WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
+@WithConfiguration(pid = "sensinact.session.manager", properties = {
+        @Property(key = "auth.policy", value = "ALLOW_ALL"),
+        @Property(key = "name", value = "test-session"),
+})
 public class WebSocketTest {
 
     @InjectService
     DataUpdate push;
 
     final ObjectMapper mapper = new ObjectMapper();
+
+    @InjectService(filter = "(name=test-session)", timeout = 1000)
+    SensiNactSessionManager sessionManager;
 
     static URI wsUri;
 

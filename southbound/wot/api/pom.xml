@@ -21,7 +21,7 @@
   </parent>
   <artifactId>wot-api</artifactId>
 
-  <name>Web of Things API</name>
+  <name>SensiNact Southbound :: Web of Things :: API</name>
   <description>APIs and classes to describe Things</description>
 
   <dependencies>

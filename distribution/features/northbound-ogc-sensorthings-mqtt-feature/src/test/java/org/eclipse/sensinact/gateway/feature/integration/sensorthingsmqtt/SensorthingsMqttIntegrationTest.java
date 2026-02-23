@@ -134,18 +134,18 @@ class SensorthingsMqttIntegrationTest {
         messages.clear();
 
         for (final Datastream ds : datastreamUpdates) {
-            assertEquals(thingId, ds.id);
-            assertEquals("No description", ds.description);
-            assertEquals("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", ds.observationType);
-            assertNotNull(ds.properties, "No properties given");
-            assertTrue(ds.properties.containsKey("timestamp"), "No timestamp property");
-            assertTrue(Instant.parse((String) ds.properties.get("timestamp")).isAfter(start));
+            assertEquals(thingId, ds.id());
+            assertEquals("No description", ds.description());
+            assertEquals("http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", ds.observationType());
+            assertNotNull(ds.properties(), "No properties given");
+            assertTrue(ds.properties().containsKey("timestamp"), "No timestamp property");
+            assertTrue(Instant.parse((String) ds.properties().get("timestamp")).isAfter(start));
 
-            assertNull(ds.observationsLink, "Got a link");
-            assertNull(ds.observedPropertyLink, "Got a link");
-            assertNull(ds.selfLink, "Got a link");
-            assertNull(ds.sensorLink, "Got a link");
-            assertNull(ds.thingLink, "Got a link");
+            assertNull(ds.observationsLink(), "Got a link");
+            assertNull(ds.observedPropertyLink(), "Got a link");
+            assertNull(ds.selfLink(), "Got a link");
+            assertNull(ds.sensorLink(), "Got a link");
+            assertNull(ds.thingLink(), "Got a link");
         }
 
         // Test observation
@@ -156,15 +156,15 @@ class SensorthingsMqttIntegrationTest {
         messages.clear();
 
         for (final Observation obs : observationUpdates) {
-            assertTrue(String.valueOf(obs.id).startsWith(thingId + "~"), "Invalid observation ID: " + obs.id);
-            assertNotNull(obs.result, "No result in observation");
-            assertInstanceOf(Number.class, obs.result);
-            assertTrue(obs.resultTime.isAfter(start));
-            assertEquals(obs.resultTime, obs.phenomenonTime);
+            assertTrue(String.valueOf(obs.id()).startsWith(thingId + "~"), "Invalid observation ID: " + obs.id());
+            assertNotNull(obs.result(), "No result in observation");
+            assertInstanceOf(Number.class, obs.result());
+            assertTrue(obs.resultTime().isAfter(start));
+            assertEquals(obs.resultTime(), obs.phenomenonTime());
 
-            assertNull(obs.datastreamLink, "Got a link");
-            assertNull(obs.featureOfInterestLink, "Got a link");
-            assertNull(obs.selfLink, "Got a link");
+            assertNull(obs.datastreamLink(), "Got a link");
+            assertNull(obs.featureOfInterestLink(), "Got a link");
+            assertNull(obs.selfLink(), "Got a link");
         }
     }
 }

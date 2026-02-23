@@ -6,7 +6,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>resource.selector.impl</artifactId>
-  <name>SensiNact Filters :: Resource Selector Implementation</name>
+  <name>SensiNact Filters :: Resource Selector :: Implementation</name>
   <description>Converts a resource selector into a SensiNact filter</description>
   <dependencies>
     <dependency>

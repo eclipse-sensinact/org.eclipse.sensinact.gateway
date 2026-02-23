@@ -27,5 +27,5 @@ public interface ResourceValueFilter {
      *                  provider
      * @return True if the provider is accepted, else false
      */
-    boolean test(ProviderSnapshot provider, List<ResourceSnapshot> resources);
+    boolean test(ProviderSnapshot provider, List<? extends ResourceSnapshot> resources);
 }

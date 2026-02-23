@@ -1,8 +1,8 @@
 {
-  "@iot.id": 1514,
   "@iot.selfLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1514)",
-  "description": "Generated using location details: The geographic location with coordinates for the Toronto bike share station Harrison/Dovercourt",
+  "@iot.id": 1514,
   "name": "7203:Harrison/Dovercourt",
+  "description": "Generated using location details: The geographic location with coordinates for the Toronto bike share station Harrison/Dovercourt",
   "encodingType": "application/vnd.geo+json",
   "feature": {
     "coordinates": [
@@ -11,5 +11,6 @@
     ],
     "type": "Point"
   },
+  "properties": {},
   "Observations@iot.navigationLink": "https://toronto-bike-snapshot.sensorup.com/v1.0/FeaturesOfInterest(1514)/Observations"
 }

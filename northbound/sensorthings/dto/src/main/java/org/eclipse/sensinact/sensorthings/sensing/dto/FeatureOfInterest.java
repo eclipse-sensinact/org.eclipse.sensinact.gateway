@@ -12,17 +12,13 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto;
 
+import java.util.Map;
+
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FeatureOfInterest extends NameDescription {
-
-    public String encodingType;
-
-    public GeoJsonObject feature;
-
-    @JsonProperty("Observations@iot.navigationLink")
-    public String observationsLink;
-
+public record FeatureOfInterest(String selfLink, Object id, String name, String description, String encodingType,
+        GeoJsonObject feature, Map<String, Object> properties,
+        @JsonProperty("Observations@iot.navigationLink") String observationsLink) implements NameDescription {
 }

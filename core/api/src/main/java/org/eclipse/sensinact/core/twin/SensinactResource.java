@@ -61,36 +61,104 @@ public interface SensinactResource extends CommandScoped {
     List<Map.Entry<String, Class<?>>> getArguments();
 
     /**
-     * Set the value of the resource
+     * The minimum number of entries supported by this resource.
+     * @return the lower bound for this resource defined by the model
+     */
+    int getLowerBound();
+
+    /**
+     * The maximum number of entries supported by this resource. If greater than
+     * one then this is a multiple resource (see {@link #isMultiple()})
+     * @return the upper bound for this resource defined by the model
+     */
+    int getUpperBound();
+
+    /**
+     * Whether this resource is multi-valued (i.e. the model has an upper bound not equal to 1)
+     * @return <code>true</code> if this resource is multi-valued
+     */
+    boolean isMultiple();
+
+    /**
+     * Set the value of the resource with the current time
      *
-     * @param value
-     * @param timestamp
-     * @return
+     * @param value If the value is a Collection and this resource
+     * is multi-valued then the values in the collection will be used
+     * to set the values in the resource.
+     * @return a {@link Promise} representing the result of setting the
+     * value. The {@link Promise} will be failed if the value cannot be
+     * set, for example:
+     * <ul>
+     *   <li>Due to a conversion failure</li>
+     *   <li>If the value violates the minumum or maximum bounds for this resource</li>
+     * </ul>
      */
     default Promise<Void> setValue(Object value) {
         return setValue(value, Instant.now());
     };
 
     /**
-     * Set the value of the resource
+     * Set the value of the resource. If this resource is multi-valued then
+     * this value will become the only entry
      *
-     * @param value
+     * @param value The single value to use as the value of this resource
      * @param timestamp
-     * @return
+     * @return a {@link Promise} representing the result of setting the
+     * value. The {@link Promise} will be failed if the value cannot be
+     * set, for example:
+     * <ul>
+     *   <li>Due to a conversion failure</li>
+     *   <li>If the value violates the minumum or maximum bounds for this resource</li>
+     * </ul>
      */
     <T> Promise<Void> setValue(T value, Instant timestamp);
 
     /**
+     * Set the value of a multi-valued resource
+     *
+     * @param value
+     * @return a {@link Promise} representing the result of setting the
+     * value. The {@link Promise} will be failed if the value cannot be
+     * set, for example:
+     * <ul>
+     *   <li>Due to a conversion failure</li>
+     *   <li>If the value violates the minumum or maximum bounds for this resource</li>
+     * </ul>
+     */
+    default <T> Promise<Void> setValue(List<? extends T> value){
+        return setValue(value, Instant.now());
+    }
+
+    /**
+     * Set the value of a multi-valued resource
+     *
+     * @param value
+     * @param timestamp
+     * @return a {@link Promise} representing the result of setting the
+     * value. The {@link Promise} will be failed if the value cannot be
+     * set, for example:
+     * <ul>
+     *   <li>Due to a conversion failure</li>
+     *   <li>If the value violates the minumum or maximum bounds for this resource</li>
+     * </ul>
+     */
+    <T> Promise<Void> setValue(List<? extends T> value, Instant timestamp);
+
+    /**
      * Get the value of the resource
+     * @return a {@link Promise} containing the value. This may be a List if
+     * this resource {@link #isMultiple()}
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     default Promise<TimedValue<?>> getValue() {
-        return getValue((Class) Object.class, GetLevel.NORMAL);
+        return isMultiple() ? getMultiValue((Class) Object.class, GetLevel.NORMAL) :
+            getValue((Class) Object.class, GetLevel.NORMAL);
     }
 
     /**
      * Get the typed value of the resource. If the value doesn't match the expected
-     * type, null is returned.
+     * type, null is returned. If this resource {@link #isMultiple()} then only the
+     * first value is returned in the {@link Promise}
      *
      * @param type Expected resource type
      * @return The timed and typed value of the resource
@@ -102,12 +170,39 @@ public interface SensinactResource extends CommandScoped {
     /**
      * Get the typed value of the resource.
      * If the value doesn't match the expected type, null is returned.
+     * If this resource {@link #isMultiple()} then only the first
+     * value is returned in the {@link Promise}
      *
      * @param type Expected resource type
      * @param getLevel Get command level for pull-based resources
      * @return The timed and typed value of the resource
      */
     <T> Promise<TimedValue<T>> getValue(Class<T> type, GetLevel getLevel);
+
+    /**
+     * Get the typed value of the resource.
+     * If the value doesn't match the expected type, null is returned.
+     * If this resource is not {@link #isMultiple()} then the single
+     * value is returned wrapped in a {@link List} in the {@link Promise}
+     *
+     * @param type Expected resource type
+     * @return The timed and typed value of the resource
+     */
+    default <T> Promise<TimedValue<List<T>>> getMultiValue(Class<T> type) {
+        return getMultiValue(type, GetLevel.NORMAL);
+    }
+
+    /**
+     * Get the typed value of the resource.
+     * If the value doesn't match the expected type, null is returned.
+     * If this resource is not {@link #isMultiple()} then the single
+     * value is returned wrapped in a {@link List} in the {@link Promise}
+     *
+     * @param type Expected resource type
+     * @param getLevel Get command level for pull-based resources
+     * @return The timed and typed value of the resource
+     */
+    <T> Promise<TimedValue<List<T>>> getMultiValue(Class<T> type, GetLevel getLevel);
 
     /**
      * Set a metadata value for the resource

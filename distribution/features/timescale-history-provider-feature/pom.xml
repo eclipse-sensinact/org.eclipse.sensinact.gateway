@@ -7,8 +7,7 @@
   </parent>
   <artifactId>timescale-history-provider-feature</artifactId>
   <packaging>pom</packaging>
-
-  <name>Eclipse sensiNact Timescale DB History Provider  Feature</name>
+  <name>SensiNact Distribution :: Features :: Timescale History Provider</name>
   <description>This project contains a feature providing a Jakarta Servlet whiteboard</description>
 
   <dependencies>
@@ -45,23 +44,23 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.5.1</version>
+      <version>42.7.9</version>
     </dependency>
     <dependency>
       <groupId>org.apache.aries.tx-control</groupId>
       <artifactId>tx-control-service-local</artifactId>
-      <version>1.0.1</version>
+      <version>${aries.tx-control.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.aries.tx-control</groupId>
       <artifactId>tx-control-provider-jdbc-local</artifactId>
-      <version>1.0.1</version>
+      <version>${aries.tx-control.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>${testcontainers.version}</version>
+      <groupId>org.eclipse.sensinact.gateway.test</groupId>
+      <artifactId>testcontainers.postgres</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

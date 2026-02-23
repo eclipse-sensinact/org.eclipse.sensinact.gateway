@@ -18,7 +18,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A parameter annotation used to define the name of a setter parameter.
+ * A parameter annotation used to define the type of a setter parameter.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
@@ -34,17 +34,21 @@ public @interface SetParam {
      */
     public enum SetSegment {
         /**
-         * Current value in the twin
+         * Current value in the twin. May be a TimedValue or
+         * a POJO. The actual resource value will be converted into
+         * the parameter type if it does not match.
          */
         CACHED_VALUE,
 
         /**
-         * New value given to the handler
+         * New value given to the handler. May be a TimedValue or
+         * a POJO. The supplied value will be converted into
+         * the parameter type if it does not match.
          */
         NEW_VALUE,
 
         /**
-         * Expected result type (Class)
+         * Expected result type - the parameter must be a {@link Class}
          */
         RESULT_TYPE,
     }

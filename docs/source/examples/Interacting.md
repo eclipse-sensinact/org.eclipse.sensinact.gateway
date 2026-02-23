@@ -238,5 +238,5 @@ A successful response will look like the following:
 After a `SET` subsequent `GET` requests will return the previously set value.
 
 ```{note}
-If your resource is `FIXED` or `UPDATABLE` then it cannot be set by the northbound API. Also, the behaviour of `SET` requests may be slightly different if your resource is [pull-based](../southbound/custom/custom.md#set-methods) and the device returns a different value.
+If your resource is `FIXED` or `UPDATABLE` then it cannot be set by the northbound API. Also, the behaviour of `SET` requests may be slightly different if your resource is [pull-based](../southbound/custom/whiteboard.md#set-methods) and the device returns a different value.
 ```

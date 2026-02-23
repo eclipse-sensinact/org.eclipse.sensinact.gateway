@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>security-api</artifactId>
-  <name>SensiNact Northbound Security API</name>
+  <name>SensiNact Northbound :: Security :: API</name>
   <description>The Security API for sensiNact gateway Northbound providers</description>
   <!-- No integration tests -->
   <properties>

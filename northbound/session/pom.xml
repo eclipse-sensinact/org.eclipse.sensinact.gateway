@@ -21,7 +21,7 @@
   <artifactId>session</artifactId>
   <packaging>pom</packaging>
 
-  <name>Northbound Session Provider</name>
+  <name>SensiNact Northbound :: Session</name>
   <description>This reactor contains the session api and implementation for Northbound Providers</description>
 
   <modules>

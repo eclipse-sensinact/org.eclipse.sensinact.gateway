@@ -13,7 +13,8 @@
 package org.eclipse.sensinact.core.notification;
 
 public sealed interface ResourceNotification permits LifecycleNotification,
-    ResourceActionNotification, ResourceDataNotification, ResourceMetaDataNotification {
+    ResourceActionNotification, ResourceDataNotification, ResourceMetaDataNotification,
+    LinkedProviderNotification {
 
     public String modelPackageUri();
 

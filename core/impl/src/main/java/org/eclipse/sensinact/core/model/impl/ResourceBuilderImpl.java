@@ -40,6 +40,8 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     private boolean hasGetter;
     private long getterCacheMs;
     private boolean hasSetter;
+    private int lowerBound = 0;
+    private int upperBound = 1;
 
     public ResourceBuilderImpl(AtomicBoolean active, R parent, ServiceImpl builtParent, String name,
             ModelNexus nexusImpl) {
@@ -122,6 +124,20 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
     }
 
     @Override
+    public ResourceBuilder<R, T> withLowerBound(int lowerBound) {
+        checkValid();
+        this.lowerBound = lowerBound;
+        return this;
+    }
+
+    @Override
+    public ResourceBuilder<R, T> withUpperBound(int upperBound) {
+        checkValid();
+        this.upperBound = upperBound;
+        return this;
+    }
+
+    @Override
     public ResourceBuilder<R, T> withGetterCache(Duration cacheDuration) {
         checkValid();
         if (cacheDuration == null || cacheDuration.isNegative()) {
@@ -145,12 +161,17 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
         if (resourceType == null) {
             resourceType = ResourceType.SENSOR;
         }
+        if (lowerBound < 0) {
+            throw new IllegalArgumentException("lower bound must not be smaller then zero");
+        }
+        if (upperBound > -1 && lowerBound > upperBound) {
+            throw new IllegalArgumentException("lower bound must not be higher then upper bound");
+        }
 
         if (resourceType == ResourceType.SENSOR) {
             if (namedParameterTypes != null) {
                 throw new IllegalArgumentException("Action details cannot be set for a SENSOR resource");
             }
-
             if (type == null && initialValue == null) {
                 throw new IllegalArgumentException("The resource " + name + " must define a type or a value");
             } else if (type == null) {
@@ -180,11 +201,11 @@ public class ResourceBuilderImpl<R, T> extends NestableBuilderImpl<R, ServiceImp
         switch (resourceType) {
         case ACTION:
             createResource = nexusImpl.createActionResource(builtParent.getServiceEClass(), name, type,
-                    namedParameterTypes, defaultMetadata);
+                    namedParameterTypes, defaultMetadata, lowerBound, upperBound);
             break;
         case SENSOR:
             createResource = nexusImpl.createResource(builtParent.getServiceEClass(), name, type, timestamp,
-                    initialValue, defaultMetadata, hasGetter, getterCacheMs, hasSetter);
+                    initialValue, defaultMetadata, hasGetter, getterCacheMs, hasSetter, lowerBound, upperBound);
             break;
         case PROPERTY:
         case STATE_VARIABLE:

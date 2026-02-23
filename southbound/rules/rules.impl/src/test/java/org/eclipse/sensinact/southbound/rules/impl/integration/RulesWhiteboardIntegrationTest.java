@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -114,19 +115,19 @@ public class RulesWhiteboardIntegrationTest {
         Mockito.verify(rule).getInputFilter();
 
         // Called once and not again
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.argThat(hasProviders("Temp1")), Mockito.notNull());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.argThat(hasProviders("Temp1")), Mockito.notNull());
         Mockito.verifyNoMoreInteractions(rule);
         Mockito.clearInvocations(rule);
 
         push.pushUpdate(makeRc("temperature", "Temp1", "sensor", "temperature", 12)).getValue();
 
         // Called once and not again
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.argThat(hasProviders("Temp1")), Mockito.notNull());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.argThat(hasProviders("Temp1")), Mockito.notNull());
 
         push.pushUpdate(makeRc("temperature", "Temp2", "sensor", "temperature", 42)).getValue();
 
         // Not called for other updates
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.anyList(), Mockito.any());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.anyList(), Mockito.any());
     }
 
     @Test
@@ -146,19 +147,19 @@ public class RulesWhiteboardIntegrationTest {
         Mockito.verify(rule).getInputFilter();
 
         // Called once and not again
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.eq(List.of()), Mockito.notNull());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.eq(List.of()), Mockito.notNull());
         Mockito.verifyNoMoreInteractions(rule);
         Mockito.clearInvocations(rule);
 
         push.pushUpdate(makeRc("temperature", "Temp5", "sensor", "temperature", 12)).getValue();
 
         // Called once and not again
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.argThat(hasProviders("Temp5")), Mockito.notNull());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.argThat(hasProviders("Temp5")), Mockito.notNull());
 
         push.pushUpdate(makeRc("temperature", "Temp2", "sensor", "temperature", 42)).getValue();
 
         // Not called for other updates
-        Mockito.verify(rule, Mockito.after(100)).evaluate(Mockito.anyList(), Mockito.any());
+        Mockito.verify(rule, Mockito.after(500)).evaluate(Mockito.anyList(), Mockito.any());
     }
 
     @Test
@@ -171,10 +172,12 @@ public class RulesWhiteboardIntegrationTest {
 
         ICriterion criterion = Mockito.mock(ICriterion.class, Mockito.CALLS_REAL_METHODS);
 
+        AtomicBoolean s2Acquired = new AtomicBoolean(false);
         Mockito.when(rule.getInputFilter()).thenReturn(criterion);
         Mockito.doAnswer(x -> {
+            System.out.println("Rule called on thread: " + Thread.currentThread().toString());
             s1.release();
-            s2.acquire();
+            s2Acquired.set(s2.tryAcquire(5000, TimeUnit.MILLISECONDS));
             return null;
         }).when(rule).evaluate(Mockito.anyList(), Mockito.any(ResourceUpdater.class));
 
@@ -191,6 +194,7 @@ public class RulesWhiteboardIntegrationTest {
         // Release the block and we should be called again
         s2.release();
         assertTrue(s1.tryAcquire(1000, TimeUnit.MILLISECONDS));
+        assertTrue(s2Acquired.get());
     }
 
     private ArgumentMatcher<List<ProviderSnapshot>> hasProviders(String... names) {

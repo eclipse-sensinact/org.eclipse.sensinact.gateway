@@ -11,6 +11,8 @@
  **********************************************************************/
 package org.eclipse.sensinact.southbound.rules.impl;
 
+import static org.osgi.util.promise.PromiseFactory.Option.CALLBACKS_EXECUTOR_THREAD;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,7 +59,7 @@ public class RuleWhiteboard {
         this.workers = Executors.newFixedThreadPool(4, r -> new Thread(group, r));
         this.scheduler = Executors.newSingleThreadScheduledExecutor(r -> new Thread(group, r, "Rules Whiteboard Scheduler"));
         this.promiseFactory = new PromiseFactory(Executors.unconfigurableExecutorService(workers),
-                Executors.unconfigurableScheduledExecutorService(scheduler));
+                Executors.unconfigurableScheduledExecutorService(scheduler), CALLBACKS_EXECUTOR_THREAD);
     }
 
     private final Map<String, RuleProcessor> processors = new ConcurrentHashMap<>();

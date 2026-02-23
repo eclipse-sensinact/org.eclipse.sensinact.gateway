@@ -1,0 +1,13 @@
+# EditorConfig helps developers define and maintain consistent
+# coding styles between different editors and IDEs
+# editorconfig.org
+
+[*.java]
+indent_size = 1
+indent_style = tab
+trim_trailing_whitespace = false
+insert_final_newline = unset
+
+[SensorthingsPackageImpl.java]
+indent_style = unset
+

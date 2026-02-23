@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>emf-api</artifactId>
-  <name>SensiNact core API with EMF dependencies</name>
+  <name>SensiNact Core :: EMF API</name>
   <description>The API of the sensinact gateway core including EMF usage</description>
   <!-- No integration tests -->
   <properties>

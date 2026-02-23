@@ -1,0 +1,64 @@
+-includeresource: \
+    @testcontainers-${testcontainers.version}.jar, \
+    @docker-java-api-${docker.java.version}.jar, \
+    @docker-java-transport-zerodep-${docker.java.version}.jar, \
+    @docker-java-transport-${docker.java.version}.jar,\
+    @duct-tape-${duct.tape.version}.jar
+
+Export-Package: \
+    com.github.dockerjava.api;\
+    com.github.dockerjava.api.async;\
+    com.github.dockerjava.api.command;\
+    com.github.dockerjava.api.exception;\
+    com.github.dockerjava.api.model;\
+    com.github.dockerjava.transport;version=${docker.java.version};-split-package:=first,\
+    org.rnorth.ducttape.*;version=${duct.tape.version};-split-package:=first,\
+    org.testcontainers;\
+    org.testcontainers.containers;\
+    org.testcontainers.containers.output;\
+    org.testcontainers.containers.startupcheck;\
+    org.testcontainers.containers.traits;\
+    org.testcontainers.containers.wait.strategy;\
+    org.testcontainers.core;\
+    org.testcontainers.dockerclient;\
+    org.testcontainers.images;\
+    org.testcontainers.images.builder;\
+    org.testcontainers.images.builder.dockerfile;\
+    org.testcontainers.images.builder.dockerfile.statement;\
+    org.testcontainers.images.builder.dockerfile.traits;\
+    org.testcontainers.images.builder.traits;\
+    org.testcontainers.lifecycle;\
+    org.testcontainers.utility;version=${testcontainers.version};-split-package:=first
+
+Import-Package: \
+    !android.os,\
+    !com.google.appengine.*,\
+    !com.google.apphosting.api,\
+    !com.google.cloud.tools.jib.*,\
+    !javax.annotation.*,\
+    !org.conscrypt,\
+    !sun.misc,\
+    *
+
+# Remove warnings about annotation dependencies from repackaged code
+-fixupmessages: \
+    "While traversing the type tree for com.github.dockerjava.* cannot find class javax.annotation.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for com.github.dockerjava.* cannot find class org.immutables.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class com.google.auto.service.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class com.google.j2objc.annotations.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class lombok.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class javax.annotation.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class org.codehaus.mojo.animal_sniffer.*"; \
+    restrict:=warning; is:=ignore,\
+    "While traversing the type tree for org.testcontainers.* cannot find class org.jetbrains.annotations.VisibleForTesting"; \
+    restrict:=warning; is:=ignore,\
+    "Export org.testcontainers.utility,  has 1,  private references [org.testcontainers.shaded.org.awaitility.pollinterval]"; \
+    restrict:=warning; is:=ignore,\
+    "Version for package * is set to different values in the source * and in the manifest *. The version in the manifest is not picked up by an other sibling bundles in this project or projects that directly depend on this project";\
+    restrict:=warning; is:=ignore

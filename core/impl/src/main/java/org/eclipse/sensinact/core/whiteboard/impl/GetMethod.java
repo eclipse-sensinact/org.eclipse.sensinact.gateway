@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.core.whiteboard.impl;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -42,10 +43,9 @@ class GetMethod extends AbstractResourceMethod implements WhiteboardGet<Object> 
         return nullAction;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Promise<TimedValue<Object>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
-            String provider, String service, String resource, Class<Object> resourceType, TimedValue<Object> cachedValue) {
+    public Promise<TimedValue<?>> pullValue(PromiseFactory pf, String modelPackageUri, String model,
+            String provider, String service, String resource, Class<Object> resourceType, TimedValue<?> cachedValue) {
 
         try {
             final Map<Object, Object> params = new HashMap<>();
@@ -54,29 +54,70 @@ class GetMethod extends AbstractResourceMethod implements WhiteboardGet<Object> 
             Object result = super.invoke(modelPackageUri, model, provider, service, resource, params, GetParam.class,
                     GetParam::value);
 
-            if (result instanceof Promise) {
-                return (Promise<TimedValue<Object>>) result;
-            } else if (result instanceof TimedValue) {
-                return pf.resolved((TimedValue<Object>) result);
-            } else if (result == null) {
-                switch (nullAction) {
-                case IGNORE:
-                    return pf.resolved(null);
-                case UPDATE_IF_PRESENT:
-                    return pf.resolved(cachedValue == null || cachedValue.getTimestamp() == null ? null
-                            : new DefaultTimedValue<Object>(null));
-                case UPDATE:
-                    return pf.resolved(new DefaultTimedValue<Object>(null));
-                default:
-                    return pf.failed(new IllegalArgumentException("Unknown null action: " + nullAction));
-                }
-            } else if (resourceType.isAssignableFrom(result.getClass())) {
-                return pf.resolved(new DefaultTimedValue<Object>(resourceType.cast(result)));
+            Promise<TimedValue<?>> toReturn;
+            if (result instanceof Promise<?> p) {
+                toReturn = pf.resolvedWith(p).map(o -> convertToTvIfNeeded(o, resourceType, cachedValue));
             } else {
-                return pf.failed(new Exception("Invalid result type: " + result.getClass()));
+                toReturn = pf.resolved(convertToTvIfNeeded(result, resourceType, cachedValue));
             }
+
+            return toReturn;
         } catch (Exception e) {
             return pf.failed(e);
+        }
+    }
+
+    private TimedValue<?> convertToTvIfNeeded(Object o, Class<?> resourceType, TimedValue<?> cachedValue) throws Exception {
+        if(o == null) {
+            switch (nullAction) {
+            case IGNORE:
+                return null;
+            case UPDATE_IF_PRESENT:
+                return cachedValue == null || cachedValue.getTimestamp() == null ? null
+                        : new DefaultTimedValue<>(null);
+            case UPDATE:
+                return new DefaultTimedValue<>(null);
+            default:
+                throw new IllegalArgumentException("Unknown null action: " + nullAction);
+            }
+        } else if(o instanceof TimedValue<?> t) {
+            if(t.isEmpty() || t.getValue() == null) {
+                return t;
+            }
+            return new DefaultTimedValue<>(convertValueIfNeeded(t.getValue(), resourceType), t.getTimestamp());
+        } else {
+            return new DefaultTimedValue<>(convertValueIfNeeded(o, resourceType));
+        }
+    }
+
+    @Override
+    protected boolean isAnnotatedParam(Parameter param) {
+        return param.isAnnotationPresent(GetParam.class);
+    }
+
+    @Override
+    protected void validateArg(Parameter param) {
+        GetParam get = param.getAnnotation(GetParam.class);
+        if(get == null) {
+            throw new IllegalArgumentException("The parameter " + param + " in method " +
+                    param.getDeclaringExecutable() + " is not annotated with GetParam");
+        }
+        switch (get.value()) {
+        case CACHED_VALUE:
+            if(isPromise(param.getType())) {
+                throw new IllegalArgumentException("The parameter " + param + " in method " +
+                        param.getDeclaringExecutable() + " has a GetParam value CACHED_VALUE but receives a Promise");
+            }
+            break;
+        case RESULT_TYPE:
+            if(!param.getType().equals(Class.class)) {
+                throw new IllegalArgumentException("The parameter " + param + " in method " +
+                        param.getDeclaringExecutable() + " has a GetParam value RESULT_TYPE but is not of type Class");
+            }
+            break;
+        default:
+            throw new IllegalArgumentException("The parameter " + param + " in method " +
+                    param.getDeclaringExecutable() + " has an unknown GetParam value " + get.value());
         }
     }
 }

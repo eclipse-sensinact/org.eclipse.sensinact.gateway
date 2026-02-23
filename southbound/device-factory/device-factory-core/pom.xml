@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>device-factory-core</artifactId>
-  <name>SensiNact Southbound Device factory :: Core</name>
+  <name>SensiNact Southbound :: Device Factory :: Core</name>
   <description>Core of the device factory</description>
 
   <dependencies>

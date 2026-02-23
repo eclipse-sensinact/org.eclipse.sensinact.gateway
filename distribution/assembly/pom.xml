@@ -7,7 +7,7 @@
   </parent>
   <artifactId>assembly</artifactId>
   <packaging>pom</packaging>
-  <name>Eclipse sensiNact Gateway assembly</name>
+  <name>SensiNact Distribution :: Assembly</name>
   <description>This project creates a zip containing a launchable sensiNact gateway</description>
 
   <build>

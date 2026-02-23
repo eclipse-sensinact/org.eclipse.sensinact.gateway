@@ -20,7 +20,7 @@
   <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
   <artifactId>distribution</artifactId>
   <packaging>pom</packaging>
-  <name>Eclipse sensiNact Distribution</name>
+  <name>SensiNact Distribution</name>
   <description>This project contains code for launching sensiNact gateway instances</description>
 
   <modules>

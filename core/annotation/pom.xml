@@ -18,7 +18,7 @@
     <version>${revision}${changelist}</version>
   </parent>
   <artifactId>annotation</artifactId>
-  <name>SensiNact core Annotations</name>
+  <name>SensiNact Core :: Annotations</name>
   <description>The Annotations for sensinact gateway core.</description>
   <!-- No integration tests -->
   <properties>

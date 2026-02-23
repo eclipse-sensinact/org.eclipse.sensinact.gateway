@@ -18,7 +18,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A parameter annotation used to define the name of a getter parameter.
+ * A parameter annotation used to define the type of a getter parameter.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
@@ -34,12 +34,14 @@ public @interface GetParam {
      */
     public enum GetSegment {
         /**
-         * Current value in the twin (TimedValue)
+         * Current value in the twin. May be a TimedValue or
+         * a POJO. The actual resource value will be converted into
+         * the parameter type if it does not match.
          */
         CACHED_VALUE,
 
         /**
-         * Expected result type (Class)
+         * Expected result type - the parameter must be a {@link Class}
          */
         RESULT_TYPE,
     }

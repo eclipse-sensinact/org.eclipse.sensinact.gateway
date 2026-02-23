@@ -7,7 +7,7 @@
   </parent>
   <artifactId>rules.api</artifactId>
 
-  <name>Eclipse sensiNact Southbound Rules API</name>
+  <name>SensiNact Southbound :: Rules :: API</name>
   <description>The Southbound Rules API provides a connection point which allows rules implementations to be plugged in to sensiNact</description>
 
   <dependencies>

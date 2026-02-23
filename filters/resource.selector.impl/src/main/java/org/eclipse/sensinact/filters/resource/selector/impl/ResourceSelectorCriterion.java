@@ -48,6 +48,7 @@ public class ResourceSelectorCriterion implements ICriterion {
     private final List<ResourceSelectionCriterion> additionalResources;
 
     private final Predicate<ProviderSnapshot> providerFilter;
+    private final BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter;
     private final Predicate<ServiceSnapshot> serviceFilter;
     private final Predicate<ResourceSnapshot> resourceFilter;
 
@@ -63,6 +64,11 @@ public class ResourceSelectorCriterion implements ICriterion {
         this.providerFilter = providerSelections.stream()
                 .map(ProviderSelectionCriterion::providerFilter)
                 .reduce(ResourceSelectorCriterion::combineFilters)
+                .orElse(null);
+
+        this.locationFilter = providerSelections.stream()
+                .map(ProviderSelectionCriterion::locationFilter)
+                .reduce(BiPredicate::or)
                 .orElse(null);
 
         Stream<Predicate<ServiceSnapshot>> services = Stream.concat(
@@ -107,10 +113,7 @@ public class ResourceSelectorCriterion implements ICriterion {
 
     @Override
     public BiPredicate<ProviderSnapshot, GeoJsonObject> getLocationFilter() {
-        if(rs.providers().stream().flatMap(p -> p.location().stream()).findAny().isPresent()) {
-            LOG.warn("Location filtering is not yet implemented for Resource Selectors.");
-        }
-        return null;
+        return locationFilter;
     }
 
     @Override

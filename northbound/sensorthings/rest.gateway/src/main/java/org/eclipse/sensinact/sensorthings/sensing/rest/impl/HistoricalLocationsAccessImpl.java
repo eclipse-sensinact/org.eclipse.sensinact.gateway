@@ -12,132 +12,232 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.extractFirstIdSegment;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.DtoMapper.getTimestampFromId;
-
-import java.util.List;
-
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
+import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.rest.HistoricalLocationsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.HistoricalLocationsAccess;
+import org.eclipse.sensinact.sensorthings.sensing.rest.delete.HistoricalLocationsDelete;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.HistoricalLocationsDelegateSensinact;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.HistoricalLocationsDelegateSensorthings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.update.HistoricalLocationsUpdate;
 
-import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;;
 
-public class HistoricalLocationsAccessImpl extends AbstractAccess implements HistoricalLocationsAccess {
+public class HistoricalLocationsAccessImpl extends AbstractAccess
+        implements HistoricalLocationsAccess, HistoricalLocationsDelete, HistoricalLocationsUpdate {
+    private HistoricalLocationsDelegateSensinact sensinactHandler;
+    private HistoricalLocationsDelegateSensorthings sensorthigHandler;
+
+    public HistoricalLocationsDelegateSensinact getSensinactHandler() {
+        if (sensinactHandler == null)
+            sensinactHandler = new HistoricalLocationsDelegateSensinact(uriInfo, providers, application,
+                    requestContext);
+        return sensinactHandler;
+
+    }
+
+    public HistoricalLocationsDelegateSensorthings getSensorthingsHandler() {
+        if (sensorthigHandler == null)
+            sensorthigHandler = new HistoricalLocationsDelegateSensorthings(uriInfo, providers, application,
+                    requestContext);
+        return sensorthigHandler;
+
+    }
 
     @Override
-    public HistoricalLocation getHistoricalLocation(String id) {
-        String provider = extractFirstIdSegment(id);
-        getTimestampFromId(id);
+    public HistoricalLocation getHistoricalLocation(ODataId id) {
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocation(id.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocation(id.value());
 
-        HistoricalLocation hl;
-        try {
-            hl = DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
-                    getExpansions(), providerSnapshot);
-        } catch (IllegalArgumentException iae) {
-            throw new NotFoundException("No feature of interest with id");
         }
-        if (!hl.id.equals(id)) {
-            throw new NotFoundException();
+    }
+
+    @Override
+    public ResultList<Location> getHistoricalLocationLocations(ODataId id) {
+
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationLocations(id.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationLocations(id.value());
+
         }
-        return hl;
     }
 
     @Override
-    public ResultList<Location> getHistoricalLocationLocations(String id) {
-        String provider = extractFirstIdSegment(id);
-        getTimestampFromId(id);
+    public Location getHistoricalLocationLocation(ODataId id, ODataId id2) {
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationLocation(id.value(), id2.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationLocation(id.value(), id2.value());
 
-        ResultList<Location> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), providerSnapshot));
-
-        return list;
-    }
-
-    @Override
-    public Location getHistoricalLocationLocation(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
-        getTimestampFromId(id);
-
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-
-        Location loc = DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), providerSnapshot);
-
-        if (!id2.equals(loc.id)) {
-            throw new NotFoundException();
         }
-        return loc;
     }
 
     @Override
-    public ResultList<Thing> getHistoricalLocationLocationThings(String id, String id2) {
-        String provider = extractFirstIdSegment(id);
-        getTimestampFromId(id);
+    public ResultList<Thing> getHistoricalLocationLocationThings(ODataId id, ODataId id2) {
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationLocationThings(id.value(), id2.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationLocationThings(id.value(), id2.value());
 
-        ResultList<Thing> list = new ResultList<>();
-        list.value = List.of(DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), providerSnapshot));
-
-        return list;
-    }
-
-    @Override
-    public ResultList<HistoricalLocation> getHistoricalLocationLocationHistoricalLocations(String id, String id2) {
-        ResultList<HistoricalLocation> list = new ResultList<>();
-        list.value = List.of(getHistoricalLocation(id));
-        return list;
-    }
-
-    @Override
-    public Thing getHistoricalLocationThing(String id) {
-        String provider = extractFirstIdSegment(id);
-        getTimestampFromId(id);
-
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-
-        Thing t;
-        try {
-            t = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), providerSnapshot);
-        } catch (IllegalArgumentException iae) {
-            throw new NotFoundException("No feature of interest with id");
         }
-        if (!t.id.equals(provider)) {
-            throw new NotFoundException();
+    }
+
+    @Override
+    public ResultList<HistoricalLocation> getHistoricalLocationLocationHistoricalLocations(ODataId id, ODataId id2) {
+
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationLocationHistoricalLocations(id.value(), id2.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationLocationHistoricalLocations(id.value(), id2.value());
+
         }
-        return t;
     }
 
     @Override
-    public ResultList<Datastream> getHistoricalLocationThingDatastreams(String id) {
-        String provider = extractFirstIdSegment(id);
-        getTimestampFromId(id);
+    public Thing getHistoricalLocationThing(ODataId id) {
 
-        return DatastreamsAccessImpl.getDataStreams(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                validateAndGetProvider(provider));
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationThing(id.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationThing(id.value());
+
+        }
     }
 
     @Override
-    public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(String id) {
-        ResultList<HistoricalLocation> list = new ResultList<>();
-        list.value = List.of(getHistoricalLocation(id));
-        return list;
+    public ResultList<Datastream> getHistoricalLocationThingDatastreams(ODataId id) {
+
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationThingDatastreams(id.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationThingDatastreams(id.value());
+
+        }
     }
 
     @Override
-    public ResultList<Location> getHistoricalLocationThingLocations(String id) {
-        return getHistoricalLocationLocations(id);
+    public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(ODataId id) {
+
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationThingHistoricalLocations(id.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationThingHistoricalLocations(id.value());
+
+        }
     }
 
+    @Override
+    public ResultList<Location> getHistoricalLocationThingLocations(ODataId id) {
+
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationThingLocations(id.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationThingLocations(id.value());
+
+        }
+    }
+
+    private boolean isSensorthingModel(ProviderSnapshot provider) {
+        return DtoMapperSimple.isSensorthingModel(provider);
+    }
+
+    @Override
+    public Sensor getHistoricalLocationThingDatastreamSensor(ODataId id, ODataId id2, ODataId id3) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationThingDatastreamSensor(id3.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationThingDatastreamSensor(id3.value());
+
+        }
+    }
+
+    @Override
+    public ResultList<Observation> getHistoricalLocationThingDatastreamObservations(ODataId id, ODataId id2,
+            ODataId id3) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationThingDatastreamObservations(id3.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationThingDatastreamObservations(id3.value());
+
+        }
+    }
+
+    @Override
+    public FeatureOfInterest getHistoricalLocationThingDatastreamObservationFeatureOfInterest(ODataId id, ODataId id2,
+            ODataId id3, ODataId id4) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationThingDatastreamObservationFeatureOfInterest(id3.value());
+        } else {
+            return getSensorthingsHandler()
+                    .getHistoricalLocationThingDatastreamObservationFeatureOfInterest(id3.value());
+
+        }
+    }
+
+    @Override
+    public ObservedProperty getHistoricalLocationThingDatastreamObservedProperty(ODataId id, ODataId id2, ODataId id3) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getHistoricalLocationThingDatastreamObservedProperty(id3.value());
+        } else {
+            return getSensorthingsHandler().getHistoricalLocationThingDatastreamObservedProperty(id3.value());
+
+        }
+    }
+
+    @Override
+    public Response deleteHistoricalLocation(ODataId id) {
+        getSensorthingsHandler().deleteHistoricalLocation(id.value());
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response updateHistoricalLocation(ODataId id, HistoricalLocation hl) {
+        return getSensorthingsHandler().updateHistoricalLocation(id.value(), hl);
+    }
+
+    @Override
+    public Response patchHistoricalLocation(ODataId id, HistoricalLocation hl) {
+        return getSensorthingsHandler().updateHistoricalLocation(id.value(), hl);
+    }
 }
