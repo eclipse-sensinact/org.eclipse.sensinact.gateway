@@ -14,7 +14,6 @@
   <description>This project contains a feature providing an OGC Sensorthings compatible REST API for sensiNact</description>
 
   <properties>
-    <spatial4j.version>0.8</spatial4j.version>
     <filters.version>${revision}${changelist}</filters.version>
     <sensorthings.version>${revision}${changelist}</sensorthings.version>
   </properties>
@@ -26,9 +25,9 @@
       <version>${antlr.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.locationtech.spatial4j</groupId>
-      <artifactId>spatial4j</artifactId>
-      <version>${spatial4j.version}</version>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>esri.geometry</artifactId>
+      <version>${filters.version}</version>
     </dependency>
       <dependency>
       <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
@@ -87,7 +86,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -96,7 +94,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
@@ -106,7 +103,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
       <artifactId>jackson-jakarta-rs-json-provider</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
   </dependencies>
 

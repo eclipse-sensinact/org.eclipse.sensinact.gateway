@@ -19,29 +19,22 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoField;
 import java.time.temporal.Temporal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.eclipse.sensinact.gateway.geojson.Coordinates;
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.gateway.geojson.GeoJsonType;
-import org.eclipse.sensinact.gateway.geojson.LineString;
-import org.eclipse.sensinact.gateway.geojson.Point;
-import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterBaseVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.CommonexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.MethodcallexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.SubstringmethodcallexprContext;
-import org.locationtech.spatial4j.context.SpatialContext;
-import org.locationtech.spatial4j.distance.DistanceCalculator;
-import org.locationtech.spatial4j.distance.DistanceUtils;
-import org.locationtech.spatial4j.shape.ShapeFactory;
 
-public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<ResourceValueFilterInputHolder, Object>> {
+import com.esri.core.geometry.Geometry;
+import com.esri.core.geometry.GeometryEngine;
+import com.esri.core.geometry.Point;
+import com.esri.core.geometry.Polyline;
+
+public class MethodCallExprVisitor extends AbstractGeometryConvertingVisitor<Function<ResourceValueFilterInputHolder, Object>> {
 
     final Parser parser;
     final CommonExprVisitor visitor;
@@ -110,25 +103,6 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
         default:
             throw new UnsupportedRuleException("Unsupported method call", parser, child);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T convert(final ParserRuleContext ctx, final Object object, final Class<T> type,
-            final boolean allowNull, final String placeDescription) {
-        if (object == null) {
-            if (allowNull) {
-                return null;
-            } else {
-                throw new InvalidResultTypeException(placeDescription + " is null", type.getSimpleName(), object);
-            }
-        }
-
-        if (!type.isAssignableFrom(object.getClass())) {
-            throw new InvalidResultTypeException("Unsupported " + placeDescription + " for \"" + ctx.getText() + "\"",
-                    type.getSimpleName(), object);
-        }
-
-        return (T) object;
     }
 
     private Function<ResourceValueFilterInputHolder, Object> runSingleString(ParserRuleContext ctx) {
@@ -330,61 +304,26 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
     }
 
     private Function<ResourceValueFilterInputHolder, Object> runGeoLength(ParserRuleContext ctx) {
-        final SpatialContext spatialContext = SpatialContext.GEO;
 
         final CommonexprContext subExpr = ctx.getChild(CommonexprContext.class, 0);
         final Function<ResourceValueFilterInputHolder, Object> exprFun = visitor.visitCommonexpr(subExpr);
 
         return x -> {
-            GeoJsonObject obj = convert(ctx, exprFun.apply(x), GeoJsonObject.class, false, "line");
+            Geometry obj = convert(ctx, exprFun.apply(x), Geometry.class, false, "line");
 
-            final ShapeFactory shpFactory = spatialContext.getShapeFactory();
-            final List<org.locationtech.spatial4j.shape.Point> allPoints = new ArrayList<>();
-
-            if (obj.type() == GeoJsonType.LineString) {
-                final List<Coordinates> allCoordinates = ((LineString) obj).coordinates();
-                if (allCoordinates == null) {
-                    throw new InvalidResultTypeException("Null coordinates given to geo.length");
+            if (obj instanceof Polyline pl && pl.getPathCount() == 1) {
+                double distance = 0.0d;
+                for(int i = pl.getPathStart(0); i < pl.getPathSize(0) - 1; i++) {
+                    distance += GeometryEngine.geodesicDistanceOnWGS84(pl.getPoint(i), pl.getPoint(i + 1));
                 }
-                for (Coordinates coordinates : allCoordinates) {
-                    allPoints.add(shpFactory.pointLatLon(coordinates.latitude(), coordinates.longitude()));
-                }
+                return distance;
             } else {
                 throw new InvalidResultTypeException("Unsupported input for geo.length", "geography linestring", obj);
             }
-
-            final DistanceCalculator distCalc = spatialContext.getDistCalc();
-            double length = 0;
-            org.locationtech.spatial4j.shape.Point previousPoint = null;
-            for (org.locationtech.spatial4j.shape.Point nextPoint : allPoints) {
-                if (previousPoint == null) {
-                    previousPoint = nextPoint;
-                    continue;
-                }
-
-                double arcLength = distCalc.distance(previousPoint, nextPoint);
-                double mLength = DistanceUtils.degrees2Dist(arcLength, DistanceUtils.EARTH_MEAN_RADIUS_KM * 1000);
-                length += mLength;
-                previousPoint = nextPoint;
-            }
-            return length;
-
         };
     }
 
-    private org.locationtech.spatial4j.shape.Point spatialPoint(final ShapeFactory shpFactory, final Point geoPoint) {
-        return spatialPoint(shpFactory, geoPoint.coordinates());
-    }
-
-    private org.locationtech.spatial4j.shape.Point spatialPoint(final ShapeFactory shpFactory,
-            final Coordinates geoCoords) {
-        return shpFactory.pointLatLon(geoCoords.latitude(), geoCoords.longitude());
-    }
-
     private Function<ResourceValueFilterInputHolder, Object> runGeoDistance(ParserRuleContext ctx) {
-        final SpatialContext spatialContext = SpatialContext.GEO;
-        final ShapeFactory shpFactory = spatialContext.getShapeFactory();
-
         final CommonexprContext leftExpr = ctx.getChild(CommonexprContext.class, 0);
         final CommonexprContext rightExpr = ctx.getChild(CommonexprContext.class, 1);
 
@@ -392,9 +331,13 @@ public class MethodCallExprVisitor extends ODataFilterBaseVisitor<Function<Resou
         final Function<ResourceValueFilterInputHolder, Object> rightFun = visitor.visitCommonexpr(rightExpr);
 
         return x -> {
-            Point left = convert(ctx, leftFun.apply(x), Point.class, false, "left");
-            Point right = convert(ctx, rightFun.apply(x), Point.class, false, "right");
-            return spatialContext.calcDistance(spatialPoint(shpFactory, left), spatialPoint(shpFactory, right));
+            Geometry left = convert(ctx, leftFun.apply(x), Geometry.class, false, "left");
+            Geometry right = convert(ctx, rightFun.apply(x), Geometry.class, false, "right");
+            if (left instanceof Point lp && right instanceof Point rp) {
+                return GeometryEngine.geodesicDistanceOnWGS84(lp, rp);
+            } else {
+                throw new InvalidResultTypeException("Unsupported inputs for geo.distance", "geo.distance ( Point, Point )", left, right);
+            }
         };
     }
 }

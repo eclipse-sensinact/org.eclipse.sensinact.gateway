@@ -1,5 +1,6 @@
-Multi-Release: true
+-includeresource: @esri-geometry-api-${esri.version}.jar!/!com/esri/core/geometry/SizeOf.class
 
--includeresource: @esri-geometry-api-${esri.version}.jar
+-exportcontents: \
+    com.esri.core.geometry.*;version=${esri.version},\
+    org.eclipse.sensinact.gateway.filters.esri.geometry;version=${project.version}
 
--exportcontents: com.esri.core.geometry.*;version=${esri.version}
