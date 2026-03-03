@@ -22,7 +22,6 @@ import java.util.function.Function;
 
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterBaseVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.AddexprContext;
@@ -37,6 +36,8 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.PrimitiveliteralContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.SubexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler;
+
+import com.esri.core.geometry.Geometry;
 
 public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceValueFilterInputHolder, Object>> {
 
@@ -105,7 +106,7 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
         case ODataFilterParser.RULE_geographymultipolygon:
         case ODataFilterParser.RULE_geographypolygon:
         case ODataFilterParser.RULE_geographypoint: {
-            final GeoJsonObject value = visitor.visit(element);
+            final Geometry value = visitor.visit(element);
             return x -> value;
         }
 

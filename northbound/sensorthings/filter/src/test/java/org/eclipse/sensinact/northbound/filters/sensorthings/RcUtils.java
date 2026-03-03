@@ -392,6 +392,7 @@ public class RcUtils {
     static TestServiceSnapshot addService(final ProviderSnapshot provider, final String svcName) {
         TestProviderSnapshot test = (TestProviderSnapshot) provider;
         TestServiceSnapshot svc = new TestServiceSnapshot(test, svcName);
+        test.getServices().removeIf(s -> svcName.equals(s.getName()));
         test.getServices().add(svc);
         return svc;
     }
@@ -465,7 +466,7 @@ public class RcUtils {
                 return value instanceof List;
             }
         };
-
+        test.getResources().removeIf(r -> rcName.equals(r.getName()));
         test.getResources().add(rc);
         return rc;
     }

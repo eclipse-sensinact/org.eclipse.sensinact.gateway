@@ -104,7 +104,7 @@ public class OGCParserTestSensorthings {
     void testGeography() throws Exception {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
         // Length
-        expectations.put("floor(geo.length(geography'LINESTRING (30 10, 10 30, 40 40)')) eq 5973069", true);
+        expectations.put("floor(geo.length(geography'LINESTRING (30 10, 10 30, 40 40)')) eq 5972807", true);
         expectations.put("geo.length(geography'LINESTRING (5.69773 45.12477, 5.72047 45.19225)') gt 7000", true);
         expectations.put("geo.length(geography'LINESTRING (-0.4478 51.4649, 0.05523 51.5052)') lt 36000.0", true);
         // Distance
@@ -125,7 +125,7 @@ public class OGCParserTestSensorthings {
 
         rc = makeLocatedResource(outOfCircle, provider);
         holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, RcUtils.getSession(), provider, List.of(rc));
-        assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
+        assertQuery(false, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
     }
 
     private Coordinates makeCoors(double lon, double lat) {
@@ -136,6 +136,12 @@ public class OGCParserTestSensorthings {
     void testSpatial() throws Exception {
         final String point1 = "geography'POINT (30 10)'";
         final String point2 = "geography'POINT (50 10)'";
+        final String point3 = "geography'POINT (50 20)'";
+        final String line1 = "geography'LINESTRING (20 10, 30 10, 50 10, 40 20)'";
+        final String line2 = "geography'LINESTRING (20 0, 50 20, 60 30)'";
+        final String line3 = "geography'LINESTRING (-20 0, -40 20, -60 30)'";
+        final String line4 = "geography'LINESTRING (40 15, 35 15, 40 10, 35 10, 35 12)'";
+        final String line5 = "geography'LINESTRING (40 15, 35 15, 40 10)'";
         final Polygon rect1 = new Polygon(List
                 .of(List.of(makeCoors(0, 0), makeCoors(50, 0), makeCoors(50, 50), makeCoors(00, 50), makeCoors(0, 0))),
                 null, null);
@@ -146,11 +152,52 @@ public class OGCParserTestSensorthings {
                 RcUtils.getSession(), provider, List.of(rc));
 
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
+
+        expectations.put(String.format("st_intersects(%s, %s)", line1, point1), true);
+        expectations.put(String.format("st_intersects(%s, %s)", line1, line2), true);
+        expectations.put(String.format("st_intersects(%s, %s)", line1, line3), false);
+
+        expectations.put(String.format("st_crosses(%s, %s)", line1, point1), false);
+        expectations.put(String.format("st_crosses(%s, %s)", line1, line2), true);
+        expectations.put(String.format("st_crosses(%s, %s)", line1, line3), false);
+        expectations.put(String.format("st_crosses(%s, %s)", line1, line4), false);
+
+        expectations.put(String.format("st_disjoint(%s, %s)", line1, point1), false);
+        expectations.put(String.format("st_disjoint(%s, %s)", line1, line2), false);
+        expectations.put(String.format("st_disjoint(%s, %s)", line1, point3), true);
+        expectations.put(String.format("st_disjoint(%s, %s)", line1, line3), true);
+        expectations.put(String.format("st_disjoint(%s, %s)", line1, line4), false);
+
+        expectations.put(String.format("st_contains(%s, %s)", line1, point1), true);
+        expectations.put(String.format("st_contains(%s, %s)", line1, point3), false);
+
+        expectations.put(String.format("st_within(%s, %s)", point1, line1), true);
+        expectations.put(String.format("st_within(%s, %s)", point3, line1), false);
+
         expectations.put(String.format("st_equals(%s, %s)", point1, point1), true);
         expectations.put(String.format("st_equals(%s, %s)", point1, point2), false);
-        expectations.put(String.format("st_within(%s, %s)", point1, point1), false);
-        expectations.put(String.format("st_relate(%s, %s, 'WITHIN')", point1, point1), false);
-        expectations.put(String.format("st_relate(%s, %s, 'INTERSECTS')", point1, point1), true);
+
+        // Within
+        expectations.put(String.format("st_relate(%s, %s, 'T*F**F***')", point3, line1), false);
+        expectations.put(String.format("st_relate(%s, %s, 'T*F**F***')", point1, line1), true);
+        // Disjoint
+        expectations.put(String.format("st_relate(%s, %s, 'FF*FF****')", line1, line2), false);
+        expectations.put(String.format("st_relate(%s, %s, 'FF*FF****')", line1, point3), true);
+
+        expectations.put(String.format("st_overlaps(%s, %s)", point1, point1), false);
+        expectations.put(String.format("st_overlaps(%s, %s)", point1, point2), false);
+        expectations.put(String.format("st_overlaps(%s, %s)", point1, line1), false);
+        expectations.put(String.format("st_overlaps(%s, %s)", line1, line2), false);
+        expectations.put(String.format("st_overlaps(%s, %s)", line1, line3), false);
+        expectations.put(String.format("st_overlaps(%s, %s)", line1, line4), true);
+
+        expectations.put(String.format("st_touches(%s, %s)", point1, line1), false);
+        expectations.put(String.format("st_touches(%s, %s)", point1, line2), false);
+        expectations.put(String.format("st_touches(%s, %s)", line1, line2), false);
+        expectations.put(String.format("st_touches(%s, %s)", line1, line3), false);
+        expectations.put(String.format("st_touches(%s, %s)", line1, line4), false);
+        expectations.put(String.format("st_touches(%s, %s)", line1, line5), true);
+
         expectations.put(String.format("st_contains(Locations/location, %s)", point1), true);
         expectations.put(String.format("st_within(%s, Locations/location)", point1), true);
         assertQueries(expectations, holder);
