@@ -55,7 +55,7 @@ public class SensorPathHandlerSensorthings extends AbstractPathHandlerSensorthin
     public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
             final String path) {
         ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
-        switch (path) {
+        switch (path.toLowerCase()) {
         case "id":
             return provider.getName();
 
@@ -64,7 +64,7 @@ public class SensorPathHandlerSensorthings extends AbstractPathHandlerSensorthin
 
         case "description":
             return DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class);
-        case "encodingType":
+        case "encodingtype":
             return DtoMapperSimple.getResourceField(service, "sensorEncodingType", String.class);
 
         case "metadata":
@@ -80,9 +80,7 @@ public class SensorPathHandlerSensorthings extends AbstractPathHandlerSensorthin
     }
 
     private Object subDatastreams(final String path) {
-        return getDatastreamsProviderFromSensor(pathContext.provider()).stream()
-                .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
-                        pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
+        return getDatastreamsProviderFromSensor(pathContext.provider()).stream().map(p -> withProvider(pathContext, p))
                 .flatMap(pc -> {
                     Object result = new DatastreamPathHandlerSensorthings(pc).handle(path);
 

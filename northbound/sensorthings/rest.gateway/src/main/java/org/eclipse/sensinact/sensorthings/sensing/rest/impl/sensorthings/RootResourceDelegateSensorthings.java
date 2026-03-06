@@ -94,9 +94,12 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
                 .filter(p -> DtoMapperSimple.isSensorthingModel(p)).toList();
         Stream<HistoricalLocation> cacheHl = Stream.empty();
         if (isHistoryMemory()) {
-            cacheHl = getCacheHistoricalLocation().keySet().stream()
-                    .map(id -> DtoMapper.toHistoricalLocation(getSession(), getMapper(), uriInfo, getExpansions(),
-                            criterion, id, getCacheHistoricalLocation().getDto(id)));
+            cacheHl = getCacheHistoricalLocation().keySet().stream().map(id -> {
+                String provId = DtoMapperSimple.extractFirstIdSegment(id);
+                ProviderSnapshot p = validateAndGetProvider(provId);
+                return getSensorThingDtoMapper().toHistoricalLocation(getSession(), getMapper(), uriInfo,
+                        getExpansions(), criterion, id, getCacheHistoricalLocation().getDto(id), p);
+            }).filter(hl -> hl.isPresent()).map(hl -> hl.get());
         }
         Stream<HistoricalLocation> liveHl = providers
                 .stream().filter(p -> DtoMapperSimple.getThingService(p) != null).map(p -> getSensorThingDtoMapper()
@@ -115,10 +118,8 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
                 .filter(p -> DtoMapperSimple.isSensorthingModel(p))
                 .filter(p -> DtoMapperSimple.getDatastreamService(p) != null).toList();
         ResultList<Datastream> result = new ResultList<>(
-                providersDatastreams.stream()
-                        .map(p -> getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo,
-                                getExpansions(), criterion, p))
-                        .filter(ds -> ds.isPresent()).map(ds -> ds.get()).toList());
+                providersDatastreams.stream().map(p -> getSensorThingDtoMapper().toDatastream(getSession(), getMapper(),
+                        uriInfo, getExpansions(), criterion, p)).toList());
         return result;
 
     }
@@ -216,8 +217,8 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
                 requestContext.getMethod(), datastream);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
 
-        Datastream createDto = getSensorThingDtoMapper()
-                .toDatastream(getSession(), getMapper(), uriInfo, getExpansions(), criterion, snapshot).get();
+        Datastream createDto = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot);
         URI createdUri = getCreatedUri(createDto);
 
         return Response.created(createdUri).entity(createDto).build();
@@ -269,10 +270,9 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
         ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), location);
         ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
-        ICriterion criterionThing = parseFilter(EFilterContext.THINGS);
 
         Location createDto = getSensorThingDtoMapper().toLocation(getSession(), getMapper(), uriInfo, getExpansions(),
-                criterion, snapshot, criterionThing);
+                criterion, snapshot);
 
         URI createdUri = getCreatedUri(createDto);
 

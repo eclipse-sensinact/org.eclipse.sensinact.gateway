@@ -56,7 +56,7 @@ public class ObservationPathHandlerSensorthings extends AbstractPathHandlerSenso
         if (obs == null) {
             return null;
         }
-        switch (path) {
+        switch (path.toLowerCase()) {
         case "id":
         case "@iot.id":
 
@@ -66,6 +66,8 @@ public class ObservationPathHandlerSensorthings extends AbstractPathHandlerSenso
             return obs.result();
 
         case "resulttime":
+        case "resultTime":
+
             return obs.resultTime();
 
         case "phenomenontime":
@@ -73,9 +75,11 @@ public class ObservationPathHandlerSensorthings extends AbstractPathHandlerSenso
             return obs.phenomenonTime();
 
         case "validtime":
+
             return obs.validTime();
 
         case "resultquality":
+
             return obs.resultQuality();
 
         case "properties":

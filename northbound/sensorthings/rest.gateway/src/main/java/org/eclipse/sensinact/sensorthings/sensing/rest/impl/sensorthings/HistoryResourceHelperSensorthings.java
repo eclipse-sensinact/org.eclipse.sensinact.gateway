@@ -104,8 +104,8 @@ public class HistoryResourceHelperSensorthings {
                 null, values);
     }
 
-    static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession, DtoMapper dtoMapper,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
+    public static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession,
+            DtoMapper dtoMapper, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot providerThing, String historyProvider, int localResultLimit,
             IDtoMemoryCache<Instant> cacheHl) {
 
@@ -121,14 +121,13 @@ public class HistoryResourceHelperSensorthings {
         List<HistoricalLocation> values = new ArrayList<>();
 
         if (cacheHl != null) {
-            values.addAll(
-                    providerThings
-                            .stream().map(
-                                    p -> p.getName())
-                            .flatMap(idProv -> cacheHl.keySet().stream().filter(id -> id.startsWith(idProv))
-                                    .map(id -> DtoMapper.toHistoricalLocation(userSession, mapper, uriInfo, expansions,
-                                            filter, id, cacheHl.getDto(id))))
-                            .toList());
+            values.addAll(providerThings.stream().flatMap(p -> {
+
+                String idProv = p.getName();
+                return cacheHl.keySet().stream().filter(id -> id.startsWith(idProv))
+                        .map(id -> dtoMapper.toHistoricalLocation(userSession, mapper, uriInfo, expansions, filter, id,
+                                cacheHl.getDto(id), p));
+            }).filter(hl -> hl.isPresent()).map(hl -> hl.get()).toList());
             values.addAll(providerThings.stream().flatMap(prov -> {
                 TimedValue<GeoJsonObject> location = DtoMapperSimple.getLocation(prov, mapper, true);
                 return dtoMapper.toHistoricalLocation(userSession, mapper, uriInfo, expansions, filter, prov,

@@ -34,7 +34,7 @@ public class ResourceValueFilterInputHolder {
     private final List<? extends ResourceSnapshot> resources;
     private final ResourceSnapshot resource;
     private final SensiNactSession session;
-    private Map<String, Object> configProperties;
+    private final Map<String, Object> configProperties;
     private final IDtoMemoryCache<ExpandedObservation> cacheObs;
     private final IDtoMemoryCache<Instant> cacheHl;
 

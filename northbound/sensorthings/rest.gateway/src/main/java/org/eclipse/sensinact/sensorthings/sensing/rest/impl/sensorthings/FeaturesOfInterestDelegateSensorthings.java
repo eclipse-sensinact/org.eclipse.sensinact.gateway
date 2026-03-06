@@ -37,7 +37,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
@@ -49,7 +48,6 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
     public FeaturesOfInterestDelegateSensorthings(UriInfo uriInfo, Providers providers, Application application,
             ContainerRequestContext requestContext) {
         super(uriInfo, providers, application, requestContext);
-        // TODO Auto-generated constructor stub
     }
 
     public FeatureOfInterest getFeatureOfInterest(String id) {
@@ -68,10 +66,13 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         @SuppressWarnings("unchecked")
         List<String> datastreamIds = DtoMapperSimple.getResourceField(
                 DtoMapperSimple.getFeatureofInterestService(providerFoi), "datastreamIds", List.class);
+        ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
         List<ResultList<Observation>> list = datastreamIds.stream()
                 .map(idDatastream -> validateAndGetProvider(idDatastream))
-                .map(p -> getLiveObservations(getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo,
-                        getExpansions(), parseFilter(EFilterContext.OBSERVATIONS), p))
+                .map(p -> RootResourceDelegateSensorthings.getObservationList(getSession(), getSensorThingDtoMapper(),
+                        getMapper(), uriInfo, requestContext,
+                        p.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter,
+                        getHistoryProvider(), getMaxResult(), getCacheObservationIfHistoryMemory()))
                 .toList();
         return new ResultList<Observation>(list.stream().flatMap(l -> l.value().stream()).toList());
     }
@@ -130,13 +131,8 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
             throw new BadRequestException(String.format(
                     "observations %s~%s are not associate with feature of interest %s", provider2, obs.id(), provider));
         }
-        Datastream d;
-        try {
-            d = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo, getExpansions(),
-                    parseFilter(EFilterContext.DATASTREAMS), providerSnapshot).get();
-        } catch (Exception e) {
-            throw new NotFoundException();
-        }
+        Datastream d = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo, getExpansions(),
+                parseFilter(EFilterContext.DATASTREAMS), providerSnapshot);
 
         return d;
 
@@ -232,7 +228,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         ResultList<Observation> observationList = RootResourceDelegateSensorthings.getObservationList(getSession(),
                 getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext,
                 providerSnapshot.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter,
-                getHistoryProvider(), getMaxResult(0), getCacheObservationIfHistoryMemory());
+                getHistoryProvider(), getMaxResult(), getCacheObservationIfHistoryMemory());
         return observationList;
     }
 

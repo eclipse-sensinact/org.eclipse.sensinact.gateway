@@ -75,6 +75,7 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         json = getJsonResponseFromPost(datastream2, "Datastreams?$expand=ObservedProperty,Observations", 201);
 
         ServiceSnapshot service = serviceUseCase.read(session, observedPropertyId, "observedproperty");
+        @SuppressWarnings("unchecked")
         List<String> listDatastreamIds = DtoMapperSimple.getResourceField(service, "datastreamIds", List.class);
         assertEquals(2, listDatastreamIds.size());
     }
@@ -216,7 +217,6 @@ public class ObservedPropertyTest extends AbstractIntegrationTest {
         ExpandedDataStream datastream = DtoFactory.getDatastreamMinimalLinkThingLinkObservedProperty(name + "1",
                 DtoFactory.getRefId(thingId), DtoFactory.getRefId(ObservedPropertyId));
         json = getJsonResponseFromPost(datastream, "Datastreams?$expand=ObservedProperty,Observations", 201);
-        String idDatastream = getIdFromJson(json);
         ExpandedDataStream expectedDatastream = DtoFactory.getDatastreamMinimalWithThingObervedPropertySensor(
                 name + "1", DtoFactory.getRefId(thingId), null, ObservedProperty);
         UtilsAssert.assertDatastream(expectedDatastream, json, true);

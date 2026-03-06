@@ -61,9 +61,24 @@ public class PathUtils {
         case "result":
             if (rcValue != null) {
                 return rcValue.getValue();
-            } else {
-                return null;
             }
+            return null;
+
+        case "name":
+            if (resource.getName().equals("friendlyName")) {
+                if (rcValue != null) {
+                    return rcValue.getValue();
+                }
+            }
+            return null;
+
+        case "description":
+            if (resource.getName().equals("description")) {
+                if (rcValue != null) {
+                    return rcValue.getValue();
+                }
+            }
+            return null;
 
         case "resulttime":
         case "phenomenontime":
@@ -71,15 +86,20 @@ public class PathUtils {
         case "validtime":
             if (rcValue != null) {
                 return rcValue.getTimestamp();
-            } else {
-                return null;
             }
+            return null;
 
         case "resultquality":
             // FIXME: requires access to metadata from snapshot
+            return "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation";
+        case "observationtype":
+            // FIXME: requires access to metadata from snapshot
             // -> sensorthings.observation.quality
             return null;
-
+        case "encodingtype":
+            // FIXME: requires access to metadata from snapshot
+            // -> sensorthings.observation.quality
+            return null;
         case "observedarea":
             // TODO: convert to GeoJSON?
             return getResourceValue(provider, "admin", "location").orElse(null);
@@ -90,12 +110,12 @@ public class PathUtils {
             return Map.of();
 
         default:
-            throw new UnsupportedRuleException("Unexpected resource level field: " + path);
+            return null;
         }
     }
 
-    public static Object getProviderLevelField(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources,
-            final String path) {
+    public static Object getProviderLevelField(final ProviderSnapshot provider,
+            final List<? extends ResourceSnapshot> resources, final String path) {
         switch (path) {
         case "name":
             return getResourceValue(provider, "admin", "friendlyName").orElse(provider.getName());
@@ -105,6 +125,12 @@ public class PathUtils {
 
         case "location":
             return getResourceValue(provider, "admin", "location").orElse(null);
+        case "encodingtype":
+            // need to return the same order
+            return getResourceValue(provider, "admin", "friendlyName").orElse(provider.getName());
+        case "time":
+            ResourceSnapshot rc = findResource(provider, "admin", "location");
+            return rc != null && rc.getValue() != null ? rc.getValue().getTimestamp() : null;
 
         default:
             final Optional<Object> value = getResourceValue(provider, "admin", path);

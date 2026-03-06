@@ -112,7 +112,7 @@ class HistoryResourceHelperSensorthingsTest {
 
     private DtoMapper getDtoMapper() {
         if (dtoMapper == null) {
-            dtoMapper = new DtoMapper(null, 0, null);
+            dtoMapper = new DtoMapper(null, 0, null, null);
         }
         return dtoMapper;
     }

@@ -86,9 +86,7 @@ public class HistoricalLocationPathHandlerSensorthings extends AbstractPathHandl
 
     private Object subLocations(final String path) {
         ProviderSnapshot provider = pathContext.provider();
-        return getLocationsProviderFromThing(provider).stream()
-                .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
-                        pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
+        return getLocationsProviderFromThing(provider).stream().map(p -> withProvider(pathContext, p))
                 .map(pc -> new LocationPathHandlerSensorthings(pc).handle(path)).toList();
 
     }

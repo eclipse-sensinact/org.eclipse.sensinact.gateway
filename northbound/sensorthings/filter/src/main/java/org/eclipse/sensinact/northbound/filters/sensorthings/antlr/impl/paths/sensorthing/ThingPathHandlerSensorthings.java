@@ -61,6 +61,10 @@ public class ThingPathHandlerSensorthings extends AbstractPathHandlerSensorthing
 
             case "location":
                 return DtoMapperSimple.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
+            case "time":
+                return service.getResource("location") != null && service.getResource("location").getValue() != null
+                        ? service.getResource("location").getValue().getTimestamp()
+                        : null;
 
             default:
                 throw new UnsupportedRuleException("Unexpected resource level field: " + path);
@@ -83,27 +87,22 @@ public class ThingPathHandlerSensorthings extends AbstractPathHandlerSensorthing
     private Object subDatastreams(final String path) {
         ProviderSnapshot provider = pathContext.provider();
 
-        return getDatastreamsProviderFromThing(provider).stream()
-                .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
-                        pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
-                .flatMap(pc -> {
-                    Object result = new DatastreamPathHandlerSensorthings(pc).handle(path);
+        return getDatastreamsProviderFromThing(provider).stream().map(p -> withProvider(pathContext, p)).flatMap(pc -> {
+            Object result = new DatastreamPathHandlerSensorthings(pc).handle(path);
 
-                    if (result instanceof List<?>) {
-                        return ((List<?>) result).stream();
-                    } else if (result != null) {
-                        return Stream.of(result);
-                    } else {
-                        return Stream.empty();
-                    }
-                }).collect(Collectors.toList());
+            if (result instanceof List<?>) {
+                return ((List<?>) result).stream();
+            } else if (result != null) {
+                return Stream.of(result);
+            } else {
+                return Stream.empty();
+            }
+        }).collect(Collectors.toList());
     }
 
     private Object subLocations(final String path) {
         ProviderSnapshot provider = pathContext.provider();
-        return getLocationsProviderFromThing(provider).stream()
-                .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
-                        pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
+        return getLocationsProviderFromThing(provider).stream().map(p -> withProvider(pathContext, p))
                 .map(pc -> new LocationPathHandlerSensorthings(pc).handle(path)).collect(Collectors.toList());
     }
 }

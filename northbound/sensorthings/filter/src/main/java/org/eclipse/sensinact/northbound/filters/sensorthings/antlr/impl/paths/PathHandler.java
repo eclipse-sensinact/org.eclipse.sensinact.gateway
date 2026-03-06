@@ -52,14 +52,13 @@ public class PathHandler {
             IDtoMemoryCache<ExpandedObservation> cacheObs, IDtoMemoryCache<Instant> cacheHl) {
     }
 
-    protected ObjectMapper mapper;
+    protected static ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
 
     private final String path;
 
     public PathHandler(final String path) {
         this.path = path;
-        mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+
     }
 
     public Object handle(final ResourceValueFilterInputHolder holder) {
@@ -71,7 +70,7 @@ public class PathHandler {
         final IDtoMemoryCache<ExpandedObservation> cacheObs = holder.getCacheObs();
         final IDtoMemoryCache<Instant> cacheHl = holder.getCacheHl();
 
-        PathContext pathContext = new PathContext(mapper, provider, session, resource, configProperties, cacheObs,
+        PathContext pathContext = new PathContext(MAPPER, provider, session, resource, configProperties, cacheObs,
                 cacheHl);
         if (!isSensorthingModel(provider)) {
             switch (holder.getContext()) {
@@ -95,8 +94,8 @@ public class PathHandler {
             }
         } else {
             ExpandedObservation obs = null;
-            if (resource != null && resource.getName().equals("lastObservation")) {
-                obs = DtoMapperSimple.parseExpandObservation(mapper, resource.getValue().getValue());
+            if (resource != null && resource.getName().equals("lastObservation") && resource.getValue() != null) {
+                obs = DtoMapperSimple.parseExpandObservation(MAPPER, resource.getValue().getValue());
             }
             switch (holder.getContext()) {
             case THINGS:

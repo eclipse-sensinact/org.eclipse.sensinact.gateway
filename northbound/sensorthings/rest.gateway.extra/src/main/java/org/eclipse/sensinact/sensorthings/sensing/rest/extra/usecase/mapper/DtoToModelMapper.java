@@ -350,11 +350,17 @@ public class DtoToModelMapper {
         String description = ds != null ? ds.description() : null;
         Map<String, Object> properties = ds != null ? ds.properties() : null;
         // --- Sensor ---
-        List<String> newDatastreamIdSensor = new ArrayList<String>();
-        newDatastreamIdSensor.addAll(existingDatastreamIdSensor);
+        List<String> newDatastreamIdSensor = null;
+        if (existingDatastreamIdSensor != null) {
+            newDatastreamIdSensor = new ArrayList<String>();
+            newDatastreamIdSensor.addAll(existingDatastreamIdSensor);
+        }
         // --- ObservedProperty ---
-        List<String> newDatastreamObservedProperty = new ArrayList<String>();
-        newDatastreamObservedProperty.addAll(existingDatastreamObservedProperty);
+        List<String> newDatastreamIdOp = null;
+        if (existingDatastreamObservedProperty != null) {
+            newDatastreamIdOp = new ArrayList<String>();
+            newDatastreamIdOp.addAll(existingDatastreamObservedProperty);
+        }
         String observationType = ds != null ? ds.observationType() : null;
         // --- Unit ---
         String unitName = unit != null ? unit.name() : null;
@@ -408,10 +414,9 @@ public class DtoToModelMapper {
             updates.add(toSensorUpdate(sensorId, sensor, newDatastreamIdSensor, timestamp));
         }
         if (observedProperty != null) {
-            newDatastreamObservedProperty.add(providerId);
+            newDatastreamIdOp.add(providerId);
 
-            updates.add(
-                    toObservedProperty(observedPropertyId, observedProperty, newDatastreamObservedProperty, timestamp));
+            updates.add(toObservedProperty(observedPropertyId, observedProperty, newDatastreamIdOp, timestamp));
         }
 
         updates.add(datastreamUpdate);

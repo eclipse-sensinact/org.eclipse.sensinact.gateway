@@ -11,6 +11,7 @@
 *   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVATION_QUALITY;
 
 import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA;
 import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDPROPERTY_DEFINITION;
@@ -316,14 +317,15 @@ public class DtoMapper {
                 return Optional.empty();
             }
         }
-        if (t.isEmpty()) {
-            return Optional.empty();
-        }
+
         final Instant timestamp = t.map(TimedValue::getTimestamp).orElse(null);
 
         ProviderSnapshot providerSnapshot = resource.getService().getProvider();
         String id = String.format("%s~%s~%s~%s", providerSnapshot.getName(), resource.getService().getName(),
                 resource.getName(), Long.toString(timestamp.toEpochMilli(), 16));
+
+        Object result = t.map(TimedValue::getValue).orElse(null);
+        Object resultQuality = resource.getMetadata().get(SENSORTHINGS_OBSERVATION_QUALITY);
 
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})").resolveTemplate("id", id)
                 .build().toString();
@@ -331,8 +333,8 @@ public class DtoMapper {
         String featureOfInterestLink = uriInfo.getBaseUriBuilder().uri(selfLink).path("FeatureOfInterest").build()
                 .toString();
 
-        Observation observation = DtoMapperSimple.toObservation(mapper, id, t.get(), selfLink, datastreamLink,
-                featureOfInterestLink);
+        Observation observation = new Observation(selfLink, id, timestamp, timestamp, result, resultQuality, null, null,
+                datastreamLink, featureOfInterestLink);
         if (expansions.shouldExpand("Datastream", observation)) {
             expansions.addExpansion("Datastream", observation, toDatastream(userSession, application, mapper, uriInfo,
                     expansions.getExpansionSettings("Datastream"), resource, filter));

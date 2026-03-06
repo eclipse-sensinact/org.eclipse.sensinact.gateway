@@ -57,17 +57,21 @@ public class DatastreamPathHandlerSensorthings extends AbstractPathHandlerSensor
 
     public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
             final String path) {
-        switch (path) {
+        switch (path.toLowerCase()) {
         case "id":
         case "@iot.id":
             return provider.getName();
 
         case "name":
             return DtoMapperSimple.getResourceField(service, "friendlyName", String.class);
+        case "observationtype":
+
+            return DtoMapperSimple.getResourceField(service, "observationType", String.class);
 
         case "description":
             return DtoMapperSimple.getResourceField(service, "description", String.class);
-        case "observedArea":
+        case "observedarea":
+
             return DtoMapperSimple.getResourceField(service, "location", GeoJsonObject.class);
         default:
             throw new UnsupportedRuleException("Unexpected resource level field: " + path);

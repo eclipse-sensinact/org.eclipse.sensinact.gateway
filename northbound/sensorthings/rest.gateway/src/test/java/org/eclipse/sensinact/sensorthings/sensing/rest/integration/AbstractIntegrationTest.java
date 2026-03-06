@@ -182,23 +182,24 @@ public class AbstractIntegrationTest {
 
     protected void createObservation(String provider, String thingId, Object value, Instant valueInstant) {
         FeatureOfInterest foi = getFeatureOfInterest(provider + "test");
-        createFoi(valueInstant, foi);
+        createFoi(provider, valueInstant, foi);
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation",
                 getObservation(provider + "~test", value, foi, valueInstant), valueInstant);
 
     }
 
-    private void createFoi(Instant valueInstant, FeatureOfInterest foi) {
+    private void createFoi(String datastreamprov, Instant valueInstant, FeatureOfInterest foi) {
         createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_ADMIN, "friendlyName",
                 foi.name(), valueInstant);
         createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_ADMIN, "description",
                 foi.name(), valueInstant);
         createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_ADMIN, "location",
                 foi.feature(), valueInstant);
-        createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_ADMIN, "friendlyName",
-                foi.name(), valueInstant);
+
         createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_FOI, "encodingType",
                 foi.name(), valueInstant);
+        createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_FOI, "datastreamIds",
+                List.of(datastreamprov), valueInstant);
     }
 
     protected void createDatastream(String provider, String thingId, String sensorId, String opId, Object value,

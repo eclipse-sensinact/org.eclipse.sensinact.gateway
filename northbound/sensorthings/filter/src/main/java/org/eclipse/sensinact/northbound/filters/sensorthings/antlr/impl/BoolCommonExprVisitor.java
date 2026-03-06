@@ -194,6 +194,12 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
                             } else if (rightValue instanceof AnyMatch) {
                                 return ((AnyMatch) rightValue).compare(leftValue, comparatorRuleIndex, true);
                             } else {
+                                if (rightValue instanceof String) {
+                                    String lStr = (leftValue == null) ? "" : String.valueOf(leftValue);
+                                    String rStr = (String) rightValue;
+
+                                    return subPredicate.apply(lStr, rStr);
+                                }
                                 if (leftValue instanceof Number && rightValue instanceof Number) {
                                     // Ensure both sides are ints or doubles
                                     if (leftValue instanceof Double || rightValue instanceof Double) {

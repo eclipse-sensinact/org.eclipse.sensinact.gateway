@@ -106,10 +106,30 @@ public class SensorthingsFilterComponent implements IFilterParser, ISensorthings
         return parseFilter(query, context);
     }
 
-    private volatile Map<String, Object> dynamicProps = new HashMap<>();
-
     public boolean isHistoryMemory() {
         return config != null ? config.history_in_memory() : false;
+    }
+
+    public Map<String, Object> getProperties() {
+        boolean defaultHistoryInMemory = config != null ? config.history_in_memory() : false;
+        int defaultHistoryMaxResult = config != null ? config.history_results_max() : 0;
+
+        boolean historyInMem = defaultHistoryInMemory;
+
+        int resultMax = defaultHistoryMaxResult;
+
+        String provider = config != null ? config.history_provider() : null;
+
+        Map<String, Object> props = new HashMap<>();
+        props.put("session.manager", sessionManager);
+        props.put("sensinact.history.in.memory", historyInMem);
+        props.put("sensinact.history.result.limit", resultMax);
+        props.put("cache.historical.location", cacheHl);
+        props.put("cache.expanded.observation", cacheObs);
+        if (!NOT_SET.equals(provider)) {
+            props.put("sensinact.history.provider", provider);
+        }
+        return props;
     }
 
     @Override
@@ -128,9 +148,8 @@ public class SensorthingsFilterComponent implements IFilterParser, ISensorthings
         } catch (Exception e) {
             throw new FilterParserException("Error parsing SensorThings query '" + query + "': " + e, e);
         }
-
         // Return the ICriterion
-        return new SensorthingsCriterion(filterContext, getSession(), predicate, dynamicProps,
+        return new SensorthingsCriterion(filterContext, getSession(), predicate, getProperties(),
                 isHistoryMemory() ? cacheObs : null, isHistoryMemory() ? cacheHl : null);
     }
 }

@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -64,15 +62,15 @@ public class DtoMapperSimple {
     public static final String VERSION = "v1.1";
     private static final String NO_DESCRIPTION = "No description";
 
-    public static String SERVICE_FOI = "foi";
-    public static String SERVICE_DATASTREAM = "datastream";
-    public static String SERVICE_THING = "thing";
-    public static String SERVICE_OBSERVED_PROPERTY = "observedproperty";
-    public static String SERVICE_SENSOR = "sensor";
+    public final static String SERVICE_FOI = "foi";
+    public final static String SERVICE_DATASTREAM = "datastream";
+    public final static String SERVICE_THING = "thing";
+    public final static String SERVICE_OBSERVED_PROPERTY = "observedproperty";
+    public final static String SERVICE_SENSOR = "sensor";
 
-    public static String SERVICE_ADMIN = "admin";
+    public final static String SERVICE_ADMIN = "admin";
 
-    public static String SERVICE_LOCATON = "location";
+    public final static String SERVICE_LOCATON = "location";
 
     public static String stampToId(Instant stamp) {
         return Long.toString(stamp.toEpochMilli(), 16);
@@ -558,9 +556,8 @@ public class DtoMapperSimple {
             String historicalLocationsLink, String locationsLink) {
         String name = getResourceField(getAdminService(provider), FRIENDLY_NAME, String.class);
         String description = getResourceField(getAdminService(provider), DESCRIPTION, String.class);
-        Map<String, Object> properties = getThingService(provider).getResource("id").getMetadata().entrySet().stream()
-                .collect(Collectors.toMap(entry -> entry.getKey().replace("sensorthings.thing.", ""),
-                        Map.Entry::getValue));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> properties = getResourceField(getThingService(provider), "properties", Map.class);
 
         Thing thing = new Thing(selfLink, id, name, description, properties, datastreamsLink, historicalLocationsLink,
                 locationsLink);

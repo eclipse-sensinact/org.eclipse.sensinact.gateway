@@ -81,9 +81,7 @@ public class ObservedPropertyPathHandlerSensorthings extends AbstractPathHandler
     }
 
     private Object subDatastreams(final String path) {
-        return getDatastreamsProviderFromOp(pathContext.provider()).stream()
-                .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
-                        pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
+        return getDatastreamsProviderFromOp(pathContext.provider()).stream().map(p -> withProvider(pathContext, p))
                 .flatMap(pc -> {
                     Object result = new DatastreamPathHandlerSensorthings(pc).handle(path);
 

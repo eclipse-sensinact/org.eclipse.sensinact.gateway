@@ -221,7 +221,7 @@ public class FiltersSensorthingsTest extends AbstractIntegrationTest {
         ResultList<? extends Self> observations = utils.queryJson(String
                 .format("/FeaturesOfInterest(%s)/Observations/$ref", String.format("%s%s", providerDatastream, "test")),
                 RESULT_SELF);
-        String baseUrl = observations.value().stream().filter(s -> s.selfLink().contains(providerDatastream + "test"))
+        String baseUrl = observations.value().stream().filter(s -> s.selfLink().contains(providerDatastream + "~test"))
                 .findFirst().get().selfLink();
 
         String property = "resultTime";

@@ -1,15 +1,15 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,6 +43,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -50,6 +51,7 @@ import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DATASTREAM;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_FOI;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION;
 
 public class OGCParserTestSensorthings {
 
@@ -104,7 +106,7 @@ public class OGCParserTestSensorthings {
     void testGeography() throws Exception {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
         // Length
-        expectations.put("floor(geo.length(geography'LINESTRING (30 10, 10 30, 40 40)')) eq 5973069", true);
+        expectations.put("floor(geo.length(geography'LINESTRING (30 10, 10 30, 40 40)')) eq 5972807", true);
         expectations.put("geo.length(geography'LINESTRING (5.69773 45.12477, 5.72047 45.19225)') gt 7000", true);
         expectations.put("geo.length(geography'LINESTRING (-0.4478 51.4649, 0.05523 51.5052)') lt 36000.0", true);
         // Distance
@@ -119,7 +121,6 @@ public class OGCParserTestSensorthings {
         ProviderSnapshot provider = RcUtils.makeProvider(SENSOR_THING_DEVICE.getName(), eNS_URI, "testProvider");
 
         ResourceSnapshot rc = makeLocatedResource(inCircle, provider);
-
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
                 RcUtils.getSession(), provider, List.of(rc), Map.of());
         assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
@@ -127,7 +128,8 @@ public class OGCParserTestSensorthings {
         rc = makeLocatedResource(outOfCircle, provider);
         holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, RcUtils.getSession(), provider, List.of(rc),
                 Map.of());
-        assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
+        assertQuery(false, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3",
+                holder);
     }
 
     private Coordinates makeCoors(double lon, double lat) {
@@ -138,6 +140,12 @@ public class OGCParserTestSensorthings {
     void testSpatial() throws Exception {
         final String point1 = "geography'POINT (30 10)'";
         final String point2 = "geography'POINT (50 10)'";
+        final String point3 = "geography'POINT (50 20)'";
+        final String line1 = "geography'LINESTRING (20 10, 30 10, 50 10, 40 20)'";
+        final String line2 = "geography'LINESTRING (20 0, 50 20, 60 30)'";
+        final String line3 = "geography'LINESTRING (-20 0, -40 20, -60 30)'";
+        final String line4 = "geography'LINESTRING (40 15, 35 15, 40 10, 35 10, 35 12)'";
+        final String line5 = "geography'LINESTRING (40 15, 35 15, 40 10)'";
         final Polygon rect1 = new Polygon(List
                 .of(List.of(makeCoors(0, 0), makeCoors(50, 0), makeCoors(50, 50), makeCoors(00, 50), makeCoors(0, 0))),
                 null, null);
@@ -148,11 +156,52 @@ public class OGCParserTestSensorthings {
                 RcUtils.getSession(), provider, List.of(rc), Map.of());
 
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
+
+        expectations.put(String.format("st_intersects(%s, %s)", line1, point1), true);
+        expectations.put(String.format("st_intersects(%s, %s)", line1, line2), true);
+        expectations.put(String.format("st_intersects(%s, %s)", line1, line3), false);
+
+        expectations.put(String.format("st_crosses(%s, %s)", line1, point1), false);
+        expectations.put(String.format("st_crosses(%s, %s)", line1, line2), true);
+        expectations.put(String.format("st_crosses(%s, %s)", line1, line3), false);
+        expectations.put(String.format("st_crosses(%s, %s)", line1, line4), false);
+
+        expectations.put(String.format("st_disjoint(%s, %s)", line1, point1), false);
+        expectations.put(String.format("st_disjoint(%s, %s)", line1, line2), false);
+        expectations.put(String.format("st_disjoint(%s, %s)", line1, point3), true);
+        expectations.put(String.format("st_disjoint(%s, %s)", line1, line3), true);
+        expectations.put(String.format("st_disjoint(%s, %s)", line1, line4), false);
+
+        expectations.put(String.format("st_contains(%s, %s)", line1, point1), true);
+        expectations.put(String.format("st_contains(%s, %s)", line1, point3), false);
+
+        expectations.put(String.format("st_within(%s, %s)", point1, line1), true);
+        expectations.put(String.format("st_within(%s, %s)", point3, line1), false);
+
         expectations.put(String.format("st_equals(%s, %s)", point1, point1), true);
         expectations.put(String.format("st_equals(%s, %s)", point1, point2), false);
-        expectations.put(String.format("st_within(%s, %s)", point1, point1), false);
-        expectations.put(String.format("st_relate(%s, %s, 'WITHIN')", point1, point1), false);
-        expectations.put(String.format("st_relate(%s, %s, 'INTERSECTS')", point1, point1), true);
+
+        // Within
+        expectations.put(String.format("st_relate(%s, %s, 'T*F**F***')", point3, line1), false);
+        expectations.put(String.format("st_relate(%s, %s, 'T*F**F***')", point1, line1), true);
+        // Disjoint
+        expectations.put(String.format("st_relate(%s, %s, 'FF*FF****')", line1, line2), false);
+        expectations.put(String.format("st_relate(%s, %s, 'FF*FF****')", line1, point3), true);
+
+        expectations.put(String.format("st_overlaps(%s, %s)", point1, point1), false);
+        expectations.put(String.format("st_overlaps(%s, %s)", point1, point2), false);
+        expectations.put(String.format("st_overlaps(%s, %s)", point1, line1), false);
+        expectations.put(String.format("st_overlaps(%s, %s)", line1, line2), false);
+        expectations.put(String.format("st_overlaps(%s, %s)", line1, line3), false);
+        expectations.put(String.format("st_overlaps(%s, %s)", line1, line4), true);
+
+        expectations.put(String.format("st_touches(%s, %s)", point1, line1), false);
+        expectations.put(String.format("st_touches(%s, %s)", point1, line2), false);
+        expectations.put(String.format("st_touches(%s, %s)", line1, line2), false);
+        expectations.put(String.format("st_touches(%s, %s)", line1, line3), false);
+        expectations.put(String.format("st_touches(%s, %s)", line1, line4), false);
+        expectations.put(String.format("st_touches(%s, %s)", line1, line5), true);
+
         expectations.put(String.format("st_contains(Locations/location, %s)", point1), true);
         expectations.put(String.format("st_within(%s, Locations/location)", point1), true);
         assertQueries(expectations, holder);
@@ -244,6 +293,49 @@ public class OGCParserTestSensorthings {
     }
 
     @Test
+    void testHistocalLocationsPath() throws Exception {
+
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+
+        expectations.put("time lt '2015-10-14T21:30:00.104Z'", false);
+
+        ProviderSnapshot provider = RcUtils.makeProvider(SENSOR_THING_DEVICE.getName(), eNS_URI, "testProviderThing");
+        ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_ADMIN);
+        ResourceSnapshot rc1 = RcUtils.addResource(svc, "location", new Point(0, 0), Instant.now());
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.HISTORICAL_LOCATIONS,
+                RcUtils.getSession(), provider, rc1, Map.of());
+        assertQueries(expectations, holder);
+
+    }
+
+    @Test
+    void testLocationsPath() throws Exception {
+
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+        final Map<String, Boolean> expectations2 = new LinkedHashMap<>();
+
+        expectations.put("encodingType lt 'application/vnd.geo+json'", false);
+        expectations2.put("encodingType lt 'application/vnd.geo+json'", true);
+
+        ProviderSnapshot providerLocation = RcUtils.makeProvider(SENSOR_THING_LOCATION.getName(), eNS_URI,
+                "testProviderThing");
+        ServiceSnapshot svcLocation = RcUtils.addService(providerLocation, DtoMapperSimple.SERVICE_LOCATON);
+        ResourceSnapshot rc1 = RcUtils.addResource(svcLocation, "encodingType", "application/vnd.geo+json");
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.LOCATIONS,
+                RcUtils.getSession(), providerLocation, rc1, Map.of());
+        assertQueries(expectations, holder);
+        ProviderSnapshot providerLocation2 = RcUtils.makeProvider(SENSOR_THING_LOCATION.getName(), eNS_URI,
+                "testProviderThing2");
+        ServiceSnapshot svcLocation2 = RcUtils.addService(providerLocation2, DtoMapperSimple.SERVICE_LOCATON);
+
+        ResourceSnapshot rc2 = RcUtils.addResource(svcLocation2, "encodingType", "aaplication/vnd.geo+json");
+        ResourceValueFilterInputHolder holder2 = new ResourceValueFilterInputHolder(EFilterContext.LOCATIONS,
+                RcUtils.getSession(), providerLocation, rc2, Map.of());
+        assertQueries(expectations2, holder2);
+
+    }
+
+    @Test
     void testThingsPath() throws Exception {
 
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
@@ -291,7 +383,7 @@ public class OGCParserTestSensorthings {
         ServiceSnapshot svc2 = RcUtils.addService(provider2, DtoMapperSimple.SERVICE_DATASTREAM);
         FeatureOfInterest foi = getFeatureOfInterest("testProvider");
         ProviderSnapshot providerFoi = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi.id().toString());
-        ServiceSnapshot svcFoi = RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
         RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_ADMIN);
 
         ResourceSnapshot rc1 = RcUtils.addResource(svc, "lastObservation",
@@ -324,7 +416,7 @@ public class OGCParserTestSensorthings {
         ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_DATASTREAM);
         FeatureOfInterest foi = getFeatureOfInterest("testProvider");
         ProviderSnapshot providerFoi = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi.id().toString());
-        ServiceSnapshot svcFoi = RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
         RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_ADMIN);
 
         ResourceSnapshot rc = RcUtils.addResource(svc, "lastObservation",
@@ -333,6 +425,25 @@ public class OGCParserTestSensorthings {
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
                 RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
+
+        final Map<String, Boolean> expectations2 = new LinkedHashMap<>();
+        expectations2.put("result lt '10'", false);
+        expectations2.put("Datastream/id eq 'testProvider'", true);
+        expectations2.put("FeatureOfInterest/id eq 'testProvidertest'", true);
+
+        ProviderSnapshot provider2 = RcUtils.makeProvider(SENSOR_THING_DATASTREAM.getName(), eNS_URI, "testProvider2");
+        ServiceSnapshot svc2 = RcUtils.addService(provider2, DtoMapperSimple.SERVICE_DATASTREAM);
+        FeatureOfInterest foi2 = getFeatureOfInterest("testProvider2");
+        ProviderSnapshot providerFoi2 = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi2.id().toString());
+        RcUtils.addService(providerFoi2, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi2, DtoMapperSimple.SERVICE_ADMIN);
+
+        ResourceSnapshot rc2 = RcUtils.addResource(svc2, "lastObservation",
+                getExpandedObservation(Instant.now(), "testProvider2", 5, foi2));
+
+        ResourceValueFilterInputHolder holder2 = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
+                RcUtils.getSession(), provider2, rc2, Map.of());
+        assertQueries(expectations2, holder2);
     }
 
     @Test
@@ -363,7 +474,7 @@ public class OGCParserTestSensorthings {
         ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_DATASTREAM);
         FeatureOfInterest foi = getFeatureOfInterest("provider");
         ProviderSnapshot providerFoi = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi.id().toString());
-        ServiceSnapshot svcFoi = RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
         RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_ADMIN);
 
         ResourceSnapshot rc = RcUtils.addResource(svc, "lastObservation", getExpandedObservation(
@@ -426,7 +537,7 @@ public class OGCParserTestSensorthings {
         RcUtils.addResource(svcThing, "thingId", "thing1");
         FeatureOfInterest foi = getFeatureOfInterest("datastream1");
         ProviderSnapshot providerFoi = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi.id().toString());
-        ServiceSnapshot svcFoi = RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
         RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_ADMIN);
 
         Instant resulTime = ZonedDateTime.of(2010, 6, 15, 21, 42, 0, 0, ZoneId.of("UTC")).toInstant();

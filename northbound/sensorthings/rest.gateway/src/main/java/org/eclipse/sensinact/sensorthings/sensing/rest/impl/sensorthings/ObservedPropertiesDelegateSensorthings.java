@@ -75,10 +75,11 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
     }
 
     public ResultList<Datastream> getObservedPropertyDatastreams(String id) {
-        ProviderSnapshot provider = validateAndGetProvider(id);
-        List<String> datastreamIds = getDatastreamsIdsFromObservedProperty(provider);
-        List<Datastream> list = datastreamIds.stream()
-                .map(idDatastream -> getObservedPropertyDatastream(id, idDatastream)).toList();
+        ICriterion filter = parseFilter(DATASTREAMS);
+        List<ProviderSnapshot> datastreamProviders = getDatastreamsFiltered(getFilterParser(), getSession(), filter, id,
+                ObservedProperty.class);
+        List<Datastream> list = datastreamProviders.stream()
+                .map(provDatastream -> getObservedPropertyDatastream(id, provDatastream.getName())).toList();
         return new ResultList<>(list);
     }
 
@@ -90,11 +91,10 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
 
-        Optional<Datastream> ds = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo,
-                getExpansions(), parseFilter(DATASTREAMS), validateAndGetProvider(id2));
-        if (ds.isEmpty())
-            throw new NotFoundException();
-        return ds.get();
+        Datastream ds = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo, getExpansions(),
+                parseFilter(DATASTREAMS), validateAndGetProvider(id2));
+
+        return ds;
     }
 
     @PaginationLimit(500)
@@ -109,7 +109,7 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
         }
         return RootResourceDelegateSensorthings.getObservationList(getSession(), getSensorThingDtoMapper(), getMapper(),
                 uriInfo, getExpansions(), getObservationResourceSnapshot(id2), parseFilter(OBSERVATIONS),
-                getHistoryProvider(), getMaxResult(0), getCacheObservationIfHistoryMemory());
+                getHistoryProvider(), getMaxResult(), getCacheObservationIfHistoryMemory());
     }
 
     public ObservedProperty getObservedPropertyDatastreamObservedProperty(String id, String id2) {
@@ -180,10 +180,11 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
 
     public ResultList<Datastream> getObservedPropertyDatastreamThingDatastreams(String value, String value2) {
         String ThingId = getThingIdFromDatastream(value2);
-        return new ResultList<Datastream>(getDatastreamProvidersFromThing(getSession(), ThingId).stream()
-                .map(p -> getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo, getExpansions(),
-                        null, p))
-                .filter(ds -> ds.isPresent()).map(ds -> ds.get()).toList());
+        return new ResultList<Datastream>(
+                getDatastreamsFiltered(getFilterParser(), getSession(), parseFilter(DATASTREAMS), ThingId, Thing.class)
+                        .stream().map(p -> getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo,
+                                getExpansions(), null, p))
+                        .toList());
     }
 
     public ResultList<HistoricalLocation> getObservedPropertyDatastreamThingHistoricalLocations(String value,
@@ -210,9 +211,9 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
     public ResultList<Location> getObservedPropertyDatastreamThingLocations(String value, String value2) {
         // same method in thing TODO refacto
         String ThingId = getThingIdFromDatastream(value2);
-        ResultList<Location> list = new ResultList<>(getLocationIdsFromThing(getSession(), ThingId)
-                .stream().map(idLoc -> validateAndGetProvider(idLoc)).map(p -> getSensorThingDtoMapper()
-                        .toLocation(getSession(), getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), p))
+        ResultList<Location> list = new ResultList<>(getLocationProviderFiltered(ThingId).stream()
+                .map(p -> getSensorThingDtoMapper().toLocation(getSession(), getMapper(), uriInfo, getExpansions(),
+                        parseFilter(LOCATIONS), p))
                 .toList());
 
         return list;

@@ -15,12 +15,8 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mock.Strictness.LENIENT;
 
-import java.util.Map;
-
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoCacheMemoryHistoricalLocation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMemoryCacheObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessResourceUseCase;
@@ -75,8 +71,6 @@ class UseCaseTest {
                 .thenReturn(ucp);
 
         // Dependencies
-        Mockito.when(application.getProperties()).thenReturn(Map.of("cache.expanded.observation",
-                new DtoMemoryCacheObservation(), "cache.historical.location", new DtoCacheMemoryHistoricalLocation()));
         DtoMemoryCacheProvider dtoMemoryCacheProvider = new DtoMemoryCacheProvider();
         dtoMemoryCacheProvider.application = application;
         Mockito.when(providers.<IDtoMemoryCache>getContextResolver(

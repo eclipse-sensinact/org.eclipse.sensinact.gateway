@@ -69,15 +69,24 @@ public final class ExpansionSettingsImpl implements ExpansionSettings {
 
     private void addRequestedExpansion(String expansion) {
         ExpansionSettingsImpl settings = this;
+
         if (expansion.indexOf("($expand=") != -1) {
-            settings.configuredExpansions.computeIfAbsent(expansion.substring(0, expansion.indexOf("($expand=")),
-                    x -> new ExpansionSettingsImpl(
-                            split(expansion.substring(expansion.indexOf("($expand=") + 9, expansion.length() - 1))));
+            String prefix = expansion.substring(0, expansion.indexOf("($expand="));
+            String nested = expansion.substring(expansion.indexOf("($expand=") + 9, expansion.length() - 1);
+
+            settings.configuredExpansions.computeIfAbsent(prefix, x -> new ExpansionSettingsImpl(split(nested)));
+        } else if (expansion.contains("/")) {
+            int firstSlash = expansion.indexOf("/");
+            String prefix = expansion.substring(0, firstSlash);
+            String remaining = expansion.substring(firstSlash + 1);
+
+            ExpansionSettingsImpl nestedSettings = settings.configuredExpansions.computeIfAbsent(prefix,
+                    x -> new ExpansionSettingsImpl());
+
+            nestedSettings.addRequestedExpansion(remaining);
         } else {
             settings.configuredExpansions.computeIfAbsent(expansion, x -> new ExpansionSettingsImpl());
-
         }
-
     }
 
     @Override

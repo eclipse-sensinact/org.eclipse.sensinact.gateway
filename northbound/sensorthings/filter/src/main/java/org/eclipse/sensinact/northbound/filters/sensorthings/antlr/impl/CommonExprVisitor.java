@@ -75,7 +75,10 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
         }
 
         case ODataFilterParser.RULE_string_1: {
-            final String value = new StringVisitor().visitChildren(ctx);
+            String raw = ctx.getText();
+
+            final String value = (raw.length() >= 2) ? raw.substring(1, raw.length() - 1) : raw;
+
             return x -> value;
         }
 
@@ -181,8 +184,8 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
         case ODataFilterParser.RULE_divexpr:
             rightExpr = rightVisitor.visit(((DivexprContext) rightElement).commonexpr());
             subOperation = this::div;
-            break;
 
+            break;
         case ODataFilterParser.RULE_modexpr:
             rightExpr = rightVisitor.visit(((ModexprContext) rightElement).commonexpr());
             subOperation = this::mod;

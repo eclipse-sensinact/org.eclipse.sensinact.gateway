@@ -23,7 +23,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -63,8 +62,8 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
 
     public ResultList<Datastream> getThingDatastreams(String id) {
 
-        return DatastreamsDelegateSensorthings.getDataStreams(getSession(), getSensorThingDtoMapper(), getMapper(),
-                uriInfo, getExpansions(), parseFilter(DATASTREAMS), id);
+        return DatastreamsDelegateSensorthings.getDataStreams(getFilterParser(), getSession(),
+                getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), parseFilter(DATASTREAMS), id);
     }
 
     public Datastream getThingDatastream(String id, String id2) {
@@ -75,15 +74,13 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
 
-        Optional<Datastream> d = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo,
-                getExpansions(), parseFilter(DATASTREAMS), validateAndGetProvider(providerDatastreamId));
-        if (d.isEmpty()) {
+        Datastream d = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo, getExpansions(),
+                parseFilter(DATASTREAMS), validateAndGetProvider(providerDatastreamId));
+
+        if (!id2.equals(d.id())) {
             throw new NotFoundException();
         }
-        if (!id2.equals(d.get().id())) {
-            throw new NotFoundException();
-        }
-        return d.get();
+        return d;
     }
 
     @PaginationLimit(500)
@@ -232,7 +229,8 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
     public ResultList<Location> getThingLocations(String id) {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
-        List<ProviderSnapshot> providersLocation = getLocationProvidersFromThing(provider);
+        List<ProviderSnapshot> providersLocation = getLocationProviderFiltered(provider);
+
         ResultList<Location> list = new ResultList<>(providersLocation.stream().map(p -> getSensorThingDtoMapper()
                 .toLocation(getSession(), getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), p)).toList());
 
@@ -272,22 +270,8 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         if (!getLocationIdsFromThing(getSession(), id).contains(id2)) {
             throw new NotFoundException();
         }
-        try {
-            ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
-            ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
+        return getHistoricalLocations(provider);
 
-            ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), filter,
-                    providerSnapshot, getHistoryProvider(), getMaxResult(),
-                    getCacheHistoricalLocationIfHistoryMemory());
-            if (list.value().isEmpty()) {
-                list = getSensorThingDtoMapper().toHistoricalLocations(getSession(), getMapper(), uriInfo,
-                        getExpansions(), filter, providerSnapshot);
-            }
-            return list;
-        } catch (IllegalArgumentException iae) {
-            throw new NotFoundException();
-        }
     }
 
     public Response createDatastream(String id, ExpandedDataStream datastream) {
@@ -295,8 +279,8 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         ProviderSnapshot snapshot = getExtraDelegate().create(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), datastream, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
-        Datastream createDto = getSensorThingDtoMapper()
-                .toDatastream(getSession(), getMapper(), uriInfo, getExpansions(), criterion, snapshot).get();
+        Datastream createDto = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot);
 
         URI createdUri = getCreatedUri(createDto);
 
@@ -325,8 +309,8 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
                 requestContext.getMethod(), id2, datastream, id);
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
 
-        Datastream createDto = getSensorThingDtoMapper()
-                .toDatastream(getSession(), getMapper(), uriInfo, getExpansions(), criterion, snapshot).get();
+        Datastream createDto = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo,
+                getExpansions(), criterion, snapshot);
 
         return Response.ok().entity(createDto).build();
     }
@@ -425,9 +409,10 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         if (obs == null) {
             throw new NotFoundException();
         }
-        return getSensorThingDtoMapper()
-                .toDatastream(getSession(), getMapper(), uriInfo, getExpansions(), null, provider).get();
+        Datastream od = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo, getExpansions(),
+                null, provider);
 
+        return od;
     }
 
 }

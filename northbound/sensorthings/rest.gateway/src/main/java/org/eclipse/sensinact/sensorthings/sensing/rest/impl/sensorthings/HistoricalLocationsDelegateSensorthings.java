@@ -66,8 +66,13 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
                 DtoMapperSimple.LOCATION);
         Instant resourceStamp = location.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
         if (isHistoryMemory() && getCacheHistoricalLocation().getDto(id) != null) {
-            return DtoMapper.toHistoricalLocation(getSession(), getMapper(), uriInfo, getExpansions(), null, id,
-                    getCacheHistoricalLocation().getDto(id));
+            Optional<HistoricalLocation> historicalLocation = getSensorThingDtoMapper().toHistoricalLocation(
+                    getSession(), getMapper(), uriInfo, getExpansions(), null, id,
+                    getCacheHistoricalLocation().getDto(id), providerSnapshot);
+            if (historicalLocation.isEmpty() || !historicalLocation.get().id().equals(id)) {
+                throw new NotFoundException();
+            }
+            return historicalLocation.get();
         } else if (!timestamp.equals(resourceStamp)) {
             throw new NotFoundException();
         }
@@ -90,7 +95,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
 
         validateAndGetProvider(provider);
 
-        ResultList<Location> list = new ResultList<>(getLocationProvidersFromThing(provider).stream()
+        ResultList<Location> list = new ResultList<>(getLocationProviderFiltered(provider).stream()
                 .map(p -> getSensorThingDtoMapper().toLocation(getSession(), getMapper(), uriInfo, getExpansions(),
                         parseFilter(LOCATIONS), p))
                 .toList());
@@ -140,7 +145,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
             }
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
                     getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), filter,
-                    List.of(thingProvider), id2, getHistoryProvider(), getMaxResult(0),
+                    List.of(thingProvider), id2, getHistoryProvider(), getMaxResult(),
                     getCacheHistoricalLocationIfHistoryMemory());
             if (list.value().isEmpty())
                 list = getSensorThingDtoMapper().toHistoricalLocations(getSession(), getMapper(), uriInfo,
@@ -176,8 +181,8 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         DtoMapperSimple.getTimestampFromId(id);
 
-        return DatastreamsDelegateSensorthings.getDataStreams(getSession(), getSensorThingDtoMapper(), getMapper(),
-                uriInfo, getExpansions(), parseFilter(DATASTREAMS), provider);
+        return DatastreamsDelegateSensorthings.getDataStreams(getFilterParser(), getSession(),
+                getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), parseFilter(DATASTREAMS), provider);
     }
 
     public ResultList<HistoricalLocation> getHistoricalLocationThingHistoricalLocations(String id) {
@@ -190,7 +195,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
                     getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), filter,
-                    providerSnapshot, getHistoryProvider(), getMaxResult(0),
+                    providerSnapshot, getHistoryProvider(), getMaxResult(),
                     getCacheHistoricalLocationIfHistoryMemory());
             if (list.value().isEmpty())
                 list = getSensorThingDtoMapper().toHistoricalLocations(getSession(), getMapper(), uriInfo,
@@ -258,9 +263,8 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
         ProviderSnapshot snapshot = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), value, hl);
         ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
-        HistoricalLocation createDto = getSensorThingDtoMapper().toHistoricalLocation(getSession(), application,
-                getMapper(), uriInfo, getExpansions(), criterion, snapshot, value,
-                getCacheHistoricalLocation().getDto(value));
+        HistoricalLocation createDto = getSensorThingDtoMapper().toHistoricalLocation(getSession(), getMapper(),
+                uriInfo, getExpansions(), criterion, snapshot, value, getCacheHistoricalLocation().getDto(value));
 
         return Response.ok().entity(createDto).build();
     }

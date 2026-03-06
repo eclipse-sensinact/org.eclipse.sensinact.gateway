@@ -94,8 +94,8 @@ public class DtoFactory {
 
     }
 
-    // Required
     public static ExpandedDataStream getDatastreamMinimalLinkThing(String name, RefId thingRefId) {
+        // Required
         Sensor sensor = getSensor("test");
         ObservedProperty op = getObservedProperty("Temperature");
         UnitOfMeasurement uom = getUnitOfMeasure("Celcius");

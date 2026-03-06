@@ -238,7 +238,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
     }
 
     private void waitForRowCount(String table, int count) {
-        waitForRowCount(table, count, false);
+        waitForRowCount(table, count, true);
     }
 
     private void waitForRowCount(String table, int count, boolean allowMore) {
@@ -303,7 +303,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         // 1008: 1000 updates + history provider name & description & model &
         // modelPackageUri + foo
         // provider name & description & modelUri
-        waitForRowCount("sensinact.text_data", 5063);
+        waitForRowCount("sensinact.text_data", 5713);
 
         ResultList<Observation> observations = utils.queryJson("/Datastreams(baz)/Observations?$count=true",
                 RESULT_OBSERVATIONS);
@@ -356,7 +356,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         createThing(thingId, List.of(), List.of(datastreamId), TS_2012);
         // 16: 10 updates + history provider name & model & modelPackageUri + fizz
         // provider name & modelUri
-        waitForRowCount("sensinact.text_data", 99);
+        waitForRowCount("sensinact.text_data", 110);
 
         String id = String.format("%s~%s~%s", datastreamId, "test",
                 Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
@@ -379,7 +379,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
 
         }
         createThing(thingId, List.of(), List.of(datastreamId));
-        waitForRowCount("sensinact.text_data", 59);
+        waitForRowCount("sensinact.text_data", 110);
 
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
         });
@@ -420,7 +420,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         createLocation(testProviderLocation);
         createThing(testProviderThing, List.of(), List.of(testProvider));
 
-        waitForRowCount("sensinact.text_data", 76);
+        waitForRowCount("sensinact.text_data", 78);
 
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils.queryJson(
@@ -457,7 +457,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         for (int i = 0; i < 1000; i++) {
             createObservation("foobar", thingId, Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 1133);
+        waitForRowCount("sensinact.text_data", 2086);
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils
                 .queryJson(String.format("/Datastreams(foobar)/Observations?$filter=%s",

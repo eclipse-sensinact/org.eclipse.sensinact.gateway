@@ -45,7 +45,7 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
             return null;
         }
         if (parts.length == 1) {
-            switch (path) {
+            switch (path.toLowerCase()) {
             case "id":
             case "@iot.id":
 
@@ -58,7 +58,8 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
 
             case "location":
                 return DtoMapperSimple.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
-            case "encodingType":
+            case "encodingtype":
+
                 return DtoMapperSimple.getResourceField(service, "encodingType", String.class);
 
             case "properties":
@@ -77,6 +78,12 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
         }
     }
 
+    @Override
+    public PathContext withProvider(PathContext pathContext, ProviderSnapshot newProvider) {
+        return new PathContext(pathContext.mapper(), newProvider, pathContext.session(), pathContext.resource(),
+                pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl());
+    }
+
     private Object subThings(final String path) {
         SensiNactSession session = pathContext.session();
         ProviderSnapshot provider = pathContext.provider();
@@ -84,9 +91,7 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
                 .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
                         .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
                 .map(s -> s.getProvider()).toList();
-        return thingProviders.stream()
-                .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
-                        pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
+        return thingProviders.stream().map(p -> withProvider(pathContext, p))
                 .map(pc -> new ThingPathHandlerSensorthings(pc).handle(path)).toList();
     }
 

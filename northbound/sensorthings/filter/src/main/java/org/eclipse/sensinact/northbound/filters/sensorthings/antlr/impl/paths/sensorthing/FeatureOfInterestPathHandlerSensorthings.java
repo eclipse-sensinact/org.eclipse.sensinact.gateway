@@ -73,7 +73,7 @@ public class FeatureOfInterestPathHandlerSensorthings extends AbstractPathHandle
         if (service == null || serviceAdmin == null) {
             return null;
         }
-        switch (path) {
+        switch (path.toLowerCase()) {
         case "id":
         case "@iot.id":
 
@@ -82,7 +82,8 @@ public class FeatureOfInterestPathHandlerSensorthings extends AbstractPathHandle
             return DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class);
         case "description":
             return DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class);
-        case "encodingType":
+        case "encodingtype":
+
             return DtoMapperSimple.getResourceField(service, "encodingType", String.class);
         case "feature":
             return DtoMapperSimple.getResourceField(serviceAdmin, "location", String.class);

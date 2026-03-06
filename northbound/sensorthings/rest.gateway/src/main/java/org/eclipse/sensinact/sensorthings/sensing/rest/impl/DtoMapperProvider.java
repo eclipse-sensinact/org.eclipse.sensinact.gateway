@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import java.time.Instant;
+
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper;
@@ -36,7 +38,9 @@ public class DtoMapperProvider implements ContextResolver<DtoMapper> {
             int maxResult = (int) application.getProperties().get("sensinact.history.result.limit");
             IDtoMemoryCache<ExpandedObservation> cacheObs = (IDtoMemoryCache<ExpandedObservation>) application
                     .getProperties().get("cache.expanded.observation");
-            dtoMapper = new DtoMapper(historyProvider, maxResult, cacheObs);
+            IDtoMemoryCache<Instant> cacheHl = (IDtoMemoryCache<Instant>) application.getProperties()
+                    .get("cache.historical.location");
+            dtoMapper = new DtoMapper(historyProvider, maxResult, cacheObs, cacheHl);
         }
         return dtoMapper;
     }

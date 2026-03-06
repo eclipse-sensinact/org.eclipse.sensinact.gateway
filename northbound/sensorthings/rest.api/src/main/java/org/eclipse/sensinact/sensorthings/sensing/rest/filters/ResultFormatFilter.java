@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.eclipse.sensinact.sensorthings.sensing.dto.DataArray;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
@@ -41,22 +43,24 @@ public class ResultFormatFilter implements ContainerRequestFilter, ContainerResp
 
     private static final String RESULT_FORMAT_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.resultformat";
 
-    private DataArray convertToDataArray(String request, ResultList<? extends Self> resultList, List<String> components,
-            String entityType) {
+    private DataArray convertToDataArray(String request, ResultList<? extends Self> resultList,
+            List<String> components) {
 
-        String[] split = request.split("/");
+        // Retire les query params avant de parser le path
+        String path = request.contains("?") ? request.substring(0, request.indexOf('?')) : request;
+        String[] split = path.split("/");
         String plural = split[split.length - 1];
-        String entityName = plural.substring(0, plural.length() - 1);
-        List<List<Object>> rows = resultList.value().stream()
-                .<List<Object>>map(dto -> DtoMapperSimple.getRecordField(dto)).toList();
+        String entityName = PLURAL_TO_ENTITY.getOrDefault(plural, plural);
+
+        List<List<Object>> rows = resultList.value().stream().<List<Object>>map(DtoMapperSimple::getRecordField)
+                .toList();
         return new DataArray(null, entityName, request, components, rows);
-
     }
 
-    private String resolveEntityTypeName(Object obj) {
-        return obj.getClass().getSimpleName();
-
-    }
+    static final Map<String, String> PLURAL_TO_ENTITY = Map.of("Things", "Thing", "Locations", "Location",
+            "HistoricalLocations", "HistoricalLocation", "Datastreams", "Datastream", "Sensors", "Sensor",
+            "Observations", "Observation", "ObservedProperties", "ObservedProperty", "FeaturesOfInterest",
+            "FeatureOfInterest");
 
     private List<String> determineComponents(Object record) {
         List<String> components = new ArrayList<>();
@@ -86,11 +90,10 @@ public class ResultFormatFilter implements ContainerRequestFilter, ContainerResp
         if (entity instanceof ResultList<?> resultList && !resultList.value().isEmpty()) {
 
             Object firstItem = resultList.value().get(0);
-            String typeName = resolveEntityTypeName(firstItem);
             List<String> components = determineComponents(firstItem);
 
             DataArray dataArrayValue = convertToDataArray(requestContext.getUriInfo().getRequestUri().toString(),
-                    resultList, components, typeName);
+                    resultList, components);
 
             responseContext
                     .setEntity(new ResultList<>(resultList.count(), resultList.nextLink(), List.of(dataArrayValue)));
@@ -101,8 +104,8 @@ public class ResultFormatFilter implements ContainerRequestFilter, ContainerResp
     public void filter(ContainerRequestContext requestContext) throws IOException {
         List<String> list = requestContext.getUriInfo().getQueryParameters().getOrDefault("$resultFormat", List.of());
         if (list.size() > 1) {
-            requestContext.abortWith(
-                    Response.status(Status.BAD_REQUEST).entity("Only one $count parameter may be provided").build());
+            requestContext.abortWith(Response.status(Status.BAD_REQUEST)
+                    .entity("Only one $resultFormat parameter may be provided").build());
         }
         if (!list.isEmpty())
             requestContext.setProperty(RESULT_FORMAT_PROP, list.get(0));
