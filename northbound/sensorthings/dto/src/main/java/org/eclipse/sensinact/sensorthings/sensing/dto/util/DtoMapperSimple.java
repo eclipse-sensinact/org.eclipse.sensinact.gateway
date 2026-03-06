@@ -70,7 +70,7 @@ public class DtoMapperSimple {
 
     public final static String SERVICE_ADMIN = "admin";
 
-    public final static String SERVICE_LOCATON = "location";
+    public final static String SERVICE_LOCATION = "location";
 
     public static String stampToId(Instant stamp) {
         return Long.toString(stamp.toEpochMilli(), 16);
@@ -318,7 +318,7 @@ public class DtoMapperSimple {
      * get location service
      */
     public static ServiceSnapshot getLocationService(ProviderSnapshot providerDatastream) {
-        return providerDatastream.getService(SERVICE_LOCATON);
+        return providerDatastream.getService(SERVICE_LOCATION);
     }
 
     /**
@@ -713,7 +713,7 @@ public class DtoMapperSimple {
         Polygon observedArea = getObservedArea(observedAreaRead);
         String thingId = getResourceField(getDatastreamService(provider), "thingId", String.class);
         String sensorId = getResourceField(getDatastreamService(provider), "sensorId", String.class);
-        String observerdPropertyId = getResourceField(getDatastreamService(provider), "observedPropertyId",
+        String observedPropertyId = getResourceField(getDatastreamService(provider), "observedPropertyId",
                 String.class);
 
         UnitOfMeasurement unitOfMeasurement = toUnitOfMeasure(provider);
@@ -722,7 +722,7 @@ public class DtoMapperSimple {
                 observedArea, null, null, metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
 
         DtoMapperSimple.checkRequireField(datastream);
-        DtoMapperSimple.checkRequireLink(unit, sensorId, observerdPropertyId, unitOfMeasurement, thingId);
+        DtoMapperSimple.checkRequireLink(unit, sensorId, observedPropertyId, unitOfMeasurement, thingId);
 
         return datastream;
     }

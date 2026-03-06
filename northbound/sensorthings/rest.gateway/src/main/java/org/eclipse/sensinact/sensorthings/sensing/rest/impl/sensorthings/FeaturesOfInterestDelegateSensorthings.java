@@ -109,8 +109,9 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
                 DtoMapperSimple.getDatastreamService(providerSnapshot));
         if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
-            throw new BadRequestException(String.format(
-                    "observations %s~%s are not associate with feature of interest %s", provider2, obs.id(), provider));
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
         }
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
         Optional<Observation> o = getSensorThingDtoMapper().toObservation(getSession(), getMapper(), uriInfo,
@@ -128,8 +129,9 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
                 DtoMapperSimple.getDatastreamService(providerSnapshot));
         if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
-            throw new BadRequestException(String.format(
-                    "observations %s~%s are not associate with feature of interest %s", provider2, obs.id(), provider));
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
         }
         Datastream d = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo, getExpansions(),
                 parseFilter(EFilterContext.DATASTREAMS), providerSnapshot);
@@ -166,8 +168,9 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
                 DtoMapperSimple.getDatastreamService(providerSnapshot));
         if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
-            throw new BadRequestException(String.format(
-                    "observations %s~%s are not associate with feature of interest %s", provider2, obs.id(), provider));
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
         }
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
         String thingId = DtoMapperSimple.getResourceField(service, "thingId", String.class);
@@ -184,8 +187,9 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
                 DtoMapperSimple.getDatastreamService(providerSnapshot));
         if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
-            throw new BadRequestException(String.format(
-                    "observations %s~%s are not associate with feature of interest %s", provider2, obs.id(), provider));
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
         }
         String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerSnapshot),
                 "sensorId", String.class);
@@ -202,8 +206,9 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
                 DtoMapperSimple.getDatastreamService(providerSnapshot));
         if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
-            throw new BadRequestException(String.format(
-                    "observations %s~%s are not associate with feature of interest %s", provider2, obs.id(), provider));
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
         }
         String observedPropertyId = DtoMapperSimple.getResourceField(
                 DtoMapperSimple.getDatastreamService(providerSnapshot), "observedPropertyId", String.class);
@@ -222,8 +227,9 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
                 DtoMapperSimple.getDatastreamService(providerSnapshot));
         if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
-            throw new BadRequestException(String.format(
-                    "observations %s~%s are not associate with feature of interest %s", provider2, obs.id(), provider));
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
         }
         ResultList<Observation> observationList = RootResourceDelegateSensorthings.getObservationList(getSession(),
                 getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext,

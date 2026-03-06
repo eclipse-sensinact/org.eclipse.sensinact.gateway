@@ -541,7 +541,7 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider, "sesor", "op");
+        createDatastream(providerDatastream, provider, "sensor", "op");
         createLocation(providerLocation);
 
         // Get the new locations

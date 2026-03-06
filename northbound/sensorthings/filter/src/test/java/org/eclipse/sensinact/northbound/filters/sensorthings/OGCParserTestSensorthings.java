@@ -319,14 +319,14 @@ public class OGCParserTestSensorthings {
 
         ProviderSnapshot providerLocation = RcUtils.makeProvider(SENSOR_THING_LOCATION.getName(), eNS_URI,
                 "testProviderThing");
-        ServiceSnapshot svcLocation = RcUtils.addService(providerLocation, DtoMapperSimple.SERVICE_LOCATON);
+        ServiceSnapshot svcLocation = RcUtils.addService(providerLocation, DtoMapperSimple.SERVICE_LOCATION);
         ResourceSnapshot rc1 = RcUtils.addResource(svcLocation, "encodingType", "application/vnd.geo+json");
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.LOCATIONS,
                 RcUtils.getSession(), providerLocation, rc1, Map.of());
         assertQueries(expectations, holder);
         ProviderSnapshot providerLocation2 = RcUtils.makeProvider(SENSOR_THING_LOCATION.getName(), eNS_URI,
                 "testProviderThing2");
-        ServiceSnapshot svcLocation2 = RcUtils.addService(providerLocation2, DtoMapperSimple.SERVICE_LOCATON);
+        ServiceSnapshot svcLocation2 = RcUtils.addService(providerLocation2, DtoMapperSimple.SERVICE_LOCATION);
 
         ResourceSnapshot rc2 = RcUtils.addResource(svcLocation2, "encodingType", "aaplication/vnd.geo+json");
         ResourceValueFilterInputHolder holder2 = new ResourceValueFilterInputHolder(EFilterContext.LOCATIONS,

@@ -283,8 +283,8 @@ public class AbstractIntegrationTest {
     }
 
     protected void createLocation(String provider, GeoJsonObject location, Instant instant) {
-        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_LOCATON, "id", provider, instant);
-        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_LOCATON, "location", location, instant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_LOCATION, "id", provider, instant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_LOCATION, "location", location, instant);
 
     }
 
