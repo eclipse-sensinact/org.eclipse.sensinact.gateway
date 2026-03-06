@@ -39,6 +39,7 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
@@ -316,6 +317,49 @@ public abstract class AbstractDelegate {
         ServiceSnapshot serviceDatastream = DtoMapperSimple.getDatastreamService(providerDatastream);
         String thingId = DtoMapperSimple.getResourceField(serviceDatastream, "thingId", String.class);
         return thingId;
+    }
+
+    /**
+     * Validates that two IDs refer to the same datastream provider, and that the
+     * datastream is linked to the expected parent entity (sensor or
+     * observedProperty). Throws {@link NotFoundException} if validation fails.
+     *
+     * @param parentEntityId  the expected parent entity ID (sensor or OP)
+     * @param datastreamIdStr the datastream ID string
+     * @param observationIdStr the observation ID string (must resolve to same
+     *                         provider)
+     * @param fieldName       the field in the datastream service to check
+     *                        ("sensorId" or "observedPropertyId")
+     * @return the validated datastream ProviderSnapshot
+     */
+    protected ProviderSnapshot validateDatastreamRelation(String parentEntityId, String datastreamIdStr,
+            String observationIdStr, String fieldName) {
+        String dsProvider = DtoMapperSimple.extractFirstIdSegment(datastreamIdStr);
+        String obsProvider = DtoMapperSimple.extractFirstIdSegment(observationIdStr);
+        if (!dsProvider.equals(obsProvider)) {
+            throw new NotFoundException();
+        }
+        ProviderSnapshot providerDatastream = validateAndGetProvider(dsProvider);
+        String linkedId = DtoMapperSimple.getResourceField(
+                DtoMapperSimple.getDatastreamService(providerDatastream), fieldName, String.class);
+        if (!linkedId.equals(parentEntityId)) {
+            throw new NotFoundException();
+        }
+        return providerDatastream;
+    }
+
+    /**
+     * Get the locations for a thing identified by its datastream.
+     *
+     * @param datastreamId the datastream ID
+     * @return the list of locations for the thing
+     */
+    protected ResultList<Location> getDatastreamThingLocations(String datastreamId) {
+        String thingId = getThingIdFromDatastream(datastreamId);
+        return new ResultList<>(getLocationProviderFiltered(thingId).stream()
+                .map(p -> getSensorThingDtoMapper().toLocation(getSession(), getMapper(), uriInfo, getExpansions(),
+                        parseFilter(LOCATIONS), p))
+                .toList());
     }
 
     protected static List<ProviderSnapshot> getLinkProvidersFromThing(SensiNactSession session, String thingId,

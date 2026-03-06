@@ -13,9 +13,6 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,7 +21,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.DependentCommand;
-import org.eclipse.sensinact.core.command.ResourceCommand;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
@@ -39,7 +35,6 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
 
@@ -52,32 +47,6 @@ public class ObservedPropertiesExtraUseCase
 
     public ObservedPropertiesExtraUseCase(Providers providers, Application application) {
         super(providers, application);
-    }
-
-    public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ObservedProperty> request) {
-        String idOp = request.id();
-
-        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
-
-        // update/create provider
-        try {
-            dataUpdate.pushUpdate(listDtoModels).getValue();
-
-        } catch (InvocationTargetException | InterruptedException e) {
-            throw new InternalServerErrorException(e);
-        }
-        ProviderSnapshot snapshot = providerUseCase.read(request.session(), idOp);
-        if (snapshot == null) {
-            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "can't find sensor");
-        }
-        return new ExtraUseCaseResponse<ProviderSnapshot>(request.id(), snapshot);
-    }
-
-    @Override
-    public ExtraUseCaseResponse<ProviderSnapshot> delete(ExtraUseCaseRequest<ObservedProperty> request) {
-
-        return super.delete(request);
-
     }
 
     @Override
@@ -98,142 +67,13 @@ public class ObservedPropertiesExtraUseCase
         return List.of(DtoToModelMapper.toObservedProperty(observedPropertyId, opToUpdate, datastreamIds, null));
     }
 
-    public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ObservedProperty> request) {
-        // check if sensor is in cached map
-
-        String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
-
-        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
-
-        // update/create provider
-        try {
-            dataUpdate.pushUpdate(listDtoModels).getValue();
-
-        } catch (InvocationTargetException | InterruptedException e) {
-            throw new InternalServerErrorException(e);
-        }
-        ProviderSnapshot snapshot = providerUseCase.read(request.session(), providerId);
-        if (snapshot == null) {
-            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "can't find sensor");
-        }
-        return new ExtraUseCaseResponse<ProviderSnapshot>(request.id(), snapshot);
-
-    }
-
-    /**
-     * return the thingId, observedPropertyId and lastObservation for all datastream
-     * link to sensor
-     *
-     * @param datastreamIds
-     * @return
-     */
-    protected DependentCommand<Map<String, Map<String, TimedValue<?>>>, Map<String, List<?>>> getDatastreamidsSensorOp(
-            ExtraUseCaseRequest<?> request) {
-        ResourceCommand<TimedValue<List<String>>> listDatastreamIds = new ResourceCommand<TimedValue<List<String>>>(
-                request.id(), DtoMapperSimple.SERVICE_OBSERVED_PROPERTY, "datastreamIds") {
-
-            @Override
-            protected Promise<TimedValue<List<String>>> call(SensinactResource resource, PromiseFactory pf) {
-                return resource.getMultiValue(String.class);
-            }
-
-        };
-        DependentCommand<TimedValue<List<String>>, Map<String, Map<String, TimedValue<?>>>> parentCommand = new DependentCommand<TimedValue<List<String>>, Map<String, Map<String, TimedValue<?>>>>(
-                listDatastreamIds) {
-
-            @SuppressWarnings("unchecked")
-            @Override
-            protected Promise<Map<String, Map<String, TimedValue<?>>>> call(
-                    Promise<TimedValue<List<String>>> parentResult, SensinactDigitalTwin twin,
-                    SensinactModelManager modelMgr, PromiseFactory pf) {
-                try {
-                    List<String> datastreamIds = parentResult.getValue().getValue();
-                    List<SensinactProvider> datastreamProvs = datastreamIds.stream().map(id -> twin.getProvider(id))
-                            .filter(Objects::nonNull).toList();
-
-                    List<Promise<List<TimedValue<?>>>> promisesOfLists = datastreamProvs.stream().map(sp -> {
-
-                        Promise<TimedValue<?>> lastObs = getPromiseLastObservation(sp);
-
-                        Promise<TimedValue<?>> sensorId = (Promise<TimedValue<?>>) (Promise<?>) sp
-                                .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "sensorId").getValue(String.class);
-
-                        Promise<TimedValue<?>> thingId = (Promise<TimedValue<?>>) (Promise<?>) sp
-                                .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "thingId").getValue(String.class);
-
-                        return pf.all(List.of(lastObs, sensorId, thingId));
-                    }).toList();
-
-                    return pf.all(promisesOfLists).map(resolvedLists -> {
-                        Map<String, Map<String, TimedValue<?>>> finalMap = new HashMap<>();
-
-                        for (int i = 0; i < datastreamProvs.size(); i++) {
-                            List<TimedValue<?>> list = resolvedLists.get(i);
-                            finalMap.put(datastreamProvs.get(i).getName(), Map.of("lastObservation", list.get(0),
-                                    "sensorId", list.get(1), "thingId", list.get(2)));
-                        }
-                        return finalMap;
-                    });
-                } catch (Exception e) {
-                    return pf.failed(e);
-                }
-            }
-
-        };
-        DependentCommand<Map<String, Map<String, TimedValue<?>>>, Map<String, List<?>>> parent2 = new DependentCommand<Map<String, Map<String, TimedValue<?>>>, Map<String, List<?>>>(
-                parentCommand) {
-
-            @Override
-            protected Promise<Map<String, List<?>>> call(Promise<Map<String, Map<String, TimedValue<?>>>> parentResult,
-                    SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
-                try {
-                    Map<String, Map<String, TimedValue<?>>> map = parentResult.getValue();
-                    List<String> datastreamIds = map.keySet().stream().toList();
-                    List<SensinactProvider> datastreamProvs = map.keySet().stream().map(id -> twin.getProvider(id))
-                            .filter(Objects::nonNull).toList();
-
-                    Map<String, Promise<TimedValue<List<String>>>> promisesMap = new LinkedHashMap<>();
-
-                    datastreamProvs.stream().forEach(spDatastream -> {
-
-                        String thingId = (String) map.get(spDatastream.getName()).get("thingId").getValue();
-                        String sensorId = (String) map.get(spDatastream.getName()).get("sensorId").getValue();
-
-                        promisesMap.put(thingId,
-                                twin.getProvider(thingId).getResource(DtoMapperSimple.SERVICE_THING, "datastreamIds")
-                                        .getMultiValue(String.class));
-                        promisesMap.put(sensorId,
-                                twin.getProvider(sensorId).getResource(DtoMapperSimple.SERVICE_SENSOR, "datastreamIds")
-                                        .getMultiValue(String.class));
-                    });
-
-                    List<String> keys = new ArrayList<>(promisesMap.keySet());
-                    List<Promise<TimedValue<List<String>>>> promises = new ArrayList<>(promisesMap.values());
-
-                    return pf.all(promises).then(resolvedList -> {
-                        Map<String, List<?>> result = new LinkedHashMap<>();
-                        List<TimedValue<List<String>>> values = resolvedList.getValue();
-                        for (int i = 0; i < keys.size(); i++) {
-                            result.put(keys.get(i), List.of(values.get(i)));
-                        }
-                        result.put("datastreamIds", datastreamIds);
-                        return pf.resolved(result);
-                    });
-
-                } catch (Exception e) {
-                    return pf.failed(e);
-                }
-            }
-        };
-        return parent2;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ObservedProperty> request) {
 
         DependentCommand<Map<String, Map<String, TimedValue<?>>>, Map<String, List<?>>> parentCommand = getDatastreamidsSensorOp(
-                request);
+                request, DtoMapperSimple.SERVICE_OBSERVED_PROPERTY, "sensorId", "sensorId",
+                DtoMapperSimple.SERVICE_SENSOR);
 
         return new DependentCommand<Map<String, List<?>>, List<Void>>(parentCommand) {
 

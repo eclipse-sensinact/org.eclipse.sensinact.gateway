@@ -200,30 +200,13 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
     }
 
     public ResultList<Location> getSensorDatastreamThingLocations(String value, String value2) {
-        // same method in thing TODO refacto
-        String ThingId = getThingIdFromDatastream(value2);
-        ResultList<Location> list = new ResultList<>(getLocationProviderFiltered(ThingId).stream()
-                .map(p -> getSensorThingDtoMapper().toLocation(getSession(), getMapper(), uriInfo, getExpansions(),
-                        parseFilter(LOCATIONS), p))
-                .toList());
-
-        return list;
+        return getDatastreamThingLocations(value2);
     }
 
     public Observation getSensorDatastreamObservation(String value, String value2, String value3) {
-        String provider2 = extractFirstIdSegment(value2);
-        String provider3 = extractFirstIdSegment(value3);
-        if (!provider2.equals(provider3)) {
-            throw new NotFoundException();
-        }
-        ProviderSnapshot providerDatastream = validateAndGetProvider(provider2);
-        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
-                "sensorId", String.class);
-        if (!sensorId.equals(value)) {
-            throw new NotFoundException();
-        }
+        validateDatastreamRelation(value, value2, value3, "sensorId");
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider3);
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(extractFirstIdSegment(value3));
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
 
         Optional<Observation> o = getSensorThingDtoMapper().toObservation(getSession(), getMapper(), uriInfo,
@@ -234,17 +217,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
 
     public FeatureOfInterest getSensorDatastreamObservationFeatureOfInterest(String value, String value2,
             String value3) {
-        String provider2 = extractFirstIdSegment(value2);
-        String provider3 = extractFirstIdSegment(value3);
-        if (!provider2.equals(provider3)) {
-            throw new NotFoundException();
-        }
-        ProviderSnapshot providerDatastream = validateAndGetProvider(provider2);
-        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
-                "sensorId", String.class);
-        if (!sensorId.equals(value)) {
-            throw new NotFoundException();
-        }
+        validateDatastreamRelation(value, value2, value3, "sensorId");
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
         ResourceSnapshot resource = getObservationResourceSnapshot(value3);
         String val = resource.getValue() != null ? (String) resource.getValue().getValue() : null;
@@ -261,17 +234,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
 
     public ResultList<Observation> getSensorDatastreamObservationFeatureOfInterestObservations(String value,
             String value2, String value3) {
-        String provider2 = extractFirstIdSegment(value2);
-        String provider3 = extractFirstIdSegment(value3);
-        if (!provider2.equals(provider3)) {
-            throw new NotFoundException();
-        }
-        ProviderSnapshot providerDatastream = validateAndGetProvider(provider2);
-        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
-                "sensorId", String.class);
-        if (!sensorId.equals(value)) {
-            throw new NotFoundException();
-        }
+        ProviderSnapshot providerDatastream = validateDatastreamRelation(value, value2, value3, "sensorId");
         // refacto same method in datastream
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
         ResultList<Observation> observationList = RootResourceDelegateSensorthings.getObservationList(getSession(),
