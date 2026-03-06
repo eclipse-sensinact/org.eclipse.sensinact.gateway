@@ -42,7 +42,7 @@
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>geo-json</artifactId>
     </dependency>
-   
+
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>api</artifactId>

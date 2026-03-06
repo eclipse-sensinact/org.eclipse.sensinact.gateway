@@ -51,8 +51,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.ws.rs.BadRequestException;
-
 public class DtoMapperSimple {
 
     private static final String DESCRIPTION = "description";
@@ -79,12 +77,12 @@ public class DtoMapperSimple {
     public static Instant getTimestampFromId(String id) {
         int idx = id.lastIndexOf('~');
         if (idx < 0 || idx == id.length() - 1) {
-            throw new BadRequestException("Invalid id");
+            throw new RuntimeException("Invalid id");
         }
         try {
             return Instant.ofEpochMilli(Long.parseLong(id.substring(idx + 1), 16));
         } catch (Exception e) {
-            throw new BadRequestException("Invalid id");
+            throw new RuntimeException("Invalid id");
         }
     }
 

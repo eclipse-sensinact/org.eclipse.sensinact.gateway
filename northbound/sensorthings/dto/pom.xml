@@ -70,10 +70,6 @@
     <!-- OSGi -->
     <dependency>
       <groupId>org.osgi</groupId>
-      <artifactId>osgi.annotation</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.component.annotations</artifactId>
     </dependency>
     <dependency>
@@ -81,14 +77,12 @@
       <artifactId>org.osgi.service.jakartars</artifactId>
     </dependency>
     <dependency>
-        <groupId>
-            org.eclipse.sensinact.gateway.northbound.session
-        </groupId>
-        <artifactId>session-api</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+      <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+      <artifactId>session-api</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
     </dependency>
   </dependencies>
-  
+
   <build>
     <plugins>
       <plugin>
@@ -98,3 +92,5 @@
     </plugins>
   </build>
 </project>
+
+
