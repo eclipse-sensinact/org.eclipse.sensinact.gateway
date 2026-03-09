@@ -237,16 +237,11 @@ public class MetadataOverlayTest {
         assertEquals("%", snapshot2.getResource(svcName, rcHumidity).getMetadata().get(metaUnit));
         assertNull(snapshot2.getResource(svcName, rcSerial).getMetadata().get(metaUnit));
 
-        // Metadata should have been overridden by details
-        assertEquals("°C", getModelResourceMetadata(temperature).getExtra().get(metaUnit).getValue());
+        // Metadata should not have been overridden by details
+        assertEquals("K", getModelResourceMetadata(temperature).getExtra().get(metaUnit).getValue());
 
         // Remove unit as detail
         temperature.getEAnnotation(EMFUtil.METADATA_ANNOTATION_SOURCE).getDetails().removeKey(metaUnit);
-        // Metadata can't change by itself
-        assertEquals("°C", getModelResourceMetadata(temperature).getExtra().get(metaUnit).getValue());
-
-        // Update metadata
-        getModelResourceMetadata(temperature).getExtra().put(metaUnit, EMFUtil.createMetadataValue(Instant.now(), "K"));
 
         snapshot = getProviderSnapshot(providerName);
         assertEquals("°F", snapshot.getResource(svcName, rcTemp).getMetadata().get(metaUnit));

@@ -116,11 +116,15 @@ public class EMFUtil {
 
     public static Map<String, Object> toMetadataAttributesToMap(Metadata metadata, EModelElement element) {
         Map<String, Object> attributes = new HashMap<>();
-        NexusMetadata nexusMetadata = getModelMetadata(element);
+
+        // Get merged (extra | details) metadata
+        NexusMetadata nexusMetadata = getMergedModelMetadataView(element);
         if (nexusMetadata != null) {
             attributes.put("timestamp", nexusMetadata.getTimestamp());
             nexusMetadata.getExtra().forEach(entry -> attributes.put(entry.getKey(), entry.getValue().getValue()));
         }
+
+        // Use provided metadata
         if (metadata != null) {
             attributes.putAll(toEObjectAttributesToMap(metadata, false, List.of(), null, null));
             for (Entry<String, MetadataValue> entry : metadata.getExtra()) {
@@ -133,28 +137,58 @@ public class EMFUtil {
     /**
      * This method will look if the element has an {@link EAnnotation} with the
      * source {@link EMFUtil#METADATA_ANNOTATION_SOURCE}. If one is found it will
-     * first look if the content list contains a {@link NexusMetadata} object. It
-     * will also look in the Details, as for convenience we also support setting
-     * metadata via simple key value pairs. If it has Details and ModelNexus
-     * metadata the Details will be applied to the {@link NexusMetadata} and may
-     * overwrite existing attributes. If no {@link NexusMetadata} Object was
-     * present, one will be created, that might not be attached to the given
-     * ModelElement.
+     * look if the content list contains a {@link NexusMetadata} object and return
+     * it as is. It will return null otherwise.
      *
      * @param element the Feature to look
-     * @return
+     * @return The {@link NexusMetadata} found in the content list of the
+     *         {@link EAnnotation} or null
      */
     public static NexusMetadata getModelMetadata(EModelElement element) {
-        NexusMetadata result = null;
         EAnnotation eAnnotation = element.getEAnnotation(METADATA_ANNOTATION_SOURCE);
         if (eAnnotation != null) {
-            result = eAnnotation.getContents().stream().filter(meta -> meta instanceof NexusMetadata)
+            return eAnnotation.getContents().stream().filter(meta -> meta instanceof NexusMetadata)
                     .map(NexusMetadata.class::cast).findFirst().orElseGet(() -> null);
-            if (!eAnnotation.getDetails().isEmpty()) {
-                if (result == null) {
-                    result = createCorrectNexusMetadata(element);
+        }
+        return null;
+    }
+
+    /**
+     * This method returns a {@link NexusMetadata} object that merges both the extra
+     * and details of the {@link EAnnotation} with the source
+     * {@link EMFUtil#METADATA_ANNOTATION_SOURCE}.
+     *
+     * The result is therefore an unlinked view of the metadata loaded from the
+     * model element. To update the metadata of the model element, use the
+     * {@link #getModelMetadata(EModelElement)} method to get direct access to the
+     * metadata object.
+     *
+     * If no annotation is found, an empty NexusMetadata object will be created and
+     * returned.
+     *
+     * @param element the Feature to look
+     * @return A merged view of the metadata found in the content list and details
+     *         of the {@link EAnnotation}.
+     */
+    public static NexusMetadata getMergedModelMetadataView(EModelElement element) {
+        final EAnnotation eAnnotation = element.getEAnnotation(METADATA_ANNOTATION_SOURCE);
+        if (eAnnotation == null) {
+            return createCorrectNexusMetadata(element);
+        }
+
+        final NexusMetadata result = eAnnotation.getContents().stream().filter(meta -> meta instanceof NexusMetadata)
+                .map(NexusMetadata.class::cast).findFirst().map(m -> EcoreUtil.copy(m))
+                .orElseGet(() -> createCorrectNexusMetadata(element));
+
+        if (eAnnotation != null && !eAnnotation.getDetails().isEmpty()) {
+            for (final Entry<String, String> entry : eAnnotation.getDetails().entrySet()) {
+                final EStructuralFeature eStructuralFeature = result.eClass().getEStructuralFeature(entry.getKey());
+                if (eStructuralFeature instanceof EAttribute attribute) {
+                    result.eSet(eStructuralFeature,
+                            EcoreUtil.createFromString(attribute.getEAttributeType(), entry.getValue()));
+                } else {
+                    result.getExtra().put(entry.getKey(), createMetadataValue(null, entry.getValue()));
                 }
-                fillMetadataFromAnnotationDetails(eAnnotation.getDetails(), result);
             }
         }
         return result;
@@ -168,19 +202,6 @@ public class EMFUtil {
         customMetadata.setTimestamp(timestamp);
         customMetadata.setValue(value);
         return customMetadata;
-    }
-
-    private static void fillMetadataFromAnnotationDetails(EMap<String, String> details, NexusMetadata metadata) {
-        for (Entry<String, String> entry : details.entrySet()) {
-            EStructuralFeature eStructuralFeature = metadata.eClass().getEStructuralFeature(entry.getKey());
-            if (eStructuralFeature instanceof EAttribute attribute) {
-                metadata.eSet(eStructuralFeature,
-                        EcoreUtil.createFromString(attribute.getEAttributeType(), entry.getValue()));
-            } else {
-                metadata.getExtra().put(entry.getKey(), createMetadataValue(null, entry.getValue()));
-            }
-        }
-
     }
 
     private static NexusMetadata createCorrectNexusMetadata(EModelElement element) {
@@ -472,13 +493,23 @@ public class EMFUtil {
         return converter.convert(recordAsMap).to(targetType);
     }
 
+    /**
+     * Updates the given NexusMetadata with the given values.
+     *
+     * @param meta      Metadata to update
+     * @param timestamp Update timestamp
+     * @param locked    Nexus Metadata lock flag
+     * @param name      Original container name
+     * @param extra     Additional metadata to add/update
+     */
     public static void fillMetadata(NexusMetadata meta, Instant timestamp, boolean locked, String name,
             EMap<String, MetadataValue> extra) {
         meta.setTimestamp(timestamp);
         meta.setLocked(locked);
         meta.setOriginalName(name);
-        extra.forEach(e -> meta.getExtra().put(e.getKey(), e.getValue()));
 
+        EMap<String, MetadataValue> metadataExtra = meta.getExtra();
+        extra.forEach(e -> metadataExtra.put(e.getKey(), e.getValue()));
     }
 
     public static EOperation createAction(EClass serviceEClass, String name, Class<?> type, List<EParameter> params,
@@ -526,7 +557,7 @@ public class EMFUtil {
         if (modelAnnotation != null) {
             return model.getEAnnotation("model").getDetails().get("name");
         }
-        ModelMetadata metadata = (ModelMetadata) getModelMetadata(model);
+        ModelMetadata metadata = (ModelMetadata) getMergedModelMetadataView(model);
         if (metadata != null) {
             return metadata.getOriginalName();
         }

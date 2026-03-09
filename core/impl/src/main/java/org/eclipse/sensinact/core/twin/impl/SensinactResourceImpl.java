@@ -149,7 +149,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
 
         try {
             final boolean hasExternalSetter;
-            ResourceMetadata metadata = (ResourceMetadata) EMFUtil.getModelMetadata(resource);
+            ResourceMetadata metadata = (ResourceMetadata) EMFUtil.getMergedModelMetadataView(resource);
             if (metadata != null) {
                 // Resource created by ResourceBuilder
                 hasExternalSetter = metadata.isExternalSet();
@@ -203,7 +203,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         // Check if the resource is pull based
         final boolean hasExternalGetter;
         final Duration cacheThreshold;
-        ResourceMetadata metadata = (ResourceMetadata) EMFUtil.getModelMetadata(resource);
+        ResourceMetadata metadata = (ResourceMetadata) EMFUtil.getMergedModelMetadataView(resource);
         if (metadata != null) {
             // Resource created by ResourceBuilder
             hasExternalGetter = metadata.isExternalGet();
