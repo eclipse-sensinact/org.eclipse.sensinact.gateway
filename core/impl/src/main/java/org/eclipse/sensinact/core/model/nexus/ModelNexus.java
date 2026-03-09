@@ -762,19 +762,20 @@ public class ModelNexus {
             return null;
         }
 
-        final ResourceValueMetadata metadata = getOrInitializeResourceMetadata(svc, rcFeature);
-        if (metadata != null) {
-            EMap<String, MetadataValue> extra = metadata.getExtra();
-            MetadataValue MetadataValue = extra.get(key);
-            if (MetadataValue != null)
-                return new DefaultTimedValue<>(MetadataValue.getValue(), MetadataValue.getTimestamp());
-            else
-                // If the resource exists but has no metadata for that key then return an
-                // empty timed value indicating that the resource exists but the metadata
-                // is not set
-                return new DefaultTimedValue<>(null, null);
+        // Ensure that metadata exists for the resource
+        ResourceValueMetadata metadata = getOrInitializeResourceMetadata(svc, rcFeature);
+
+        // Get the value from the merged view of metadata
+        EMap<String, MetadataValue> extra = EMFUtil.getMergedModelMetadataView(rcFeature, metadata).getExtra();
+        MetadataValue metadataValue = extra.get(key);
+        if (metadataValue != null) {
+            return new DefaultTimedValue<>(metadataValue.getValue(), metadataValue.getTimestamp());
+        } else {
+            // If the resource exists but has no metadata for that key then return an
+            // empty timed value indicating that the resource exists but the metadata
+            // is not set
+            return new DefaultTimedValue<>(null, null);
         }
-        return null;
     }
 
     public void setResourceMetadata(Provider provider, EStructuralFeature svcFeature, ETypedElement resource,

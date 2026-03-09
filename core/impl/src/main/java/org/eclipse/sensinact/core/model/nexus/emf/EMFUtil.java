@@ -171,15 +171,39 @@ public class EMFUtil {
      *         of the {@link EAnnotation}.
      */
     public static NexusMetadata getMergedModelMetadataView(EModelElement element) {
+        return getMergedModelMetadataView(element, null);
+    }
+
+    /**
+     * This method returns a {@link NexusMetadata} object that merges both the extra
+     * and details of the {@link EAnnotation} with the source
+     * {@link EMFUtil#METADATA_ANNOTATION_SOURCE}.
+     *
+     * The result is therefore an unlinked view of the metadata loaded from the
+     * model element. To update the metadata of the model element, use the
+     * {@link #getModelMetadata(EModelElement)} method to get direct access to the
+     * metadata object.
+     *
+     * If no annotation is found, an empty NexusMetadata object will be created and
+     * returned.
+     *
+     * @param element  the Feature to look
+     * @param metadata the existing metadata to merge
+     * @return A merged view of the metadata found in the content list and details
+     *         of the {@link EAnnotation}.
+     */
+    public static NexusMetadata getMergedModelMetadataView(EModelElement element, Metadata metadata) {
         final EAnnotation eAnnotation = element.getEAnnotation(METADATA_ANNOTATION_SOURCE);
         if (eAnnotation == null) {
-            return createCorrectNexusMetadata(element);
+            return null;
         }
 
         final NexusMetadata result = eAnnotation.getContents().stream().filter(meta -> meta instanceof NexusMetadata)
-                .map(NexusMetadata.class::cast).findFirst().map(m -> EcoreUtil.copy(m))
+                .map(NexusMetadata.class::cast).findFirst()
+                .map(m -> EcoreUtil.copy(m))
                 .orElseGet(() -> createCorrectNexusMetadata(element));
 
+        EMap<String, MetadataValue> resultExtra = result.getExtra();
         if (eAnnotation != null && !eAnnotation.getDetails().isEmpty()) {
             for (final Entry<String, String> entry : eAnnotation.getDetails().entrySet()) {
                 final EStructuralFeature eStructuralFeature = result.eClass().getEStructuralFeature(entry.getKey());
@@ -187,10 +211,22 @@ public class EMFUtil {
                     result.eSet(eStructuralFeature,
                             EcoreUtil.createFromString(attribute.getEAttributeType(), entry.getValue()));
                 } else {
-                    result.getExtra().put(entry.getKey(), createMetadataValue(null, entry.getValue()));
+                    resultExtra.put(entry.getKey(), createMetadataValue(null, entry.getValue()));
                 }
             }
         }
+
+        if (metadata != null) {
+            // Merge provided metadata
+            streamAttributes(metadata.eClass())
+                    .filter(metadata::eIsSet)
+                    .forEach(a -> result.eSet(a, metadata.eGet(a)));
+
+            // Copy on put, to avoid the change of container setting the value in the
+            // metadata EMap to null
+            metadata.getExtra().forEach(e -> resultExtra.put(e.getKey(), EcoreUtil.copy(e.getValue())));
+        }
+
         return result;
     }
 
@@ -407,12 +443,12 @@ public class EMFUtil {
 
     private static Object convertToTargetType(EDataType targetEType, Type targetType, Object o) {
         Object converted;
-        if (o == null || (targetType instanceof Class && ((Class<?>)targetType).isInstance(o))) {
+        if (o == null || (targetType instanceof Class && ((Class<?>) targetType).isInstance(o))) {
             converted = o;
         } else {
             // Fast path this as we use GeoJSON a lot and the converter isn't able to handle
             // sealed types
-            if (targetType instanceof Class && GeoJsonObject.class.isAssignableFrom((Class<?>)targetType)) {
+            if (targetType instanceof Class && GeoJsonObject.class.isAssignableFrom((Class<?>) targetType)) {
                 // Go via Jackson to use the JSON mapping
                 try {
                     converted = o instanceof String ? mapper.readValue((String) o, (Class<?>) targetType)
