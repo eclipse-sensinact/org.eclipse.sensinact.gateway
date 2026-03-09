@@ -39,7 +39,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -57,20 +57,12 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedDataStream, ProviderSnapshot> {
 
-    private final IDtoMemoryCache<Sensor> sensorCache;
-
-    private final IDtoMemoryCache<FeatureOfInterest> foiCache;
     private final IDtoMemoryCache<ExpandedObservation> obsCache;
-
-    private final IDtoMemoryCache<ObservedProperty> observedPropertyCache;
 
     @SuppressWarnings("unchecked")
     public DatastreamsExtraUseCase(Providers providers, Application application) {
         super(providers, application);
 
-        sensorCache = resolve(providers, IDtoMemoryCache.class, Sensor.class);
-        foiCache = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
-        observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
         obsCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservation.class);
     }
 
@@ -89,14 +81,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
 
         ProviderSnapshot snapshot = providerUseCase.read(request.session(), idDatastream);
         if (snapshot != null) {
-            if (!isHistoryMemory()) {
-                removeCachedExpandedObservedProperty(request.model());
-                removeCachedExpandedSensor(request.model());
-                if (request.model().observations() != null) {
-                    request.model().observations().stream()
-                            .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
-                }
-            }
+
             return new ExtraUseCaseResponse<ProviderSnapshot>(idDatastream, snapshot);
         }
         return new ExtraUseCaseResponse<ProviderSnapshot>(false, "fail to get Snapshot");
@@ -113,11 +98,11 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
 
         checkRequireField(request);
 
-        Sensor sensor = getCachedExpandedSensor(request, sensorCache, request.model());
-        ObservedProperty observedProperty = getCachedExpandedObservedProperty(request, observedPropertyCache,
-                request.model());
+        Sensor sensor = getCachedExpandedSensor(request, request.model());
+        ObservedProperty observedProperty = getCachedExpandedObservedProperty(request, request.model());
         UnitOfMeasurement unit = request.model().unitOfMeasurement();
-
+        String sensorId = DtoToModelMapper.getNewId(sensor);
+        String observedPropertyId = DtoToModelMapper.getNewId(observedProperty);
         String thingId = getThingId(request, datastream, datastreamId);
         ProviderSnapshot providerThing = providerUseCase.read(request.session(), thingId);
 
@@ -126,24 +111,43 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
         checkRequireLink(request, sensor, observedProperty, unit, providerThing);
         addDatastreamIdLinkToLinkThing(request, datastreamId, providerThing, listUpdates);
 
-        if (datastream.observations() != null && datastream.observations().size() > 0) {
-            listUpdates.addAll(datastream.observations().stream().map(obs -> {
-                FeatureOfInterest foi = getCachedFeatureOfInterest(obs.featureOfInterest());
-                if (foi == null) {
-                    GeoJsonObject locationFeature = DtoMapperSimple.getResourceField(
-                            DtoMapperSimple.getAdminService(providerThing), "location", GeoJsonObject.class);
-                    final GeoJsonObject feature = locationFeature != null ? locationFeature : observedArea;
+        List<String> existingDatastreamIdsSensor = DtoToModelMapper.getExistingDatastreamIdsSensor(request,
+                providerUseCase, sensorId);
+        List<String> existingDatastreamIdsObservedProperty = DtoToModelMapper
+                .getExistingDatastreamIdsObservedProperty(request, providerUseCase, observedPropertyId);
 
-                    foi = new FeatureOfInterest(null, DtoToModelMapper.getNewId(), "default",
-                            "default feature of interest", "application/vnd.geo+json", feature, Map.of(), null);
+        if (datastream.observations() != null && datastream.observations().size() > 0) {
+            listUpdates.addAll(datastream.observations().stream().flatMap(obs -> {
+                FeatureOfInterest foi = getFeatureOfInterest(request.session(), obs.featureOfInterest());
+                List<SensorThingsUpdate> updates = new ArrayList<SensorThingsUpdate>();
+                if (foi == null) {
+                    // check if default foi already exists
+                    foi = getFeatureOfInterest(request.session(), providerThing.getName());
+                    if (foi == null) {
+                        GeoJsonObject locationFeature = DtoMapperSimple.getResourceField(
+                                DtoMapperSimple.getAdminService(providerThing), "location", GeoJsonObject.class);
+                        final GeoJsonObject feature = locationFeature != null ? locationFeature : observedArea;
+
+                        foi = new FeatureOfInterest(null, providerThing.getName() + "foi", "default",
+                                "default feature of interest", "application/vnd.geo+json", feature, Map.of(), null);
+                    }
                 }
-                return DtoToModelMapper.toDatastreamUpdate(request.mapper(), datastreamId, observedArea, thingId,
-                        datastream, sensor, observedProperty, unit, obs, foi);
+
+                updates.add(DtoToModelMapper.toFoiUpdate((String) foi.id(), foi, DtoToModelMapper
+                        .getDatastreamIdsFoi(providerUseCase, request, foi.id().toString(), datastreamId), true));
+
+                updates.addAll(DtoToModelMapper.toDatastreamUpdate(request.mapper(), datastreamId, observedArea,
+                        thingId, datastream, sensorId, sensor, existingDatastreamIdsSensor, observedPropertyId,
+                        observedProperty, existingDatastreamIdsObservedProperty, unit, obs, foi));
+
+                return updates.stream();
             }).toList());
         } else {
-            listUpdates.add(DtoToModelMapper.toDatastreamUpdate(request.mapper(), datastreamId, observedArea, thingId,
-                    datastream, sensor, observedProperty, unit, null, null));
+            listUpdates.addAll(DtoToModelMapper.toDatastreamUpdate(request.mapper(), datastreamId, observedArea,
+                    thingId, datastream, sensorId, sensor, existingDatastreamIdsSensor, observedPropertyId,
+                    observedProperty, existingDatastreamIdsObservedProperty, unit, null, null));
         }
+
         return listUpdates;
 
     }
@@ -151,6 +155,20 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
     private String getThingId(ExtraUseCaseRequest<?> request) {
         String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
         return getThingId(request, providerId);
+    }
+
+    private String getSensorId(ExtraUseCaseRequest<?> request) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+        ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
+        return DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(provider), "sensorId",
+                String.class);
+    }
+
+    private String getObservedPropertyId(ExtraUseCaseRequest<?> request) {
+        String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+        ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
+        return DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(provider), "observedPropertyId",
+                String.class);
     }
 
     private String getThingId(ExtraUseCaseRequest<?> request, String datastreamId) {
@@ -184,7 +202,8 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
 
             // need to remove link to this datastream in oldthing
             ProviderSnapshot providerThing = providerUseCase.read(request.session(), oldThingId);
-            List<String> ids = getDatastreamIds(providerThing).stream().filter(id -> !datastreamId.equals(id)).toList();
+            List<String> ids = DtoToModelMapper.getDatastreamIdsFromThing(providerThing).stream()
+                    .filter(id -> !datastreamId.equals(id)).toList();
 
             listUpdates.add(new ThingUpdate(thingId, Instant.now(), null, null, null, thingId, null, null, ids));
 
@@ -195,7 +214,7 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
             ProviderSnapshot providerThing, List<SensorThingsUpdate> listUpdates) {
         ServiceSnapshot serviceThing = providerThing.getService("thing");
 
-        List<String> ids = getDatastreamIds(serviceThing);
+        List<String> ids = DtoToModelMapper.getDatastreamIds(serviceThing);
         if (!ids.contains(datastreamId)) {
             ids = Stream.concat(ids.stream(), Stream.of(datastreamId)).toList();
             listUpdates.add(new ThingUpdate(providerThing.getName(), Instant.now(), null, null, null,
@@ -214,80 +233,6 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
-    }
-
-    /**
-     * get cache foi if we create observation using link foi id or directly foi
-     * inline or null
-     *
-     * @param foi
-     * @return
-     */
-    private FeatureOfInterest getCachedFeatureOfInterest(FeatureOfInterest foi) {
-        FeatureOfInterest featureOfInterest = null;
-        // retrieve created sensor
-        if (foi != null) {
-            if (DtoToModelMapper.isRecordOnlyField(foi, "id")) {
-
-                String idFoi = DtoToModelMapper.getIdFromRecord(foi);
-                if (idFoi == null) {
-                    throw new BadRequestException(String.format("foi id is null"));
-                }
-                featureOfInterest = foiCache.getDto(idFoi);
-                if (featureOfInterest == null) {
-                    throw new BadRequestException(String.format("Feature of interest id %s doesn't exists", idFoi));
-                }
-            } else {
-                featureOfInterest = foi;
-                DtoMapperSimple.checkRequireField(featureOfInterest);
-            }
-        }
-        return featureOfInterest;
-    }
-
-    /**
-     * remove cache sensor linked to datastream
-     *
-     * @param datastream
-     */
-    private void removeCachedExpandedSensor(ExpandedDataStream datastream) {
-        // retrieve created sensor
-        if (datastream.sensor() != null && DtoToModelMapper.isRecordOnlyField(datastream.sensor(), "id")) {
-            String idSensor = DtoToModelMapper.getIdFromRecord(datastream.sensor());
-
-            sensorCache.removeDto(idSensor);
-
-        }
-
-    }
-
-    /**
-     * remove cache observed Property linked to datastream
-     *
-     * @param datastream
-     */
-    private void removeCachedExpandedObservedProperty(ExpandedDataStream datastream) {
-        // retrieve create observedPorperty
-        if (datastream.observedProperty() != null
-                && DtoToModelMapper.isRecordOnlyField(datastream.observedProperty(), "id")) {
-            String idObservedProperty = DtoToModelMapper.getIdFromRecord(datastream.observedProperty());
-            observedPropertyCache.removeDto(idObservedProperty);
-        }
-
-    }
-
-    /**
-     * remove cache sensor linked to observation
-     *
-     * @param datastream
-     */
-    private void removeCachedFeatureOfInterest(FeatureOfInterest foi) {
-        // retrieve create observedPorperty
-        if (foi != null && DtoToModelMapper.isRecordOnlyField(foi, "id")) {
-            String idFoi = DtoToModelMapper.getIdFromRecord(foi);
-            foiCache.removeDto(idFoi);
-        }
-
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<ExpandedDataStream> request) {
@@ -312,17 +257,10 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
             throw new InternalServerErrorException(e);
 
         }
-        observations.stream().forEach(u -> updateObservationMemoryHistory(obsCache, foiCache, request.mapper(), u));
+        observations.stream().forEach(u -> updateObservationMemoryHistory(obsCache, request.mapper(), u));
 
         ProviderSnapshot provider = providerUseCase.read(request.session(), id);
-        if( !isHistoryMemory() ) {
-            removeCachedExpandedObservedProperty(request.model());
-            removeCachedExpandedSensor(request.model());
-            if (request.model().observations() != null) {
-                request.model().observations().stream()
-                        .forEach(obs -> removeCachedFeatureOfInterest(obs.featureOfInterest()));
-            }
-        }
+
         return new ExtraUseCaseResponse<ProviderSnapshot>(id, provider);
 
     }
@@ -344,21 +282,22 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
         }
     }
 
-    @Override
-    protected AbstractSensinactCommand<Map<String, TimedValue<?>>> getContextDeleteDatastreamProvider(
-            ExtraUseCaseRequest<?> request) {
-        String thingId = getThingId(request);
+    protected AbstractSensinactCommand<Map<String, TimedValue<?>>> getDatastreamidsSensorOp(String providerId,
+            String thingId, String opId, String sensorId) {
+
         AbstractSensinactCommand<Map<String, TimedValue<?>>> parentCommand = new AbstractSensinactCommand<Map<String, TimedValue<?>>>() {
 
             @Override
             protected Promise<Map<String, TimedValue<?>>> call(SensinactDigitalTwin twin,
                     SensinactModelManager modelMgr, PromiseFactory pf) {
-                String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+                SensinactProvider spOp = twin.getProvider(opId);
+                SensinactProvider spSensor = twin.getProvider(sensorId);
                 SensinactProvider sp = twin.getProvider(providerId);
+
                 SensinactProvider spThing = twin.getProvider(thingId);
 
                 if (sp == null) {
-                    return pf.failed(new NotFoundException("provider for datastream " + request.id() + " not found"));
+                    return pf.failed(new NotFoundException("provider for datastream " + providerId + " not found"));
                 }
 
                 // Make sure all promises are Promise<TimedValue<?>>
@@ -366,32 +305,27 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
                 @SuppressWarnings("unchecked")
                 Promise<TimedValue<?>> datastreamIds = (Promise<TimedValue<?>>) (Promise<?>) r
                         .getMultiValue(String.class);
+                r = sp.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation");
+                @SuppressWarnings("unchecked")
+                Promise<TimedValue<?>> lastObservation = (Promise<TimedValue<?>>) (Promise<?>) r.getValue(String.class);
 
-                r = sp.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId");
+                r = spOp.getResource(DtoMapperSimple.SERVICE_OBSERVED_PROPERTY, "datastreamIds");
                 @SuppressWarnings("unchecked")
-                Promise<TimedValue<?>> observedPropertyId = (Promise<TimedValue<?>>) (Promise<?>) sp
-                        .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId").getValue(String.class);
-                @SuppressWarnings("unchecked")
-                Promise<TimedValue<?>> obsStr = (Promise<TimedValue<?>>) (Promise<?>) sp
-                        .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation").getValue(String.class);
+                Promise<TimedValue<?>> datastreamIdsOp = (Promise<TimedValue<?>>) (Promise<?>) r
+                        .getMultiValue(String.class);
 
-                r = sp.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "sensorId");
+                r = spSensor.getResource(DtoMapperSimple.SERVICE_SENSOR, "datastreamIds");
                 @SuppressWarnings("unchecked")
-                Promise<TimedValue<?>> sensorId = (Promise<TimedValue<?>>) (Promise<?>) sp
-                        .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "sensorId").getValue(String.class);
-
-                r = sp.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "id");
-                @SuppressWarnings("unchecked")
-                Promise<TimedValue<?>> id = (Promise<TimedValue<?>>) (Promise<?>) sp
-                        .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "id").getValue(String.class);
+                Promise<TimedValue<?>> datastreamIdsSensor = (Promise<TimedValue<?>>) (Promise<?>) r
+                        .getMultiValue(String.class);
 
                 // Combine all promises in a concrete list
-                List<Promise<TimedValue<?>>> promises = List.of(datastreamIds, observedPropertyId, sensorId, id,
-                        obsStr);
+                List<Promise<TimedValue<?>>> promises = List.of(datastreamIds, datastreamIdsOp, datastreamIdsSensor,
+                        lastObservation);
 
                 // pf.all now works
-                return pf.all(promises).map(list -> Map.of("datastreamIds", list.get(0), "observedPropertyId",
-                        list.get(1), "sensorId", list.get(2), "id", list.get(3), "lastObservation", list.get(4)));
+                return pf.all(promises).map(list -> Map.of("datastreamIds", list.get(0), "datastreamIdsOp", list.get(1),
+                        "datastreamIdsSensor", list.get(2), "lastObservation", list.get(3)));
 
             }
         };
@@ -402,10 +336,12 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<ExpandedDataStream> request) {
         // delete datastream
         // TODO Authorization
+        String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
         String thingId = getThingId(request);
-
-        AbstractSensinactCommand<Map<String, TimedValue<?>>> parentCommand = getContextDeleteDatastreamProvider(
-                request);
+        String opId = getObservedPropertyId(request);
+        String sensorId = getSensorId(request);
+        AbstractSensinactCommand<Map<String, TimedValue<?>>> parentCommand = getDatastreamidsSensorOp(providerId,
+                thingId, opId, sensorId);
 
         return new DependentCommand<Map<String, TimedValue<?>>, List<Void>>(parentCommand) {
 
@@ -416,41 +352,32 @@ public class DatastreamsExtraUseCase extends AbstractExtraUseCaseModelDelete<Exp
                     String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
                     SensinactProvider sp = twin.getProvider(providerId);
                     Map<String, TimedValue<?>> map = parentResult.getValue();
-                    String opId = (String) map.get("observedPropertyId").getValue();
-                    String sensorId = (String) map.get("sensorId").getValue();
-                    String obsStr = (String) map.get("lastObservation").getValue();
-                    Instant obsStamp = map.get("lastObservation").getTimestamp();
-                    List<Promise<Void>> list = new ArrayList<Promise<Void>>();
-                    if (sp != null) {
-                        // check if there are still observed property and sensor
-                        if (hasNoObservedPropertyAndSensor(opId, sensorId)) {
-                            sp.delete();
-                            obsCache.removeDtoStartWith(providerId);
-                        } else {
-                            saveObservationHistoryMemory(obsCache, request, obsStr, obsStamp);
-                            list.addAll(removeDatastream(twin, providerId));
 
-                        }
-                    }
+                    List<Promise<Void>> list = new ArrayList<Promise<Void>>();
+
+                    @SuppressWarnings("unchecked")
+                    List<String> datastreamIdsSensor = (List<String>) map.get("datastreamIdsSensor").getValue();
+                    @SuppressWarnings("unchecked")
+                    List<String> datastreamIdsOp = (List<String>) map.get("datastreamIdsOp").getValue();
+
+                    updateSensorDatastreamIds(request, thingId, twin, list, datastreamIdsSensor);
+                    updateObservedPropertyDatastreamIds(request, opId, twin, list, datastreamIdsOp);
                     @SuppressWarnings("unchecked")
                     List<String> datastreamIds = map.containsKey("datastreamIds")
                             ? (List<String>) map.get("datastreamIds").getValue()
                             : null;
-                    if (datastreamIds != null) {
-                        List<String> newDatastreamIds = datastreamIds.stream().filter(id -> !id.equals(request.id()))
-                                .toList();
-                        SensinactResource resource = twin.getResource(thingId, DtoMapperSimple.SERVICE_THING,
-                                "datastreamIds");
-                        list.add(resource.setValue(newDatastreamIds));
+                    updateThingDatastreamIds(request, sensorId, twin, list, datastreamIds);
+                    if (sp != null) {
+                        // check if there are still observed property and sensor
+
+                        obsCache.removeDtoStartWith(providerId);
+                        sp.delete();
+
                     }
                     return pf.all(list);
                 } catch (InvocationTargetException | InterruptedException e) {
                     return pf.failed(e);
                 }
-            }
-
-            private boolean hasNoObservedPropertyAndSensor(String opId, String sensorId) {
-                return opId == null && sensorId == null;
             }
 
         };

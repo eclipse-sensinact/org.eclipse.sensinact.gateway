@@ -101,7 +101,7 @@ public class DatastreamsDelegateSensinact extends AbstractDelegate {
     }
 
     public ResultList<Datastream> getDatastreamObservedPropertyDatastreams(String id) {
-        return new ResultList<>(null, null, List.of(getDatastream(id)));
+        return new ResultList<>(List.of(getDatastream(id)));
     }
 
     public Sensor getDatastreamSensor(String id) {
@@ -139,9 +139,8 @@ public class DatastreamsDelegateSensinact extends AbstractDelegate {
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -165,8 +164,7 @@ public class DatastreamsDelegateSensinact extends AbstractDelegate {
     static ResultList<Datastream> getDataStreams(SensiNactSession userSession, Application application,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot providerSnapshot) {
-        return new ResultList<>(null, null, providerSnapshot.getServices().stream()
-                .flatMap(s -> s.getResources().stream())
+        return new ResultList<>(providerSnapshot.getServices().stream().flatMap(s -> s.getResources().stream())
                 .filter(r -> !r.getMetadata().containsKey(SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA))
                 .map(r -> DtoMapper.toDatastream(userSession, application, mapper, uriInfo, expansions, r, filter))
                 .collect(toList()));
@@ -177,7 +175,7 @@ public class DatastreamsDelegateSensinact extends AbstractDelegate {
     }
 
     public ResultList<Thing> getDatastreamThingLocationThings(String id, String id2) {
-        return new ResultList<Thing>(null, null, List.of(getDatastreamThing(id2)));
+        return new ResultList<Thing>(List.of(getDatastreamThing(id2)));
     }
 
 }

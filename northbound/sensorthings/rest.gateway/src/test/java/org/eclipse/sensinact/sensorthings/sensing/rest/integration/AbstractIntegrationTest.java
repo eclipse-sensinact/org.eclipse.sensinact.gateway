@@ -168,26 +168,43 @@ public class AbstractIntegrationTest {
         createResourceWithPackageUri(provider, "sensinact", service, resource, value, null);
     }
 
-    protected void createDatastream(String provider, String thingId) {
-        createDatastream(provider, thingId, 42);
+    protected void createDatastream(String provider, String thingId, String sensorId, String opId) {
+        createDatastream(provider, thingId, sensorId, opId, 42);
     }
 
     protected FeatureOfInterest getFeatureOfInterest(String foiRefId) {
         return new FeatureOfInterest(null, foiRefId, "test", null, "test", new Point(0, 0), null, null);
     }
 
-    protected void createDatastream(String provider, String thingId, int value) {
-        createDatastream(provider, thingId, value, Instant.now());
+    protected void createDatastream(String provider, String thingId, String sensorId, String opId, int value) {
+        createDatastream(provider, thingId, sensorId, opId, value, Instant.now());
     }
 
     protected void createObservation(String provider, String thingId, Object value, Instant valueInstant) {
-
+        FeatureOfInterest foi = getFeatureOfInterest(provider + "test");
+        createFoi(provider, valueInstant, foi);
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation",
-                getObservation(provider + "~test", value, getFeatureOfInterest("test"), valueInstant), valueInstant);
+                getObservation(provider + "~test", value, foi, valueInstant), valueInstant);
 
     }
 
-    protected void createDatastream(String provider, String thingId, Object value, Instant valueInstant) {
+    private void createFoi(String datastreamprov, Instant valueInstant, FeatureOfInterest foi) {
+        createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_ADMIN, "friendlyName",
+                foi.name(), valueInstant);
+        createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_ADMIN, "description",
+                foi.name(), valueInstant);
+        createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_ADMIN, "location",
+                foi.feature(), valueInstant);
+
+        createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_FOI, "encodingType",
+                foi.name(), valueInstant);
+        createResourceWithPackageUri((String) foi.id(), eNS_URI, DtoMapperSimple.SERVICE_FOI, "datastreamIds",
+                List.of(datastreamprov), valueInstant);
+    }
+
+    protected void createDatastream(String provider, String thingId, String sensorId, String opId, Object value,
+            Instant valueInstant) {
+
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "thingId", thingId,
                 valueInstant);
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "id", provider,
@@ -196,18 +213,14 @@ public class AbstractIntegrationTest {
                 valueInstant);
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "observationType", "test",
                 valueInstant);
-        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "sensorId", "test1",
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "sensorId", sensorId,
                 valueInstant);
-        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "sensorName", "test",
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId", opId,
                 valueInstant);
-        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "sensorEncodingType",
-                "test", valueInstant);
-        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId",
-                "test2", valueInstant);
-        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyName",
-                "test", valueInstant);
-        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM,
-                "observedPropertyDefinition", "test", valueInstant);
+
+        createSensor(provider, sensorId, valueInstant);
+
+        createObservedProperty(provider, opId, valueInstant);
 
         createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_DATASTREAM, "unitName", "test",
                 valueInstant);
@@ -217,6 +230,28 @@ public class AbstractIntegrationTest {
                 valueInstant);
 
         createObservation(provider, thingId, value, valueInstant);
+    }
+
+    private void createSensor(String provider, String sensorId, Instant valueInstant) {
+        createResourceWithPackageUri(sensorId, eNS_URI, DtoMapperSimple.SERVICE_SENSOR, "id", sensorId, valueInstant);
+        createResourceWithPackageUri(sensorId, eNS_URI, DtoMapperSimple.SERVICE_SENSOR, "datastreamIds",
+                List.of(provider), valueInstant);
+
+        createResourceWithPackageUri(sensorId, eNS_URI, DtoMapperSimple.SERVICE_ADMIN, "friendlyName", "test",
+                valueInstant);
+        createResourceWithPackageUri(sensorId, eNS_URI, DtoMapperSimple.SERVICE_SENSOR, "sensorEncodingType", "test",
+                valueInstant);
+    }
+
+    private void createObservedProperty(String provider, String opId, Instant valueInstant) {
+        createResourceWithPackageUri(opId, eNS_URI, DtoMapperSimple.SERVICE_OBSERVED_PROPERTY, "observedPropertyId",
+                opId, valueInstant);
+        createResourceWithPackageUri(opId, eNS_URI, DtoMapperSimple.SERVICE_ADMIN, "friendlyName", "test",
+                valueInstant);
+        createResourceWithPackageUri(opId, eNS_URI, DtoMapperSimple.SERVICE_OBSERVED_PROPERTY,
+                "observedPropertyDefinition", "test", valueInstant);
+        createResourceWithPackageUri(opId, eNS_URI, DtoMapperSimple.SERVICE_OBSERVED_PROPERTY, "datastreamIds",
+                List.of(provider), valueInstant);
     }
 
     public static String getObservation(String name, Object result, FeatureOfInterest foi) {
@@ -236,7 +271,6 @@ public class AbstractIntegrationTest {
     }
 
     public static String getObservation(String id, Object result, FeatureOfInterest foi, Instant instant) {
-
         ExpandedObservation obs = new ExpandedObservation(null, id,
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 instant != null ? instant : Instant.now().truncatedTo(ChronoUnit.SECONDS), result, "test", null, null,
@@ -249,8 +283,8 @@ public class AbstractIntegrationTest {
     }
 
     protected void createLocation(String provider, GeoJsonObject location, Instant instant) {
-        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_LOCATON, "id", provider, instant);
-        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_LOCATON, "location", location, instant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_LOCATION, "id", provider, instant);
+        createResourceWithPackageUri(provider, eNS_URI, DtoMapperSimple.SERVICE_LOCATION, "location", location, instant);
 
     }
 

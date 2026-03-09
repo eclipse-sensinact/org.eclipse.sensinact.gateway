@@ -11,8 +11,8 @@
 *   Kentyou - initial implementation
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact;
-
 import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVATION_QUALITY;
+
 import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDAREA;
 import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_OBSERVEDPROPERTY_DEFINITION;
 import static org.eclipse.sensinact.sensorthings.sensing.dto.SensorthingsAnnotations.SENSORTHINGS_SENSOR_ENCODING_TYPE;
@@ -53,6 +53,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.snapshot.GenericResourceSnapshot;
 
@@ -131,13 +132,13 @@ public class DtoMapper {
             Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(userSession, application,
                     mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter, provider);
             if (historicalLocation.isPresent()) {
-                ResultList<HistoricalLocation> list = new ResultList<>(null, null, List.of(historicalLocation.get()));
+                ResultList<HistoricalLocation> list = new ResultList<>(List.of(historicalLocation.get()));
                 expansions.addExpansion("HistoricalLocations", thing, list);
             }
         }
         if (expansions.shouldExpand("Locations", thing)) {
-            ResultList<Location> list = new ResultList<>(null, null, List.of(toLocation(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, provider)));
+            ResultList<Location> list = new ResultList<>(List.of(toLocation(userSession, application, mapper, uriInfo,
+                    expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", thing, list);
         }
 
@@ -166,8 +167,8 @@ public class DtoMapper {
         Location location = new Location(selfLink, id, name, description, ENCODING_TYPE_VND_GEO_JSON, object, null,
                 thingsLink, historicalLocationsLink);
         if (expansions.shouldExpand("Things", location)) {
-            ResultList<Thing> list = new ResultList<>(null, null, List.of(DtoMapper.toThing(userSession, application,
-                    mapper, uriInfo, expansions.getExpansionSettings("Thing"), filter, provider)));
+            ResultList<Thing> list = new ResultList<>(List.of(DtoMapper.toThing(userSession, application, mapper,
+                    uriInfo, expansions.getExpansionSettings("Thing"), filter, provider)));
             expansions.addExpansion("Things", location, list);
         }
         if (expansions.shouldExpand("HistoricalLocations", location)) {
@@ -232,8 +233,8 @@ public class DtoMapper {
                     expansions.getExpansionSettings("Thing"), filter, provider));
         }
         if (expansions.shouldExpand("Locations", historicalLocation)) {
-            ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(userSession,
-                    application, mapper, uriInfo, expansions.getExpansionSettings("Locations"), filter, provider)));
+            ResultList<Location> list = new ResultList<>(List.of(DtoMapper.toLocation(userSession, application, mapper,
+                    uriInfo, expansions.getExpansionSettings("Locations"), filter, provider)));
             expansions.addExpansion("Locations", historicalLocation, list);
         }
         return Optional.of(historicalLocation);
@@ -417,18 +418,6 @@ public class DtoMapper {
             throw new BadRequestException("Invalid id");
         }
         return id.substring(0, idx);
-    }
-
-    public static Instant getTimestampFromId(String id) {
-        int idx = id.lastIndexOf('~');
-        if (idx < 0 || idx == id.length() - 1) {
-            throw new BadRequestException("Invalid id");
-        }
-        try {
-            return Instant.ofEpochMilli(Long.parseLong(id.substring(idx + 1), 16));
-        } catch (Exception e) {
-            throw new BadRequestException("Invalid id");
-        }
     }
 
     /**

@@ -35,11 +35,8 @@ import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
-import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -94,13 +91,9 @@ public abstract class AbstractIntegrationTest {
 
     @Path("test")
     public static class TestTypeExfiltrator {
-        public IDtoMemoryCache<FeatureOfInterest> foiCache;
-        public IDtoMemoryCache<ObservedProperty> observedPropertyCache;
-        public IDtoMemoryCache<Sensor> sensorCache;
         public IAccessServiceUseCase serviceUseCase;
         public SensiNactSession session;
 
-        @SuppressWarnings("unchecked")
         @GET
         public void exfiltrate(@Context Providers providers) {
             ContextResolver<SensiNactSession> sessionResolver = providers.getContextResolver(SensiNactSession.class,
@@ -116,9 +109,6 @@ public abstract class AbstractIntegrationTest {
             @SuppressWarnings("rawtypes")
             ContextResolver<IDtoMemoryCache> resolverCache = providers.getContextResolver(IDtoMemoryCache.class,
                     MediaType.WILDCARD_TYPE);
-            sensorCache = resolverCache != null ? resolverCache.getContext(Sensor.class) : null;
-            observedPropertyCache = resolverCache != null ? resolverCache.getContext(ObservedProperty.class) : null;
-            foiCache = resolverCache != null ? resolverCache.getContext(FeatureOfInterest.class) : null;
 
         }
     }
@@ -134,13 +124,9 @@ public abstract class AbstractIntegrationTest {
         for (int i = 0; i < 20; i++) {
             result = queryGet("http://localhost:8185/test");
             if (result.statusCode() == 204) {
-                this.sensorCache = exfiltrator.sensorCache;
-                this.observedPropertyCache = exfiltrator.observedPropertyCache;
-                this.foiCache = exfiltrator.foiCache;
                 this.serviceUseCase = exfiltrator.serviceUseCase;
                 this.session = exfiltrator.session;
-                if (this.serviceUseCase != null && this.foiCache != null && this.observedPropertyCache != null
-                        && this.sensorCache != null && this.session != null) {
+                if (this.serviceUseCase != null && this.session != null) {
                     success = true;
                     break;
                 }
@@ -217,9 +203,6 @@ public abstract class AbstractIntegrationTest {
     protected JakartarsServiceRuntime jakartarsRuntime;
     public IAccessServiceUseCase serviceUseCase;
 
-    public IDtoMemoryCache<FeatureOfInterest> foiCache;
-    public IDtoMemoryCache<ObservedProperty> observedPropertyCache;
-    public IDtoMemoryCache<Sensor> sensorCache;
     public SensiNactSession session;
 
     public HttpResponse<String> queryGet(final String path) throws IOException, InterruptedException {

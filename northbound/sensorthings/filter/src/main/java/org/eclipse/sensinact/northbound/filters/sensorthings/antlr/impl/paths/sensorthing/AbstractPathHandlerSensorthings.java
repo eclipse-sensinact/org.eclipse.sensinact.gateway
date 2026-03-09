@@ -14,29 +14,44 @@ package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.s
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class AbstractPathHandlerSensorthings {
 
-    protected final ProviderSnapshot provider;
-    protected final SensiNactSession session;
-    private ObjectMapper mapper;
+    private static final String SENSINACT_HISTORY_PROVIDER = "sensinact.history.provider";
+    private static final String SENSINACT_HISTORY_MAX_RESULT = "sensinact.history.max.result";
+    protected PathContext pathContext;
 
-    public AbstractPathHandlerSensorthings(final ProviderSnapshot provider, SensiNactSession session) {
-        this.provider = provider;
-        this.session = session;
-        mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+    public AbstractPathHandlerSensorthings(final PathContext pathContext) {
+        this.pathContext = pathContext;
+
+    }
+
+    public PathContext withProvider(PathContext pathContext, ProviderSnapshot newProvider) {
+        return new PathContext(pathContext.mapper(), newProvider, pathContext.session(), pathContext.resource(),
+                pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl());
+    }
+
+    public static List<ExpandedObservation> getListExpandedObservationWithHistory(PathContext pathContext) {
+        ProviderSnapshot provider = pathContext.provider();
+        // get list of observation resource
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
+        ResourceSnapshot resource = service.getResource("lastObservation");
+        String historyProvider = getHistoryProvider(pathContext);
+        int maxResult = getMaxResult(pathContext);
+        List<ExpandedObservation> listHistory = HistoryResourceHelperSensorthings.loadHistoricalObservations(
+                pathContext.session(), pathContext.mapper(), resource, historyProvider, maxResult,
+                pathContext.cacheObs());
+        return listHistory;
     }
 
     public ProviderSnapshot getThingProviderFromDatastream(ProviderSnapshot datastremaProvider) {
@@ -46,25 +61,80 @@ public class AbstractPathHandlerSensorthings {
         }
         String thingId = DtoMapperSimple.getResourceField(service, "thingId", String.class);
 
-        return session.providerSnapshot(thingId, EnumSet.noneOf(SnapshotOption.class));
+        return pathContext.session().providerSnapshot(thingId, EnumSet.noneOf(SnapshotOption.class));
+    }
+
+    public ProviderSnapshot getSensorProviderFromDatastream(ProviderSnapshot datastremaProvider) {
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(datastremaProvider);
+        if (service == null) {
+            return null;
+        }
+        String sensorId = DtoMapperSimple.getResourceField(service, "sensorId", String.class);
+
+        return pathContext.session().providerSnapshot(sensorId, EnumSet.noneOf(SnapshotOption.class));
+    }
+
+    private List<ProviderSnapshot> getDatastreamProviders(Function<ProviderSnapshot, ServiceSnapshot> svcGetter,
+            ProviderSnapshot provider) {
+        ServiceSnapshot service = svcGetter.apply(provider);
+        if (service == null)
+            return List.of();
+        List<?> ids = DtoMapperSimple.getResourceField(service, "datastreamIds", List.class);
+        return ids.stream()
+                .map(id -> pathContext.session().providerSnapshot((String) id, EnumSet.noneOf(SnapshotOption.class)))
+                .toList();
+    }
+
+    public ProviderSnapshot getOpProviderFromDatastream(ProviderSnapshot datastreamProvider) {
+        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(datastreamProvider);
+        if (service == null) {
+            return null;
+        }
+        String opId = DtoMapperSimple.getResourceField(service, "observedPropertyId", String.class);
+
+        return pathContext.session().providerSnapshot(opId, EnumSet.noneOf(SnapshotOption.class));
+    }
+
+    protected static int getMaxResult(PathContext pathContext) {
+        if (pathContext.configProperties() != null
+                && pathContext.configProperties().containsKey(SENSINACT_HISTORY_MAX_RESULT)) {
+            Number n = (Number) pathContext.configProperties().get(SENSINACT_HISTORY_MAX_RESULT);
+            return n != null ? n.intValue() : 0;
+        }
+        return 0;
+    }
+
+    protected static String getHistoryProvider(PathContext pathContext) {
+        if (pathContext.configProperties() != null
+                && pathContext.configProperties().containsKey(SENSINACT_HISTORY_PROVIDER)) {
+            String historyProvider = (String) pathContext.configProperties().get(SENSINACT_HISTORY_PROVIDER);
+            return historyProvider;
+        }
+        return null;
     }
 
     public List<ProviderSnapshot> getDatastreamsProviderFromThing(ProviderSnapshot thingProvider) {
-        ServiceSnapshot service = DtoMapperSimple.getThingService(thingProvider);
-        if (service == null) {
-            return List.of();
-        }
-        List<?> datastreamIds = DtoMapperSimple.getResourceField(service, "datastreamIds", List.class);
 
-        return datastreamIds.stream()
-                .map(id -> session.providerSnapshot((String) id, EnumSet.noneOf(SnapshotOption.class))).toList();
+        return getDatastreamProviders(DtoMapperSimple::getThingService, thingProvider);
+
     }
 
-    protected ExpandedObservation getObservationFromService(final ServiceSnapshot service) {
-        String obsStr = DtoMapperSimple.getResourceField(service, "lastObservation", String.class);
+    public List<ProviderSnapshot> getDatastreamsProviderFromSensor(ProviderSnapshot sensorProvider) {
+
+        return getDatastreamProviders(DtoMapperSimple::getSensorService, sensorProvider);
+
+    }
+
+    public List<ProviderSnapshot> getDatastreamsProviderFromOp(ProviderSnapshot opProvider) {
+        return getDatastreamProviders(DtoMapperSimple::getObservedPropertyService, opProvider);
+
+    }
+
+    protected ExpandedObservation getObservationFromResource(final ResourceSnapshot resource) {
+        String obsStr = DtoMapperSimple.getResourceField(resource.getService(), "lastObservation", String.class);
         ExpandedObservation obs;
         try {
-            obs = mapper.readValue(obsStr, ExpandedObservation.class);
+            obs = pathContext.mapper().readValue(obsStr, ExpandedObservation.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -72,12 +142,7 @@ public class AbstractPathHandlerSensorthings {
     }
 
     public List<ProviderSnapshot> getLocationsProviderFromThing(ProviderSnapshot thingProvider) {
-        ServiceSnapshot service = DtoMapperSimple.getThingService(thingProvider);
-        if (service == null) {
-            return List.of();
-        }
-        List<?> locationIds = DtoMapperSimple.getResourceField(service, "locationIds", List.class);
-        return locationIds.stream()
-                .map(id -> session.providerSnapshot((String) id, EnumSet.noneOf(SnapshotOption.class))).toList();
+        return getDatastreamProviders(DtoMapperSimple::getThingService, thingProvider);
+
     }
 }

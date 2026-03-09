@@ -200,7 +200,7 @@ public interface DatastreamsAccess {
     @GET
     default public ResultList<Observation> getDatastreamObservationFeatureOfInterestObservations(
             @PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
-        return new ResultList<Observation>(null, null, List.of(getDatastreamObservation(id, id2)));
+        return new ResultList<Observation>(List.of(getDatastreamObservation(id, id2)));
     }
 
     @Path("Observations({id2})/FeatureOfInterest/$ref")

@@ -65,38 +65,31 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
         final List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
         if (criterion != null && criterion.getResourceValueFilter() != null) {
             final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p)).filter(p -> rcFilter.test(p,
-                    p.getServices().stream().flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
+            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p))
+                    .filter(p -> isNotSensinactRoot(p)).filter(p -> rcFilter.test(p, p.getServices().stream()
+                            .flatMap(s -> s.getResources().stream()).collect(Collectors.toList())))
                     .collect(Collectors.toList());
         } else {
-            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p)).toList();
+            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p))
+                    .filter(p -> isNotSensinactRoot(p)).toList();
         }
     }
 
     private List<ResourceSnapshot> listSetResourcesSensinact(final ICriterion criterion) {
         return listResources(criterion).stream().filter(ResourceSnapshot::isSet)
                 .filter(r -> !DtoMapperSimple.isSensorthingModel(r.getService().getProvider()))
-                .collect(Collectors.toList());
+                .filter(r -> isNotSensinactRoot(r.getService().getProvider())).collect(Collectors.toList());
     }
 
-    private List<ResourceSnapshot> listResourcesSensinact(final ICriterion criterion) {
-
-        final SensiNactSession userSession = getSession();
-        List<ProviderSnapshot> providers = userSession.filteredSnapshot(criterion);
-        if (criterion != null && criterion.getResourceValueFilter() != null) {
-            final ResourceValueFilter rcFilter = criterion.getResourceValueFilter();
-            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p))
-                    .flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                    .filter(r -> rcFilter.test(r.getService().getProvider(), List.of(r))).collect(Collectors.toList());
-        } else {
-            return providers.stream().filter(p -> !DtoMapperSimple.isSensorthingModel(p))
-                    .flatMap(p -> p.getServices().stream()).flatMap(s -> s.getResources().stream())
-                    .collect(Collectors.toList());
-        }
+    private static boolean isNotSensinactRoot(ProviderSnapshot r) {
+        return !r.getName().equals("sensiNact");
     }
 
     private static Optional<? extends ResourceSnapshot> getResource(final ProviderSnapshot provider,
             final String svcName, final String rcName) {
+        if (!isNotSensinactRoot(provider)) {
+            return Optional.empty();
+        }
         return provider.getServices().stream().filter(s -> !DtoMapperSimple.isSensorthingModel(s.getProvider()))
                 .filter(s -> s.getName().equals(svcName)).flatMap(s -> s.getResources().stream())
                 .filter(r -> r.getName().equals(rcName)).findFirst();
@@ -121,35 +114,32 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
     public ResultList<Thing> getThings() {
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
         List<ProviderSnapshot> providers = listProvidersSeninact(criterion);
-        return new ResultList<>(null, null,
-                providers.stream().filter(p -> !"sensiNact".equals(p.getName())).map(
-                        p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                        .toList());
+        return new ResultList<>(providers.stream().filter(p -> !"sensiNact".equals(p.getName()))
+                .map(p -> toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
+                .toList());
     }
 
     public ResultList<Location> getLocations() {
         ICriterion criterion = parseFilter(EFilterContext.LOCATIONS);
         List<ProviderSnapshot> providers = listProvidersSeninact(criterion);
-        return new ResultList<>(null, null,
-                providers.stream().filter(p -> hasResourceSet(p, "admin", "location")).map(
-                        p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
-                        .toList());
+        return new ResultList<>(providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
+                .map(p -> toLocation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, p))
+                .toList());
     }
 
     public ResultList<HistoricalLocation> getHistoricalLocations() {
         ICriterion criterion = parseFilter(EFilterContext.HISTORICAL_LOCATIONS);
         List<ProviderSnapshot> providers = listProvidersSeninact(criterion);
-        return new ResultList<>(null, null,
-                providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
-                        .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                criterion, p))
-                        .filter(Optional::isPresent).map(Optional::get).toList());
+        return new ResultList<>(providers.stream().filter(p -> hasResourceSet(p, "admin", "location"))
+                .map(p -> toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
+                        criterion, p))
+                .filter(Optional::isPresent).map(Optional::get).toList());
     }
 
     public ResultList<Datastream> getDatastreams() {
         ICriterion criterion = parseFilter(EFilterContext.DATASTREAMS);
         List<ResourceSnapshot> resources = listSetResourcesSensinact(criterion);
-        return new ResultList<>(null, null, resources.stream()
+        return new ResultList<>(resources.stream()
                 .map(r -> toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(), r, criterion))
                 .toList());
     }
@@ -157,10 +147,9 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
     public ResultList<Sensor> getSensors() {
         ICriterion criterion = parseFilter(EFilterContext.SENSORS);
         List<ResourceSnapshot> resources = listSetResourcesSensinact(criterion);
-        return new ResultList<>(null, null,
-                resources.stream().map(
-                        r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
-                        .toList());
+        return new ResultList<>(resources.stream()
+                .map(r -> toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
+                .toList());
     }
 
     // No history as it is *live* observation data not a data stream
@@ -168,7 +157,7 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
     public ResultList<Observation> getObservations() {
         ICriterion criterion = parseFilter(EFilterContext.OBSERVATIONS);
         List<ResourceSnapshot> resources = listSetResourcesSensinact(criterion);
-        return new ResultList<>(null, null, resources.stream()
+        return new ResultList<>(resources.stream()
                 .map(r -> toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .filter(Optional::isPresent).map(Optional::get).toList());
     }
@@ -176,7 +165,7 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
     public ResultList<ObservedProperty> getObservedProperties() {
         ICriterion criterion = parseFilter(EFilterContext.OBSERVED_PROPERTIES);
         List<ResourceSnapshot> resources = listSetResourcesSensinact(criterion);
-        return new ResultList<>(null, null, resources.stream().map(
+        return new ResultList<>(resources.stream().map(
                 r -> toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
                 .toList());
     }
@@ -184,8 +173,8 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
     public ResultList<FeatureOfInterest> getFeaturesOfInterest() {
         ICriterion criterion = parseFilter(EFilterContext.FEATURES_OF_INTEREST);
         List<ProviderSnapshot> providers = listProvidersSeninact(criterion);
-        return new ResultList<>(null, null, providers.stream().map(p -> toFeatureOfInterest(getSession(), application,
-                getMapper(), uriInfo, getExpansions(), criterion, p)).toList());
+        return new ResultList<>(providers.stream().map(p -> toFeatureOfInterest(getSession(), application, getMapper(),
+                uriInfo, getExpansions(), criterion, p)).toList());
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
@@ -204,7 +193,7 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
                 application, mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
 
         if (list.value().isEmpty() && resourceSnapshot.isSet()) {
-            list = new ResultList<Observation>(null, null, DtoMapper
+            list = new ResultList<Observation>(DtoMapper
                     .toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot)
                     .map(List::of).orElse(List.of()));
         }

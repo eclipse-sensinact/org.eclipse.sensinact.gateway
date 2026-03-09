@@ -14,20 +14,27 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Objects;
 
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.DependentCommand;
+import org.eclipse.sensinact.core.command.ResourceCommand;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.HttpMethod;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
+
 import jakarta.ws.rs.InternalServerErrorException;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.ext.Providers;
@@ -36,151 +43,114 @@ import jakarta.ws.rs.ext.Providers;
  * UseCase that manage the create, update, delete use case for sensorthing
  * FeatureOfInterest
  */
-public class FeatureOfInterestExtraUseCase extends AbstractExtraUseCaseModel<FeatureOfInterest, Object> {
-
-    private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
-    private final IDtoMemoryCache<ExpandedObservation> obsCache;
-    private ObservationsExtraUseCase observationExtraUseCase;
+public class FeatureOfInterestExtraUseCase
+        extends AbstractExtraUseCaseModelDelete<FeatureOfInterest, ProviderSnapshot> {
+    private final IDtoMemoryCache<ExpandedObservation> cacheObs;
 
     @SuppressWarnings("unchecked")
     public FeatureOfInterestExtraUseCase(Providers providers, Application application) {
         super(providers, application);
-        cacheFoi = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
-        obsCache = resolve(providers, IDtoMemoryCache.class, ExpandedObservation.class);
-    }
-
-    public ExtraUseCaseResponse<Object> create(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        FeatureOfInterest featureOfInterest = request.model();
-        checkRequireField(request);
-        String featureOfInterestId = request.id();
-
-        String selfLink = getLink(request.uriInfo(), DtoMapperSimple.VERSION, "FeaturesOfInterest({id})",
-                featureOfInterestId);
-        String observationLink = getLink(request.uriInfo(), selfLink, "Observations");
-        FeatureOfInterest createFoi = new FeatureOfInterest(selfLink, featureOfInterestId, featureOfInterest.name(),
-                featureOfInterest.description(), featureOfInterest.encodingType(), featureOfInterest.feature(),
-                featureOfInterest.properties(), observationLink);
-        cacheFoi.addDto(featureOfInterestId, createFoi);
-        return new ExtraUseCaseResponse<Object>(featureOfInterestId, createFoi);
-
-    }
-
-    @Override
-    public ExtraUseCaseResponse<Object> delete(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        if (cacheFoi.getDto(request.id()) != null) {
-            cacheFoi.removeDto(request.id());
-            return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
-        }
-        String[] split = request.id().split("~");
-        if (split.length > 3) {
-            String idObs = String.format("%s~%s~%s", split[0], split[1], split[3]);
-            if (isHistoryMemory() && obsCache.getDto(idObs) != null) {
-                obsCache.removeDto(idObs);
-                return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
-            }
-            ExtraUseCaseRequest<ExpandedObservation> requestObs = new ExtraUseCaseRequest<ExpandedObservation>(
-                    request.session(), request.mapper(), request.uriInfo(), HttpMethod.DELETE, idObs);
-            ExtraUseCaseResponse<ServiceSnapshot> result = observationExtraUseCase.delete(requestObs);
-            if (result.success()) {
-                if (isHistoryMemory() && obsCache.getDto(idObs) != null) {
-                    obsCache.removeDto(idObs);
-                }
-                return new ExtraUseCaseResponse<Object>(true, "feature of interest deleted");
-            }
-        }
-        if (isHistoryMemory())
-            throw new NotFoundException();
-        else
-            throw new WebApplicationException("foi is link to observation so it is immutable", 409);
-
+        cacheObs = resolve(providers, IDtoMemoryCache.class, ExpandedObservation.class);
     }
 
     @Override
     public List<SensorThingsUpdate> dtosToCreateUpdate(ExtraUseCaseRequest<FeatureOfInterest> request) {
         String providerId = DtoToModelMapper.extractFirstIdSegment(request.id());
-        String observationId = DtoToModelMapper.extractSecondIdSegment(request.id());
-        String foiId = DtoToModelMapper.extractFouthIdSegment(request.id());
 
-        if (providerId == null || observationId == null || foiId == null) {
-            throw new BadRequestException("bad id format");
-        }
-        FeatureOfInterest receiveFoi = request.model();
         checkRequireField(request);
-        FeatureOfInterest foiToUpdate = new FeatureOfInterest(null, foiId, receiveFoi.name(), receiveFoi.description(),
-                receiveFoi.encodingType(), receiveFoi.feature(), receiveFoi.properties(), null);
-        GeoJsonObject observedArea = getObservedArea(request.session(), providerId);
 
-        ExpandedObservation lastObservation = getExpandedObservationFromService(request,
-                serviceUseCase.read(request.session(), providerId, DtoMapperSimple.SERVICE_DATASTREAM));
-        return List.of(DtoToModelMapper.toDatastreamUpdate(request.mapper(), providerId, observedArea, null, null, null,
-                null, null, lastObservation, foiToUpdate));
+        return List.of(DtoToModelMapper.toFoiUpdate(providerId, request.model(), List.of(), false));
 
     }
 
-    private FeatureOfInterest updateInMemoryFoi(ExtraUseCaseRequest<FeatureOfInterest> request, FeatureOfInterest foi) {
-        FeatureOfInterest updateFoi = request.model();
-        String selfLink = DtoToModelMapper.getLink(request.uriInfo(), DtoMapperSimple.VERSION,
-                "/FeaturesofInterest({id})", request.id());
+    public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<FeatureOfInterest> request) {
+        String idOp = request.id();
 
-        String observationsLink = DtoToModelMapper.getLink(request.uriInfo(), selfLink, "/Observationos");
-        FeatureOfInterest createFoi = new FeatureOfInterest(selfLink, request.id(),
-                updateFoi.name() != null ? updateFoi.name() : foi.name(),
-                updateFoi.description() != null ? updateFoi.description() : foi.description(),
-                updateFoi.encodingType() != null ? updateFoi.encodingType() : foi.encodingType(),
-                updateFoi.feature() != null ? updateFoi.feature() : foi.feature(),
-                updateFoi.properties() != null ? updateFoi.properties() : foi.properties(), observationsLink);
-        cacheFoi.addDto(request.id(), createFoi);
-        return createFoi;
-    }
+        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
 
-    public ExtraUseCaseResponse<Object> update(ExtraUseCaseRequest<FeatureOfInterest> request) {
-        // check if sensor is in cached map
-        FeatureOfInterest property = cacheFoi.getDto(request.id());
-        if (property != null) {
-            FeatureOfInterest createdProperty = updateInMemoryFoi(request, property);
-            return new ExtraUseCaseResponse<Object>(request.id(), createdProperty);
-        } else {
-            String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+        // update/create provider
+        try {
+            dataUpdate.pushUpdate(listDtoModels).getValue();
 
-            List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
-            ResourceSnapshot resource = getObservationForMemoryHistory(request.session(), providerId);
-
-            // update/create provider
-            try {
-                dataUpdate.pushUpdate(listDtoModels).getValue();
-
-            } catch (InvocationTargetException | InterruptedException e) {
-                throw new InternalServerErrorException(e);
-            }
-            updateObservationMemoryHistory(obsCache, cacheFoi, request.mapper(), resource);
-
-            ServiceSnapshot serviceSnapshot = serviceUseCase.read(request.session(), providerId, "datastream");
-            if (serviceSnapshot == null) {
-                return new ExtraUseCaseResponse<Object>(false, "can't find sensor");
-            }
-            ExpandedObservation obsUpdate = getExpandedObservationFromService(request, serviceSnapshot);
-            String selfLink = DtoToModelMapper.getLink(request.uriInfo(), DtoMapperSimple.VERSION,
-                    "/FeaturesOfInterest({})", (String) obsUpdate.featureOfInterest().id());
-            String observationsLink = DtoToModelMapper.getLink(request.uriInfo(), selfLink, "/Observations");
-
-            return new ExtraUseCaseResponse<Object>(request.id(), DtoMapperSimple.toFeatureOfInterest(obsUpdate,
-                    (String) obsUpdate.featureOfInterest().id(), selfLink, observationsLink));
-
+        } catch (InvocationTargetException | InterruptedException e) {
+            throw new InternalServerErrorException(e);
         }
+        ProviderSnapshot snapshot = providerUseCase.read(request.session(), idOp);
+        if (snapshot == null) {
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "can't find sensor");
+        }
+        return new ExtraUseCaseResponse<ProviderSnapshot>(request.id(), snapshot);
 
     }
 
-    public void removeInMemoryFeatureOfInterest(String id) {
-        cacheFoi.removeDto(id);
+    public ExtraUseCaseResponse<ProviderSnapshot> update(ExtraUseCaseRequest<FeatureOfInterest> request) {
+        // check if sensor is in cached map
+
+        String providerId = DtoMapperSimple.extractFirstIdSegment(request.id());
+
+        List<SensorThingsUpdate> listDtoModels = dtosToCreateUpdate(request);
+
+        // update/create provider
+        try {
+            dataUpdate.pushUpdate(listDtoModels).getValue();
+
+        } catch (InvocationTargetException | InterruptedException e) {
+            throw new InternalServerErrorException(e);
+        }
+        ProviderSnapshot snapshot = providerUseCase.read(request.session(), providerId);
+        if (snapshot == null) {
+            return new ExtraUseCaseResponse<ProviderSnapshot>(false, "can't find sensor");
+        }
+        return new ExtraUseCaseResponse<ProviderSnapshot>(request.id(), snapshot);
 
     }
 
-    public FeatureOfInterest getInMemoryFeatureOfInterest(String id) {
-        return cacheFoi.getDto(id);
-    }
+    @Override
+    public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<FeatureOfInterest> request) {
+        ProviderSnapshot provider = providerUseCase.read(request.session(), request.id());
+        boolean hasObs = DtoMapperSimple.getResourceField(DtoMapperSimple.getFeatureofInterestService(provider),
+                "hasObs", Boolean.class);
 
-    public void setObservationExtraUseCase(ObservationsExtraUseCase useCase) {
-        observationExtraUseCase = useCase;
+        if (!isHistoryMemory())
+            if (hasObs)
+                throw new WebApplicationException(409);
+
+        cacheObs.removeDtoContain(request.id());
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIds = DtoMapperSimple
+                .getResourceField(DtoMapperSimple.getFeatureofInterestService(provider), "datastreamIds", List.class);
+        ResourceCommand<TimedValue<List<String>>> datastreamIdsCommand = new ResourceCommand<TimedValue<List<String>>>(
+                request.id(), DtoMapperSimple.SERVICE_FOI, "datastreamIds") {
+
+            @Override
+            protected Promise<TimedValue<List<String>>> call(SensinactResource resource, PromiseFactory pf) {
+                return resource.getMultiValue(String.class);
+            }
+        };
+
+        return new DependentCommand<TimedValue<List<String>>, Void>(datastreamIdsCommand) {
+
+            @Override
+            protected Promise<Void> call(Promise<TimedValue<List<String>>> parentResult, SensinactDigitalTwin twin,
+                    SensinactModelManager modelMgr, PromiseFactory pf) {
+                try {
+                    SensinactProvider sp = twin.getProvider(request.id());
+                    parentResult.getValue().getValue().stream().map(id -> twin.getProvider(id)).filter(Objects::nonNull)
+                            .forEach(prov -> {
+                                SensinactResource resource = prov.getResource(DtoMapperSimple.SERVICE_DATASTREAM,
+                                        "lastObservation");
+                                resource.setValue(null);
+                            });
+                    if (sp != null) {
+                        sp.delete();
+                    }
+                    return pf.resolved(null);
+                } catch (Exception e) {
+                    return pf.failed(e);
+                }
+            }
+
+        };
     }
 
 }

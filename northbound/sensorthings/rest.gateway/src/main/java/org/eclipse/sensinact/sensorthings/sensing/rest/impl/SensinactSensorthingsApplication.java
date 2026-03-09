@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,6 +20,8 @@ import java.util.Set;
 
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.SensorThingsFeature;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessProviderUseCaseProvider;
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessResourceUseCaseProvider;
@@ -26,7 +29,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.AccessServic
 import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.DtoMemoryCacheProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
@@ -52,6 +54,12 @@ public class SensinactSensorthingsApplication extends Application {
 
     public static final String NOT_SET = "<<NOT_SET>>";
 
+    @Reference(target = "(cache.type=expanded-observation)")
+    IDtoMemoryCache<ExpandedObservation> cacheObs;
+
+    @Reference(target = "(cache.type=historical-location)")
+    IDtoMemoryCache<Instant> cacheHl;
+
     @Reference
     SensiNactSessionManager sessionManager;
 
@@ -69,7 +77,7 @@ public class SensinactSensorthingsApplication extends Application {
                 SensorThingsFeature.class, ThrowableMapperProvider.class, SensinactSessionProvider.class,
                 SensorthingsFilterProvider.class, AccessProviderUseCaseProvider.class,
                 AccessResourceUseCaseProvider.class, AccessServiceUseCaseProvider.class, LoggingFilter.class,
-                DtoMemoryCacheProvider.class,
+                DtoMemoryCacheProvider.class, DtoMapperProvider.class,
                 // Root
                 RootResourceAccessImpl.class,
                 // Collections
@@ -82,36 +90,26 @@ public class SensinactSensorthingsApplication extends Application {
 
     @Override
     public Map<String, Object> getProperties() {
+        boolean defaultHistoryInMemory = config != null ? config.history_in_memory() : false;
+        int defaultHistoryMaxResult = config != null ? config.history_results_max() : 0;
 
-        boolean historyInMem = dynamicProps.containsKey("history.in.memory")
-                ? Boolean.parseBoolean(String.valueOf(dynamicProps.get("history.in.memory")))
-                : config.history_in_memory();
+        boolean historyInMem = defaultHistoryInMemory;
 
-        int resultMax = dynamicProps.containsKey("history.results.max")
-                ? Integer.parseInt(String.valueOf(dynamicProps.get("history.results.max")))
-                : config.history_results_max();
+        int resultMax = defaultHistoryMaxResult;
 
-        String provider = dynamicProps.containsKey("history.provider")
-                ? String.valueOf(dynamicProps.get("history.provider"))
-                : config.history_provider();
+        String provider = config.history_provider();
 
         Map<String, Object> props = new HashMap<>();
         props.put("session.manager", sessionManager);
         props.put("filter.parser", filterParser);
         props.put("sensinact.history.in.memory", historyInMem);
         props.put("sensinact.history.result.limit", resultMax);
+        props.put("cache.historical.location", cacheHl);
+        props.put("cache.expanded.observation", cacheObs);
         if (!NOT_SET.equals(provider)) {
             props.put("sensinact.history.provider", provider);
         }
         return props;
-    }
-
-    private volatile Map<String, Object> dynamicProps = new HashMap<>();
-
-    @Activate
-    @Modified
-    protected void update(Map<String, Object> properties) {
-        this.dynamicProps = properties;
     }
 
     public SensiNactSessionManager getSessionManager() {

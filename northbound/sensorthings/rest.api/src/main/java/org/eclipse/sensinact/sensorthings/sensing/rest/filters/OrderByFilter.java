@@ -141,7 +141,13 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
                 throw new BadRequestException("Failed to order objects by " + Arrays.toString(path));
             }
         }
-        return (Comparable<Object>) result;
+        if (result == null)
+            return null;
+        if (result instanceof Comparable<?>) {
+            return (Comparable<Object>) result;
+        }
+        return (Comparable<Object>) (Comparable<?>) result.toString();
+
     }
 
 }

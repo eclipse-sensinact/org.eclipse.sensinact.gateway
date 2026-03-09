@@ -16,13 +16,13 @@ import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage
 
 import java.lang.reflect.RecordComponent;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -60,14 +60,30 @@ public class DtoMapperSimple {
     public static final String VERSION = "v1.1";
     private static final String NO_DESCRIPTION = "No description";
 
-    public static String SERVICE_DATASTREAM = "datastream";
-    public static String SERVICE_THING = "thing";
-    public static String SERVICE_ADMIN = "admin";
+    public final static String SERVICE_FOI = "foi";
+    public final static String SERVICE_DATASTREAM = "datastream";
+    public final static String SERVICE_THING = "thing";
+    public final static String SERVICE_OBSERVED_PROPERTY = "observedproperty";
+    public final static String SERVICE_SENSOR = "sensor";
 
-    public static String SERVICE_LOCATON = "location";
+    public final static String SERVICE_ADMIN = "admin";
+
+    public final static String SERVICE_LOCATION = "location";
 
     public static String stampToId(Instant stamp) {
         return Long.toString(stamp.toEpochMilli(), 16);
+    }
+
+    public static Instant getTimestampFromId(String id) {
+        int idx = id.lastIndexOf('~');
+        if (idx < 0 || idx == id.length() - 1) {
+            throw new RuntimeException("Invalid id");
+        }
+        try {
+            return Instant.ofEpochMilli(Long.parseLong(id.substring(idx + 1), 16));
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid id");
+        }
     }
 
     public static void checkRequireField(Sensor dto) {
@@ -278,11 +294,29 @@ public class DtoMapperSimple {
         return providerDatastream.getService(SERVICE_DATASTREAM);
     }
 
+    public static ServiceSnapshot getFeatureofInterestService(ProviderSnapshot providerDatastream) {
+        return providerDatastream.getService(SERVICE_FOI);
+    }
+
+    /**
+     * get sensor service
+     */
+    public static ServiceSnapshot getSensorService(ProviderSnapshot providerDatastream) {
+        return providerDatastream.getService(SERVICE_SENSOR);
+    }
+
+    /**
+     * get observedProperty service
+     */
+    public static ServiceSnapshot getObservedPropertyService(ProviderSnapshot providerDatastream) {
+        return providerDatastream.getService(SERVICE_OBSERVED_PROPERTY);
+    }
+
     /**
      * get location service
      */
     public static ServiceSnapshot getLocationService(ProviderSnapshot providerDatastream) {
-        return providerDatastream.getService(SERVICE_LOCATON);
+        return providerDatastream.getService(SERVICE_LOCATION);
     }
 
     /**
@@ -355,6 +389,22 @@ public class DtoMapperSimple {
         return null;
     }
 
+    public static List<Object> getRecordField(Object record) {
+
+        if (!record.getClass().isRecord()) {
+            throw new IllegalArgumentException("Ce n'est pas un record !");
+        }
+        RecordComponent[] components = record.getClass().getRecordComponents();
+        return Arrays.stream(components).map(rc -> {
+            try {
+                return rc.getAccessor().invoke(record);
+            } catch (Throwable e) {
+                throw new RuntimeException();
+            }
+        }).toList();
+
+    }
+
     public static String extractIdSegment(String id, int part) {
 
         if (id.isEmpty())
@@ -412,12 +462,34 @@ public class DtoMapperSimple {
 
     }
 
-    public static FeatureOfInterest toFeatureOfInterest(ExpandedObservation lastObservation, String foiId,
-            String selfLink, String observationLink) {
+    public static FeatureOfInterest toFeatureOfInterest(ProviderSnapshot provider, String foiId, String selfLink,
+            String observationLink) {
+        ServiceSnapshot service = getFeatureofInterestService(provider);
+        ServiceSnapshot serviceAdmin = getAdminService(provider);
 
-        FeatureOfInterest foiReaded = lastObservation.featureOfInterest();
+        if (service == null) {
+            throw new RuntimeException();
+        }
 
-        FeatureOfInterest foi = new FeatureOfInterest(selfLink, foiId, foiReaded.name(), foiReaded.description(),
+        String name = getResourceField(serviceAdmin, "friendlyName", String.class);
+        String description = getResourceField(serviceAdmin, "description", String.class);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> properties = getResourceField(service, "properties", Map.class);
+        String encodingType = getResourceField(service, "encodingType", String.class);
+
+        GeoJsonObject location = getResourceField(serviceAdmin, "location", GeoJsonObject.class);
+        FeatureOfInterest foi = new FeatureOfInterest(selfLink, foiId, name, description, encodingType, location,
+                properties, observationLink);
+
+        DtoMapperSimple.checkRequireField(foi);
+
+        return foi;
+    }
+
+    public static FeatureOfInterest toFeatureOfInterest(String id, FeatureOfInterest foiReaded, String selfLink,
+            String observationLink) {
+
+        FeatureOfInterest foi = new FeatureOfInterest(selfLink, id, foiReaded.name(), foiReaded.description(),
                 foiReaded.encodingType(), foiReaded.feature(), foiReaded.properties(), observationLink);
 
         DtoMapperSimple.checkRequireField(foi);
@@ -427,21 +499,19 @@ public class DtoMapperSimple {
 
     public static ObservedProperty toObservedProperty(ProviderSnapshot provider, String observedPropertyLink,
             String datastreamLink) {
-        ServiceSnapshot service = getDatastreamService(provider);
-        String datastreamId = provider.getName();
-        String observedPropertyId = getResourceField(service, "observedPropertyId", String.class);
 
-        String id = String.format("%s~%s", datastreamId, observedPropertyId);
+        String id = provider.getName();
         return toObservedProperty(provider, id, observedPropertyLink, datastreamLink);
 
     }
 
     public static ObservedProperty toObservedProperty(ProviderSnapshot provider, String id, String observedPropertyLink,
             String datastreamLink) {
-        ServiceSnapshot service = getDatastreamService(provider);
+        ServiceSnapshot service = getObservedPropertyService(provider);
+        ServiceSnapshot serviceAdmin = getAdminService(provider);
 
-        String observedPropertyName = getResourceField(service, "observedPropertyName", String.class);
-        String observedPropertyDescription = getResourceField(service, "observedPropertyDescription", String.class);
+        String observedPropertyName = getResourceField(serviceAdmin, "friendlyName", String.class);
+        String observedPropertyDescription = getResourceField(serviceAdmin, "description", String.class);
         String observedPropertyDefinition = getResourceField(service, "observedPropertyDefinition", String.class);
         @SuppressWarnings("unchecked")
         Map<String, Object> observedPropertyProperty = getResourceField(service, "observedPropertyProperties",
@@ -455,23 +525,22 @@ public class DtoMapperSimple {
     }
 
     public static Sensor toSensor(ProviderSnapshot provider, String sensorLink, String datastreamLink) {
-        ServiceSnapshot service = getDatastreamService(provider);
-        String sensorId = String.format("%s~%s", provider.getName(),
-                getResourceField(service, "sensorId", String.class));
 
+        String sensorId = provider.getName();
         return toSensor(provider, sensorId, sensorLink, datastreamLink);
     }
 
     public static Sensor toSensor(ProviderSnapshot provider, String id, String sensorLink, String datastreamLink) {
-        ServiceSnapshot service = getDatastreamService(provider);
+        ServiceSnapshot service = getSensorService(provider);
+        ServiceSnapshot serviceAdmin = getAdminService(provider);
 
-        String sensorName = getResourceField(service, "sensorName", String.class);
-        String sensorDescription = getResourceField(service, "sensorDescription", String.class);
+        String sensorName = getResourceField(serviceAdmin, "friendlyName", String.class);
+        String sensorDescription = getResourceField(serviceAdmin, "description", String.class);
         String sensorEncodingType = getResourceField(service, "sensorEncodingType", String.class);
         Object sensorMetadata = getResourceField(service, "sensorMetadata", Object.class);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> sensorProperty = getResourceField(service, "sensorProperty", Map.class);
+        Map<String, Object> sensorProperty = getResourceField(service, "sensorProperties", Map.class);
 
         Sensor sensor = new Sensor(sensorLink, id, sensorName, sensorDescription, sensorEncodingType, sensorMetadata,
                 sensorProperty, datastreamLink);
@@ -485,9 +554,8 @@ public class DtoMapperSimple {
             String historicalLocationsLink, String locationsLink) {
         String name = getResourceField(getAdminService(provider), FRIENDLY_NAME, String.class);
         String description = getResourceField(getAdminService(provider), DESCRIPTION, String.class);
-        Map<String, Object> properties = getThingService(provider).getResource("id").getMetadata().entrySet().stream()
-                .collect(Collectors.toMap(entry -> entry.getKey().replace("sensorthings.thing.", ""),
-                        Map.Entry::getValue));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> properties = getResourceField(getThingService(provider), "properties", Map.class);
 
         Thing thing = new Thing(selfLink, id, name, description, properties, datastreamsLink, historicalLocationsLink,
                 locationsLink);
@@ -642,16 +710,17 @@ public class DtoMapperSimple {
         GeoJsonObject observedAreaRead = getResourceField(getAdminService(provider), LOCATION, GeoJsonObject.class);
         Polygon observedArea = getObservedArea(observedAreaRead);
         String thingId = getResourceField(getDatastreamService(provider), "thingId", String.class);
+        String sensorId = getResourceField(getDatastreamService(provider), "sensorId", String.class);
+        String observedPropertyId = getResourceField(getDatastreamService(provider), "observedPropertyId",
+                String.class);
 
-        Sensor sensor = toSensor(provider, null, null);
-        ObservedProperty observedProperty = toObservedProperty(provider, null, null);
         UnitOfMeasurement unitOfMeasurement = toUnitOfMeasure(provider);
 
         Datastream datastream = new Datastream(selfLink, provider.getName(), name, description, observationType, unit,
                 observedArea, null, null, metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
 
         DtoMapperSimple.checkRequireField(datastream);
-        DtoMapperSimple.checkRequireLink(unit, sensor, observedProperty, unitOfMeasurement, thingId);
+        DtoMapperSimple.checkRequireLink(unit, sensorId, observedPropertyId, unitOfMeasurement, thingId);
 
         return datastream;
     }
@@ -682,11 +751,14 @@ public class DtoMapperSimple {
         }
 
         if (List.class.isAssignableFrom(expectedType)) {
-            return expectedType.cast(List.of());
+            return expectedType.cast(new ArrayList<>());
         }
 
         if (Map.class.isAssignableFrom(expectedType)) {
-            return expectedType.cast(Map.of());
+            return expectedType.cast(new HashMap<>());
+        }
+        if (expectedType.equals(Boolean.class)) {
+            return expectedType.cast(resource.getValue() != null);
         }
         return null;
     }

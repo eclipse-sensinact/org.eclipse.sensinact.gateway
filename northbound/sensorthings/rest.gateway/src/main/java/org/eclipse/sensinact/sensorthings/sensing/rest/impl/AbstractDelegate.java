@@ -12,7 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.DATASTREAMS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.HISTORICAL_LOCATIONS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings.EMPTY;
 
@@ -36,16 +38,23 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilter
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.HistoryResourceHelperSensorthings;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
@@ -76,6 +85,98 @@ public abstract class AbstractDelegate {
         this.requestContext = requestContext;
     }
 
+    protected ProviderSnapshot getEntityIdFromDatastream(String entityProp, ProviderSnapshot providerDatastream) {
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerDatastream),
+                entityProp, String.class);
+        ProviderSnapshot providerSensorId = validateAndGetProvider(sensorId);
+        return providerSensorId;
+    }
+
+    protected List<ProviderSnapshot> getLocationProviderFiltered(String provider) {
+        List<String> locationIds = getLocationIdsFromThing(getSession(), provider).stream().toList();
+        String orFilter = locationIds.stream().map(idLoc -> "id eq '" + idLoc + "'")
+                .collect(Collectors.joining(" or ", "(", ")"));
+        ICriterion filter = parseFilter(LOCATIONS);
+
+        ICriterion filterLocation = parseFilter(getFilterParser(), orFilter, LOCATIONS);
+        ICriterion filterWithLocation = filter != null ? filter.and(filterLocation) : filterLocation;
+        List<ProviderSnapshot> providersLocation = listProviders(getSession(), filterWithLocation);
+        return providersLocation;
+    }
+
+    public ResultList<HistoricalLocation> getHistoricalLocations(String idThing) {
+
+        try {
+            ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
+            ProviderSnapshot providerThing = validateAndGetProvider(idThing);
+            ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
+                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), filter,
+                    providerThing, getHistoryProvider(), getMaxResult(), getCacheHistoricalLocationIfHistoryMemory());
+            if (list.value().isEmpty()) {
+                list = getSensorThingDtoMapper().toHistoricalLocations(getSession(), getMapper(), uriInfo,
+                        getExpansions(), filter, providerThing);
+            }
+            return list;
+        } catch (IllegalArgumentException iae) {
+            throw new NotFoundException();
+        }
+    }
+
+    protected static List<ProviderSnapshot> getDatastreamsFiltered(ISensorthingsFilterParser parser,
+            SensiNactSession userSession, ICriterion filter, String id, Class<? extends Id> type) {
+        List<String> datastreamIds = List.of();
+        if (type.isAssignableFrom(ObservedProperty.class)) {
+            datastreamIds = getDatastreamsIdsFromObservedProperty(validateAndGetProvider(userSession, id)).stream()
+                    .toList();
+        } else if (type.isAssignableFrom(Thing.class)) {
+            datastreamIds = getDatastreamProvidersFromThing(userSession, id).stream().map(p -> p.getName()).toList();
+        } else if (type.isAssignableFrom(Sensor.class)) {
+            datastreamIds = getDatastreamsIdsFromSensor(validateAndGetProvider(userSession, id)).stream().toList();
+        }
+        String orFilter = datastreamIds.stream().map(idDatastream -> "id eq '" + idDatastream + "'")
+                .collect(Collectors.joining(" or ", "(", ")"));
+
+        ICriterion filterDatastream = parseFilter(parser, orFilter, DATASTREAMS);
+        ICriterion filterWithDatastream = filter != null ? filter.and(filterDatastream) : filterDatastream;
+        List<ProviderSnapshot> datastreamProviders = listProviders(userSession, filterWithDatastream);
+        return datastreamProviders;
+    }
+
+    protected List<ProviderSnapshot> getDatastreamsFiltered(ICriterion filter, String id, Class<Id> type) {
+        return getDatastreamsFiltered(getFilterParser(), getSession(), filter, id, type);
+    }
+
+    protected int getMaxResult(int localResultLimit) {
+
+        Integer maxResults = (Integer) this.application.getProperties().get("sensinact.history.result.limit");
+        if (localResultLimit > 0) {
+            maxResults = Math.min(localResultLimit, maxResults);
+        }
+        return maxResults;
+    }
+
+    protected int getMaxResult() {
+        return getMaxResult(-1);
+    }
+
+    protected String getHistoryProvider() {
+        return (String) this.application.getProperties().get("sensinact.history.provider");
+    }
+
+    protected IDtoMemoryCache<ExpandedObservation> getCacheObservationIfHistoryMemory() {
+        if (isHistoryMemory()) {
+            return getCacheObservation();
+        }
+        return null;
+    }
+
+    protected IDtoMemoryCache<Instant> getCacheHistoricalLocationIfHistoryMemory() {
+        if (isHistoryMemory()) {
+            return getCacheHistoricalLocation();
+        }
+        return null;
+    }
+
     protected boolean isHistoryMemory() {
         Object flag = application.getProperties().get("sensinact.history.in.memory");
         if (flag != null)
@@ -87,8 +188,8 @@ public abstract class AbstractDelegate {
     public Thing getThing(String id) {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
 
-        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), parseFilter(THINGS),
-                providerSnapshot);
+        return getSensorThingDtoMapper().toThing(getSession(), getMapper(), uriInfo, getExpansions(),
+                parseFilter(THINGS), providerSnapshot);
     }
 
     public HistoricalLocation getHistoricalLocationFromThing(String id) {
@@ -97,8 +198,9 @@ public abstract class AbstractDelegate {
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         try {
-            Optional<HistoricalLocation> historicalLocation = DtoMapper.toHistoricalLocation(getSession(), application,
-                    getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS), providerSnapshot);
+            Optional<HistoricalLocation> historicalLocation = getSensorThingDtoMapper().toHistoricalLocation(
+                    getSession(), getMapper(), uriInfo, getExpansions(), parseFilter(HISTORICAL_LOCATIONS),
+                    providerSnapshot);
             if (historicalLocation.isEmpty()) {
                 throw new NotFoundException();
             }
@@ -132,8 +234,8 @@ public abstract class AbstractDelegate {
                 requestContext.getMethod(), id, thing);
         ICriterion criterion = parseFilter(EFilterContext.THINGS);
 
-        Thing createDto = DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion,
-                snapshot);
+        Thing createDto = getSensorThingDtoMapper().toThing(getSession(), getMapper(), uriInfo, getExpansions(),
+                criterion, snapshot);
 
         return Response.ok().entity(createDto).build();
     }
@@ -170,6 +272,10 @@ public abstract class AbstractDelegate {
     protected IDtoMemoryCache<ExpandedObservation> getCacheObservation() {
         return providers.getContextResolver(IDtoMemoryCache.class, MediaType.WILDCARD_TYPE)
                 .getContext(ExpandedObservation.class);
+    }
+
+    protected DtoMapper getSensorThingDtoMapper() {
+        return providers.getContextResolver(DtoMapper.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
     @SuppressWarnings("unchecked")
@@ -211,6 +317,49 @@ public abstract class AbstractDelegate {
         ServiceSnapshot serviceDatastream = DtoMapperSimple.getDatastreamService(providerDatastream);
         String thingId = DtoMapperSimple.getResourceField(serviceDatastream, "thingId", String.class);
         return thingId;
+    }
+
+    /**
+     * Validates that two IDs refer to the same datastream provider, and that the
+     * datastream is linked to the expected parent entity (sensor or
+     * observedProperty). Throws {@link NotFoundException} if validation fails.
+     *
+     * @param parentEntityId  the expected parent entity ID (sensor or OP)
+     * @param datastreamIdStr the datastream ID string
+     * @param observationIdStr the observation ID string (must resolve to same
+     *                         provider)
+     * @param fieldName       the field in the datastream service to check
+     *                        ("sensorId" or "observedPropertyId")
+     * @return the validated datastream ProviderSnapshot
+     */
+    protected ProviderSnapshot validateDatastreamRelation(String parentEntityId, String datastreamIdStr,
+            String observationIdStr, String fieldName) {
+        String dsProvider = DtoMapperSimple.extractFirstIdSegment(datastreamIdStr);
+        String obsProvider = DtoMapperSimple.extractFirstIdSegment(observationIdStr);
+        if (!dsProvider.equals(obsProvider)) {
+            throw new NotFoundException();
+        }
+        ProviderSnapshot providerDatastream = validateAndGetProvider(dsProvider);
+        String linkedId = DtoMapperSimple.getResourceField(
+                DtoMapperSimple.getDatastreamService(providerDatastream), fieldName, String.class);
+        if (!linkedId.equals(parentEntityId)) {
+            throw new NotFoundException();
+        }
+        return providerDatastream;
+    }
+
+    /**
+     * Get the locations for a thing identified by its datastream.
+     *
+     * @param datastreamId the datastream ID
+     * @return the list of locations for the thing
+     */
+    protected ResultList<Location> getDatastreamThingLocations(String datastreamId) {
+        String thingId = getThingIdFromDatastream(datastreamId);
+        return new ResultList<>(getLocationProviderFiltered(thingId).stream()
+                .map(p -> getSensorThingDtoMapper().toLocation(getSession(), getMapper(), uriInfo, getExpansions(),
+                        parseFilter(LOCATIONS), p))
+                .toList());
     }
 
     protected static List<ProviderSnapshot> getLinkProvidersFromThing(SensiNactSession session, String thingId,
@@ -256,6 +405,20 @@ public abstract class AbstractDelegate {
     protected static List<ProviderSnapshot> getDatastreamProvidersFromThing(SensiNactSession session, String thingId) {
         return getLinkProvidersFromThing(session, thingId, "datastreamIds");
 
+    }
+
+    protected static List<String> getDatastreamsIdsFromSensor(ProviderSnapshot provider) {
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIds = DtoMapperSimple.getResourceField(DtoMapperSimple.getSensorService(provider),
+                "datastreamIds", List.class);
+        return datastreamIds;
+    }
+
+    protected static List<String> getDatastreamsIdsFromObservedProperty(ProviderSnapshot provider) {
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIds = DtoMapperSimple
+                .getResourceField(DtoMapperSimple.getObservedPropertyService(provider), "datastreamIds", List.class);
+        return datastreamIds;
     }
 
     /**
@@ -369,7 +532,7 @@ public abstract class AbstractDelegate {
      *
      * @return
      */
-    private ISensorthingsFilterParser getFilterParser() {
+    protected ISensorthingsFilterParser getFilterParser() {
         return providers.getContextResolver(ISensorthingsFilterParser.class, MediaType.WILDCARD_TYPE).getContext(null);
     }
 
@@ -382,11 +545,16 @@ public abstract class AbstractDelegate {
      * @throws WebApplicationException
      */
     protected ICriterion parseFilter(String filterString, final EFilterContext context) throws WebApplicationException {
+        return parseFilter(getFilterParser(), filterString, context);
+    }
+
+    protected static ICriterion parseFilter(ISensorthingsFilterParser parser, String filterString,
+            final EFilterContext context) throws WebApplicationException {
         if (filterString == null || filterString.isBlank()) {
             return null;
         }
         try {
-            return getFilterParser().parseFilter(filterString, context);
+            return parser.parseFilter(filterString, context);
         } catch (FilterParserException e) {
             throw new BadRequestException("Error parsing filter", e);
         }

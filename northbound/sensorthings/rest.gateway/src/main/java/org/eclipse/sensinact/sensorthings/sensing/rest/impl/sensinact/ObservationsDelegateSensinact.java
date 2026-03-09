@@ -39,6 +39,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
@@ -57,7 +58,7 @@ public class ObservationsDelegateSensinact extends AbstractDelegate {
 
     public Observation getObservation(String id) {
         ResourceSnapshot resourceSnapshot = validateAndGetResourceSnapshot(id);
-        Instant timestamp = DtoMapper.getTimestampFromId(id);
+        Instant timestamp = DtoMapperSimple.getTimestampFromId(id);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
         Optional<Observation> result = null;
@@ -158,15 +159,15 @@ public class ObservationsDelegateSensinact extends AbstractDelegate {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
         ICriterion criterion = parseFilter(OBSERVATIONS);
-        return new ResultList<>(null, null, providerSnapshot.getServices().stream()
-                .flatMap(s -> s.getResources().stream()).filter(ResourceSnapshot::isSet).map(r -> DtoMapper
-                        .toObservation(getSession(), application, getMapper(), uriInfo, getExpansions(), criterion, r))
+        return new ResultList<>(providerSnapshot.getServices().stream().flatMap(s -> s.getResources().stream())
+                .filter(ResourceSnapshot::isSet).map(r -> DtoMapper.toObservation(getSession(), application,
+                        getMapper(), uriInfo, getExpansions(), criterion, r))
                 .filter(Optional::isPresent).map(Optional::get).toList());
     }
 
     public ResultList<Datastream> getObservationDatastreamThingDataastreams(String value) {
         // TODO Auto-generated method stub
-        return new ResultList<Datastream>(null, null, List.of(getObservationDatastream(value)));
+        return new ResultList<Datastream>(List.of(getObservationDatastream(value)));
     }
 
     public ResultList<HistoricalLocation> getObservationDatastreamThingHistoricalLocations(String value) {
@@ -176,16 +177,16 @@ public class ObservationsDelegateSensinact extends AbstractDelegate {
         ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
                 application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
         if (list.value().isEmpty())
-            list = new ResultList<>(null, null, DtoMapper.toHistoricalLocation(getSession(), application, getMapper(),
-                    uriInfo, getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
+            list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                    getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
         return list;
     }
 
     public ResultList<Location> getObservationDatastreamThingLocations(String value) {
         String provider = extractFirstIdSegment(value);
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return new ResultList<Location>(null, null, List.of(DtoMapper.toLocation(getSession(), application, getMapper(),
-                uriInfo, getExpansions(), null, providerSnapshot)));
+        return new ResultList<Location>(List.of(DtoMapper.toLocation(getSession(), application, getMapper(), uriInfo,
+                getExpansions(), null, providerSnapshot)));
     }
 
 }

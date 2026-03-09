@@ -14,17 +14,12 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings;
 
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.FEATURES_OF_INTEREST;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -42,7 +37,6 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Response;
@@ -54,60 +48,13 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
     public FeaturesOfInterestDelegateSensorthings(UriInfo uriInfo, Providers providers, Application application,
             ContainerRequestContext requestContext) {
         super(uriInfo, providers, application, requestContext);
-        // TODO Auto-generated constructor stub
     }
 
     public FeatureOfInterest getFeatureOfInterest(String id) {
 
-        Instant timestamp = DtoMapper.getTimestampFromId(id);
-        ExpandedObservation obs = null;
+        return getSensorThingDtoMapper().toFeatureOfInterest(getSession(), getMapper(), uriInfo, getExpansions(),
+                parseFilter(FEATURES_OF_INTEREST), validateAndGetProvider(id));
 
-        if (isHistoryMemory() && getCacheFeatureOfInterest().getDto(id) != null) {
-            return getCacheFeatureOfInterest().getDto(id);
-
-        } else {
-            ResourceSnapshot resourceSnapshot = getObservationResourceSnapshot(id);
-            Instant stampResource = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
-
-            if (stampResource.equals(timestamp)) {
-                String val = (String) resourceSnapshot.getValue().getValue();
-                obs = DtoMapperSimple.parseExpandObservation(getMapper(), val);
-
-            } else {
-                String history = (String) application.getProperties().get("sensinact.history.provider");
-                if (history != null) {
-                    String provider = resourceSnapshot.getService().getProvider().getName();
-                    String service = resourceSnapshot.getService().getName();
-                    String resource = resourceSnapshot.getName();
-                    // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
-                    // (timestamp)
-                    Instant timestampPlusOneMilli = timestamp.plusMillis(1).truncatedTo(ChronoUnit.MILLIS);
-                    ;
-                    TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
-                            Map.of("provider", provider, "service", service, "resource", resource, "time",
-                                    timestampPlusOneMilli));
-                    if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
-                        obs = DtoMapperSimple.parseExpandObservation(getMapper(), t.getValue());
-                    }
-                }
-            }
-        }
-        if (obs == null)
-            throw new NotFoundException();
-        FeatureOfInterest foi;
-        try {
-            foi = DtoMapper.toFeatureOfInterest(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(FEATURES_OF_INTEREST), timestamp, obs);
-        } catch (IllegalArgumentException iae) {
-            throw new NotFoundException("No feature of interest with id");
-        }
-        if (foi == null) {
-            throw new NotFoundException();
-        }
-        if (!foi.id().equals(id)) {
-            throw new NotFoundException();
-        }
-        return foi;
     }
 
     // No history as it is *live* observation data not a data stream
@@ -115,19 +62,41 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
     public ResultList<Observation> getFeatureOfInterestObservations(String id) {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
-
-        return getLiveObservations(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                parseFilter(EFilterContext.OBSERVATIONS), validateAndGetProvider(provider));
+        ProviderSnapshot providerFoi = validateAndGetProvider(provider);
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIds = DtoMapperSimple.getResourceField(
+                DtoMapperSimple.getFeatureofInterestService(providerFoi), "datastreamIds", List.class);
+        ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
+        List<ResultList<Observation>> list = datastreamIds.stream()
+                .map(idDatastream -> validateAndGetProvider(idDatastream))
+                .map(p -> RootResourceDelegateSensorthings.getObservationList(getSession(), getSensorThingDtoMapper(),
+                        getMapper(), uriInfo, requestContext,
+                        p.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter,
+                        getHistoryProvider(), getMaxResult(), getCacheObservationIfHistoryMemory()))
+                .toList();
+        return new ResultList<Observation>(list.stream().flatMap(l -> l.value().stream()).toList());
     }
 
-    static ResultList<Observation> getLiveObservations(SensiNactSession userSession, Application application,
+    static ResultList<Observation> getLiveObservations(SensiNactSession userSession, DtoMapper dtoMapper,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
             ProviderSnapshot provider) {
+        return getLiveObservations(userSession, dtoMapper, mapper, uriInfo, expansions, filter, provider, null);
+    }
+
+    static ResultList<Observation> getLiveObservations(SensiNactSession userSession, DtoMapper dtoMapper,
+            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
+            ProviderSnapshot provider, String foiId) {
 
         ServiceSnapshot datastreamService = DtoMapperSimple.getDatastreamService(provider);
-
-        return new ResultList<>(null, null, DtoMapper.toObservation(userSession, application, mapper, uriInfo,
-                expansions, filter, datastreamService.getResource("lastObservation")).map(List::of).orElse(List.of()));
+        ExpandedObservation obs = DtoMapperSimple.getObservationFromService(mapper, datastreamService);
+        if (foiId != null && obs != null) {
+            if (!foiId.equals(obs.featureOfInterest().id())) {
+                return new ResultList<Observation>(List.of());
+            }
+        }
+        // TODO return list of obs with history that match the foi
+        return new ResultList<>(dtoMapper.toObservation(userSession, mapper, uriInfo, expansions, filter,
+                datastreamService.getResource("lastObservation")).map(List::of).orElse(List.of()));
 
     }
 
@@ -135,13 +104,17 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!provider.equals(provider2)) {
-            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
-        }
-
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider2);
+
+        ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
+                DtoMapperSimple.getDatastreamService(providerSnapshot));
+        if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
+        }
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
-        Optional<Observation> o = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
+        Optional<Observation> o = getSensorThingDtoMapper().toObservation(getSession(), getMapper(), uriInfo,
                 getExpansions(), parseFilter(EFilterContext.FEATURES_OF_INTEREST),
                 service.getResource("lastObservation"));
 
@@ -152,19 +125,16 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!provider.equals(provider2)) {
-            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider2);
+        ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
+                DtoMapperSimple.getDatastreamService(providerSnapshot));
+        if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
         }
-
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-
-        Datastream d;
-        try {
-            d = DtoMapper.toDatastream(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                    parseFilter(EFilterContext.DATASTREAMS), providerSnapshot).get();
-        } catch (Exception e) {
-            throw new NotFoundException();
-        }
+        Datastream d = getSensorThingDtoMapper().toDatastream(getSession(), getMapper(), uriInfo, getExpansions(),
+                parseFilter(EFilterContext.DATASTREAMS), providerSnapshot);
 
         return d;
 
@@ -172,9 +142,10 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
     public Response updateFeaturesOfInterest(String id, FeatureOfInterest foi) {
 
-        FeatureOfInterest createDto = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
+        ProviderSnapshot provider = getExtraDelegate().update(getSession(), getMapper(), uriInfo,
                 requestContext.getMethod(), id, foi);
-
+        FeatureOfInterest createDto = getSensorThingDtoMapper().toFeatureOfInterest(getSession(), getMapper(), uriInfo,
+                getExpansions(), null, provider);
         return Response.ok().entity(createDto).build();
     }
 
@@ -193,50 +164,77 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
 
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!provider.equals(provider2)) {
-            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider2);
+        ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
+                DtoMapperSimple.getDatastreamService(providerSnapshot));
+        if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
         }
-
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(providerSnapshot);
         String thingId = DtoMapperSimple.getResourceField(service, "thingId", String.class);
         ProviderSnapshot providerThing = validateAndGetProvider(thingId);
-        return DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), null, providerThing);
+        return getSensorThingDtoMapper().toThing(getSession(), getMapper(), uriInfo, getExpansions(), null,
+                providerThing);
     }
 
     public Sensor getFeatureOfInterestObservationDatastreamSensor(String id, String id2) {
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!provider.equals(provider2)) {
-            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
-        }
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapper
-                .toSensor(getSession(), application, getMapper(), uriInfo, getExpansions(), null, providerSnapshot)
-                .get();
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider2);
+        ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
+                DtoMapperSimple.getDatastreamService(providerSnapshot));
+        if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
+        }
+        String sensorId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(providerSnapshot),
+                "sensorId", String.class);
+        ProviderSnapshot providerSensorId = validateAndGetProvider(sensorId);
+        return getSensorThingDtoMapper().toSensor(getSession(), getMapper(), uriInfo, getExpansions(), null,
+                providerSensorId);
     }
 
     public ObservedProperty getFeatureOfInterestObservationDatastreamObservedProperty(String id, String id2) {
         String provider = DtoMapperSimple.extractFirstIdSegment(id);
         String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
-        if (!provider.equals(provider2)) {
-            throw new BadRequestException("The ids for the FeatureOfInterest and the Observation are inconsistent");
-        }
 
-        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
-        return DtoMapper.toObservedProperty(getSession(), application, getMapper(), uriInfo, getExpansions(), null,
-                providerSnapshot).get();
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider2);
+        ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
+                DtoMapperSimple.getDatastreamService(providerSnapshot));
+        if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
+        }
+        String observedPropertyId = DtoMapperSimple.getResourceField(
+                DtoMapperSimple.getDatastreamService(providerSnapshot), "observedPropertyId", String.class);
+        ProviderSnapshot providerOp = validateAndGetProvider(observedPropertyId);
+        return getSensorThingDtoMapper().toObservedProperty(getSession(), getMapper(), uriInfo, getExpansions(), null,
+                providerOp);
     }
 
     public ResultList<Observation> getFeatureOfInterestObservationDatastreamObservations(String id, String id2) {
         // TODO refacto
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
-        String providerId = DtoMapperSimple.extractFirstIdSegment(id2);
-        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        String provider2 = DtoMapperSimple.extractFirstIdSegment(id2);
+        String provider = DtoMapperSimple.extractFirstIdSegment(id);
+
+        ProviderSnapshot providerSnapshot = validateAndGetProvider(provider2);
+        ExpandedObservation obs = DtoMapperSimple.getObservationFromService(getMapper(),
+                DtoMapperSimple.getDatastreamService(providerSnapshot));
+        if (obs.featureOfInterest() == null || !obs.featureOfInterest().id().equals(provider)) {
+            throw new BadRequestException(
+                    String.format("observations %s~%s are not associated with feature of interest %s", provider2,
+                            obs.id(), provider));
+        }
         ResultList<Observation> observationList = RootResourceDelegateSensorthings.getObservationList(getSession(),
-                application, getMapper(), uriInfo, requestContext,
-                provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter);
+                getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext,
+                providerSnapshot.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"), filter,
+                getHistoryProvider(), getMaxResult(), getCacheObservationIfHistoryMemory());
         return observationList;
     }
 

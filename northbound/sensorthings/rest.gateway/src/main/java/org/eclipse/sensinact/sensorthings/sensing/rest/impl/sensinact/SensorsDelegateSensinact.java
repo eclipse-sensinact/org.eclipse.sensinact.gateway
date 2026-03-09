@@ -55,7 +55,7 @@ public class SensorsDelegateSensinact extends AbstractDelegate {
     }
 
     public ResultList<Datastream> getSensorDatastreams(String id) {
-        ResultList<Datastream> list = new ResultList<>(null, null, List.of(getSensorDatastream(id, id)));
+        ResultList<Datastream> list = new ResultList<>(List.of(getSensorDatastream(id, id)));
         return list;
     }
 
@@ -114,7 +114,7 @@ public class SensorsDelegateSensinact extends AbstractDelegate {
     }
 
     public ResultList<Datastream> getSensorDatastreamThingDatastreams(String value, String value2) {
-        return new ResultList<Datastream>(null, null, List.of(getSensorDatastream(value, value2)));
+        return new ResultList<Datastream>(List.of(getSensorDatastream(value, value2)));
     }
 
     public ResultList<HistoricalLocation> getSensorDatastreamThingHistoricalLocations(String value, String value2) {
@@ -126,9 +126,8 @@ public class SensorsDelegateSensinact extends AbstractDelegate {
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -140,7 +139,7 @@ public class SensorsDelegateSensinact extends AbstractDelegate {
 
         String provider = extractFirstIdSegment(value2);
 
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
+        ResultList<Location> list = new ResultList<>(List.of(DtoMapper.toLocation(getSession(), application,
                 getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider))));
 
         return list;

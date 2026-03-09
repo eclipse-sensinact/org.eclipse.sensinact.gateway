@@ -17,7 +17,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.LOCATIONS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.extractFirstIdSegment;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.getTimestampFromId;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +32,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple.getTimestampFromId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.AbstractDelegate;
 
 import jakarta.ws.rs.NotFoundException;
@@ -48,6 +48,7 @@ public class HistoricalLocationsDelegateSensinact extends AbstractDelegate {
         super(uriInfo, providers, application, requestContext);
     }
 
+    @Override
     public HistoricalLocation getHistoricalLocation(String id) {
         String provider = extractFirstIdSegment(id);
         getTimestampFromId(id);
@@ -71,7 +72,7 @@ public class HistoricalLocationsDelegateSensinact extends AbstractDelegate {
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
+        ResultList<Location> list = new ResultList<>(List.of(DtoMapper.toLocation(getSession(), application,
                 getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), providerSnapshot)));
 
         return list;
@@ -98,7 +99,7 @@ public class HistoricalLocationsDelegateSensinact extends AbstractDelegate {
 
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
 
-        return new ResultList<>(null, null, List.of(DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
+        return new ResultList<>(List.of(DtoMapper.toThing(getSession(), application, getMapper(), uriInfo,
                 getExpansions(), parseFilter(THINGS), providerSnapshot)));
     }
 
@@ -111,9 +112,8 @@ public class HistoricalLocationsDelegateSensinact extends AbstractDelegate {
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -156,9 +156,8 @@ public class HistoricalLocationsDelegateSensinact extends AbstractDelegate {
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();

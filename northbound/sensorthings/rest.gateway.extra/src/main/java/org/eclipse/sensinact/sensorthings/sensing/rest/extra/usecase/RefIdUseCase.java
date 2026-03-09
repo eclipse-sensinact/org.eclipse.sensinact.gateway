@@ -34,7 +34,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.RefId;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint.DependsOnUseCases;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 
@@ -60,9 +59,6 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     private final IAccessServiceUseCase serviceUseCase;
     private DatastreamsExtraUseCase datastreamUseCase;
 
-    private final IDtoMemoryCache<Sensor> sensorCaches;
-    private final IDtoMemoryCache<FeatureOfInterest> foiCaches;
-    private final IDtoMemoryCache<ObservedProperty> observedPropertyCaches;
     private final LocationsExtraUseCase locationUseCase;
     private final ThingsExtraUseCase thingExtraUseCase;
 
@@ -96,15 +92,11 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
             new RefKey(ExpandedDataStream.class, ExpandedThing.class), this::updateDatastreamThingRef,
             new RefKey(ExpandedThing.class, ExpandedLocation.class), this::updateThingLocationRef);
 
-    @SuppressWarnings("unchecked")
     public RefIdUseCase(Providers providers, Application application) {
         super(providers, application);
-        observedPropertyCaches = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
         providerUseCase = resolve(providers, IAccessProviderUseCase.class);
         gatewayThread = resolve(providers, GatewayThread.class);
         serviceUseCase = resolve(providers, IAccessServiceUseCase.class);
-        sensorCaches = resolve(providers, IDtoMemoryCache.class, Sensor.class);
-        foiCaches = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
 
         datastreamUseCase = resolveUseCase(providers, DatastreamsExtraUseCase.class);
         foiExtraUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
@@ -119,15 +111,14 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     private void initUpdateHandler() {
         updateHandlers.put(new RefKey(ExpandedDataStream.class, ExpandedThing.class), this::updateDatastreamThingRef);
         updateHandlers.put(new RefKey(ExpandedObservation.class, FeatureOfInterest.class),
-                request -> updateObservationFeatureOfInterestRef(request, foiCaches, observationsExtraUseCase,
+                request -> updateObservationFeatureOfInterestRef(request, observationsExtraUseCase,
                         "FeatureOfInterest"));
         updateHandlers.put(new RefKey(ExpandedThing.class, ExpandedLocation.class), this::updateThingLocationRef);
         updateHandlers.put(new RefKey(ExpandedDataStream.class, ObservedProperty.class),
-                request -> updateDatasteamSensorOrObservedPropertyRef(request, observedPropertyCaches,
-                        datastreamUseCase, "ObservedProperty"));
+                request -> updateDatasteamSensorOrObservedPropertyRef(request, datastreamUseCase,
+                        ObservedProperty.class));
         updateHandlers.put(new RefKey(ExpandedDataStream.class, Sensor.class),
-                request -> updateDatasteamSensorOrObservedPropertyRef(request, sensorCaches, datastreamUseCase,
-                        "Sensor"));
+                request -> updateDatasteamSensorOrObservedPropertyRef(request, datastreamUseCase, Sensor.class));
     }
 
     /**
@@ -201,25 +192,32 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
 
     private ExtraUseCaseResponse<Object> deleteDatastreamObservedPropertyRef(ExtraUseCaseRequest<RefId> request) {
         String idDatastream = request.parentId();
-        ServiceSnapshot service = serviceUseCase.read(request.session(), idDatastream,
+        ServiceSnapshot datastreamService = serviceUseCase.read(request.session(), idDatastream,
                 DtoMapperSimple.SERVICE_DATASTREAM);
+        String idProperty = DtoMapperSimple.getResourceField(datastreamService, "observedPropertyId", String.class);
+
+        ServiceSnapshot service = serviceUseCase.read(request.session(), idProperty,
+                DtoMapperSimple.SERVICE_OBSERVED_PROPERTY);
         ObservedProperty obsProp = DtoMapperSimple.toObservedProperty(service.getProvider(), null, null);
-        ExtraUseCaseResponse<Object> response = observedPropertyExtraUseCase
+        ExtraUseCaseResponse<ProviderSnapshot> response = observedPropertyExtraUseCase
                 .delete(new ExtraUseCaseRequest<ObservedProperty>(request.session(), request.mapper(),
                         request.uriInfo(), HttpMethod.DELETE, obsProp));
-        return response;
+        return new ExtraUseCaseResponse<Object>(response.id(), response.snapshot(), response.success(), response.e(),
+                response.message());
     }
 
     private ExtraUseCaseResponse<Object> deleteDatastreamSensor(ExtraUseCaseRequest<RefId> request) {
         String idDatastream = request.parentId();
-        ServiceSnapshot service = serviceUseCase.read(request.session(), idDatastream,
+        ServiceSnapshot datastreamService = serviceUseCase.read(request.session(), idDatastream,
                 DtoMapperSimple.SERVICE_DATASTREAM);
+        String sensorId = DtoMapperSimple.getResourceField(datastreamService, "sensorId", String.class);
+        ServiceSnapshot service = serviceUseCase.read(request.session(), sensorId, DtoMapperSimple.SERVICE_SENSOR);
 
         Sensor sensor = DtoMapperSimple.toSensor(service.getProvider(), null, null);
-        ExtraUseCaseResponse<Object> response = sensorExtraUseCase.delete(new ExtraUseCaseRequest<Sensor>(
+        ExtraUseCaseResponse<ProviderSnapshot> response = sensorExtraUseCase.delete(new ExtraUseCaseRequest<Sensor>(
                 request.session(), request.mapper(), request.uriInfo(), HttpMethod.DELETE, sensor));
-        return response;
-
+        return new ExtraUseCaseResponse<Object>(response.id(), response.snapshot(), response.success(), response.e(),
+                response.message());
     }
 
     private ExtraUseCaseResponse<Object> deleteObservationFeatureOfInterest(ExtraUseCaseRequest<RefId> request) {
@@ -234,9 +232,11 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
             throw new NotFoundException();
 
         }
-        ExtraUseCaseResponse<Object> response = foiExtraUseCase.delete(new ExtraUseCaseRequest<FeatureOfInterest>(
-                request.session(), request.mapper(), request.uriInfo(), HttpMethod.DELETE, foi));
-        return response;
+        ExtraUseCaseResponse<ProviderSnapshot> response = foiExtraUseCase
+                .delete(new ExtraUseCaseRequest<FeatureOfInterest>(request.session(), request.mapper(),
+                        request.uriInfo(), HttpMethod.DELETE, foi));
+        return new ExtraUseCaseResponse<Object>(response.id(), response.snapshot(), response.success(), response.e(),
+                response.message());
 
     }
 
@@ -289,8 +289,7 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     }
 
     private <T extends Id> ExtraUseCaseResponse<Object> updateDatasteamSensorOrObservedPropertyRef(
-            ExtraUseCaseRequest<RefId> request, IDtoMemoryCache<T> cache, DatastreamsExtraUseCase useCase,
-            String entityName) {
+            ExtraUseCaseRequest<RefId> request, DatastreamsExtraUseCase useCase, Class<?> dtoType) {
         String id = (String) request.model().id();
         String parentId = request.parentId();
 
@@ -298,17 +297,19 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
             throw new WebApplicationException("Conflict", Response.Status.CONFLICT);
         }
 
-        T dto = cache.getDto(id);
-        if (dto == null) {
-            throw new NotFoundException(entityName + " " + id + " not found");
-        }
         ExpandedDataStream datastream = null;
-        if (dto instanceof Sensor) {
+        if (dtoType.equals(Sensor.class)) {
+            Sensor sensor = providerUseCase.read(request.session(), id) != null
+                    ? DtoMapperSimple.toSensor(providerUseCase.read(request.session(), id), null, null)
+                    : null;
             datastream = new ExpandedDataStream(null, parentId, null, null, null, null, null, null, null, null, null,
-                    null, null, null, null, null, (Sensor) dto, null, null);
-        } else if (dto instanceof ObservedProperty) {
+                    null, null, null, null, null, sensor, null, null);
+        } else if (dtoType.equals(ObservedProperty.class)) {
+            ObservedProperty op = providerUseCase.read(request.session(), id) != null
+                    ? DtoMapperSimple.toObservedProperty(providerUseCase.read(request.session(), id), null, null)
+                    : null;
             datastream = new ExpandedDataStream(null, parentId, null, null, null, null, null, null, null, null, null,
-                    null, null, null, null, (ObservedProperty) dto, null, null, null);
+                    null, null, null, null, op, null, null, null);
         }
         ExtraUseCaseResponse<ProviderSnapshot> response = useCase.update(new ExtraUseCaseRequest<>(request.session(),
                 request.mapper(), request.uriInfo(), HttpMethod.PATCH, datastream, null, true));
@@ -317,20 +318,18 @@ public class RefIdUseCase extends AbstractExtraUseCase<RefId, Object> {
     }
 
     private ExtraUseCaseResponse<Object> updateObservationFeatureOfInterestRef(ExtraUseCaseRequest<RefId> request,
-            IDtoMemoryCache<FeatureOfInterest> cache, ObservationsExtraUseCase useCase, String entityName) {
+            ObservationsExtraUseCase useCase, String entityName) {
         String id = (String) request.model().id();
         String parentId = request.parentId();
 
         if (id.contains("~")) {
             throw new WebApplicationException("Conflict", Response.Status.CONFLICT);
         }
+        ProviderSnapshot providerFoi = providerUseCase.read(request.session(), id);
 
-        FeatureOfInterest dto = cache.getDto(id);
-        if (dto == null) {
-            throw new NotFoundException(entityName + " " + id + " not found");
-        }
         ExpandedObservation observation = new ExpandedObservation(null, parentId, null, null, null, null, null, null,
-                null, null, null, null, dto, false);
+                null, null, null, null,
+                DtoMapperSimple.toFeatureOfInterest(providerFoi, providerFoi.getName(), null, null), false);
 
         ExtraUseCaseResponse<ServiceSnapshot> response = useCase.update(new ExtraUseCaseRequest<>(request.session(),
                 request.mapper(), request.uriInfo(), HttpMethod.PATCH, observation, parentId, true));

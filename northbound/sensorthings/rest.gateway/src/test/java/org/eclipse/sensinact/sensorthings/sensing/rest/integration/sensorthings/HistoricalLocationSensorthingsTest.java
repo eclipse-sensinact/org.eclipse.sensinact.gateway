@@ -279,10 +279,10 @@ public class HistoricalLocationSensorthingsTest extends AbstractIntegrationTest 
     void getDataStreamHistoricalLocationsTest() throws Exception {
         for (int i = 0; i < 10; i++) {
             createThing("fizz", List.of(), List.of(), new Point(i, i), TS_2012.plus(ofDays(i)));
-            createDatastream("fizzbuzz", "fizz", "test" + i, TS_2012.plus(ofDays(i)));
+            createDatastream("fizzbuzz", "fizz", "test" + i, "sensor" + i, "op" + i, TS_2012.plus(ofDays(i)));
         }
         // 10 updates
-        waitForRowCount("sensinact.geo_data", 10);
+        waitForRowCount("sensinact.geo_data", 20);
 
         String id = "fizzbuzz";
 

@@ -29,7 +29,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -55,7 +54,7 @@ public class ValueSensorthingsTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream), valueSetInstant);
-        createDatastream(providerDatastream, provider, value, valueSetInstant);
+        createDatastream(providerDatastream, provider, "sensor", "op", value, valueSetInstant);
         createLocation(providerLocation);
 
         // Check thing direct access
@@ -64,7 +63,7 @@ public class ValueSensorthingsTest extends AbstractIntegrationTest {
         assertEquals(provider, thing.id());
 
         // Check sensor direct access
-        final String sensorId = String.join("~", providerDatastream, "test1");
+        final String sensorId = "sensor";
         Sensor sensor = utils.queryJson("/Sensors(" + sensorId + ")", Sensor.class);
         assertNotNull(sensor, "Sensor not found");
         assertEquals(sensorId, sensor.id());
@@ -115,7 +114,7 @@ public class ValueSensorthingsTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider, value);
+        createDatastream(providerDatastream, provider, "sensor", "op", value);
         createLocation(providerLocation);
 
         // No unit by default

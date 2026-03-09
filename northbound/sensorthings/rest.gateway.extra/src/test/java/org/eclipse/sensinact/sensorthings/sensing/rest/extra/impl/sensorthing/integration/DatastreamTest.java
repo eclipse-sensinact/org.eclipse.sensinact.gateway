@@ -13,10 +13,9 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +29,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.ws.rs.NotFoundException;
 
 /**
  * Unit test for simple App.
@@ -340,17 +341,9 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         getJsonResponseFromDelete(String.format("Datastreams(%s)", idDatastream), 200);
         // then
-        ServiceSnapshot serviceDatastream = serviceUseCase.read(session, idDatastream, "datastream");
-        ServiceSnapshot serviceAdmin = serviceUseCase.read(session, idDatastream, "admin");
-
-        assertTrue(DtoMapperSimple.getResourceField(serviceDatastream, "id", String.class) == null,
-                "id datastream is not null");
-        assertTrue(DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class) == null,
-                "id datastream is not null");
-        assertTrue(DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class) == null,
-                "id datastream is not null");
-        assertTrue(DtoMapperSimple.getResourceField(serviceAdmin, "location", String.class) == null,
-                "id datastream is not null");
+        assertThrows(NotFoundException.class, () -> {
+            serviceUseCase.read(session, idDatastream, "datastream");
+        });
 
         ServiceSnapshot service = serviceUseCase.read(session, idJson, "thing");
         @SuppressWarnings("unchecked")
@@ -392,8 +385,6 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertNotNull(DtoMapperSimple.getResourceField(service, "sensorId", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorName", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "sensorMetadata", Object.class));
 
     }
 
@@ -430,8 +421,6 @@ public class DatastreamTest extends AbstractIntegrationTest {
 
         ServiceSnapshot service = serviceUseCase.read(session, idDatastream, "datastream");
         assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyId", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyName", String.class));
-        assertNotNull(DtoMapperSimple.getResourceField(service, "observedPropertyDefinition", String.class));
 
     }
 

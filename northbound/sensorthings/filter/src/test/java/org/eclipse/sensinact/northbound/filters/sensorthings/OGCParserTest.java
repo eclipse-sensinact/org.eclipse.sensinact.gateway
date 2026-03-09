@@ -1,15 +1,15 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -107,13 +107,14 @@ public class OGCParserTest {
         double[] inCircle = { 4.9544520269, 47.176310264 };
         ResourceSnapshot rc = makeLocatedResource(inCircle);
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), rc.getService().getProvider(), List.of(rc));
+                RcUtils.getSession(), rc.getService().getProvider(), List.of(rc), Map.of());
         assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
 
         rc = makeLocatedResource(outOfCircle);
         holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, RcUtils.getSession(),
-                rc.getService().getProvider(), List.of(rc));
-        assertQuery(false, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
+                rc.getService().getProvider(), List.of(rc), Map.of());
+        assertQuery(false, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3",
+                holder);
     }
 
     private Coordinates makeCoors(double lon, double lat) {
@@ -136,7 +137,7 @@ public class OGCParserTest {
 
         ResourceSnapshot rc = makeLocatedResource(rect1);
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), rc.getService().getProvider(), List.of(rc));
+                RcUtils.getSession(), rc.getService().getProvider(), List.of(rc), Map.of());
 
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
 
@@ -282,7 +283,7 @@ public class OGCParserTest {
         ResourceSnapshot rc2 = RcUtils.addResource(svc, "value2", 15.2);
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), provider, List.of(rc1, rc2));
+                RcUtils.getSession(), provider, List.of(rc1, rc2), Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -298,7 +299,7 @@ public class OGCParserTest {
         ResourceSnapshot rc = RcUtils.addResource(svc, "value", 5.0);
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -332,7 +333,7 @@ public class OGCParserTest {
                 ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant());
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -352,7 +353,7 @@ public class OGCParserTest {
                 ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant());
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -369,7 +370,7 @@ public class OGCParserTest {
                 ZonedDateTime.of(2010, 6, 15, 21, 42, 0, 0, ZoneId.of("UTC")).toInstant());
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), provider, List.of(rc));
+                RcUtils.getSession(), provider, List.of(rc), Map.of());
         assertQueries(expectations, holder);
     }
 }

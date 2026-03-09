@@ -10,13 +10,11 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl;
+package org.eclipse.sensinact.sensorthings.sensing.dto.util;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 
 public class DtoMemoryCache<M> implements IDtoMemoryCache<M> {
 

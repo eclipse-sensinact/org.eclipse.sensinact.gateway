@@ -72,6 +72,12 @@ public class ExtendedFactoryImpl extends EFactoryImpl implements ExtendedFactory
 			case ExtendedPackage.SENSOR_THING_SERVICE: return createSensorThingService();
 			case ExtendedPackage.SENSOR_THING_LOCATION: return createSensorThingLocation();
 			case ExtendedPackage.SENSOR_THING_DATASTREAM: return createSensorThingDatastream();
+			case ExtendedPackage.SENSOR_THING_OBSERVED_PROPERTY: return createSensorThingObservedProperty();
+			case ExtendedPackage.SENSOR_THING_SENSOR: return createSensorThingSensor();
+			case ExtendedPackage.OBSERVED_PROPERTY_SERVICE: return createObservedPropertyService();
+			case ExtendedPackage.SENSOR_SERVICE: return createSensorService();
+			case ExtendedPackage.SENSOR_THING_FOI: return createSensorThingFoi();
+			case ExtendedPackage.FEATURE_THING_SERVICE: return createFeatureThingService();
 			default:
 				throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
 		}
@@ -141,6 +147,72 @@ public class ExtendedFactoryImpl extends EFactoryImpl implements ExtendedFactory
 	public SensorThingDatastream createSensorThingDatastream() {
 		SensorThingDatastreamImpl sensorThingDatastream = new SensorThingDatastreamImpl();
 		return sensorThingDatastream;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public SensorThingObservedProperty createSensorThingObservedProperty() {
+		SensorThingObservedPropertyImpl sensorThingObservedProperty = new SensorThingObservedPropertyImpl();
+		return sensorThingObservedProperty;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public SensorThingSensor createSensorThingSensor() {
+		SensorThingSensorImpl sensorThingSensor = new SensorThingSensorImpl();
+		return sensorThingSensor;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public ObservedPropertyService createObservedPropertyService() {
+		ObservedPropertyServiceImpl observedPropertyService = new ObservedPropertyServiceImpl();
+		return observedPropertyService;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public SensorService createSensorService() {
+		SensorServiceImpl sensorService = new SensorServiceImpl();
+		return sensorService;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public SensorThingFoi createSensorThingFoi() {
+		SensorThingFoiImpl sensorThingFoi = new SensorThingFoiImpl();
+		return sensorThingFoi;
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@Override
+	public FeatureThingService createFeatureThingService() {
+		FeatureThingServiceImpl featureThingService = new FeatureThingServiceImpl();
+		return featureThingService;
 	}
 
 	/**

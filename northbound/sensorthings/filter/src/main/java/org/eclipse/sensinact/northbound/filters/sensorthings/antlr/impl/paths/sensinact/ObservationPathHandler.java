@@ -10,9 +10,10 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
+package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensinact;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -20,14 +21,15 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 
-public class SensorPathHandler {
+public class ObservationPathHandler {
 
     private final ProviderSnapshot provider;
     private final ResourceSnapshot resource;
 
-    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams);
+    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastream", this::subDatastream,
+            "featureofinterest", this::subFeatureOfInterest);
 
-    public SensorPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
+    public ObservationPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
         this.provider = provider;
         this.resource = resource;
     }
@@ -37,8 +39,9 @@ public class SensorPathHandler {
         if (parts.length == 1) {
             switch (parts[0]) {
             case "id":
-                // Provider~Service~Resource
-                return String.join("~", provider.getName(), resource.getService().getName(), resource.getName());
+                // Provider~Service~Resource~Timestamp
+                return String.join("~", provider.getName(), resource.getService().getName(), resource.getName(),
+                        PathUtils.timestampToString(resource.getValue().getTimestamp()));
 
             default:
                 return PathUtils.getResourceLevelField(provider, resource, parts[0]);
@@ -52,8 +55,11 @@ public class SensorPathHandler {
         }
     }
 
-    private Object subDatastreams(final String path) {
-        // Only one datastream per observed property
+    private Object subDatastream(final String path) {
         return new DatastreamPathHandler(provider, resource).handle(path);
+    }
+
+    private Object subFeatureOfInterest(final String path) {
+        return new FeatureOfInterestPathHandler(provider, List.of(resource)).handle(path);
     }
 }

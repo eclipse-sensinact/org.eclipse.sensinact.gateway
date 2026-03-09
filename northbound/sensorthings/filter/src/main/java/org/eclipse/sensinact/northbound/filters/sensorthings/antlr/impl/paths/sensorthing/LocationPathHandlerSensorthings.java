@@ -21,8 +21,8 @@ import java.util.function.Function;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
@@ -31,12 +31,12 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("things", this::subThings,
             "historicallocations", this::subHistoricalLocations);
 
-    public LocationPathHandlerSensorthings(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
-
+    public LocationPathHandlerSensorthings(final PathContext pathContext) {
+        super(pathContext);
     }
 
     public Object handle(final String path) {
+        ProviderSnapshot provider = pathContext.provider();
         final String[] parts = path.toLowerCase().split("/");
         ServiceSnapshot service = DtoMapperSimple.getLocationService(provider);
         ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
@@ -45,7 +45,7 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
             return null;
         }
         if (parts.length == 1) {
-            switch (path) {
+            switch (path.toLowerCase()) {
             case "id":
             case "@iot.id":
 
@@ -58,7 +58,8 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
 
             case "location":
                 return DtoMapperSimple.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
-            case "encodingType":
+            case "encodingtype":
+
                 return DtoMapperSimple.getResourceField(service, "encodingType", String.class);
 
             case "properties":
@@ -77,22 +78,36 @@ public class LocationPathHandlerSensorthings extends AbstractPathHandlerSensorth
         }
     }
 
+    @Override
+    public PathContext withProvider(PathContext pathContext, ProviderSnapshot newProvider) {
+        return new PathContext(pathContext.mapper(), newProvider, pathContext.session(), pathContext.resource(),
+                pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl());
+    }
+
     private Object subThings(final String path) {
+        SensiNactSession session = pathContext.session();
+        ProviderSnapshot provider = pathContext.provider();
         List<ProviderSnapshot> thingProviders = session.filteredSnapshot(null).stream()
                 .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
                         .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
                 .map(s -> s.getProvider()).toList();
-        return new AnyMatch(
-                thingProviders.stream().map(p -> new ThingPathHandlerSensorthings(p, session).handle(path)).toList());
+        return thingProviders.stream().map(p -> withProvider(pathContext, p))
+                .map(pc -> new ThingPathHandlerSensorthings(pc).handle(path)).toList();
     }
 
     private Object subHistoricalLocations(final String path) {
+        SensiNactSession session = pathContext.session();
+        ProviderSnapshot provider = pathContext.provider();
+
         List<ProviderSnapshot> thingProviders = session.filteredSnapshot(null).stream()
                 .map(DtoMapperSimple::getThingService).filter(Objects::nonNull).filter(s -> DtoMapperSimple
                         .getResourceField(s, "locationIds", List.class).contains(provider.getName()))
                 .map(s -> s.getProvider()).toList();
-        return new AnyMatch(thingProviders.stream()
-                .map(p -> new HistoricalLocationPathHandlerSensorthings(p, session).handle(path)).toList());
+        return thingProviders.stream()
+                .map(p -> new PathContext(pathContext.mapper(), p, pathContext.session(), pathContext.resource(),
+                        pathContext.configProperties(), pathContext.cacheObs(), pathContext.cacheHl()))
+
+                .map(pc -> new HistoricalLocationPathHandlerSensorthings(pc).handle(path)).toList();
 
     }
 }

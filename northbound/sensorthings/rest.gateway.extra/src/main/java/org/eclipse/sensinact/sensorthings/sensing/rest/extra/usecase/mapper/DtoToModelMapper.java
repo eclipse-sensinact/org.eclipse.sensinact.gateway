@@ -49,10 +49,14 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.DatastreamUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.FoiUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ObservedPropertyUpdate;
+import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.SensorUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
+import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase.ExtraUseCaseRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -109,6 +113,9 @@ public class DtoToModelMapper {
      * @return
      */
     public static String getNewId(Id model) {
+        if (model == null) {
+            return null;
+        }
         return model.id() != null ? (String) model.id() : getNewId();
     }
 
@@ -228,15 +235,13 @@ public class DtoToModelMapper {
     }
 
     public static ExpandedDataStream toDatastream(ProviderSnapshot provider) {
+
         Datastream datastream = DtoMapperSimple.toDatastream(provider, null, null, null, null, null);
         UnitOfMeasurement uom = DtoMapperSimple.toUnitOfMeasure(provider);
-        ObservedProperty observedProperty = DtoMapperSimple.toObservedProperty(provider, null, null);
-        Sensor sensor = DtoMapperSimple.toSensor(provider, null, null);
 
         return new ExpandedDataStream(null, datastream.id(), datastream.name(), datastream.description(),
                 datastream.observationType(), uom, datastream.observedArea(), datastream.phenomenonTime(),
-                datastream.resultTime(), datastream.properties(), null, null, null, null, null, observedProperty,
-                sensor, null, null);
+                datastream.resultTime(), datastream.properties(), null, null, null, null, null, null, null, null, null);
     }
 
     public static ExpandedDataStream toDatastreamOnly(ProviderSnapshot provider) {
@@ -263,12 +268,14 @@ public class DtoToModelMapper {
      * @return
      * @throws JsonProcessingException
      */
-    public static SensorThingsUpdate toDatastreamUpdate(ObjectMapper mapper, String providerId,
-            GeoJsonObject observedArea, String thingId, ExpandedDataStream ds, Sensor sensor,
-            ObservedProperty observedProperty, UnitOfMeasurement unit, ExpandedObservation lastObservation,
-            FeatureOfInterest featureOfInterest) {
-        return toDatastreamUpdate(mapper, providerId, observedArea, thingId, ds, sensor, observedProperty, unit,
-                lastObservation, lastObservation, featureOfInterest);
+    public static List<SensorThingsUpdate> toDatastreamUpdate(ObjectMapper mapper, String providerId,
+            GeoJsonObject observedArea, String thingId, ExpandedDataStream ds, String sensorId, Sensor sensor,
+            List<String> existingDatastreamIdsSensor, String observedPropertyId, ObservedProperty observedProperty,
+            List<String> existingDatastreamIdsObservedProperty, UnitOfMeasurement unit,
+            ExpandedObservation lastObservation, FeatureOfInterest featureOfInterest) {
+        return toDatastreamUpdate(mapper, providerId, observedArea, thingId, ds, sensorId, sensor,
+                existingDatastreamIdsSensor, observedPropertyId, observedProperty,
+                existingDatastreamIdsObservedProperty, unit, lastObservation, lastObservation, featureOfInterest);
     }
 
     /**
@@ -279,7 +286,7 @@ public class DtoToModelMapper {
      * @return the merged observedArea geometry
      */
 
-    static GeoJsonObject mergeObservedArea(GeoJsonObject existing, GeoJsonObject newGeo) {
+    private static GeoJsonObject mergeObservedArea(GeoJsonObject existing, GeoJsonObject newGeo) {
         if (existing == null) {
             return newGeo;
         }
@@ -331,33 +338,29 @@ public class DtoToModelMapper {
      * @return
      * @throws JsonProcessingException
      */
-    public static SensorThingsUpdate toDatastreamUpdate(ObjectMapper mapper, String providerId,
-            GeoJsonObject observedArea, String thingId, ExpandedDataStream ds, Sensor sensor,
-            ObservedProperty observedProperty, UnitOfMeasurement unit, ExpandedObservation lastObservation,
-            ExpandedObservation lastObservationReceived, FeatureOfInterest featureOfInterest) {
-
+    public static List<SensorThingsUpdate> toDatastreamUpdate(ObjectMapper mapper, String providerId,
+            GeoJsonObject observedArea, String thingId, ExpandedDataStream ds, String sensorId, Sensor sensor,
+            List<String> existingDatastreamIdSensor, String observedPropertyId, ObservedProperty observedProperty,
+            List<String> existingDatastreamObservedProperty, UnitOfMeasurement unit,
+            ExpandedObservation lastObservation, ExpandedObservation lastObservationReceived,
+            FeatureOfInterest featureOfInterest) {
+        List<SensorThingsUpdate> updates = new ArrayList<>();
         Instant timestamp = Instant.now();
         String name = ds != null ? ds.name() : null;
         String description = ds != null ? ds.description() : null;
         Map<String, Object> properties = ds != null ? ds.properties() : null;
         // --- Sensor ---
-        String sensorId = sensor != null && !isRecordOnlyField(sensor, "id") ? DtoToModelMapper.getNewId(sensor) : null;
-        String sensorName = sensor != null ? sensor.name() : null;
-        String sensorDescription = sensor != null ? sensor.description() : null;
-        String sensorEncodingType = sensor != null ? sensor.encodingType() : null;
-        Object sensorMetadata = sensor != null ? sensor.metadata() : null;
-        Map<String, Object> sensorProperties = sensor != null ? sensor.properties() : null;
-
+        List<String> newDatastreamIdSensor = null;
+        if (existingDatastreamIdSensor != null) {
+            newDatastreamIdSensor = new ArrayList<String>();
+            newDatastreamIdSensor.addAll(existingDatastreamIdSensor);
+        }
         // --- ObservedProperty ---
-        String observedPropertyId = observedProperty != null && !isRecordOnlyField(observedProperty, "id")
-                ? DtoToModelMapper.getNewId(observedProperty)
-                : null;
-        String observedPropertyName = observedProperty != null ? observedProperty.name() : null;
-        String observedPropertyDescription = observedProperty != null ? observedProperty.description() : null;
-        String observedPropertyDefinition = observedProperty != null ? observedProperty.definition() : null;
-        Map<String, Object> observedPropertyProperties = observedProperty != null ? observedProperty.properties()
-                : null;
-
+        List<String> newDatastreamIdOp = null;
+        if (existingDatastreamObservedProperty != null) {
+            newDatastreamIdOp = new ArrayList<String>();
+            newDatastreamIdOp.addAll(existingDatastreamObservedProperty);
+        }
         String observationType = ds != null ? ds.observationType() : null;
         // --- Unit ---
         String unitName = unit != null ? unit.name() : null;
@@ -376,9 +379,7 @@ public class DtoToModelMapper {
                     : lastObservation.phenomenonTime();
             Instant resultTime = lastObservationReceived.resultTime() != null ? lastObservationReceived.resultTime()
                     : lastObservation.resultTime();
-//            if (resultTime == null) {
-//                resultTime = Instant.now();
-//            }
+
             Object result = lastObservationReceived.result() != null ? lastObservationReceived.result()
                     : lastObservation.result();
             Object resultQuality = lastObservationReceived.resultQuality() != null
@@ -403,14 +404,72 @@ public class DtoToModelMapper {
 
         }
         String obsStr = obs != null ? serializeObservation(mapper, obs) : null;
-        // --- Build DatastreamUpdate ---
-        DatastreamUpdate datastreamUpdate = new DatastreamUpdate(providerId, providerId, name, description,
-                observationType, properties, timestamp, observedAreaToUpdate, thingId, sensorId, sensorName,
-                sensorDescription, sensorEncodingType, sensorMetadata, sensorProperties, observedPropertyId,
-                observedPropertyName, observedPropertyDescription, observedPropertyDefinition,
-                observedPropertyProperties, unitName, unitSymbol, unitDefinition, obsStr);
 
-        return datastreamUpdate;
+        DatastreamUpdate datastreamUpdate = new DatastreamUpdate(providerId, providerId, name, description,
+                observationType, properties, timestamp, observedAreaToUpdate, thingId, sensorId, observedPropertyId,
+                unitName, unitSymbol, unitDefinition, obsStr);
+        if (sensor != null) {
+            newDatastreamIdSensor.add(providerId);
+
+            updates.add(toSensorUpdate(sensorId, sensor, newDatastreamIdSensor, timestamp));
+        }
+        if (observedProperty != null) {
+            newDatastreamIdOp.add(providerId);
+
+            updates.add(toObservedProperty(observedPropertyId, observedProperty, newDatastreamIdOp, timestamp));
+        }
+
+        updates.add(datastreamUpdate);
+        return updates;
+    }
+
+    public static SensorThingsUpdate toSensorUpdate(String sensorId, Sensor sensor, List<String> datastreamIds,
+            Instant stamp) {
+        // --- Sensor ---
+        Instant timestamp = stamp != null ? stamp : Instant.now();
+
+        String sensorName = sensor != null ? sensor.name() : null;
+        String sensorDescription = sensor != null ? sensor.description() : null;
+        String sensorEncodingType = sensor != null ? sensor.encodingType() : null;
+        Object sensorMetadata = sensor != null ? sensor.metadata() : null;
+        Map<String, Object> sensorProperties = sensor != null ? sensor.properties() : null;
+        SensorUpdate sensorUpdate = new SensorUpdate(sensorId, sensorId, sensorName, sensorDescription, timestamp,
+                datastreamIds, sensorEncodingType, sensorMetadata, sensorProperties);
+
+        return sensorUpdate;
+    }
+
+    public static SensorThingsUpdate toFoiUpdate(String foiId, FeatureOfInterest foi, List<String> datastreamIds,
+            boolean hasObs) {
+        // --- Sensor ---
+        Instant timestamp = Instant.now();
+
+        String name = foi != null ? foi.name() : null;
+        String description = foi != null ? foi.description() : null;
+        String encodingType = foi != null ? foi.encodingType() : null;
+        GeoJsonObject feature = foi != null ? foi.feature() : null;
+        Map<String, Object> properties = foi != null ? foi.properties() : null;
+        FoiUpdate sensorUpdate = new FoiUpdate(foiId, foiId, name, description, encodingType, properties, timestamp,
+                feature, datastreamIds, hasObs);
+
+        return sensorUpdate;
+    }
+
+    public static SensorThingsUpdate toObservedProperty(String observedPropertyId, ObservedProperty observedProperty,
+            List<String> datastreamIds, Instant stamp) {
+        // --- ObservedProperty ---
+        Instant timestamp = stamp != null ? stamp : Instant.now();
+
+        String observedPropertyName = observedProperty != null ? observedProperty.name() : null;
+        String observedPropertyDescription = observedProperty != null ? observedProperty.description() : null;
+        String observedPropertyDefinition = observedProperty != null ? observedProperty.definition() : null;
+        Map<String, Object> observedPropertyProperties = observedProperty != null ? observedProperty.properties()
+                : null;
+        ObservedPropertyUpdate opUpdate = new ObservedPropertyUpdate(observedPropertyId, observedPropertyId,
+                observedPropertyName, observedPropertyDescription, timestamp, datastreamIds, observedPropertyDefinition,
+                observedPropertyProperties);
+
+        return opUpdate;
     }
 
     public static String getLink(UriInfo uriInfo, String baseUri, String path) {
@@ -543,6 +602,73 @@ public class DtoToModelMapper {
 
     }
 
+    public static List<String> getExistingDatastreamIdsSensor(ExtraUseCaseRequest<?> request,
+            IAccessProviderUseCase providerUseCase, String sensorId) {
+        ProviderSnapshot provider = providerUseCase.read(request.session(), sensorId);
+        return getDatastreamIdsFromSensor(provider);
+    }
+
+    public static List<String> getExistingDatastreamIdsObservedProperty(ExtraUseCaseRequest<?> request,
+            IAccessProviderUseCase providerUseCase, String observedPropertyId) {
+        ProviderSnapshot provider = providerUseCase.read(request.session(), observedPropertyId);
+        return getDatastreamIdsFromObservedProperty(provider);
+
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> getDatastreamIds(ServiceSnapshot serviceThing) {
+        return DtoMapperSimple.getResourceField(serviceThing, "datastreamIds", List.class);
+
+    }
+
+    public static List<String> getLocationIds(ProviderSnapshot provider) {
+        if (provider == null) {
+            return new ArrayList<String>();
+        }
+        return getLocationIds(DtoMapperSimple.getThingService(provider));
+
+    }
+
+    public static List<String> getDatastreamIdsFromThing(ProviderSnapshot provider) {
+        if (provider == null) {
+            return new ArrayList<String>();
+        }
+        return getDatastreamIds(DtoMapperSimple.getThingService(provider));
+    }
+
+    public static List<String> getDatastreamIdsFromSensor(ProviderSnapshot provider) {
+        if (provider == null) {
+            return new ArrayList<String>();
+        }
+        return getDatastreamIds(DtoMapperSimple.getSensorService(provider));
+    }
+
+    public static List<String> getDatastreamIdsFromObservedProperty(ProviderSnapshot provider) {
+        if (provider == null) {
+            return new ArrayList<String>();
+        }
+        return getDatastreamIds(DtoMapperSimple.getObservedPropertyService(provider));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> getLocationIds(ServiceSnapshot serviceThing) {
+
+        return DtoMapperSimple.getResourceField(serviceThing, "locationIds", List.class);
+
+    }
+
+    public static List<String> getDatastreamIdsFoi(IAccessProviderUseCase providerUseCase,
+            ExtraUseCaseRequest<?> request, String foiId, String datastreamtoAdd) {
+        ProviderSnapshot providerFoi = providerUseCase.read(request.session(), foiId);
+        if (providerFoi == null) {
+            return List.of(datastreamtoAdd);
+        }
+        @SuppressWarnings("unchecked")
+        List<String> datastreamIdsFoi = DtoMapperSimple.getResourceField(
+                DtoMapperSimple.getFeatureofInterestService(providerFoi), "datastreamIds", List.class);
+        return Stream.concat(datastreamIdsFoi.stream(), Stream.of(datastreamtoAdd)).toList();
+    }
+
     /**
      * return the thing update object to be use in dataupdate to update Thing entity
      *
@@ -553,8 +679,8 @@ public class DtoToModelMapper {
      * @return
      */
     public static List<SensorThingsUpdate> toThingUpdates(ExtraUseCaseRequest<ExpandedThing> request, String id,
-            List<String> existingLocationIds, List<String> existingDatastreamIds, List<ExpandedDataStream> listDs,
-            List<Location> listNewLocation) {
+            IAccessProviderUseCase providerUseCase, List<String> existingLocationIds,
+            List<String> existingDatastreamIds, List<ExpandedDataStream> listDs, List<Location> listNewLocation) {
         String providerIdThing = id;
         ExpandedThing thing = request.model();
         Instant timestamp = Instant.now();
@@ -568,6 +694,7 @@ public class DtoToModelMapper {
         GeoJsonObject geoLocationAggregate = null;
 
         if (thing.locations() != null) {
+            existingLocationIds.clear();
             for (ExpandedLocation l : thing.locations()) {
                 String locationId = getLocationId(l);
                 if (!isRecordOnlyField(l, "id")) {
@@ -583,22 +710,39 @@ public class DtoToModelMapper {
                 // check require field for datastream + require link
 
                 String idDatastream = getDatastreamid(ds);
+                String idSensor = DtoToModelMapper.getNewId(ds.sensor());
+                String idObservedProperty = DtoToModelMapper.getNewId(ds.observedProperty());
+                List<String> existingDatastreamIdsSensor = DtoToModelMapper.getExistingDatastreamIdsSensor(request,
+                        providerUseCase, idSensor);
+                List<String> existingDatastreamIdsObservedProperty = DtoToModelMapper
+                        .getExistingDatastreamIdsObservedProperty(request, providerUseCase, idObservedProperty);
                 existingDatastreamIds.add(idDatastream);
                 if (ds.observations() != null && ds.observations().size() > 0) {
                     final GeoJsonObject feature = geoLocationAggregate != null ? geoLocationAggregate : new Point(0, 0);
-                    listUpdate.addAll(ds.observations().stream().map(obs -> {
+                    listUpdate.addAll(ds.observations().stream().flatMap(obs -> {
+                        List<SensorThingsUpdate> list = new ArrayList<>();
                         FeatureOfInterest foi = obs.featureOfInterest();
-                        if (foi == null) {
+                        String foiId = foi != null && foi.id() != null ? foi.id().toString()
+                                : DtoToModelMapper.getNewId();
 
-                            foi = new FeatureOfInterest(null, DtoToModelMapper.getNewId(), "default",
-                                    "default feature of interest", "application/vnd.geo+json", feature, Map.of(), null);
+                        if (foi == null) {
+                            foi = new FeatureOfInterest(null, foiId, "default", "default feature of interest",
+                                    "application/vnd.geo+json", feature, Map.of(), null);
                         }
-                        return toDatastreamUpdate(request.mapper(), idDatastream, null, providerIdThing, ds,
-                                ds.sensor(), ds.observedProperty(), ds.unitOfMeasurement(), obs, foi);
+                        list.add(toFoiUpdate(foiId, foi,
+                                getDatastreamIdsFoi(providerUseCase, request, foiId, idDatastream), true));
+
+                        list.addAll(toDatastreamUpdate(request.mapper(), idDatastream, null, providerIdThing, ds,
+                                idSensor, ds.sensor(), existingDatastreamIdsSensor, idObservedProperty,
+                                ds.observedProperty(), existingDatastreamIdsObservedProperty, ds.unitOfMeasurement(),
+                                obs, foi));
+                        return list.stream();
                     }).toList());
                 } else {
-                    listUpdate.add(toDatastreamUpdate(request.mapper(), idDatastream, null, providerIdThing, ds,
-                            ds.sensor(), ds.observedProperty(), ds.unitOfMeasurement(), null, null, null));
+                    listUpdate.addAll(
+                            toDatastreamUpdate(request.mapper(), idDatastream, null, providerIdThing, ds, idSensor,
+                                    ds.sensor(), existingDatastreamIdsSensor, idObservedProperty, ds.observedProperty(),
+                                    existingDatastreamIdsObservedProperty, ds.unitOfMeasurement(), null, null, null));
                 }
             }
 
@@ -610,6 +754,14 @@ public class DtoToModelMapper {
         listUpdate.add(provider);
 
         return listUpdate;
+    }
+
+    private static boolean isSensorFromOtherDatastream(ExpandedDataStream ds, String idDatastream) {
+        return ((String) ds.sensor().id()).contains(idDatastream);
+    }
+
+    private static boolean isObservedPropertyFromOtherDatastream(ExpandedDataStream ds, String idDatastream) {
+        return ((String) ds.observedProperty().id()).contains(idDatastream);
     }
 
     /**

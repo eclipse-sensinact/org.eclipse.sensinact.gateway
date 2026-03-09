@@ -110,7 +110,7 @@ public interface ObservationsAccess {
     @Path("Datastream/Sensor/Datastreams")
     @GET
     default public ResultList<Datastream> getObservationDatastreamSensorDatastreams(@PathParam("id") ODataId id) {
-        return new ResultList<Datastream>(null, null, List.of(getObservationDatastream(id)));
+        return new ResultList<Datastream>(List.of(getObservationDatastream(id)));
     }
 
     @Path("Datastream/Sensor/Datastreams/$ref")
@@ -124,7 +124,7 @@ public interface ObservationsAccess {
     @GET
     default public ResultList<Datastream> getObservationDatastreamObservedPropertyDatastreams(
             @PathParam("id") ODataId id) {
-        return new ResultList<Datastream>(null, null, List.of(getObservationDatastream(id)));
+        return new ResultList<Datastream>(List.of(getObservationDatastream(id)));
     }
 
     @Path("Datastream/ObservedProperty/Datastreams/$ref")

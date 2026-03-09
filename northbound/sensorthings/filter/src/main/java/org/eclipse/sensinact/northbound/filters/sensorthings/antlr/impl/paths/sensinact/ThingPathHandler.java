@@ -10,27 +10,28 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
+package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensinact;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 
-public class HistoricalLocationPathHandler {
+public class ThingPathHandler {
 
     private final ProviderSnapshot provider;
     private final List<? extends ResourceSnapshot> resources;
 
-    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("things", this::subThings, "locations",
-            this::subLocations);
+    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams,
+            "locations", this::subLocations);
 
-    public HistoricalLocationPathHandler(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
+    public ThingPathHandler(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
         this.provider = provider;
         this.resources = resources;
     }
@@ -42,15 +43,6 @@ public class HistoricalLocationPathHandler {
             case "id":
                 // Provider
                 return provider.getName();
-
-            case "time":
-                // Get time from the HistoricalLocationResourceSnapshot TimedValue
-                final Optional<? extends ResourceSnapshot> resource = resources.stream().filter(this::isAdminLocation)
-                        .findFirst();
-                if (resource.isPresent()) {
-                    return PathUtils.getResourceLevelField(provider, resource.get(), parts[0]);
-                }
-                return null;
 
             default:
                 return PathUtils.getProviderLevelField(provider, resources, parts[0]);
@@ -64,12 +56,13 @@ public class HistoricalLocationPathHandler {
         }
     }
 
-    private boolean isAdminLocation(ResourceSnapshot r) {
-        return "admin".equals(r.getService().getName()) && "location".equals(r.getName());
-    }
-
-    private Object subThings(final String path) {
-        return new ThingPathHandler(provider, resources).handle(path);
+    private Object subDatastreams(final String path) {
+        if (resources.size() == 1) {
+            return new DatastreamPathHandler(provider, resources.get(0)).handle(path);
+        } else {
+            return new AnyMatch(resources.stream().map(r -> new DatastreamPathHandler(provider, r).handle(path))
+                    .collect(Collectors.toList()));
+        }
     }
 
     private Object subLocations(final String path) {

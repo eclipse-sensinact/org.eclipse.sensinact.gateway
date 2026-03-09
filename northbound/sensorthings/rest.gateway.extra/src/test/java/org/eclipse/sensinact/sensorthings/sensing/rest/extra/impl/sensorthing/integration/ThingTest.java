@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedDataStream;
@@ -556,14 +555,9 @@ public class ThingTest extends AbstractIntegrationTest {
         assertThrows(NotFoundException.class, () -> {
             serviceUseCase.read(session, thingId, "thing");
         });
-        assertTrue(DtoMapperSimple.getResourceField(serviceUseCase.read(session, idDatastream, "datastream"), "id",
-                String.class) == null);
-        assertTrue(DtoMapperSimple.getResourceField(serviceUseCase.read(session, idDatastream, "admin"), "friendlyName",
-                String.class) == null);
-        assertTrue(DtoMapperSimple.getResourceField(serviceUseCase.read(session, idDatastream, "admin"), "description",
-                String.class) == null);
-        assertTrue(DtoMapperSimple.getResourceField(serviceUseCase.read(session, idDatastream, "admin"), "location",
-                GeoJsonObject.class) == null);
+        assertThrows(NotFoundException.class, () -> {
+            serviceUseCase.read(session, idDatastream, "datastream");
+        });
 
     }
 

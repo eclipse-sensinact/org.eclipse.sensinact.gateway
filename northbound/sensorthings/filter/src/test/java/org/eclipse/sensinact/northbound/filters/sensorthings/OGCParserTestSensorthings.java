@@ -1,15 +1,15 @@
 /*********************************************************************
-* Copyright (c) 2023 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2023 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,6 +50,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DATASTREAM;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_FOI;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION;
 
 public class OGCParserTestSensorthings {
 
@@ -120,12 +122,14 @@ public class OGCParserTestSensorthings {
 
         ResourceSnapshot rc = makeLocatedResource(inCircle, provider);
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), provider, List.of(rc));
+                RcUtils.getSession(), provider, List.of(rc), Map.of());
         assertQuery(true, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
 
         rc = makeLocatedResource(outOfCircle, provider);
-        holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, RcUtils.getSession(), provider, List.of(rc));
-        assertQuery(false, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3", holder);
+        holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS, RcUtils.getSession(), provider, List.of(rc),
+                Map.of());
+        assertQuery(false, "geo.distance(Locations/location, geography'POINT(4.954450501 47.17631149)') lt 0.3",
+                holder);
     }
 
     private Coordinates makeCoors(double lon, double lat) {
@@ -149,7 +153,7 @@ public class OGCParserTestSensorthings {
 
         ResourceSnapshot rc = makeLocatedResource(rect1, provider);
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), provider, List.of(rc));
+                RcUtils.getSession(), provider, List.of(rc), Map.of());
 
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
 
@@ -289,13 +293,83 @@ public class OGCParserTestSensorthings {
     }
 
     @Test
+    void testHistocalLocationsPath() throws Exception {
+
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+
+        expectations.put("time lt '2015-10-14T21:30:00.104Z'", false);
+
+        ProviderSnapshot provider = RcUtils.makeProvider(SENSOR_THING_DEVICE.getName(), eNS_URI, "testProviderThing");
+        ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_ADMIN);
+        ResourceSnapshot rc1 = RcUtils.addResource(svc, "location", new Point(0, 0), Instant.now());
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.HISTORICAL_LOCATIONS,
+                RcUtils.getSession(), provider, rc1, Map.of());
+        assertQueries(expectations, holder);
+
+    }
+
+    @Test
+    void testLocationsPath() throws Exception {
+
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+        final Map<String, Boolean> expectations2 = new LinkedHashMap<>();
+
+        expectations.put("encodingType lt 'application/vnd.geo+json'", false);
+        expectations2.put("encodingType lt 'application/vnd.geo+json'", true);
+
+        ProviderSnapshot providerLocation = RcUtils.makeProvider(SENSOR_THING_LOCATION.getName(), eNS_URI,
+                "testProviderThing");
+        ServiceSnapshot svcLocation = RcUtils.addService(providerLocation, DtoMapperSimple.SERVICE_LOCATION);
+        ResourceSnapshot rc1 = RcUtils.addResource(svcLocation, "encodingType", "application/vnd.geo+json");
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.LOCATIONS,
+                RcUtils.getSession(), providerLocation, rc1, Map.of());
+        assertQueries(expectations, holder);
+        ProviderSnapshot providerLocation2 = RcUtils.makeProvider(SENSOR_THING_LOCATION.getName(), eNS_URI,
+                "testProviderThing2");
+        ServiceSnapshot svcLocation2 = RcUtils.addService(providerLocation2, DtoMapperSimple.SERVICE_LOCATION);
+
+        ResourceSnapshot rc2 = RcUtils.addResource(svcLocation2, "encodingType", "aaplication/vnd.geo+json");
+        ResourceValueFilterInputHolder holder2 = new ResourceValueFilterInputHolder(EFilterContext.LOCATIONS,
+                RcUtils.getSession(), providerLocation, rc2, Map.of());
+        assertQueries(expectations2, holder2);
+
+    }
+
+    @Test
     void testThingsPath() throws Exception {
 
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
         expectations.put("id eq 'testProviderThing'", true);
-        expectations.put("Datastreams/Observations/FeatureOfInterest/id eq 'testProvider~test~test'", true);
+        expectations.put("Datastreams/Observations/FeatureOfInterest/id eq 'testProvidertest'", true);
         expectations.put("Datastreams/Observations/result lt 5", false);
         expectations.put("Datastreams/Observations/result le 5", true);
+
+        ProviderSnapshot providerThing = RcUtils.makeProvider(SENSOR_THING_DEVICE.getName(), eNS_URI,
+                "testProviderThing");
+        ServiceSnapshot svcThing = RcUtils.addService(providerThing, DtoMapperSimple.SERVICE_THING);
+        RcUtils.addResource(svcThing, "datastreamIds", List.of("testProvider"));
+        FeatureOfInterest foi = getFeatureOfInterest("testProvider");
+        ProviderSnapshot providerFoi = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi.id().toString());
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_ADMIN);
+
+        ProviderSnapshot provider = RcUtils.makeProvider(SENSOR_THING_DATASTREAM.getName(), eNS_URI, "testProvider");
+        ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_DATASTREAM);
+        ResourceSnapshot rc1 = RcUtils.addResource(svc, "lastObservation",
+                getExpandedObservation(Instant.now(), "testProvider", 5, foi));
+
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
+                RcUtils.getSession(), providerThing, rc1, Map.of());
+
+        assertQueries(expectations, holder);
+
+    }
+
+    @Test
+    void testDatastreamsPath() throws Exception {
+
+        final Map<String, Boolean> expectations = new LinkedHashMap<>();
+        expectations.put("Observations/result le 5", true);
 
         ProviderSnapshot providerThing = RcUtils.makeProvider(SENSOR_THING_DEVICE.getName(), eNS_URI,
                 "testProviderThing");
@@ -304,11 +378,29 @@ public class OGCParserTestSensorthings {
 
         ProviderSnapshot provider = RcUtils.makeProvider(SENSOR_THING_DATASTREAM.getName(), eNS_URI, "testProvider");
         ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_DATASTREAM);
-        ResourceSnapshot rc1 = RcUtils.addResource(svc, "lastObservation",
-                getExpandedObservation(Instant.now(), "testProvider", 5));
 
-        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), providerThing, rc1);
+        ProviderSnapshot provider2 = RcUtils.makeProvider(SENSOR_THING_DATASTREAM.getName(), eNS_URI, "testProvider2");
+        ServiceSnapshot svc2 = RcUtils.addService(provider2, DtoMapperSimple.SERVICE_DATASTREAM);
+        FeatureOfInterest foi = getFeatureOfInterest("testProvider");
+        ProviderSnapshot providerFoi = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi.id().toString());
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_ADMIN);
+
+        ResourceSnapshot rc1 = RcUtils.addResource(svc, "lastObservation",
+                getExpandedObservation(Instant.now(), "testProvider", 5, foi));
+        RcUtils.addResource(svc, "lastObservation", getExpandedObservation(Instant.now(), "testProvider", 5, foi));
+        ResourceSnapshot rc2 = RcUtils.addResource(svc, "lastObservation",
+                getExpandedObservation(Instant.now(), "testProvider2", 3, foi));
+        RcUtils.addResource(svc2, "lastObservation", getExpandedObservation(Instant.now(), "testProvider2", 3, foi));
+
+        ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.DATASTREAMS,
+                RcUtils.getSession(), provider, rc1, Map.of());
+
+        assertQueries(expectations, holder);
+
+        holder = new ResourceValueFilterInputHolder(EFilterContext.DATASTREAMS, RcUtils.getSession(), provider2, rc2,
+                Map.of());
+
         assertQueries(expectations, holder);
 
     }
@@ -318,16 +410,40 @@ public class OGCParserTestSensorthings {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
         expectations.put("result lt 10.00", true);
         expectations.put("Datastream/id eq 'testProvider'", true);
-        expectations.put("FeatureOfInterest/id eq 'testProvider~test~test'", true);
+        expectations.put("FeatureOfInterest/id eq 'testProvidertest'", true);
 
         ProviderSnapshot provider = RcUtils.makeProvider(SENSOR_THING_DATASTREAM.getName(), eNS_URI, "testProvider");
         ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_DATASTREAM);
+        FeatureOfInterest foi = getFeatureOfInterest("testProvider");
+        ProviderSnapshot providerFoi = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi.id().toString());
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_ADMIN);
+
         ResourceSnapshot rc = RcUtils.addResource(svc, "lastObservation",
-                getExpandedObservation(Instant.now(), "testProvider", 5.0));
+                getExpandedObservation(Instant.now(), "testProvider", 5.0, foi));
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
+
+        final Map<String, Boolean> expectations2 = new LinkedHashMap<>();
+        expectations2.put("result lt '10'", false);
+        expectations2.put("Datastream/id eq 'testProvider'", true);
+        expectations2.put("FeatureOfInterest/id eq 'testProvidertest'", true);
+
+        ProviderSnapshot provider2 = RcUtils.makeProvider(SENSOR_THING_DATASTREAM.getName(), eNS_URI, "testProvider2");
+        ServiceSnapshot svc2 = RcUtils.addService(provider2, DtoMapperSimple.SERVICE_DATASTREAM);
+        FeatureOfInterest foi2 = getFeatureOfInterest("testProvider2");
+        ProviderSnapshot providerFoi2 = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi2.id().toString());
+        RcUtils.addService(providerFoi2, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi2, DtoMapperSimple.SERVICE_ADMIN);
+
+        ResourceSnapshot rc2 = RcUtils.addResource(svc2, "lastObservation",
+                getExpandedObservation(Instant.now(), "testProvider2", 5, foi2));
+
+        ResourceValueFilterInputHolder holder2 = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
+                RcUtils.getSession(), provider2, rc2, Map.of());
+        assertQueries(expectations2, holder2);
     }
 
     @Test
@@ -356,11 +472,16 @@ public class OGCParserTestSensorthings {
 
         ProviderSnapshot provider = RcUtils.makeProvider(SENSOR_THING_DATASTREAM.getName(), eNS_URI, "provider");
         ServiceSnapshot svc = RcUtils.addService(provider, DtoMapperSimple.SERVICE_DATASTREAM);
+        FeatureOfInterest foi = getFeatureOfInterest("provider");
+        ProviderSnapshot providerFoi = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi.id().toString());
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_ADMIN);
+
         ResourceSnapshot rc = RcUtils.addResource(svc, "lastObservation", getExpandedObservation(
-                ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant(), "provider", 5.0));
+                ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant(), "provider", 5.0, foi));
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
@@ -380,13 +501,17 @@ public class OGCParserTestSensorthings {
                 ZonedDateTime.of(2023, 2, 7, 15, 40, 30, 0, ZoneId.of("UTC")).toInstant());
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.OBSERVATIONS,
-                RcUtils.getSession(), provider, rc);
+                RcUtils.getSession(), provider, rc, Map.of());
         assertQueries(expectations, holder);
     }
 
-    public String getExpandedObservation(Instant resultTime, String providerId, Object value) {
+    public FeatureOfInterest getFeatureOfInterest(String providerPref) {
+        return new FeatureOfInterest(null, providerPref + "test", "test", null, null, null, null, null);
 
-        FeatureOfInterest foi = new FeatureOfInterest(null, "test", "test", null, null, null, null, null);
+    }
+
+    public String getExpandedObservation(Instant resultTime, String providerId, Object value, FeatureOfInterest foi) {
+
         ExpandedObservation obs = new ExpandedObservation("test", providerId + "~test", resultTime, resultTime, value,
                 "test", null, null, null, null, null, null, foi, false);
         try {
@@ -399,7 +524,7 @@ public class OGCParserTestSensorthings {
     @Test
     void testThingsComplex() throws Exception {
         final Map<String, Boolean> expectations = new LinkedHashMap<>();
-        expectations.put("Datastreams/Observations/FeatureOfInterest/id eq 'datastream1~test~test' "
+        expectations.put("Datastreams/Observations/FeatureOfInterest/id eq 'datastream1test' "
                 + "and Datastreams/Observations/resultTime ge 2010-06-01T00:00:00Z "
                 + "and Datastreams/Observations/resultTime le 2010-07-01T00:00:00Z", true);
         ProviderSnapshot providerThing = RcUtils.makeProvider(SENSOR_THING_DEVICE.getName(), eNS_URI, "thing1");
@@ -410,13 +535,17 @@ public class OGCParserTestSensorthings {
                 "datastream1");
         ServiceSnapshot svcDatastream = RcUtils.addService(providerDatastream, "datastream");
         RcUtils.addResource(svcThing, "thingId", "thing1");
+        FeatureOfInterest foi = getFeatureOfInterest("datastream1");
+        ProviderSnapshot providerFoi = RcUtils.makeProvider(SENSOR_THING_FOI.getName(), eNS_URI, foi.id().toString());
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_FOI);
+        RcUtils.addService(providerFoi, DtoMapperSimple.SERVICE_ADMIN);
 
         Instant resulTime = ZonedDateTime.of(2010, 6, 15, 21, 42, 0, 0, ZoneId.of("UTC")).toInstant();
         ResourceSnapshot rc = RcUtils.addResource(svcDatastream, "lastObservation",
-                getExpandedObservation(resulTime, "datastream1", 5.0), resulTime);
+                getExpandedObservation(resulTime, "datastream1", 5.0, foi), resulTime);
 
         ResourceValueFilterInputHolder holder = new ResourceValueFilterInputHolder(EFilterContext.THINGS,
-                RcUtils.getSession(), providerThing, List.of(rc));
+                RcUtils.getSession(), providerThing, List.of(rc), Map.of());
         assertQueries(expectations, holder);
     }
 }

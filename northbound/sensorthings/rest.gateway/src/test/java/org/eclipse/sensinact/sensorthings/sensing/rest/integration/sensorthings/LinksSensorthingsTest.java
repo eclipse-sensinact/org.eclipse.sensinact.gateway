@@ -240,7 +240,7 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider);
+        createDatastream(providerDatastream, provider, "sensor", "op");
         createLocation(providerLocation);
         // Get the new things
         ResultList<Thing> refIds = utils.queryJson("/Things/$ref", RESULT_THINGS);
@@ -324,7 +324,7 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider);
+        createDatastream(providerDatastream, provider, "sensor", "op");
         createLocation(providerLocation);
 
         // Get the new locations
@@ -361,7 +361,7 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider);
+        createDatastream(providerDatastream, provider, "sensor", "op");
         createLocation(providerLocation);
 
         session.setResourceValue(providerLocation, "location", "location",
@@ -403,7 +403,7 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider);
+        createDatastream(providerDatastream, provider, "sensor", "op");
         createLocation(providerLocation);
 
         // Get the new locations
@@ -463,7 +463,7 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         final String providerDatastream = "expandTesterDatastream";
 
         createThing(provider, List.of(), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider);
+        createDatastream(providerDatastream, provider, "sensor", "op");
 
         // Get the new locations
         ResultList<Sensor> refIds = utils.queryJson("/Sensors/$ref", RESULT_SENSORS);
@@ -503,7 +503,7 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider, 42);
+        createDatastream(providerDatastream, provider, "sensor", "op", 42);
         createLocation(providerLocation);
 
         // Get the new locations
@@ -541,7 +541,7 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         final String providerLocation = "expandTesterLocation";
 
         createThing(provider, List.of(providerLocation), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider);
+        createDatastream(providerDatastream, provider, "sensor", "op");
         createLocation(providerLocation);
 
         // Get the new locations
@@ -587,7 +587,7 @@ public class LinksSensorthingsTest extends AbstractIntegrationTest {
         final String providerDatastream = "expandTesterDatastream";
 
         createThing(provider, List.of(), List.of(providerDatastream));
-        createDatastream(providerDatastream, provider);
+        createDatastream(providerDatastream, provider, "sensor", "op");
         // Get the new locations
         ResultList<FeatureOfInterest> refIds = utils.queryJson("/FeaturesOfInterest/$ref",
                 new TypeReference<ResultList<FeatureOfInterest>>() {

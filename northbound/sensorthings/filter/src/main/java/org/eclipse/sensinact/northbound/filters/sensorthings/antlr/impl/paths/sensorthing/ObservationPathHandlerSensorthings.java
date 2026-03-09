@@ -17,29 +17,29 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
-import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
-import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class ObservationPathHandlerSensorthings extends AbstractPathHandlerSensorthings {
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastream", this::subDatastream,
             "featureofinterest", this::subFeatureOfInterest);
 
-    public ObservationPathHandlerSensorthings(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
+    private ExpandedObservation obs;
+
+    public ObservationPathHandlerSensorthings(final PathContext pathContext, ExpandedObservation obs) {
+        super(pathContext);
+        this.obs = obs;
     }
 
     public Object handle(final String path) {
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
-        if (service == null) {
-            return null;
-        }
+        ProviderSnapshot provider = pathContext.provider();
+        // get list of resource from history as live observation
+
         if (parts.length == 1) {
-            return getResourceLevelField(provider, service, parts[0]);
+            return getResourceLevelField(provider, obs, parts[0]);
 
         } else {
             final Function<String, Object> handler = subPartHandlers.get(parts[0]);
@@ -50,14 +50,13 @@ public class ObservationPathHandlerSensorthings extends AbstractPathHandlerSenso
         }
     }
 
-    public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
+    public Object getResourceLevelField(final ProviderSnapshot provider, final ExpandedObservation obs,
             final String path) {
 
-        ExpandedObservation obs = getObservationFromService(service);
         if (obs == null) {
             return null;
         }
-        switch (path) {
+        switch (path.toLowerCase()) {
         case "id":
         case "@iot.id":
 
@@ -67,6 +66,8 @@ public class ObservationPathHandlerSensorthings extends AbstractPathHandlerSenso
             return obs.result();
 
         case "resulttime":
+        case "resultTime":
+
             return obs.resultTime();
 
         case "phenomenontime":
@@ -74,9 +75,11 @@ public class ObservationPathHandlerSensorthings extends AbstractPathHandlerSenso
             return obs.phenomenonTime();
 
         case "validtime":
+
             return obs.validTime();
 
         case "resultquality":
+
             return obs.resultQuality();
 
         case "properties":
@@ -89,10 +92,11 @@ public class ObservationPathHandlerSensorthings extends AbstractPathHandlerSenso
     }
 
     private Object subDatastream(final String path) {
-        return new DatastreamPathHandlerSensorthings(provider, session).handle(path);
+
+        return new DatastreamPathHandlerSensorthings(pathContext).handle(path);
     }
 
     private Object subFeatureOfInterest(final String path) {
-        return new FeatureOfInterestPathHandlerSensorthings(provider, session).handle(path);
+        return new FeatureOfInterestPathHandlerSensorthings(pathContext, obs).handle(path);
     }
 }

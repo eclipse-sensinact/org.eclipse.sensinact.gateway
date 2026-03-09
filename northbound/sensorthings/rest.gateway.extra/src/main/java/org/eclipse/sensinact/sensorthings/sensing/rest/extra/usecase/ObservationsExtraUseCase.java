@@ -15,6 +15,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.endpoint.DependsOnUseCases;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
@@ -53,17 +54,12 @@ import jakarta.ws.rs.ext.Providers;
 @DependsOnUseCases(value = { FeatureOfInterestExtraUseCase.class })
 public class ObservationsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedObservation, ServiceSnapshot> {
 
-    private FeatureOfInterestExtraUseCase featureOfInterestUseCase;
     private IDtoMemoryCache<ExpandedObservation> cacheObs;
-    private IDtoMemoryCache<FeatureOfInterest> cacheFoi;
 
     @SuppressWarnings("unchecked")
     public ObservationsExtraUseCase(Providers providers, Application application) {
         super(providers, application);
-        featureOfInterestUseCase = resolveUseCase(providers, FeatureOfInterestExtraUseCase.class);
-        featureOfInterestUseCase.setObservationExtraUseCase(this);
         cacheObs = resolve(providers, IDtoMemoryCache.class, ExpandedObservation.class);
-        cacheFoi = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
 
     }
 
@@ -88,11 +84,9 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseModelDelete<Ex
 
         }
 
-        updateObservationMemoryHistory(cacheObs, cacheFoi, request.mapper(), resource);
+        updateObservationMemoryHistory(cacheObs, request.mapper(), resource);
         ServiceSnapshot service = serviceUseCase.read(request.session(), getProviderId(request), "datastream");
         if (service != null) {
-            if (!isHistoryMemory())
-                removeFeatureOfInterest(request.model());
 
             return new ExtraUseCaseResponse<ServiceSnapshot>(getProviderId(request), service);
         }
@@ -109,24 +103,33 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseModelDelete<Ex
         String id = getProviderId(request);
         String providerId = DtoMapperSimple.extractFirstIdSegment(id);
         ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
-        FeatureOfInterest foi = getFeatureOfInterest(observation);
+        FeatureOfInterest foi = getFeatureOfInterest(request.session(), observation.featureOfInterest());
+        List<SensorThingsUpdate> updates = new ArrayList<SensorThingsUpdate>();
+
         if (foi == null) {
             String thingId = DtoMapperSimple.getResourceField(DtoMapperSimple.getDatastreamService(provider), "thingId",
                     String.class);
             ProviderSnapshot providerThing = providerUseCase.read(request.session(), thingId);
-            GeoJsonObject feature = DtoMapperSimple.getResourceField(DtoMapperSimple.getAdminService(providerThing),
-                    "location", GeoJsonObject.class);
-            foi = new FeatureOfInterest(null, DtoToModelMapper.getNewId(), "default", "default feature of interest",
-                    "application/vnd.geo+json", feature, Map.of(), null);
+            foi = getFeatureOfInterest(request.session(), providerThing.getName());
+            if (foi == null) {
+                GeoJsonObject feature = DtoMapperSimple.getResourceField(DtoMapperSimple.getAdminService(providerThing),
+                        "location", GeoJsonObject.class);
+                foi = new FeatureOfInterest(null, thingId + "foi", "default", "default feature of interest",
+                        "application/vnd.geo+json", feature, Map.of(), null);
+            }
 
         }
+        updates.add(DtoToModelMapper.toFoiUpdate((String) foi.id(), foi,
+                DtoToModelMapper.getDatastreamIdsFoi(providerUseCase, request, foi.id().toString(), providerId), true));
+
         checkRequireField(foi);
 
         checkRequireLink(provider);
-        SensorThingsUpdate update = DtoToModelMapper.toDatastreamUpdate(request.mapper(), providerId,
+
+        updates.addAll(DtoToModelMapper.toDatastreamUpdate(request.mapper(), providerId,
                 getObservedArea(request.session(), providerId), null, DtoToModelMapper.toDatastream(provider), null,
-                null, null, observation, foi);
-        return List.of(update);
+                null, null, null, null, null, null, observation, foi));
+        return updates;
 
     }
 
@@ -145,37 +148,6 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseModelDelete<Ex
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
-    }
-
-    private FeatureOfInterest getFeatureOfInterest(ExpandedObservation observation) {
-        FeatureOfInterest foi = null;
-        // retrieve created sensor
-        if (observation.featureOfInterest() != null) {
-            if (DtoToModelMapper.isRecordOnlyField(observation.featureOfInterest(), "id")) {
-                String idFoi = DtoToModelMapper.getIdFromRecord(observation.featureOfInterest());
-
-                foi = featureOfInterestUseCase.getInMemoryFeatureOfInterest(idFoi);
-            } else {
-                foi = new FeatureOfInterest(null,
-                        observation.featureOfInterest().id() != null ? observation.featureOfInterest().id()
-                                : DtoToModelMapper.getNewId(),
-                        observation.featureOfInterest().name(), observation.featureOfInterest().description(),
-                        observation.featureOfInterest().encodingType(), observation.featureOfInterest().feature(),
-                        Map.of(), null);
-            }
-        }
-        return foi;
-    }
-
-    private void removeFeatureOfInterest(ExpandedObservation observation) {
-        // retrieve created sensor
-        if (observation.featureOfInterest() != null
-                && DtoToModelMapper.isRecordOnlyField(observation.featureOfInterest(), "id")) {
-            String idFoi = DtoToModelMapper.getIdFromRecord(observation.featureOfInterest());
-
-            featureOfInterestUseCase.removeInMemoryFeatureOfInterest(idFoi);
-        }
-
     }
 
     public ExtraUseCaseResponse<ServiceSnapshot> update(ExtraUseCaseRequest<ExpandedObservation> request) {
