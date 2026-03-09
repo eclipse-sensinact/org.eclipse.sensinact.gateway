@@ -79,7 +79,7 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
       <artifactId>session-api</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
