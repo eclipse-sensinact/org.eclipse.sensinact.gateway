@@ -123,7 +123,7 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
         if (feature instanceof EAttribute) {
             return ValueType.valueOf(((ResourceMetadata) EMFUtil.getModelMetadata(feature)).getValueType().getName());
         }
-        throw new UnsupportedOperationException("Handling of none Sensinact Atributes not implemented yet");
+        throw new UnsupportedOperationException("Handling of none Sensinact Attributes not implemented yet");
     }
 
     @Override
@@ -131,7 +131,7 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
         if (feature instanceof EAttribute || feature instanceof EOperation) {
             return EMFUtil.toMetadataAttributesToMap(feature);
         }
-        throw new UnsupportedOperationException("Handling of none Sensinact Atributes not implemented yet");
+        throw new UnsupportedOperationException("Handling of none Sensinact Attributes not implemented yet");
     }
 
 }

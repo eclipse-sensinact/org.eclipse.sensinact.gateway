@@ -238,11 +238,11 @@ public class EMFUtil {
         EParameter parameter = EcoreFactory.eINSTANCE.createEParameter();
         parameter.setName(entry.getKey());
         parameter.setEType(convertClass(entry.getValue(), ePackage));
-        addMetaDataAnnnotation(parameter, metaData);
+        addMetaDataAnnotation(parameter, metaData);
         return parameter;
     }
 
-    public static void addMetaDataAnnnotation(EModelElement model, EObject metaData) {
+    public static void addMetaDataAnnotation(EModelElement model, EObject metaData) {
         EAnnotation annotation = EcoreFactory.eINSTANCE.createEAnnotation();
         annotation.getContents().add(metaData);
         annotation.setSource(METADATA_ANNOTATION_SOURCE);
@@ -251,7 +251,7 @@ public class EMFUtil {
 
     /**
      * Tries to find the {@link EDataType} for the given {@link Class}. If it isn't
-     * found, it looks in the given ePackagae as well. If none is found there as
+     * found, it looks in the given ePackage as well. If none is found there as
      * well, one is created and attached to the given EPackage.
      *
      * @param clazz    the {@link Class} to find the {@link EDataType} for
@@ -356,7 +356,7 @@ public class EMFUtil {
     public static EReference createServiceReference(EClass parent, String refName, EClass type, boolean containment) {
         EReference feature = createEReference(parent, refName, type, containment, null);
         ServiceReferenceMetadata metaData = ProviderFactory.eINSTANCE.createServiceReferenceMetadata();
-        addMetaDataAnnnotation(feature, metaData);
+        addMetaDataAnnotation(feature, metaData);
         return feature;
     }
 
@@ -372,7 +372,7 @@ public class EMFUtil {
             attribute.setDefaultValue(defaultValue);
         }
         service.getEStructuralFeatures().add(attribute);
-        addMetaDataAnnnotation(attribute, metaData);
+        addMetaDataAnnotation(attribute, metaData);
         return metaData;
     }
 
@@ -491,7 +491,7 @@ public class EMFUtil {
         operation.setLowerBound(lowerBound);
         operation.setUpperBound(upperBound);
         serviceEClass.getEOperations().add(operation);
-        addMetaDataAnnnotation(operation, metaData);
+        addMetaDataAnnotation(operation, metaData);
         return operation;
     }
 

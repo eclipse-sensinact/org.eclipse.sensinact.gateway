@@ -718,7 +718,7 @@ public class ModelNexus {
         }
         EClass model = EMFUtil.createEClass(modelClassName, ePackage, null, ProviderPackage.Literals.PROVIDER);
         ModelMetadata metadata = ProviderFactory.eINSTANCE.createModelMetadata();
-        EMFUtil.addMetaDataAnnnotation(model, metadata);
+        EMFUtil.addMetaDataAnnotation(model, metadata);
         EMFUtil.fillMetadata(metadata, timestamp, false, modelName, ECollections.emptyEMap());
         return model;
     }
