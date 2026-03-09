@@ -456,9 +456,6 @@ public class ModelNexus {
 
             if (metadata == null) {
                 metadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
-                if (resourceFeature instanceof Metadata) {
-                    metadata.getExtra().addAll(((Metadata) resourceFeature).getExtra());
-                }
                 service.getMetadata().put(resourceFeature, metadata);
             }
             metadata.setTimestamp(metaTimestamp);
@@ -748,9 +745,6 @@ public class ModelNexus {
         ResourceValueMetadata metadata = svc.getMetadata().get(rcFeature);
         if (metadata == null) {
             metadata = ProviderFactory.eINSTANCE.createResourceValueMetadata();
-            if (EMFUtil.getModelMetadata(rcFeature) != null) {
-                metadata.getExtra().addAll(EMFUtil.getModelMetadata(rcFeature).getExtra());
-            }
             svc.getMetadata().put(rcFeature, metadata);
         }
         return metadata;
@@ -822,11 +816,22 @@ public class ModelNexus {
         Map<String, Object> oldMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
 
         EMap<String, MetadataValue> extra = metadata.getExtra();
-        MetadataValue fcm = extra.get(metadataKey);
-        if (fcm == null) {
-            extra.put(metadataKey, EMFUtil.createMetadataValue(timestamp, value));
+        if (value == null) {
+            // Overlay removal
+            if (extra.containsKey(metadataKey)) {
+                // Remove value and notify
+                extra.removeKey(metadataKey);
+            } else {
+                // Key didn't exist: do not create a notification
+                return;
+            }
         } else {
-            EMFUtil.handleMetadataValue(fcm, timestamp, value);
+            MetadataValue fcm = extra.get(metadataKey);
+            if (fcm == null) {
+                extra.put(metadataKey, EMFUtil.createMetadataValue(timestamp, value));
+            } else {
+                EMFUtil.handleMetadataValue(fcm, timestamp, value);
+            }
         }
         Map<String, Object> newMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
 
