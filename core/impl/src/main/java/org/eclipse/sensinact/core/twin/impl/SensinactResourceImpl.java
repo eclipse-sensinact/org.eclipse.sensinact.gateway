@@ -253,6 +253,22 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
     }
 
     @Override
+    public Promise<Void> unsetMetadataValue(String name, Instant timestamp) {
+        checkValid();
+
+        try {
+            if (!svc.isSet()) {
+                modelNexus.createServiceInstance(provider, serviceName, svc.getServiceEClass());
+            }
+
+            modelNexus.unsetResourceMetadata(provider, serviceName, resource, name, timestamp);
+            return promiseFactory.resolved(null);
+        } catch (Throwable t) {
+            return promiseFactory.failed(t);
+        }
+    }
+
+    @Override
     public Promise<TimedValue<Object>> getMetadataValue(String name) {
         checkValid();
 

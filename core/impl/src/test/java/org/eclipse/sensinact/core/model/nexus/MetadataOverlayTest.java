@@ -140,7 +140,7 @@ public class MetadataOverlayTest {
         assertNull(snapshot2.getResource(svcName, rcSerial).getMetadata().get(metaUnit));
 
         // Remove resource metadata
-        twin.getResource(providerName, svcName, rcTemp).setMetadataValue(metaUnit, null, now).getValue();
+        twin.getResource(providerName, svcName, rcTemp).unsetMetadataValue(metaUnit, now).getValue();
 
         // Check metadata values are back to model defaults
         snapshot = getProviderSnapshot(providerName);

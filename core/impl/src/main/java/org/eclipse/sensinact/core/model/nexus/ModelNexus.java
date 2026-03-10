@@ -806,7 +806,6 @@ public class ModelNexus {
         if (metadataKey == null || metadataKey.isEmpty()) {
             throw new IllegalArgumentException("Empty metadata key");
         }
-
         if (timestamp == null) {
             throw new IllegalArgumentException("Invalid timestamp");
         }
@@ -816,29 +815,72 @@ public class ModelNexus {
         Map<String, Object> oldMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
 
         EMap<String, MetadataValue> extra = metadata.getExtra();
-        if (value == null) {
-            // Overlay removal
-            if (extra.containsKey(metadataKey)) {
-                // Remove value and notify
-                extra.removeKey(metadataKey);
-            } else {
-                // Key didn't exist: do not create a notification
-                return;
-            }
+        MetadataValue fcm = extra.get(metadataKey);
+        if (fcm == null) {
+            extra.put(metadataKey, EMFUtil.createMetadataValue(timestamp, value));
         } else {
-            MetadataValue fcm = extra.get(metadataKey);
-            if (fcm == null) {
-                extra.put(metadataKey, EMFUtil.createMetadataValue(timestamp, value));
-            } else {
-                EMFUtil.handleMetadataValue(fcm, timestamp, value);
-            }
+            EMFUtil.handleMetadataValue(fcm, timestamp, value);
         }
         Map<String, Object> newMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
 
         notificationAccumulator.get().metadataValueUpdate(provider.eClass().getEPackage().getNsURI(),
                 EMFUtil.getModelName(provider.eClass()), provider.getId(), serviceName, resource.getName(), oldMetadata,
                 newMetadata, timestamp);
+    }
 
+    public void unsetResourceMetadata(Provider provider, EStructuralFeature svcFeature, ETypedElement resource,
+            String metadataKey, Instant timestamp) {
+        final Service svc = (Service) provider.eGet(svcFeature);
+        unsetResourceMetadata(provider, svcFeature.getName(), svc, resource, metadataKey, timestamp);
+    }
+
+    public void unsetResourceMetadata(Provider provider, String serviceName, ETypedElement resource, String metadataKey,
+            Instant timestamp) {
+        EStructuralFeature feature = provider.eClass().getEStructuralFeature(serviceName);
+        if (feature != null) {
+            unsetResourceMetadata(provider, feature, resource, metadataKey, timestamp);
+            return;
+        } else if (provider instanceof DynamicProvider) {
+            Service svc = ((DynamicProvider) provider).getServices().get(serviceName);
+            if (svc != null) {
+                unsetResourceMetadata(provider, serviceName, svc, resource, metadataKey, timestamp);
+            }
+        }
+    }
+
+    /**
+     * Unset instance-level resource metadata
+     */
+    private void unsetResourceMetadata(Provider provider, String serviceName, Service svc, ETypedElement resource,
+            String metadataKey, Instant timestamp) {
+        if (svc == null) {
+            throw new IllegalArgumentException("Service must not be null");
+        }
+        if (metadataKey == null || metadataKey.isEmpty()) {
+            throw new IllegalArgumentException("Empty metadata key");
+        }
+        if (timestamp == null) {
+            throw new IllegalArgumentException("Invalid timestamp");
+        }
+
+        final ResourceValueMetadata metadata = getOrInitializeResourceMetadata(svc, resource);
+
+        Map<String, Object> oldMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
+
+        EMap<String, MetadataValue> extra = metadata.getExtra();
+        // Overlay removal
+        if (extra.containsKey(metadataKey)) {
+            // Remove value and notify
+            extra.removeKey(metadataKey);
+        } else {
+            // Key didn't exist: do not create a notification
+            return;
+        }
+        Map<String, Object> newMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
+
+        notificationAccumulator.get().metadataValueUpdate(provider.eClass().getEPackage().getNsURI(),
+                EMFUtil.getModelName(provider.eClass()), provider.getId(), serviceName, resource.getName(), oldMetadata,
+                newMetadata, timestamp);
     }
 
     public Set<String> getModelNames() {

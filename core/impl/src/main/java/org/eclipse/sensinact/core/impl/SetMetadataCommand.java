@@ -19,7 +19,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
-import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
@@ -47,23 +46,19 @@ public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
             PromiseFactory promiseFactory) {
 
         SensinactResource resource = metadataUpdateDto.model != null
-                ? twin.getResource(metadataUpdateDto.modelPackageUri, metadataUpdateDto.model, metadataUpdateDto.provider, metadataUpdateDto.service,
+                ? twin.getResource(metadataUpdateDto.modelPackageUri, metadataUpdateDto.model,
+                        metadataUpdateDto.provider, metadataUpdateDto.service,
                         metadataUpdateDto.resource)
                 : twin.getResource(metadataUpdateDto.provider, metadataUpdateDto.service, metadataUpdateDto.resource);
 
-        Stream<Promise<Void>> stream;
-        if (metadataUpdateDto.removeMissingValues) {
-            stream = Stream.of(promiseFactory.failed(new UnsupportedOperationException("Not yet implemented")));
-        } else {
-            stream = metadataUpdateDto.metadata.entrySet().stream()
-                    .map(e -> updateMetadataValue(resource, e.getKey(), e.getValue(), metadataUpdateDto, promiseFactory));
-        }
+        Stream<Promise<Void>> stream = metadataUpdateDto.metadata.entrySet().stream()
+                .map(e -> updateMetadataValue(resource, e.getKey(), e.getValue(), metadataUpdateDto, promiseFactory));
 
-        List<Promise<Void>> updates = stream.map(p -> p.recoverWith(pf ->
-                            promiseFactory.failed(new DataUpdateException(metadataUpdateDto.modelPackageUri,
-                                    metadataUpdateDto.model, metadataUpdateDto.provider, metadataUpdateDto.service,
-                                    metadataUpdateDto.resource, metadataUpdateDto.originalDto, pf.getFailure()))
-                        ))
+        List<Promise<Void>> updates = stream
+                .map(p -> p.recoverWith(
+                        pf -> promiseFactory.failed(new DataUpdateException(metadataUpdateDto.modelPackageUri,
+                                metadataUpdateDto.model, metadataUpdateDto.provider, metadataUpdateDto.service,
+                                metadataUpdateDto.resource, metadataUpdateDto.originalDto, pf.getFailure()))))
                 .collect(toList());
 
         return promiseFactory.all(updates).map(x -> null);
@@ -74,9 +69,25 @@ public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
 
         try {
             Function<TimedValue<Object>, Promise<Void>> cachedValueAction = null;
-            if(value == null && metadataUpdateDto.actionOnNull == NullAction.UPDATE_IF_PRESENT) {
-                cachedValueAction = v -> v.getTimestamp() == null ? promiseFactory.resolved(null) :
-                    resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
+            if(value == null) {
+                switch (metadataUpdateDto.actionOnNull) {
+                    case UPDATE:
+                        cachedValueAction = v -> resource.setMetadataValue(key, null, metadataUpdateDto.timestamp);
+                        break;
+
+                    case UPDATE_IF_PRESENT:
+                        cachedValueAction = v -> v.getTimestamp() == null ? promiseFactory.resolved(null) :
+                            resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
+                        break;
+
+                    case REMOVE_OVERLAY:
+                        cachedValueAction = v -> resource.unsetMetadataValue(key, metadataUpdateDto.timestamp);
+                        break;
+
+                    default:
+                        // Do nothing
+                        break;
+                }
             } else if(metadataUpdateDto.actionOnDuplicate == DuplicateAction.UPDATE_IF_DIFFERENT) {
                 cachedValueAction = v -> {
                     if(v.getValue() == null) {

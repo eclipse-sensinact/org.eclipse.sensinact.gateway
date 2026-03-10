@@ -214,6 +214,14 @@ public interface SensinactResource extends CommandScoped {
     Promise<Void> setMetadataValue(String name, Object value, Instant timestamp);
 
     /**
+     * Removes an overlay metadata value for the resource
+     *
+     * @param timestamp Timestamp used in the notification
+     * @return A promise with no result
+     */
+    Promise<Void> unsetMetadataValue(String name, Instant timestamp);
+
+    /**
      * Get a metadata value for the resource
      *
      * @param value
