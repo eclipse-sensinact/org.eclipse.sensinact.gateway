@@ -21,12 +21,12 @@ import java.util.stream.Stream;
 import org.eclipse.sensinact.core.annotation.dto.DuplicateAction;
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.push.DataUpdateException;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.core.dto.impl.MetadataUpdateDto;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
@@ -56,20 +56,20 @@ public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
             stream = Stream.of(promiseFactory.failed(new UnsupportedOperationException("Not yet implemented")));
         } else {
             stream = metadataUpdateDto.metadata.entrySet().stream()
-                    .map(e -> updateMetdataValue(resource, e.getKey(), e.getValue(), metadataUpdateDto, promiseFactory));
+                    .map(e -> updateMetadataValue(resource, e.getKey(), e.getValue(), metadataUpdateDto, promiseFactory));
         }
 
-        List<Promise<Void>> updates = stream.map(p -> p.recoverWith(pf -> {
-                            return promiseFactory.failed(new DataUpdateException(metadataUpdateDto.modelPackageUri,
+        List<Promise<Void>> updates = stream.map(p -> p.recoverWith(pf ->
+                            promiseFactory.failed(new DataUpdateException(metadataUpdateDto.modelPackageUri,
                                     metadataUpdateDto.model, metadataUpdateDto.provider, metadataUpdateDto.service,
-                                    metadataUpdateDto.resource, metadataUpdateDto.originalDto, pf.getFailure()));
-                        }))
+                                    metadataUpdateDto.resource, metadataUpdateDto.originalDto, pf.getFailure()))
+                        ))
                 .collect(toList());
 
         return promiseFactory.all(updates).map(x -> null);
     }
 
-    private Promise<Void> updateMetdataValue(SensinactResource resource, String key, Object value, MetadataUpdateDto metadataUpdateDto,
+    private Promise<Void> updateMetadataValue(SensinactResource resource, String key, Object value, MetadataUpdateDto metadataUpdateDto,
             PromiseFactory promiseFactory) {
 
         try {
@@ -107,7 +107,7 @@ public class SetMetadataCommand extends AbstractSensinactCommand<Void> {
                 return resource.setMetadataValue(key, value, metadataUpdateDto.timestamp);
             }
         } catch (Exception e) {
-            LOG.error("An unexpected error ocurred setting metadata for {}/{}/{}", metadataUpdateDto.provider,
+            LOG.error("An unexpected error occurred setting metadata for {}/{}/{}", metadataUpdateDto.provider,
                     metadataUpdateDto.service, metadataUpdateDto.resource, e);
             return promiseFactory.failed(e);
         }
