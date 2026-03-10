@@ -194,7 +194,7 @@ public class ModelNexus {
                 }
             } catch (IOException e) {
                 LOG.error(
-                        "THIS WILL BE A RUNTIME EXCPETION FOR NOW: Error Loading default EPackage from persistent file: {}",
+                        "THIS WILL BE A RUNTIME EXCEPTION FOR NOW: Error Loading default EPackage from persistent file: {}",
                         fileName, e);
                 throw new RuntimeException(e);
             }
@@ -219,7 +219,7 @@ public class ModelNexus {
                 resource.getContents().clear();
                 resourceSet.getResources().remove(resource);
             } catch (IOException e) {
-                LOG.error("THIS WILL BE A RUNTIME EXCPETION FOR NOW: Error loading provider from Path: {}", fileName,
+                LOG.error("THIS WILL BE A RUNTIME EXCEPTION FOR NOW: Error loading provider from Path: {}", fileName,
                         e);
                 throw new RuntimeException(e);
             }
@@ -281,10 +281,10 @@ public class ModelNexus {
      * child do not exist then an exception will be raised.
      *
      * @param parentProvider The provider name of the parent. The name will be used
-     *                       as ID and in the first setup as the friendlyname for
+     *                       as ID and in the first setup as the friendlyName for
      *                       the Admin Service
      * @param childProvider  The provider name of the child. The name will be used
-     *                       as ID and in the first setup as the friendlyname for
+     *                       as ID and in the first setup as the friendlyName for
      *                       the Admin service
      * @param timestamp      the timestamp when the link is created. If null, the
      *                       current timestamp is used.
@@ -385,7 +385,7 @@ public class ModelNexus {
         handleDataUpdate(provider, serviceName, null, serviceEClass, resourceFeature, data, timestamp);
     }
 
-    public void handleDataUpdate(Provider provider, String serviceName, EReference serviceReferece,
+    public void handleDataUpdate(Provider provider, String serviceName, EReference serviceReference,
             EClass serviceEClass, EStructuralFeature resourceFeature, Object data, Instant timestamp) {
 
         Service service = provider.getService(serviceName);
@@ -394,7 +394,7 @@ public class ModelNexus {
         String packageUri = provider.eClass().getEPackage().getNsURI();
         NotificationAccumulator accumulator = notificationAccumulator.get();
         if (service == null) {
-            service = createServiceInstance(provider, serviceName, serviceEClass, serviceReferece);
+            service = createServiceInstance(provider, serviceName, serviceEClass, serviceReference);
         }
 
         handleDataUpdate(provider, serviceName, service, resourceFeature, data, timestamp, accumulator, packageUri,
@@ -406,13 +406,13 @@ public class ModelNexus {
     }
 
     public Service createServiceInstance(Provider provider, String serviceName, EClass serviceEClass,
-            EReference serviceReferece) {
+            EReference serviceReference) {
         String providerName = provider.getId();
         String modelName = EMFUtil.getModelName(provider.eClass());
         String packageUri = provider.eClass().getEPackage().getNsURI();
         NotificationAccumulator accumulator = notificationAccumulator.get();
         Service service = null;
-        Optional<EReference> serviceFeature = Optional.ofNullable(serviceReferece)
+        Optional<EReference> serviceFeature = Optional.ofNullable(serviceReference)
                 .or(() -> getServiceReferencesForModel(provider.eClass())
                         .filter(ref -> serviceName.equals(ref.getName())).findFirst());
         if (serviceFeature.isEmpty() && !(provider instanceof DynamicProvider)) {
@@ -858,12 +858,12 @@ public class ModelNexus {
     }
 
     public Optional<EClass> getModel(String modelPackageUri, String modelName) {
-        String themodelPackageUri = modelPackageUri;
-        if (themodelPackageUri == null || modelPackageUri.isBlank()) {
-            themodelPackageUri = EMFUtil.constructPackageUri(modelName);
+        String theModelPackageUri = modelPackageUri;
+        if (theModelPackageUri == null || modelPackageUri.isBlank()) {
+            theModelPackageUri = EMFUtil.constructPackageUri(modelName);
         }
 
-        EPackage ePackage = resourceSet.getPackageRegistry().getEPackage(themodelPackageUri);
+        EPackage ePackage = resourceSet.getPackageRegistry().getEPackage(theModelPackageUri);
 
         if (ePackage == null) {
             return Optional.empty();
@@ -1208,8 +1208,8 @@ public class ModelNexus {
         Provider p = providers.remove(name);
         List<Provider> linked = Optional.<List<Provider>>ofNullable(p.getLinkedProviders()).orElse(List.of());
 
-        for (Provider prov : linked) {
-            String id = prov.getId();
+        for (Provider provider : linked) {
+            String id = provider.getId();
             childToParents.getOrDefault(id, Set.of()).remove(name);
         }
 

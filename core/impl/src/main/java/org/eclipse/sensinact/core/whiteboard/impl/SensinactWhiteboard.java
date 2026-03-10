@@ -775,7 +775,7 @@ public class SensinactWhiteboard {
         }
 
         final Deferred<TimedValue<?>> d = promiseFactory.deferred();
-        // Coudln't find a better way to manage casting with generics
+        // Couldn't find a better way to manage casting with generics
         final WhiteboardContext<WhiteboardSet<T>> ctx = (WhiteboardContext<WhiteboardSet<T>>) (Object) opt.get();
 
         final IMetricTimer overallTimer = metrics.withTimers("sensinact.whiteboard.pull.request",
