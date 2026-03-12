@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -40,16 +39,12 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.security.api.Authenticator;
 import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
-import org.eclipse.sensinact.northbound.security.authorization.casbin.CasbinAuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.authorization.casbin.Constants;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.Property.Type;
@@ -59,7 +54,8 @@ import org.osgi.util.promise.PromiseFactory;
 
 @WithConfiguration(pid = "sensinact.session.manager", properties = {
         @Property(key = "auth.policy", value = "ALLOW_ALL"),
-        @Property(key = "name", value = "test-session"),
+        @Property(key = "name", value = "FineAuthorizationTest"),
+        @Property(key = "authorization.target", value = "(scope=FineAuthorizationTest)")
 })
 public class FineAuthorizationTest {
 
@@ -129,7 +125,7 @@ public class FineAuthorizationTest {
     /**
      * Session manager
      */
-    @InjectService(filter = "(name=test-session)", timeout = 1000)
+    @InjectService(filter = "(name=FineAuthorizationTest)", timeout = 1000)
     SensiNactSessionManager sessionManager;
 
     @BeforeAll
@@ -203,47 +199,21 @@ public class FineAuthorizationTest {
         });
     }
 
-    @BeforeEach
-    void waitForCleanState(@InjectBundleContext BundleContext ctx) throws Exception {
-        final Instant end = Instant.now().plusSeconds(5);
-
-        boolean clear = false;
-        do {
-            clear = ctx.getServiceReferences(AuthorizationEngine.class, null).size() == 0;
-        } while (!clear && Instant.now().isBefore(end));
-        assertTrue(clear, "An authorization engine is already there");
-    }
-
     @Test
     @WithConfiguration(pid = Constants.CONFIGURATION_PID, location = "?", properties = {
+            @Property(key = "name", value = "testSessionsDenyByDefault"),
+            @Property(key = "scope", value = "FineAuthorizationTest"),
             @Property(key = "allowByDefault", value = "false"),
             @Property(key = "policies", type = Type.Array, value = { "role:user, *, *, *, *, *, *, deny, 1000",
                     "role:user, *, *, *, *, *, DESCRIBE|READ, allow, 100",
                     "foobar, *, *, *, input, comment, *, allow, 0", "externalSensor, *, *, *, *, *, *, deny, 10",
                     "externalSensor, https://example.org/sensor#, *, *, sensor, *, UPDATE, allow, 0",
                     "role:admin, *, *, *, *, *, *, allow, -1", "role:anonymous, *, *, *, *, *, *, deny, -1000", }) })
-    void testSessionsDenyByDefault(@InjectBundleContext BundleContext ctx) throws Exception {
+    void testSessionsDenyByDefault(
+            // Injecting the Authorization Engine ensures that the configured component is available
+            // before the test starts, so it should be present in the sessions that we make
+            @InjectService(filter ="(name=testSessionsDenyByDefault)") AuthorizationEngine ae) throws Exception {
         final AtomicReference<SensiNactSession> sessionRef = new AtomicReference<>();
-
-        Instant end = Instant.now().plusSeconds(5);
-        boolean found = false;
-        do {
-            var svcRefs = ctx.getServiceReferences(AuthorizationEngine.class, null);
-            if (svcRefs.size() == 1) {
-                var svcRef = svcRefs.iterator().next();
-                try {
-                    var svc = ctx.getService(svcRef);
-                    if (svc instanceof CasbinAuthorizationEngine) {
-                        found = true;
-                        break;
-                    }
-                } finally {
-                    ctx.ungetService(svcRef);
-                }
-            }
-        } while (!found && Instant.now().isBefore(end));
-
-        assertTrue(found, "Authorization engine not found");
 
         // Anonymous
         SensiNactSession session = sessionManager.createNewAnonymousSession();

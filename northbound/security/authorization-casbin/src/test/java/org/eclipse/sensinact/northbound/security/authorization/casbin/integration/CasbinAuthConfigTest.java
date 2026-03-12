@@ -53,14 +53,15 @@ import org.osgi.util.promise.PromiseFactory;
 
 @WithConfiguration(pid = "sensinact.session.manager", properties = {
         @Property(key = "auth.policy", value = "ALLOW_ALL"),
-        @Property(key = "name", value = "test-session"),
+        @Property(key = "name", value = "CasbinAuthConfigTest"),
+        @Property(key = "authorization.target", value = "(scope=CasbinAuthConfigTest)")
 })
 public class CasbinAuthConfigTest {
 
     @InjectBundleContext
     BundleContext ctx;
 
-    @InjectService(filter = "(name=test-session)", timeout = 1000)
+    @InjectService(filter = "(name=CasbinAuthConfigTest)", timeout = 1000)
     SensiNactSessionManager sessionManager;
 
     @InjectService
@@ -113,11 +114,16 @@ public class CasbinAuthConfigTest {
 
     @Test
     @WithConfiguration(pid = Constants.CONFIGURATION_PID, location = "?", properties = {
+            @Property(key = "name", value = "userTest"),
+            @Property(key = "scope", value = "CasbinAuthConfigTest"),
             @Property(key = "allowByDefault", value = "true"),
             @Property(key = "policies", type = Type.Array, value = {
                     "role:user, *, *, *, *, *, describe|read, allow, 1000", "role:user, *, *, nope, *, *, *, deny, 0",
                     "role:user, *, *, *, *, *, *, allow, 1000", }) })
-    void userTest(@InjectService AuthorizationEngine engine) throws Exception {
+    void userTest(
+            // Injecting the Authorization Engine ensures that the configured component is available
+            // before the test starts, so it should be present in the sessions that we make
+            @InjectService(filter = "(name=userTest)") AuthorizationEngine engine) throws Exception {
         final SensiNactSession session = sessionManager.createNewSession(makeUser("foo", "user"));
 
         // Access the sensiNact provider
@@ -144,10 +150,15 @@ public class CasbinAuthConfigTest {
 
     @Test
     @WithConfiguration(pid = Constants.CONFIGURATION_PID, location = "?", properties = {
+            @Property(key = "name", value = "anonymousTest"),
+            @Property(key = "scope", value = "CasbinAuthConfigTest"),
             @Property(key = "allowByDefault", value = "false"),
             @Property(key = "policies", type = Type.Array, value = { "anonymous, *, *, public, data, *, read, allow, 0",
                     "anonymous, *, *, public, action, comment, describe|act, allow, 0", }) })
-    void anonymousTest(@InjectService AuthorizationEngine engine) throws Exception {
+    void anonymousTest(
+            // Injecting the Authorization Engine ensures that the configured component is available
+            // before the test starts, so it should be present in the sessions that we make
+            @InjectService(filter = "(name=anonymousTest)") AuthorizationEngine engine) throws Exception {
         final SensiNactSession session = sessionManager.createNewAnonymousSession();
         // Access the sensiNact provider
         Instant startValue = session.getResourceValue("sensiNact", "system", "started", Instant.class);
