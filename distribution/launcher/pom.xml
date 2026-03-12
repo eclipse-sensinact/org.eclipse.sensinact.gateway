@@ -114,8 +114,7 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-export-maven-plugin</artifactId>
-        <!-- Use 6.4.0 to avoid requiring Java 17 to run -->
-        <version>6.4.0</version>
+        <version>7.2.1</version>
         <executions>
           <execution>
             <id>

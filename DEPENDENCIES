@@ -167,10 +167,10 @@ maven/mavencentral/org.osgi/org.osgi.util.tracker/1.5.4, Apache-2.0, approved, t
 maven/mavencentral/org.osgi/osgi.annotation/7.0.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.osgi/osgi.cmpn/7.0.0, Apache-2.0, approved, #7911
 maven/mavencentral/org.osgi/osgi.core/7.0.0, Apache-2.0, approved, clearlydefined
-maven/mavencentral/org.ow2.asm/asm-commons/9.4, BSD-3-Clause, approved, clearlydefined
-maven/mavencentral/org.ow2.asm/asm-tree/9.4, BSD-3-Clause, approved, clearlydefined
-maven/mavencentral/org.ow2.asm/asm/9.4, BSD-3-Clause, approved, clearlydefined
+maven/mavencentral/org.ow2.asm/asm-commons/9.9.1, BSD-3-Clause, approved, #25265
+maven/mavencentral/org.ow2.asm/asm-tree/9.9.1, BSD-3-Clause, approved, #25267
 maven/mavencentral/org.ow2.asm/asm/9.6, BSD-3-Clause, approved, #10776
+maven/mavencentral/org.ow2.asm/asm/9.9.1, BSD-3-Clause, approved, #25264
 maven/mavencentral/org.postgresql/postgresql/42.7.9, BSD-2-Clause AND Apache-2.0, approved, #11681
 maven/mavencentral/org.reactivestreams/reactive-streams/1.0.3, CC0-1.0, approved, CQ16332
 maven/mavencentral/org.rnorth.duct-tape/duct-tape/1.0.8, MIT, approved, clearlydefined
