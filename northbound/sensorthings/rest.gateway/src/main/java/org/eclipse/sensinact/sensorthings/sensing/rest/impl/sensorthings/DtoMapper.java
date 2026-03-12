@@ -632,7 +632,7 @@ public class DtoMapper {
         if (expansions.shouldExpand("Observations", foi)) {
             @SuppressWarnings("unchecked")
             List<String> datastreamId = DtoMapperSimple.getResourceField(
-                    DtoMapperSimple.getFeatureofInterestService(provider), "datastreamIds", List.class);
+                    DtoMapperSimple.getFeatureOfInterestService(provider), "datastreamIds", List.class);
             List<Observation> listObs = datastreamId.stream()
                     .map(id -> userSession.providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)))
                     .map(p -> RootResourceDelegateSensorthings.getObservationList(userSession, this, mapper, uriInfo,

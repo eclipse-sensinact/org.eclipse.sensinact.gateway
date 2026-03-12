@@ -1,5 +1,5 @@
 /*********************************************************************
-* Copyright (c) 2026 Contributors to the Eclipse Foundation.
+* Copyright (c) 2025 Contributors to the Eclipse Foundation.
 *
 * This program and the accompanying materials are made
 * available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto.util;
 
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
-
 import java.lang.reflect.RecordComponent;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
@@ -34,6 +33,7 @@ import org.eclipse.sensinact.gateway.geojson.FeatureCollection;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.geojson.Polygon;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -88,13 +88,13 @@ public class DtoMapperSimple {
 
     public static void checkRequireField(Sensor dto) {
         if (dto == null) {
-            throw new RuntimeException("sensor not found in  Sensor");
+            throw new RequireFieldException("sensor not found in Sensor");
         }
         if (dto.name() == null) {
-            throw new RuntimeException("name not found in  Sensor");
+            throw new RequireFieldException("name not found in Sensor");
         }
         if (dto.encodingType() == null) {
-            throw new RuntimeException("encodingType not found in  Sensor");
+            throw new RequireFieldException("encodingType not found in Sensor");
         }
 
     }
@@ -119,100 +119,100 @@ public class DtoMapperSimple {
 
     public static void checkRequireField(ObservedProperty dto) {
         if (dto == null) {
-            throw new RuntimeException("ObservedProperty not found in  ObservedProperty");
+            throw new RequireFieldException("ObservedProperty not found in ObservedProperty");
         }
         if (dto.name() == null) {
-            throw new RuntimeException("name not found in  ObservedProperty");
+            throw new RequireFieldException("name not found in ObservedProperty");
         }
         if (dto.definition() == null) {
-            throw new RuntimeException("definition not found in  ObservedProperty");
+            throw new RequireFieldException("definition not found in ObservedProperty");
         }
         // checkConsistencyObservedProperty(dto.definition());
     }
 
     public static void checkRequireField(ExpandedObservation dto) {
         if (dto.result() == null) {
-            throw new RuntimeException("result not found in  ExpandedObservation");
+            throw new RequireFieldException("result not found in ExpandedObservation");
         }
         if (dto.phenomenonTime() == null) {
-            throw new RuntimeException("phenomenonTime not found in  ExpandedObservation");
+            throw new RequireFieldException("phenomenonTime not found in ExpandedObservation");
         }
 
     }
 
     public static void checkRequireField(Observation dto) {
         if (dto.result() == null) {
-            throw new RuntimeException("result not found in  Observation");
+            throw new RequireFieldException("result not found in Observation");
         }
         if (dto.phenomenonTime() == null) {
-            throw new RuntimeException("phenomenonTime not found in  Observation");
+            throw new RequireFieldException("phenomenonTime not found in Observation");
         }
 
     }
 
     public static void checkRequireField(ExpandedThing dto) {
         if (dto.name() == null) {
-            throw new RuntimeException("name not found in  Thing");
+            throw new RequireFieldException("name not found in Thing");
         }
 
     }
 
     public static void checkRequireField(Thing dto) {
         if (dto.name() == null) {
-            throw new RuntimeException("name not found in  Thing");
+            throw new RequireFieldException("name not found in Thing");
         }
 
     }
 
     public static void checkRequireField(Location dto) {
         if (dto.name() == null) {
-            throw new RuntimeException("name not found in  Location");
+            throw new RequireFieldException("name not found in Location");
         }
         if (dto.encodingType() == null) {
-            throw new RuntimeException("encodingType not found in  Location");
+            throw new RequireFieldException("encodingType not found in Location");
         }
         if (dto.location() == null) {
-            throw new RuntimeException("location not found in  Location");
+            throw new RequireFieldException("location not found in Location");
         }
 
     }
 
     public static void checkRequireField(ExpandedLocation dto) {
         if (dto.name() == null) {
-            throw new RuntimeException("name not found in  Location");
+            throw new RequireFieldException("name not found in Location");
         }
         if (dto.encodingType() == null) {
-            throw new RuntimeException("encodingType not found in  Location");
+            throw new RequireFieldException("encodingType not found in Location");
         }
         if (dto.location() == null) {
-            throw new RuntimeException("location not found in  Location");
+            throw new RequireFieldException("location not found in Location");
         }
 
     }
 
     public static void checkRequireField(FeatureOfInterest dto) {
         if (dto.name() == null) {
-            throw new RuntimeException("name not found in  FeatureOfInterest");
+            throw new RequireFieldException("name not found in FeatureOfInterest");
         }
         if (dto.encodingType() == null) {
-            throw new RuntimeException("encodingType not found in  FeatureOfInterest");
+            throw new RequireFieldException("encodingType not found in FeatureOfInterest");
         }
         if (dto.feature() == null) {
-            throw new RuntimeException("feature not found in  FeatureOfInterest");
+            throw new RequireFieldException("feature not found in FeatureOfInterest");
         }
 
     }
 
     public static void checkRequireField(ExpandedDataStream datastream) {
         if (datastream.name() == null) {
-            throw new RuntimeException("name not found in  Datastream");
+            throw new RequireFieldException("name not found in Datastream");
         }
 
         if (datastream.unitOfMeasurement() == null) {
-            throw new RuntimeException("unit Of Measure not found in  Datastream");
+            throw new RequireFieldException("unit Of Measure not found in Datastream");
         }
         if (datastream.observationType() == null) {
-            throw new RuntimeException("observationType not found in  Datastream");
+            throw new RequireFieldException("observationType not found in Datastream");
         }
         checkRequireField(datastream.unitOfMeasurement());
 
@@ -220,22 +220,22 @@ public class DtoMapperSimple {
 
     public static void checkRequireField(Datastream datastream) {
         if (datastream.name() == null) {
-            throw new RuntimeException("name not found in  Datastream");
+            throw new RequireFieldException("name not found in Datastream");
         }
 
         if (datastream.unitOfMeasurement() == null) {
-            throw new RuntimeException("unit Of Measure not found in  Datastream");
+            throw new RequireFieldException("unit Of Measure not found in Datastream");
         }
         checkRequireField(datastream.unitOfMeasurement());
         if (datastream.observationType() == null) {
-            throw new RuntimeException("observationType not found in  Datastream");
+            throw new RequireFieldException("observationType not found in Datastream");
         }
 
     }
 
     public static <T> void checkRequireField(T dto) {
         if (dto == null) {
-            throw new RuntimeException("dto null");
+            throw new RequireFieldException("dto null");
         } else if (dto instanceof Sensor dtoCasted) {
             checkRequireField(dtoCasted);
         } else if (dto instanceof ExpandedDataStream dtoCasted) {
@@ -259,20 +259,20 @@ public class DtoMapperSimple {
         } else if (dto instanceof FeatureOfInterest dtoCasted) {
             checkRequireField(dtoCasted);
         } else {
-            throw new RuntimeException("no dto managed");
+            throw new RequireFieldException("no dto managed");
 
         }
     }
 
     public static void checkRequireField(UnitOfMeasurement unit) {
         if (unit.name() == null) {
-            throw new RuntimeException("name not found in  UnitOfMeasurement");
+            throw new RequireFieldException("name not found in UnitOfMeasurement");
         }
         if (unit.definition() == null) {
-            throw new RuntimeException("definition not found in  UnitOfMeasurement");
+            throw new RequireFieldException("definition not found in UnitOfMeasurement");
         }
         if (unit.symbol() == null) {
-            throw new RuntimeException("symbol not found in  UnitOfMeasurement");
+            throw new RequireFieldException("symbol not found in UnitOfMeasurement");
         }
 
     }
@@ -281,7 +281,7 @@ public class DtoMapperSimple {
         for (int i = 0; i < links.length; i++) {
             Object link = links[i];
             if (link == null) {
-                throw new RuntimeException("linked entity is required");
+                throw new RequireFieldException("linked entity is required");
             }
         }
 
@@ -294,7 +294,7 @@ public class DtoMapperSimple {
         return providerDatastream.getService(SERVICE_DATASTREAM);
     }
 
-    public static ServiceSnapshot getFeatureofInterestService(ProviderSnapshot providerDatastream) {
+    public static ServiceSnapshot getFeatureOfInterestService(ProviderSnapshot providerDatastream) {
         return providerDatastream.getService(SERVICE_FOI);
     }
 
@@ -370,7 +370,7 @@ public class DtoMapperSimple {
      */
     public static Object getRecordField(Object record, String fieldName) {
         if (!record.getClass().isRecord()) {
-            throw new IllegalArgumentException("Ce n'est pas un record !");
+            throw new IllegalArgumentException("Not a record class");
         }
 
         RecordComponent[] components = record.getClass().getRecordComponents();
@@ -392,7 +392,7 @@ public class DtoMapperSimple {
     public static List<Object> getRecordField(Object record) {
 
         if (!record.getClass().isRecord()) {
-            throw new IllegalArgumentException("Ce n'est pas un record !");
+            throw new IllegalArgumentException("Not a record class");
         }
         RecordComponent[] components = record.getClass().getRecordComponents();
         return Arrays.stream(components).map(rc -> {
@@ -464,7 +464,7 @@ public class DtoMapperSimple {
 
     public static FeatureOfInterest toFeatureOfInterest(ProviderSnapshot provider, String foiId, String selfLink,
             String observationLink) {
-        ServiceSnapshot service = getFeatureofInterestService(provider);
+        ServiceSnapshot service = getFeatureOfInterestService(provider);
         ServiceSnapshot serviceAdmin = getAdminService(provider);
 
         if (service == null) {
@@ -486,11 +486,11 @@ public class DtoMapperSimple {
         return foi;
     }
 
-    public static FeatureOfInterest toFeatureOfInterest(String id, FeatureOfInterest foiReaded, String selfLink,
+    public static FeatureOfInterest toFeatureOfInterest(String id, FeatureOfInterest foiRead, String selfLink,
             String observationLink) {
 
-        FeatureOfInterest foi = new FeatureOfInterest(selfLink, id, foiReaded.name(), foiReaded.description(),
-                foiReaded.encodingType(), foiReaded.feature(), foiReaded.properties(), observationLink);
+        FeatureOfInterest foi = new FeatureOfInterest(selfLink, id, foiRead.name(), foiRead.description(),
+                foiRead.encodingType(), foiRead.feature(), foiRead.properties(), observationLink);
 
         DtoMapperSimple.checkRequireField(foi);
 
@@ -732,6 +732,18 @@ public class DtoMapperSimple {
 
     public static boolean isDatastream(ProviderSnapshot provider) {
         return getDatastreamService(provider) != null;
+    }
+
+    public static boolean isSensor(ProviderSnapshot provider) {
+        return getSensorService(provider) != null;
+    }
+
+    public static boolean isObservedProperty(ProviderSnapshot provider) {
+        return getObservedPropertyService(provider) != null;
+    }
+
+    public static boolean isFeatureOfInterest(ProviderSnapshot provider) {
+        return getFeatureOfInterestService(provider) != null;
     }
 
     public static boolean isThing(ProviderSnapshot provider) {

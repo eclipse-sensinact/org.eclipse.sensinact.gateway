@@ -69,7 +69,7 @@ public class FeatureOfInterestPathHandlerSensorthings extends AbstractPathHandle
         ProviderSnapshot providerFoi = pathContext.session().providerSnapshot(foiId,
                 EnumSet.noneOf(SnapshotOption.class));
         ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(providerFoi);
-        ServiceSnapshot service = DtoMapperSimple.getFeatureofInterestService(providerFoi);
+        ServiceSnapshot service = DtoMapperSimple.getFeatureOfInterestService(providerFoi);
         if (service == null || serviceAdmin == null) {
             return null;
         }

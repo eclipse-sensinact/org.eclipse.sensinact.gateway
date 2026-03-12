@@ -39,7 +39,7 @@ public class HistoricalLocationMapper extends HistoricalLocationsMapper {
     public Promise<Stream<HistoricalLocation>> toPayload(ResourceNotification notification) {
         // TODO what do we do about the timestamp? Do we have the wrong id mapping in
         // sensinact?
-        if (provider.equals(notification.provider())) {
+        if (provider.equals(notification.provider()) && "location".equals(notification.resource())) {
             return super.toPayload(notification);
         }
         return emptyStream();

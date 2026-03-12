@@ -665,7 +665,7 @@ public class DtoToModelMapper {
         }
         @SuppressWarnings("unchecked")
         List<String> datastreamIdsFoi = DtoMapperSimple.getResourceField(
-                DtoMapperSimple.getFeatureofInterestService(providerFoi), "datastreamIds", List.class);
+                DtoMapperSimple.getFeatureOfInterestService(providerFoi), "datastreamIds", List.class);
         return Stream.concat(datastreamIdsFoi.stream(), Stream.of(datastreamtoAdd)).toList();
     }
 

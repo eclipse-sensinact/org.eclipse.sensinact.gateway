@@ -18,9 +18,11 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,18 +37,43 @@ public class ObservedPropertiesMapper extends SensorthingsMapper<ObservedPropert
     public Promise<Stream<ObservedProperty>> toPayload(LifecycleNotification notification) {
         if (notification.resource() != null && notification.status() != Status.RESOURCE_DELETED) {
             // This is a resource appearing
-            return getObservedProperty(getResource(notification.provider(), notification.service(), notification.resource()));
+            return getObservedPropertyResource(
+                    getResource(notification.provider(), notification.service(), notification.resource()));
         }
         return emptyStream();
     }
 
     @Override
     public Promise<Stream<ObservedProperty>> toPayload(ResourceMetaDataNotification notification) {
-        return getObservedProperty(getResource(notification.provider(), notification.service(), notification.resource()));
+        return getObservedPropertyResource(
+                getResource(notification.provider(), notification.service(), notification.resource()));
     }
 
-    protected Promise<Stream<ObservedProperty>> getObservedProperty(Promise<ResourceSnapshot> resourceSnapshot) {
-        return decorate(resourceSnapshot.map(DtoMapper::toObservedProperty));
+    protected Promise<Stream<ObservedProperty>> getObservedPropertyProvider(
+            Promise<ProviderSnapshot> providerSnapshot) {
+        return decorate(providerSnapshot.map(p -> {
+            if (DtoMapperSimple.isSensorthingModel(p)) {
+                if (DtoMapperSimple.isObservedProperty(p))
+                    return DtoMapperSensorthing.toObservedProperty(p);
+            }
+
+            return null;
+        }));
+    }
+
+    protected Promise<Stream<ObservedProperty>> getObservedPropertyResource(
+            Promise<ResourceSnapshot> resourceSnapshot) {
+        return decorate(resourceSnapshot.map(r -> {
+            ProviderSnapshot p = r.getService().getProvider();
+            if (DtoMapperSimple.isSensorthingModel(p)) {
+                if (DtoMapperSimple.isObservedProperty(p))
+                    return DtoMapperSensorthing.toObservedProperty(r);
+            } else {
+                return DtoMapperSensinact.toObservedProperty(r);
+            }
+            return null;
+
+        }));
     }
 
     @Override

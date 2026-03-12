@@ -43,7 +43,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class DtoMapper {
+public class DtoMapperSensinact {
 
     private static final String NO_DESCRIPTION = "No description";
 
@@ -176,6 +176,7 @@ public class DtoMapper {
     }
 
     public static Observation toObservation(String provider, String service, String resource, TimedValue<?> tv) {
+
         String id = String.format("%s~%s~%s~%s", provider, service, resource,
                 Long.toString(tv.getTimestamp().toEpochMilli(), 16));
 

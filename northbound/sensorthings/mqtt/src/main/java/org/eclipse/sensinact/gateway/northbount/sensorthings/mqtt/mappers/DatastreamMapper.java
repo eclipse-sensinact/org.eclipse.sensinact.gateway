@@ -15,11 +15,11 @@ package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.mappers;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.osgi.util.promise.Promise;
 
@@ -27,9 +27,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DatastreamMapper extends DatastreamsMapper {
 
-    private final String provider;
-    private final String service;
-    private final String resource;
+    private String provider;
+    private String service;
+    private String resource;
 
     public DatastreamMapper(String topicFilter, String id, ObjectMapper mapper, GatewayThread thread) {
         super(topicFilter, mapper, thread);
@@ -37,11 +37,12 @@ public class DatastreamMapper extends DatastreamsMapper {
         String[] segments = id.split("~");
 
         if (segments.length != 3) {
-            throw new IllegalArgumentException("The Datastream id " + id + " is not valid");
+            this.provider = segments[0];
+        } else {
+            this.provider = segments[0];
+            this.service = segments[1];
+            this.resource = segments[2];
         }
-        this.provider = segments[0];
-        this.service = segments[1];
-        this.resource = segments[2];
     }
 
     @Override
@@ -53,29 +54,33 @@ public class DatastreamMapper extends DatastreamsMapper {
     }
 
     private boolean isOurResource(ResourceNotification notification) {
-        return service.equals(notification.service()) && resource.equals(notification.resource());
+        return provider.equals(notification.provider())
+                && (service == null || service.equals(notification.service()))
+                && (resource == null || resource.equals(notification.resource()));
     }
 
     @Override
     public Promise<Stream<Datastream>> toPayload(LifecycleNotification notification) {
         // Force the required datastream when it appears
-        return isOurResource(notification) && notification.status() == Status.RESOURCE_CREATED
-                ? getDatastream(getResource(provider, service, resource))
+        return isOurResource(notification) && notification.status() == Status.RESOURCE_CREATED ? getDatastream()
                 : emptyStream();
+    }
+
+    private Promise<Stream<Datastream>> getDatastream() {
+        return service != null ? getDatastreamResource(getResource(provider, service, resource))
+                : getDatastreamProvider(getProvider(provider));
     }
 
     @Override
     public Promise<Stream<Datastream>> toPayload(ResourceDataNotification notification) {
         // Force the required datastream if a relevant admin topic changes
-        return isRelevantAdminResource(notification)
-                ? getDatastream(getResource(provider, service, resource))
-                : emptyStream();
+        return isOurResource(notification) ? getDatastream() : emptyStream();
     }
 
     @Override
     public Promise<Stream<Datastream>> toPayload(ResourceMetaDataNotification notification) {
         // Force the required datastream
-        return isOurResource(notification) ? getDatastream(getResource(provider, service, resource)) : emptyStream();
+        return isOurResource(notification) ? getDatastream() : emptyStream();
     }
 
 }

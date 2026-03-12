@@ -24,10 +24,10 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
+import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
@@ -165,8 +165,15 @@ public abstract class SensorthingsMapper<T> {
     }
 
     protected Promise<Stream<T>> decorate(Promise<T> promise) {
-        return promise.map(Stream::of)
-                .onFailure(t -> LOG.warn("An error occurred executing mapper {}", getClass().getSimpleName(), t))
+        return promise.map(val -> val != null ? Stream.of(val) : Stream.<T>empty())
+                .onFailure(t -> {
+                    if (t instanceof NotFoundException
+                            || (t.getCause() != null && t.getCause() instanceof NotFoundException)) {
+                        LOG.debug("Provider not found in mapper {}: {}", getClass().getSimpleName(), t.getMessage());
+                    } else {
+                        LOG.warn("An error occurred executing mapper {}", getClass().getSimpleName(), t);
+                    }
+                })
                 .recoverWith(x -> emptyStream());
     }
 
