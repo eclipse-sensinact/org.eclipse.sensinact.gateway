@@ -21,10 +21,13 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.in
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.DtoFactory;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.impl.sensorthing.integration.UtilsAssert;
 import org.junit.jupiter.api.Test;
+import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import jakarta.ws.rs.core.Application;
 
 public class ObservationHistoryMemoryTest extends AbstractIntegrationTest {
 
@@ -36,7 +39,9 @@ public class ObservationHistoryMemoryTest extends AbstractIntegrationTest {
     @Test
     @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "*", properties = {
             @Property(key = "history.in.memory", value = "true") })
-    public void testDeleteObservation() throws Exception {
+    public void testDeleteObservation(
+            // We inject this to force the test start to delay until after the configuration is applied
+            @InjectService(timeout = 2000, filter = "(history.in.memory=true)") Application app) throws Exception {
         // given
         waitSensorthingAppReady();
 
