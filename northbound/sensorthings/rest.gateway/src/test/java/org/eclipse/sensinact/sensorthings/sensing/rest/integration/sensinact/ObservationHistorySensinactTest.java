@@ -51,6 +51,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
@@ -93,16 +94,19 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
         }
     }
 
+    private TestInfo testInfo;
+
     private Configuration historyProviderConfig;
 
     @BeforeEach
-    void setupTest(
+    void setupTest(TestInfo testInfo,
             @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.history.timescale", location = "?")) Configuration historyConfig,
             @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "?")) Configuration sensorthingsConfig)
             throws Exception {
 
         assertNotNull(container);
 
+        this.testInfo = testInfo;
         historyProviderConfig = historyConfig;
 
         historyConfig.update(new Hashtable<>(Map.of("url", container.getJdbcUrl(), "user", container.getUsername(),
@@ -131,13 +135,14 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
     }
 
     private void waitForHistoryTables() {
+        System.out.println("Waiting for history tables in test " + testInfo.getDisplayName());
         boolean ready = false;
         final long timeout = System.currentTimeMillis() + 5000;
         Exception lastError = null;
         do {
             try {
                 for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
-                    waitForRowCount("sensinact." + table, 0, true);
+                    waitForRowCount("sensinact." + table, "", 0, true);
                 }
                 // Got a valid count
                 ready = true;
@@ -149,10 +154,11 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
             }
         } while (!ready && System.currentTimeMillis() < timeout);
 
-        assertTrue(ready, "History provider setup timed out: " + lastError);
+        assertTrue(ready, "History provider setup timed out in test " + testInfo.getDisplayName() + " : " + lastError);
     }
 
     private void waitForSensorthingsAPI() {
+        System.out.println("Waiting for sensorthings in test " + testInfo.getDisplayName());
         boolean ready = false;
         final long timeout = System.currentTimeMillis() + 5000;
         Exception lastError = null;
@@ -175,6 +181,7 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
     }
 
     private void waitForHistory(boolean exists) throws InterruptedException {
+        System.out.println("Waiting for history " + exists + " in test " + testInfo.getDisplayName());
         for (int i = 0; i < 20; i++) {
             try {
                 ProviderDescription describeProvider = session.describeProvider("timescale-history");
@@ -193,9 +200,9 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
             Thread.sleep(250);
         }
         if (exists) {
-            fail("No history provider exists");
+            fail("No history provider exists in " + testInfo.getDisplayName() + " ");
         } else {
-            fail("History provider still exists");
+            fail("History provider still exists in " + testInfo.getDisplayName() + " ");
         }
     }
 
@@ -232,17 +239,24 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
         return ds;
     }
 
-    private void waitForRowCount(String table, int count) {
-        waitForRowCount(table, count, false);
+    private void waitForRowCount(String table, String where, int count) {
+        waitForRowCount(table, where, count, false);
     }
 
-    private void waitForRowCount(String table, int count, boolean allowMore) {
+    private void waitForRowCount(final String table, final String where, final int count, final boolean allowMore) {
         int current = -1;
+        int currentUnchangedCount = 0;
         try (Connection conn = getDataSource().getConnection()) {
-            for (int i = 0; i < 60; i++) {
-                try (ResultSet rs = conn.createStatement().executeQuery("SELECT COUNT(*) FROM " + table)) {
+            for (int i = 0; i < 200; i++) {
+                try (ResultSet rs = conn.createStatement().executeQuery("SELECT COUNT(*) FROM " + table + " " + where)) {
                     assertTrue(rs.next());
-                    current = rs.getInt(1);
+                    int updated = rs.getInt(1);
+                    currentUnchangedCount = updated == current ? currentUnchangedCount + 1 : 0;
+                    if(currentUnchangedCount > 9) {
+                        throw new AssertionFailedError("The count for table " + table +
+                                " has stablised at " + current + " which is less than the expected " + count);
+                    }
+                    current = updated;
                     if (current == count) {
                         return;
                     } else if (current > count) {
@@ -289,11 +303,8 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
         for (int i = 0; i < 4000; i++) {
             createResource("foo", "bar", "foobar", Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        // 1008: 1000 updates + history provider name & description & model &
-        // modelPackageUri + foo
-        // provider name & description & modelUri
-        waitForRowCount("sensinact.text_data", 1008);
-        waitForRowCount("sensinact.numeric_data", 4000);
+        waitForRowCount("sensinact.text_data", "WHERE provider = 'foo' AND resource = 'baz'", 1000);
+        waitForRowCount("sensinact.numeric_data", "WHERE provider = 'foo' AND resource = 'foobar'", 4000);
 
         ResultList<Observation> observations = utils.queryJson("/Datastreams(foo~bar~baz)/Observations?$count=true",
                 RESULT_OBSERVATIONS);
@@ -338,9 +349,7 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
         for (int i = 0; i < 10; i++) {
             createResource("fizz", "buzz", "fizzbuzz", String.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        // 16: 10 updates + history provider name & model & modelPackageUri + fizz
-        // provider name & modelUri
-        waitForRowCount("sensinact.text_data", 18);
+        waitForRowCount("sensinact.text_data", "WHERE provider = 'fizz' AND resource = 'fizzbuzz'", 10);
 
         String id = String.format("%s~%s~%s~%s", "fizz", "buzz", "fizzbuzz",
                 Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
@@ -357,7 +366,7 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
         for (int i = 0; i < 10; i++) {
             createResource("ding", "dong", "bell", String.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 18);
+        waitForRowCount("sensinact.text_data", "WHERE provider = 'ding' AND resource = 'bell'", 10);
 
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
         });
@@ -397,7 +406,7 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
         createResource(testProvider, "admin", "location", new Point(Coordinates.EMPTY, null, null));
         createResource(testProvider, svc, rc, 30.2, laterTime);
 
-        waitForRowCount("sensinact.numeric_data", 2);
+        waitForRowCount("sensinact.numeric_data", "", 2);
 
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils.queryJson(
@@ -430,7 +439,7 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
         for (int i = 0; i < 1000; i++) {
             createResource("foo", "bar", "foobar", Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.numeric_data", 1000);
+        waitForRowCount("sensinact.numeric_data", "", 1000);
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils
                 .queryJson(String.format("/Datastreams(foo~bar~foobar)/Observations?$filter=%s",
