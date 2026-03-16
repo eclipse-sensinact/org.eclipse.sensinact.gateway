@@ -87,7 +87,7 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
         if (feature instanceof EOperation) {
             return ResourceType.ACTION;
         } else if (feature instanceof EAttribute) {
-            ResourceMetadata metadata = ((ResourceMetadata) EMFUtil.getModelMetadata(feature));
+            ResourceMetadata metadata = ((ResourceMetadata) EMFUtil.getMergedModelMetadataView(feature));
             if (metadata != null) {
                 return ResourceType.valueOf(metadata.getResourceType().getName());
             }
@@ -121,9 +121,9 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
     public static ValueType findValueType(ETypedElement feature) {
         // Check the metadata, Sensor if no info
         if (feature instanceof EAttribute) {
-            return ValueType.valueOf(((ResourceMetadata) EMFUtil.getModelMetadata(feature)).getValueType().getName());
+            return ValueType.valueOf(((ResourceMetadata) EMFUtil.getMergedModelMetadataView(feature)).getValueType().getName());
         }
-        throw new UnsupportedOperationException("Handling of none Sensinact Atributes not implemented yet");
+        throw new UnsupportedOperationException("Handling of none Sensinact Attributes not implemented yet");
     }
 
     @Override
@@ -131,7 +131,7 @@ public class ResourceImpl extends CommandScopedImpl implements Resource {
         if (feature instanceof EAttribute || feature instanceof EOperation) {
             return EMFUtil.toMetadataAttributesToMap(feature);
         }
-        throw new UnsupportedOperationException("Handling of none Sensinact Atributes not implemented yet");
+        throw new UnsupportedOperationException("Handling of none Sensinact Attributes not implemented yet");
     }
 
 }

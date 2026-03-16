@@ -52,22 +52,22 @@ import org.eclipse.sensinact.model.core.provider.impl.ServiceMapImpl;
  */
 public class EMFCompareUtil {
 
-    public static void compareAndSet(Provider incmming, Provider original, NotificationAccumulator accumulator) {
-        if (incmming == null || original == null) {
+    public static void compareAndSet(Provider incoming, Provider original, NotificationAccumulator accumulator) {
+        if (incoming == null || original == null) {
             return;
         }
 
-        if (incmming.eClass() != original.eClass()) {
+        if (incoming.eClass() != original.eClass()) {
             throw new IllegalArgumentException(
-                    String.format("The given incomming Provider %s is of type %s but should be of type %s",
-                            incmming.toString(), incmming.eClass().getName(), original.eClass().getName()));
+                    String.format("The given incoming Provider %s is of type %s but should be of type %s",
+                            incoming.toString(), incoming.eClass().getName(), original.eClass().getName()));
         }
 
-        EClass eClass = incmming.eClass();
+        EClass eClass = incoming.eClass();
 
         // We can simply set all attributes at the Provider level without any checks as
         // they are out of the
-        EMFUtil.streamAttributes(eClass).forEach(ea -> original.eSet(ea, incmming.eGet(ea)));
+        EMFUtil.streamAttributes(eClass).forEach(ea -> original.eSet(ea, incoming.eGet(ea)));
         // The same goes for any Reference that is not of type Service or is the linked
         // Provider Reference or the map of Services
         eClass.getEAllReferences().stream()
@@ -77,10 +77,10 @@ public class EMFCompareUtil {
                 .filter(er -> !ProviderPackage.Literals.SERVICE.isSuperTypeOf(er.getEReferenceType()))
                 .filter(Predicate.not(ProviderPackage.Literals.DYNAMIC_PROVIDER__SERVICES::equals)).forEach(er -> {
                     original.eSet(er,
-                            er.isContainment() ? EcoreUtil.copy((EObject) incmming.eGet(er)) : incmming.eGet(er));
+                            er.isContainment() ? EcoreUtil.copy((EObject) incoming.eGet(er)) : incoming.eGet(er));
                 });
 
-        updateAdmin(incmming, original, accumulator);
+        updateAdmin(incoming, original, accumulator);
 
         eClass.getEAllReferences().stream()
                 // We don't want references from EObject and anything above
@@ -89,25 +89,25 @@ public class EMFCompareUtil {
                 .filter(Predicate.not(ProviderPackage.Literals.PROVIDER__ADMIN::equals))
                 .filter(Predicate.not(ProviderPackage.Literals.DYNAMIC_PROVIDER__SERVICES::equals))
                 .filter(er -> ProviderPackage.Literals.SERVICE.isSuperTypeOf(er.getEReferenceType())).forEach(er -> {
-                    serviceUpdate(er, incmming, original, accumulator, Collections.emptyList());
+                    serviceUpdate(er, incoming, original, accumulator, Collections.emptyList());
                 });
-        if (incmming instanceof DynamicProvider) {
-            servicesMapUpdate((DynamicProvider) incmming, (DynamicProvider) original, accumulator,
+        if (incoming instanceof DynamicProvider) {
+            servicesMapUpdate((DynamicProvider) incoming, (DynamicProvider) original, accumulator,
                     Collections.emptyList());
         }
     }
 
-    private static void updateAdmin(Provider incomming, Provider original, NotificationAccumulator accumulator) {
-        Admin newService = incomming.getAdmin();
+    private static void updateAdmin(Provider incoming, Provider original, NotificationAccumulator accumulator) {
+        Admin newService = incoming.getAdmin();
         if (newService != null) {
-            serviceUpdate(ProviderPackage.Literals.PROVIDER__ADMIN, incomming, original, accumulator,
+            serviceUpdate(ProviderPackage.Literals.PROVIDER__ADMIN, incoming, original, accumulator,
                     List.of(ProviderPackage.Literals.ADMIN__MODEL, ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI));
         }
     }
 
-    private static void serviceUpdate(EReference reference, Provider incomming, Provider original,
+    private static void serviceUpdate(EReference reference, Provider incoming, Provider original,
             NotificationAccumulator accumulator, List<EStructuralFeature> blackList) {
-        Service newService = (Service) incomming.eGet(reference);
+        Service newService = (Service) incoming.eGet(reference);
         Service oldService = (Service) original.eGet(reference);
 
         if (newService == null && oldService == null) {
@@ -133,11 +133,11 @@ public class EMFCompareUtil {
         }
     }
 
-    private static void servicesMapUpdate(DynamicProvider incomming, DynamicProvider original,
+    private static void servicesMapUpdate(DynamicProvider incoming, DynamicProvider original,
             NotificationAccumulator accumulator, List<EStructuralFeature> blackList) {
 
         List<String> toDelete = new ArrayList<>(original.getServices().keySet());
-        List<String> toAdd = new ArrayList<>(incomming.getServices().keySet());
+        List<String> toAdd = new ArrayList<>(incoming.getServices().keySet());
         List<String> toUpdate = new ArrayList<>();
 
         for (Iterator<String> iterator = toAdd.iterator(); iterator.hasNext();) {
@@ -149,7 +149,7 @@ public class EMFCompareUtil {
         }
 
         for (String serviceName : toAdd) {
-            Service copy = EcoreUtil.copy(incomming.getServices().get(serviceName));
+            Service copy = EcoreUtil.copy(incoming.getServices().get(serviceName));
             original.getServices().put(serviceName, copy);
             notifyServiceAdd(original, copy, serviceName, accumulator);
         }
@@ -158,7 +158,7 @@ public class EMFCompareUtil {
             notifyServiceRemove(original, oldService, serviceName, accumulator);
         }
         for (String serviceName : toUpdate) {
-            Service newService = incomming.getServices().get(serviceName);
+            Service newService = incoming.getServices().get(serviceName);
             Service oldService = original.getServices().get(serviceName);
             if (newService.eClass() != oldService.eClass()) {
                 if (oldService.eClass().isSuperTypeOf(newService.eClass())) {
@@ -197,7 +197,7 @@ public class EMFCompareUtil {
             List<EStructuralFeature> blackList, NotificationAccumulator accumulator) {
 
         if (newService.eClass() != originalService.eClass()) {
-            throw new UnsupportedOperationException("Merging Services of different Tyoes is not supported yet");
+            throw new UnsupportedOperationException("Merging Services of different Types is not supported yet");
         }
 
         // We can simply copy all non containments, as they are out of scope for
@@ -227,7 +227,7 @@ public class EMFCompareUtil {
     // timestamp
     // 3. Attribute changed; timestamp change to null; update with Timestamp Now
     // 4. Attribute changed; timestamp changed; update attribute and timestamp if
-    // new is after old timetamp
+    // new is after old timestamp
     // 5. Attribute not changed, but timestamp updated: same as 4.
     @SuppressWarnings("unchecked")
     private static void notifyResourceChange(EStructuralFeature resource, String serviceName, Service newService,
