@@ -71,6 +71,7 @@ import org.eclipse.sensinact.model.core.provider.Admin;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.MetadataValue;
 import org.eclipse.sensinact.model.core.provider.ModelMetadata;
+import org.eclipse.sensinact.model.core.provider.NexusMetadata;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderFactory;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
@@ -766,8 +767,10 @@ public class ModelNexus {
         ResourceValueMetadata metadata = getOrInitializeResourceMetadata(svc, rcFeature);
 
         // Get the value from the merged view of metadata
-        EMap<String, MetadataValue> extra = EMFUtil.getMergedModelMetadataView(rcFeature, metadata).getExtra();
-        MetadataValue metadataValue = extra.get(key);
+        final MetadataValue metadataValue = Optional.ofNullable(EMFUtil.getMergedModelMetadataView(rcFeature, metadata))
+                .map(NexusMetadata::getExtra)
+                .map(extra -> extra.get(key)).orElse(null);
+
         if (metadataValue != null) {
             return new DefaultTimedValue<>(metadataValue.getValue(), metadataValue.getTimestamp());
         } else {
