@@ -242,10 +242,8 @@ public class EMFUtil {
 
     private static NexusMetadata createCorrectNexusMetadata(EModelElement element) {
 
-        if (element instanceof EAttribute) {
+        if (element instanceof EAttribute || element instanceof EReference) {
             return ProviderFactory.eINSTANCE.createResourceMetadata();
-        } else if (element instanceof EReference) {
-            return ProviderFactory.eINSTANCE.createServiceReferenceMetadata();
         } else if (element instanceof EOperation) {
             return ProviderFactory.eINSTANCE.createActionMetadata();
         } else if (element instanceof EParameter) {

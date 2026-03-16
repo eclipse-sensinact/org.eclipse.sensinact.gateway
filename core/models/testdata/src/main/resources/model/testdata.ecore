@@ -24,7 +24,11 @@
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TestTemperaturWithComplex" eSuperTypes="../../../../../org.eclipse.sensinact.gateway.core.models.provider/src/main/resources/model/sensinact.ecore#//Service">
     <eStructuralFeatures xsi:type="ecore:EReference" name="testResource" eType="#//TestResource"
-        containment="true"/>
+        containment="true">
+      <eAnnotations source="Metadata">
+        <details key="answer" value="42"/>
+      </eAnnotations>
+    </eStructuralFeatures>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="TestResource">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="foo" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
