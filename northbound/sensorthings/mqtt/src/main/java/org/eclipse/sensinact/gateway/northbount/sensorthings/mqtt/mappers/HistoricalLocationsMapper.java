@@ -18,6 +18,7 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,10 +31,17 @@ public class HistoricalLocationsMapper extends SensorthingsMapper<HistoricalLoca
 
     @Override
     public Promise<Stream<HistoricalLocation>> toPayload(ResourceDataNotification notification) {
-        if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
-            return decorate(getProvider(notification.provider()).map(p -> DtoMapper.toHistoricalLocation(jsonMapper, p)));
-        }
-        return emptyStream();
+
+        return decorate(getProvider(notification.provider()).map(p -> {
+            if (DtoMapperSimple.isSensorthingModel(p)) {
+                if (DtoMapperSimple.isThing(p) && "location".equals(notification.resource()))
+                    return DtoMapperSensorthing.toHistoricalLocation(jsonMapper, p);
+            } else if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
+                return DtoMapperSensinact.toHistoricalLocation(jsonMapper, p);
+            }
+            return null;
+        }));
+
     }
 
     @Override

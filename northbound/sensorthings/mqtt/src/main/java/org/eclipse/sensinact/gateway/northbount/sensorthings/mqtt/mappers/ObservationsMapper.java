@@ -16,10 +16,11 @@ import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
-import org.eclipse.sensinact.core.twin.DefaultTimedValue;
-import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,9 +31,25 @@ public class ObservationsMapper extends SensorthingsMapper<Observation> {
         super(topicFilter, mapper, thread);
     }
 
+    @Override
     public Promise<Stream<Observation>> toPayload(ResourceDataNotification notification) {
-        TimedValue<Object> tv = new DefaultTimedValue<>(notification.newValue(), notification.timestamp());
-        return wrap(DtoMapper.toObservation(notification.provider(), notification.service(), notification.resource(), tv));
+        return getObservation(getResource(notification.provider(), notification.service(), notification.resource()));
+
+    }
+
+    protected Promise<Stream<Observation>> getObservation(Promise<ResourceSnapshot> resourceSnapshot) {
+        return decorate(resourceSnapshot.map(r -> {
+            ProviderSnapshot p = r.getService().getProvider();
+            if (DtoMapperSimple.isSensorthingModel(p)) {
+                if (DtoMapperSimple.isDatastream(p) && r.getName().equals("lastObservation"))
+                    return DtoMapperSensorthing.toObservation(jsonMapper, r);
+            } else {
+                return DtoMapperSensinact.toObservation(r.getService().getProvider().getName(),
+                        r.getService().getName(), r.getName(), r.getValue());
+            }
+            return null;
+
+        }));
     }
 
     @Override

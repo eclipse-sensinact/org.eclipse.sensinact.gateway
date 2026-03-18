@@ -65,7 +65,7 @@ public class FeaturesOfInterestDelegateSensorthings extends AbstractDelegate {
         ProviderSnapshot providerFoi = validateAndGetProvider(provider);
         @SuppressWarnings("unchecked")
         List<String> datastreamIds = DtoMapperSimple.getResourceField(
-                DtoMapperSimple.getFeatureofInterestService(providerFoi), "datastreamIds", List.class);
+                DtoMapperSimple.getFeatureOfInterestService(providerFoi), "datastreamIds", List.class);
         ICriterion filter = parseFilter(EFilterContext.OBSERVATIONS);
         List<ResultList<Observation>> list = datastreamIds.stream()
                 .map(idDatastream -> validateAndGetProvider(idDatastream))

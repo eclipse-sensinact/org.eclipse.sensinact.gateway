@@ -18,8 +18,10 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.LifecycleNotification.Status;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +41,7 @@ public class ThingsMapper extends SensorthingsMapper<Thing> {
         return emptyStream();
     }
 
+    @Override
     public Promise<Stream<Thing>> toPayload(ResourceDataNotification notification) {
         if ("admin".equals(notification.service())) {
             if ("friendlyName".equals(notification.resource()) || "description".equals(notification.resource())) {
@@ -50,7 +53,19 @@ public class ThingsMapper extends SensorthingsMapper<Thing> {
     }
 
     private Promise<Stream<Thing>> getThing(String id) {
-        return decorate(getProvider(id).map(DtoMapper::toThing));
+        return getThing(getProvider(id));
+    }
+
+    protected Promise<Stream<Thing>> getThing(Promise<ProviderSnapshot> provider) {
+        return decorate(provider.map(p -> {
+            if (DtoMapperSimple.isSensorthingModel(p)) {
+                if (DtoMapperSimple.isThing(p))
+                    return DtoMapperSensorthing.toThing(p);
+            } else {
+                return DtoMapperSensinact.toThing(p);
+            }
+            return null;
+        }));
     }
 
     @Override

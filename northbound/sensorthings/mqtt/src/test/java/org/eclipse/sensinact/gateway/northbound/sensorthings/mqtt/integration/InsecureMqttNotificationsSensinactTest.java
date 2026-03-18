@@ -73,7 +73,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @WithFactoryConfiguration(factoryPid = "sensiNact.northbound.sensorthings.mqtt", properties = {
         @Property(key = "port", value = "13579"), @Property(key = "websocket.enable", value = "false") })
-public class InsecureMqttNotificationsTest {
+public class InsecureMqttNotificationsSensinactTest {
 
     @InjectService
     DataUpdate push;
@@ -196,45 +196,34 @@ public class InsecureMqttNotificationsTest {
 
         @Test
         public void testDatastreamsCollection() throws Exception {
-
             client.subscribe("v1.1/Datastreams", 0, listener).waitForCompletion(5000);
-
             // We must use a different model as otherwise the other tests interfere
             // by including other resources
             createResource("data", "bar", "foobar", 17);
-
             List<Datastream> streams = readMessages(10, Datastream.class);
-
             // Creation in sorted event order (p/s/r uri)
-            int i=0;
+            int i = 0;
             assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), streams.get(i++).name());
             assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(i++).name());
             assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(i++).name());
             assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(i++).name());
             assertEquals("foobar", streams.get(i++).name());
-
             // metadata update in sorted event order (p/s/r uri)
             assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), streams.get(i++).name());
             assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(i++).name());
             assertEquals(ProviderPackage.Literals.ADMIN__MODEL.getName(), streams.get(i++).name());
             assertEquals(ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), streams.get(i++).name());
             assertEquals("foobar", streams.get(i).name());
-
             Point p = new Point(34d, 12d);
-
             createResource("data", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
-
             streams = readMessages(8, Datastream.class);
             streams.forEach(d -> System.err.println(d.name()));
-
             // location creation
             i = 0;
             assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(i++).name());
-
             // location metadata update
             assertEquals(ProviderPackage.Literals.ADMIN__LOCATION.getName(), streams.get(i++).name());
-
             // location value update
             assertEquals(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), streams.get(i++).name());
             assertEquals(ProviderPackage.Literals.ADMIN__DESCRIPTION.getName(), streams.get(i++).name());
@@ -246,42 +235,30 @@ public class InsecureMqttNotificationsTest {
 
         @Test
         public void testDatastreamsWithId() throws Exception {
-
             client.subscribe("v1.1/Datastreams(foo~bar~fizzbuzz)", 0, listener).waitForCompletion(5000);
-
             createResource("foo", "bar", "foobar", 17);
             createResource("foo", "bar", "fizzbuzz", 42);
             Point p = new Point(34d, 12d);
-
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
-
             List<Datastream> streams = readMessages(3, Datastream.class);
-
             // Creation, metadata update, location update
             assertEquals("fizzbuzz", streams.get(0).name());
             assertEquals("fizzbuzz", streams.get(1).name());
             assertEquals("fizzbuzz", streams.get(2).name());
-
         }
 
         @Test
         public void testDatastreamsWithIdAndSelection() throws Exception {
-
             client.subscribe("v1.1/Datastreams(foo~bar~fizzbuzz)?$select=@iot.id,name", 0, listener)
                     .waitForCompletion(5000);
-
             createResource("foo", "bar", "foobar", 17);
             createResource("foo", "bar", "fizzbuzz", 42);
-
             Point p = new Point(34d, 12d);
-
             createResource("foo", ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__LOCATION.getName(), p);
-
             @SuppressWarnings("rawtypes")
             List<Map> streams = readMessages(3, Map.class);
-
             // Creation, metadata update, location update
             for (@SuppressWarnings("rawtypes")
             Map m : streams) {
@@ -300,7 +277,7 @@ public class InsecureMqttNotificationsTest {
             createResource("foo", "bar", "fizzbuzz", 42);
 
             @SuppressWarnings("rawtypes")
-            List<Map> streams = readMessages(2, Map.class);
+            List<Map> streams = readMessages(3, Map.class);
 
             updateMetadata("foo", "bar", "fizzbuzz", ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), "foobar");
 
@@ -308,7 +285,8 @@ public class InsecureMqttNotificationsTest {
 
             assertEquals(Map.of("name", "fizzbuzz"), streams.get(0));
             assertEquals(Map.of("name", "fizzbuzz"), streams.get(1));
-            assertEquals(Map.of("name", "foobar"), streams.get(2));
+            assertEquals(Map.of("name", "fizzbuzz"), streams.get(2));
+            assertEquals(Map.of("name", "foobar"), streams.get(3));
 
         }
     }

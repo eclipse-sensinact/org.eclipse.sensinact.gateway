@@ -18,6 +18,7 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,10 +31,17 @@ public class LocationsMapper extends SensorthingsMapper<Location> {
 
     @Override
     public Promise<Stream<Location>> toPayload(ResourceDataNotification notification) {
-        if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
-            return decorate(getProvider(notification.provider()).map(p -> DtoMapper.toLocation(jsonMapper, p)));
-        }
-        return emptyStream();
+
+        return decorate(getProvider(notification.provider()).map(p -> {
+            if (DtoMapperSimple.isSensorthingModel(p)) {
+                if (DtoMapperSimple.isLocation(p))
+                    return DtoMapperSensorthing.toLocation(jsonMapper, p);
+            } else if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
+                return DtoMapperSensinact.toLocation(jsonMapper, p);
+            }
+            return null;
+        }));
+
     }
 
     @Override

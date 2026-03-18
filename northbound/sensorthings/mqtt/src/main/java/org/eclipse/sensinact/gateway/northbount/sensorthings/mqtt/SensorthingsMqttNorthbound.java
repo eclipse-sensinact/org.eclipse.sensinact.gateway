@@ -12,18 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt;
 
-import static io.moquette.broker.config.IConfig.HOST_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.JKS_PATH_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.KEY_STORE_TYPE;
-import static io.moquette.broker.config.IConfig.PERSISTENCE_ENABLED_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.PORT_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.SSL_PORT_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.WEB_SOCKET_PORT_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.WSS_PORT_PROPERTY_NAME;
-import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -55,6 +43,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
+import static io.moquette.broker.config.IConfig.HOST_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.JKS_PATH_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.KEY_STORE_TYPE;
+import static io.moquette.broker.config.IConfig.PERSISTENCE_ENABLED_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.PORT_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.SSL_PORT_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.WEB_SOCKET_PORT_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.WSS_PORT_PROPERTY_NAME;
 import io.moquette.broker.config.MemoryConfig;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
@@ -63,6 +61,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
+import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
 
 @Component(service = TypedEventHandler.class, configurationPid = "sensiNact.northbound.sensorthings.mqtt", configurationPolicy = ConfigurationPolicy.REQUIRE)
 @EventTopics({ "DATA/*", "LIFECYCLE/*", "METADATA/*" })

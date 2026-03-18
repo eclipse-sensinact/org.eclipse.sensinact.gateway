@@ -108,7 +108,7 @@ public class FeatureOfInterestExtraUseCase
     @Override
     public AbstractSensinactCommand<?> dtoToDelete(ExtraUseCaseRequest<FeatureOfInterest> request) {
         ProviderSnapshot provider = providerUseCase.read(request.session(), request.id());
-        boolean hasObs = DtoMapperSimple.getResourceField(DtoMapperSimple.getFeatureofInterestService(provider),
+        boolean hasObs = DtoMapperSimple.getResourceField(DtoMapperSimple.getFeatureOfInterestService(provider),
                 "hasObs", Boolean.class);
 
         if (!isHistoryMemory())
@@ -118,7 +118,7 @@ public class FeatureOfInterestExtraUseCase
         cacheObs.removeDtoContain(request.id());
         @SuppressWarnings("unchecked")
         List<String> datastreamIds = DtoMapperSimple
-                .getResourceField(DtoMapperSimple.getFeatureofInterestService(provider), "datastreamIds", List.class);
+                .getResourceField(DtoMapperSimple.getFeatureOfInterestService(provider), "datastreamIds", List.class);
         ResourceCommand<TimedValue<List<String>>> datastreamIdsCommand = new ResourceCommand<TimedValue<List<String>>>(
                 request.id(), DtoMapperSimple.SERVICE_FOI, "datastreamIds") {
 

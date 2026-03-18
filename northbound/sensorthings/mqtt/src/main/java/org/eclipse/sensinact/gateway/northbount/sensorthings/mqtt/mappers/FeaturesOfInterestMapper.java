@@ -18,6 +18,7 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt.SensorthingsMapper;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.osgi.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,10 +31,17 @@ public class FeaturesOfInterestMapper extends SensorthingsMapper<FeatureOfIntere
 
     @Override
     public Promise<Stream<FeatureOfInterest>> toPayload(ResourceDataNotification notification) {
-        if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
-            return decorate(getProvider(notification.provider()).map(p -> DtoMapper.toFeatureOfInterest(jsonMapper, p)));
-        }
-        return emptyStream();
+
+        return decorate(getProvider(notification.provider()).map(p -> {
+            if (DtoMapperSimple.isSensorthingModel(p)) {
+                if (DtoMapperSimple.isFeatureOfInterest(p))
+                    return DtoMapperSensorthing.toFeatureOfInterest(p);
+            } else if ("admin".equals(notification.service()) && "location".equals(notification.resource())) {
+                return DtoMapperSensinact.toFeatureOfInterest(jsonMapper, p);
+            }
+            return null;
+        }));
+
     }
 
     @Override

@@ -176,7 +176,7 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
 
         List<ProviderSnapshot> providers = listProviders(criterion);
         List<FeatureOfInterest> resources = providers.stream().filter(p -> DtoMapperSimple.isSensorthingModel(p))
-                .filter(p -> DtoMapperSimple.getFeatureofInterestService(p) != null).map(p -> getSensorThingDtoMapper()
+                .filter(p -> DtoMapperSimple.getFeatureOfInterestService(p) != null).map(p -> getSensorThingDtoMapper()
                         .toFeatureOfInterest(getSession(), getMapper(), uriInfo, getExpansions(), criterion, p))
                 .toList();
 
