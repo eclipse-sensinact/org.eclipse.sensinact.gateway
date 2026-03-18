@@ -90,7 +90,7 @@ public interface SensinactResource extends CommandScoped {
      * set, for example:
      * <ul>
      *   <li>Due to a conversion failure</li>
-     *   <li>If the value violates the minumum or maximum bounds for this resource</li>
+     *   <li>If the value violates the minimum or maximum bounds for this resource</li>
      * </ul>
      */
     default Promise<Void> setValue(Object value) {
@@ -108,7 +108,7 @@ public interface SensinactResource extends CommandScoped {
      * set, for example:
      * <ul>
      *   <li>Due to a conversion failure</li>
-     *   <li>If the value violates the minumum or maximum bounds for this resource</li>
+     *   <li>If the value violates the minimum or maximum bounds for this resource</li>
      * </ul>
      */
     <T> Promise<Void> setValue(T value, Instant timestamp);
@@ -122,7 +122,7 @@ public interface SensinactResource extends CommandScoped {
      * set, for example:
      * <ul>
      *   <li>Due to a conversion failure</li>
-     *   <li>If the value violates the minumum or maximum bounds for this resource</li>
+     *   <li>If the value violates the minimum or maximum bounds for this resource</li>
      * </ul>
      */
     default <T> Promise<Void> setValue(List<? extends T> value){
@@ -139,7 +139,7 @@ public interface SensinactResource extends CommandScoped {
      * set, for example:
      * <ul>
      *   <li>Due to a conversion failure</li>
-     *   <li>If the value violates the minumum or maximum bounds for this resource</li>
+     *   <li>If the value violates the minimum or maximum bounds for this resource</li>
      * </ul>
      */
     <T> Promise<Void> setValue(List<? extends T> value, Instant timestamp);
@@ -212,6 +212,14 @@ public interface SensinactResource extends CommandScoped {
      * @return
      */
     Promise<Void> setMetadataValue(String name, Object value, Instant timestamp);
+
+    /**
+     * Removes an overlay metadata value for the resource
+     *
+     * @param timestamp Timestamp used in the notification
+     * @return A promise with no result
+     */
+    Promise<Void> unsetMetadataValue(String name, Instant timestamp);
 
     /**
      * Get a metadata value for the resource
