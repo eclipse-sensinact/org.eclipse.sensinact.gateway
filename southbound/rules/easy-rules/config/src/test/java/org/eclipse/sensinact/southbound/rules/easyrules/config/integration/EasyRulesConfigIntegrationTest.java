@@ -136,7 +136,7 @@ public class EasyRulesConfigIntegrationTest {
     @Test
     @WithFactoryConfiguration(factoryPid = "sensinact.rules.easyrules",
         properties = {
-                @Property(key = "name", value = "test"),
+                @Property(key = "name", value = "testProvidersFound"),
                 @Property(key = "resource.selectors", value = "{"
                         + "\"service\": { \"value\":\"sensor\",\"type\":\"EXACT\" },"
                         + "\"resource\": { \"value\":\"temperature\",\"type\":\"EXACT\" },"
@@ -148,7 +148,7 @@ public class EasyRulesConfigIntegrationTest {
                         + "\"action\":\"const b = $updater.updateBatch(); for(p : $providers) { b.updateResource(p, 'alert', 'temperature', 'high'); } b.completeBatch();\""
                         + "}")
         })
-    void testProvidersFound(@InjectService(filter = "(name=test)") RuleDefinition def) throws Exception {
+    void testProvidersFound(@InjectService(filter = "(name=testProvidersFound)", timeout = 1000) RuleDefinition def) throws Exception {
 
         List<ProviderSnapshot> snapshots = applyFilter(def.getInputFilter());
         assertFindProviders(snapshots, "Temp1", "Temp2", "Temp3");
@@ -165,7 +165,7 @@ public class EasyRulesConfigIntegrationTest {
     @Test
     @WithFactoryConfiguration(factoryPid = "sensinact.rules.easyrules",
     properties = {
-            @Property(key = "name", value = "test"),
+            @Property(key = "name", value = "testAveraging"),
             @Property(key = "resource.selectors", value = "{"
                     + "\"service\": { \"value\":\"sensor\",\"type\":\"EXACT\" },"
                     + "\"resource\": { \"value\":\"O3\",\"type\":\"EXACT\" }}"),
@@ -176,7 +176,7 @@ public class EasyRulesConfigIntegrationTest {
                     + "\"action\":\"let sum = 0.0d; for(p : $providers) { var v = $data[p].get('sensor').get('O3').get('$value'); sum = sum + v; } if ( size($providers) > 0 ) { sum = sum / size($providers); } $updater.updateResource('test-stats', 'avg', 'O3', sum);\""
                     + "}")
     })
-    void testAveraging(@InjectService(filter = "(name=test)") RuleDefinition def) throws Exception {
+    void testAveraging(@InjectService(filter = "(name=testAveraging)", timeout = 1000) RuleDefinition def) throws Exception {
 
         List<ProviderSnapshot> snapshots = applyFilter(def.getInputFilter());
         assertFindProviders(snapshots, "Detect1", "Detect2", "test");
