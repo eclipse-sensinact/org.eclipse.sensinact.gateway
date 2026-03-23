@@ -111,7 +111,7 @@
     <!-- SPI fly / Service loader -->
     <dependency>
       <groupId>org.apache.aries.spifly</groupId>
-      <artifactId>org.apache.aries.spifly.dynamic.framework.extension</artifactId>
+      <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
       <scope>test</scope>
     </dependency>
 
