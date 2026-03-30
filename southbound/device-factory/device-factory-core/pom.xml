@@ -33,6 +33,12 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!-- Jackson -->
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
     <!-- SL4J -->
     <dependency>
       <groupId>org.slf4j</groupId>

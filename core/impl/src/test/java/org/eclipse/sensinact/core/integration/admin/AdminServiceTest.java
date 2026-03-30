@@ -30,7 +30,7 @@ import org.osgi.test.common.annotation.InjectService;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tests the behavior around the admin service

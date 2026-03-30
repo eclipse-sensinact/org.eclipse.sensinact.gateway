@@ -12,6 +12,11 @@
  **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings;
 
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DATASTREAM;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_FOI;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -44,14 +49,9 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DATASTREAM;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_DEVICE;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_FOI;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.Literals.SENSOR_THING_LOCATION;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class OGCParserTestSensorthings {
 
@@ -70,7 +70,7 @@ public class OGCParserTestSensorthings {
                 assertEquals(expected, predicate.test(testProvider),
                         String.format("Expected %s for query: %s", expected, query));
             } else {
-                fail("Coudln't parse '" + query + "'");
+                fail("Couldn't parse '" + query + "'");
             }
         } catch (Throwable e) {
             e.printStackTrace();
@@ -96,10 +96,7 @@ public class OGCParserTestSensorthings {
     }
 
     private ObjectMapper getMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-
-        return mapper;
+        return JsonMapper.builder().build();
     }
 
     @Test
@@ -516,7 +513,7 @@ public class OGCParserTestSensorthings {
                 "test", null, null, null, null, null, null, foi, false);
         try {
             return getMapper().writeValueAsString(obs);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }

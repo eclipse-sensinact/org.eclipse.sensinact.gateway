@@ -15,8 +15,8 @@
     { "id": "org.eclipse.sensinact.gateway.northbound.session:session-api:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.session:session-impl:${gateway.version}" },
     { "id": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jackson.version}" },
-    { "id": "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:${jackson.version}" },
-    { "id": "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:${jackson.version}" }
+    { "id": "tools.jackson.jakarta.rs:jackson-jakarta-rs-base:${jackson.version}" },
+    { "id": "tools.jackson.jakarta.rs:jackson-jakarta-rs-json-provider:${jackson.version}" }
   ],
   "extensions": {
     "sensinact.feature.depends": {

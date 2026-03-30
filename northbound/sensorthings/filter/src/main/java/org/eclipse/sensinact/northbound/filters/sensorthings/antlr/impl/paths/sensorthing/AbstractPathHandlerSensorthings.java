@@ -23,7 +23,7 @@ import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 
 public class AbstractPathHandlerSensorthings {
 
@@ -135,7 +135,7 @@ public class AbstractPathHandlerSensorthings {
         ExpandedObservation obs;
         try {
             obs = pathContext.mapper().readValue(obsStr, ExpandedObservation.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
         return obs;

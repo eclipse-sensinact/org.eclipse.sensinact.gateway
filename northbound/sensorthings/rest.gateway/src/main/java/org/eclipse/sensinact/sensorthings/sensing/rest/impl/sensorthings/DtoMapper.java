@@ -46,8 +46,8 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.snapshot.GenericResourceSnapshot;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -369,7 +369,7 @@ public class DtoMapper {
                     return Optional.empty();
                 }
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new InternalServerErrorException("fail to apply filter on history in memory observation");
         }
         String selfLink = uriInfo.getBaseUriBuilder().path(VERSION).path("Observations({id})").resolveTemplate("id", id)

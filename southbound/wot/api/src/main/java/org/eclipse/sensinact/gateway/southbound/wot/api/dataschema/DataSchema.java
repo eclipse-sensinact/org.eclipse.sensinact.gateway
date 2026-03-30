@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
+import tools.jackson.databind.annotation.JsonTypeIdResolver;
 
 @JsonTypeInfo(use = Id.CUSTOM, include = As.EXISTING_PROPERTY, property = "type", visible = true, defaultImpl = OneOfDataSchema.class)
 @JsonTypeIdResolver(DataSchemaTypeResolver.class)

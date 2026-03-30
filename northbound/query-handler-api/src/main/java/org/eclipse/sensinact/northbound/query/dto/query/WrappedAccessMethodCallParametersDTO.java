@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.eclipse.sensinact.northbound.query.dto.query.jackson.WrappedAccessMethodCallParametersDeserializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = WrappedAccessMethodCallParametersDeserializer.class)
 public class WrappedAccessMethodCallParametersDTO {

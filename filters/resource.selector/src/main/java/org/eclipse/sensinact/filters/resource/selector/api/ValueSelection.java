@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.eclipse.sensinact.filters.resource.selector.jackson.ValueSelectionDeserializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Defines a selection based on a resource value

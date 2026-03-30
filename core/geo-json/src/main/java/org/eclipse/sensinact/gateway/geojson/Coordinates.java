@@ -16,8 +16,8 @@ package org.eclipse.sensinact.gateway.geojson;
 import org.eclipse.sensinact.gateway.geojson.internal.CoordinatesDeserializer;
 import org.eclipse.sensinact.gateway.geojson.internal.CoordinatesSerializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 /**
  * A GeoJSON coordinate. We do not support additional point data beyond the

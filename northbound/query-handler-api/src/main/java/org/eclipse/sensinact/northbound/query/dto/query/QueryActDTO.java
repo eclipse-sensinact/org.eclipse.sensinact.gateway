@@ -18,7 +18,7 @@ import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.EQueryType;
 import org.eclipse.sensinact.northbound.query.dto.query.jackson.ActParametersDeserializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  *

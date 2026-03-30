@@ -134,7 +134,7 @@
     <emf.ecore.xmi.version>2.36.0</emf.ecore.xmi.version>
     <slf4j.version>2.0.17</slf4j.version>
     <logback.version>1.5.31</logback.version>
-    <jackson.version>2.21.0</jackson.version>
+    <jackson.version>3.1.1</jackson.version>
     <jackson.annotations.version>2.21</jackson.annotations.version>
     <jjwt.version>0.13.0</jjwt.version>
 
@@ -336,23 +336,23 @@
         <version>${jackson.annotations.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
+        <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
+        <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
+        <groupId>tools.jackson.jakarta.rs</groupId>
+        <artifactId>jackson-jakarta-rs-json-provider</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
-        <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+        <groupId>tools.jackson.module</groupId>
+        <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>

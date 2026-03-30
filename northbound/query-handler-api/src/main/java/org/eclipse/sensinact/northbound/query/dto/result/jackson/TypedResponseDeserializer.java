@@ -12,16 +12,14 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.result.jackson;
 
-import static com.fasterxml.jackson.core.JsonToken.VALUE_STRING;
 import static org.eclipse.sensinact.northbound.query.api.EResultType.DESCRIBE_PROVIDER;
 import static org.eclipse.sensinact.northbound.query.api.EResultType.DESCRIBE_RESOURCE;
 import static org.eclipse.sensinact.northbound.query.api.EResultType.DESCRIBE_SERVICE;
 import static org.eclipse.sensinact.northbound.query.api.EResultType.ERROR;
 import static org.eclipse.sensinact.northbound.query.api.EResultType.GET_RESPONSE;
 import static org.eclipse.sensinact.northbound.query.api.EResultType.SET_RESPONSE;
+import static tools.jackson.core.JsonToken.VALUE_STRING;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.eclipse.sensinact.northbound.query.api.EResultType;
@@ -33,34 +31,30 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResponseSetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.SubResult;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 @SuppressWarnings("rawtypes")
 public class TypedResponseDeserializer extends StdDeserializer<TypedResponse> {
-
-    private static final long serialVersionUID = -2337413302718463311L;
 
     public TypedResponseDeserializer() {
         super(TypedResponse.class);
     }
 
     @Override
-    public TypedResponse<SubResult> deserialize(JsonParser p, DeserializationContext ctxt)
-            throws IOException, JacksonException {
+    public TypedResponse<SubResult> deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
         JsonNode root = ctxt.readTree(p);
         JsonNode typeNode = root.get("type");
-        if (typeNode == null || !typeNode.isTextual()) {
+        if (typeNode == null || !typeNode.isString()) {
             ctxt.reportWrongTokenException(this, VALUE_STRING,
                     "Unable to find the type property to identify this typed response");
         }
 
-        String typeId = typeNode.asText();
+        String typeId = typeNode.asString();
         JsonNode responseNode = root.get("response");
 
         SubResult response;
@@ -97,11 +91,8 @@ public class TypedResponseDeserializer extends StdDeserializer<TypedResponse> {
         TypedResponse<SubResult> tr = new TypedResponse<>(resultType);
         tr.response = response;
 
-        Iterator<Entry<String, JsonNode>> fields = ((ObjectNode) root).fields();
-
         boolean hasStatus = false, hasUri = false;
-        while (fields.hasNext()) {
-            Entry<String, JsonNode> next = fields.next();
+        for (Entry<String, JsonNode> next : root.properties()) {
             switch (next.getKey()) {
             case "type":
             case "response":

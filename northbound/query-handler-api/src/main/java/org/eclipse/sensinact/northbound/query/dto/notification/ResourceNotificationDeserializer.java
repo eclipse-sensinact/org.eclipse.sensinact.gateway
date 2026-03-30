@@ -12,21 +12,19 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.notification;
 
-import java.io.IOException;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Deserialization of the content of a notification
  */
 public class ResourceNotificationDeserializer extends StdDeserializer<AbstractResourceNotificationDTO> {
-
-    private static final long serialVersionUID = 1L;
 
     public ResourceNotificationDeserializer() {
         this(null);
@@ -38,20 +36,20 @@ public class ResourceNotificationDeserializer extends StdDeserializer<AbstractRe
 
     @Override
     public AbstractResourceNotificationDTO deserialize(final JsonParser parser, final DeserializationContext ctxt)
-            throws IOException, JacksonException {
+            throws JacksonException {
 
         final Map<?, ?> rawNotif = parser.readValueAs(Map.class);
         if (rawNotif == null) {
             return null;
         }
 
-        final ObjectMapper mapper = new ObjectMapper();
+        final ObjectMapper mapper = JsonMapper.builder().build();
         if (rawNotif.containsKey("status") && rawNotif.containsKey("initialValue")) {
             return mapper.convertValue(rawNotif, ResourceLifecycleNotificationDTO.class);
         } else if (rawNotif.containsKey("oldValue") && rawNotif.containsKey("newValue")) {
             return mapper.convertValue(rawNotif, ResourceDataNotificationDTO.class);
         } else {
-            throw new IOException("Unsupported notification DTO");
+            throw new RuntimeException("Unsupported notification DTO");
         }
     }
 }

@@ -68,10 +68,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
       <artifactId>extended</artifactId>
       <version>${project.version}</version>
@@ -139,7 +135,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+      <groupId>tools.jackson.jakarta.rs</groupId>
       <artifactId>jackson-jakarta-rs-json-provider</artifactId>
     </dependency>
 

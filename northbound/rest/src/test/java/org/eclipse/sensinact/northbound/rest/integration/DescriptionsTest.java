@@ -15,12 +15,10 @@ package org.eclipse.sensinact.northbound.rest.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.StringWriter;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,22 +41,18 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListResourcesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
-import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
-import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
-
 import jakarta.ws.rs.core.Application;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.databind.JsonNode;
 
 @WithConfiguration(pid = "sensinact.session.manager", properties = @Property(key = "auth.policy", value = "ALLOW_ALL"))
 @WithConfiguration(pid = "sensinact.northbound.rest", location = "?", properties = {
@@ -220,15 +214,14 @@ public class DescriptionsTest {
             gen.writeEndArray();
         } else if (node.isObject()) {
             SortedMap<String, JsonNode> map = new TreeMap<>();
-            Iterator<Entry<String, JsonNode>> fields = node.fields();
-            while (fields.hasNext()) {
-                Entry<String, JsonNode> e = fields.next();
+
+            for (Entry<String, JsonNode> e : node.properties()) {
                 map.put(e.getKey(), e.getValue());
             }
 
             gen.writeStartObject();
             for (Entry<String, JsonNode> e : map.entrySet()) {
-                gen.writeFieldName(e.getKey());
+                gen.writeName(e.getKey());
                 gen.writeRawValue(normalizedJson(e.getValue()));
             }
             gen.writeEndObject();

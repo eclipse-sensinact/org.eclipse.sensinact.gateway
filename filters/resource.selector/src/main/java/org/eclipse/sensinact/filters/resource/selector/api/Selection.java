@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.sensinact.filters.resource.selector.jackson.SelectionDeserializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Defines a selection for the name of a token in the URI

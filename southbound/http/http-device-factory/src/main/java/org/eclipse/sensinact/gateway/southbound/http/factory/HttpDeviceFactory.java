@@ -44,7 +44,9 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.EnumFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * HTTP device factory
@@ -81,7 +83,10 @@ public class HttpDeviceFactory {
     @Activate
     void activate(final HttpDeviceFactoryConfiguration configuration) throws Exception {
         scheduledExecutor = new ScheduledThreadPoolExecutor(1);
-        final ObjectMapper mapper = new ObjectMapper();
+        final ObjectMapper mapper = JsonMapper.builder()
+                .configure(EnumFeature.READ_ENUMS_USING_TO_STRING, false)
+                .configure(EnumFeature.WRITE_ENUMS_USING_TO_STRING, false)
+                .build();
 
         final HttpDeviceFactoryConfigurationTaskDTO[] oneShotTasks = loadTasks(mapper,
                 HttpDeviceFactoryConfigurationTaskDTO.class, configuration.tasks_oneshot());

@@ -64,12 +64,11 @@ import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 @WithFactoryConfiguration(factoryPid = "sensiNact.northbound.sensorthings.mqtt", properties = {
         @Property(key = "port", value = "13579"), @Property(key = "websocket.enable", value = "false") })
@@ -117,8 +116,8 @@ public class InsecureMqttNotificationsSensinactTest {
 
         listener = (t, m) -> messages.put(new String(m.getPayload(), StandardCharsets.UTF_8));
 
-        mapper = JsonMapper.builder().addModule(new JavaTimeModule())
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true).build();
+        mapper = JsonMapper.builder()
+                .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, true).build();
     }
 
     protected String getMqttURL() {
@@ -177,7 +176,7 @@ public class InsecureMqttNotificationsSensinactTest {
     }
 
     private <T> List<T> readMessages(int expected, Class<T> type)
-            throws InterruptedException, JsonProcessingException, JsonMappingException {
+            throws InterruptedException, JacksonException, DatabindException {
         List<T> streams = new ArrayList<>();
 
         String message = messages.poll(1500, TimeUnit.MILLISECONDS);

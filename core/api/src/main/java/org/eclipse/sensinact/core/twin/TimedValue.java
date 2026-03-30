@@ -15,7 +15,7 @@ package org.eclipse.sensinact.core.twin;
 import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(as = DefaultTimedValue.class)
 public interface TimedValue<T> {

@@ -38,7 +38,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoT
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.HttpMethod;

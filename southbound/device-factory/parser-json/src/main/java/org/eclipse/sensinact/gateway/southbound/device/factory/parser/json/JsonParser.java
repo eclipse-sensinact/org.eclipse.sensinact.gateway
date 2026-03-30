@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.gateway.southbound.device.factory.parser.json;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -28,8 +27,9 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRec
 import org.eclipse.sensinact.gateway.southbound.device.factory.ParserException;
 import org.osgi.service.component.annotations.Component;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * JSON parser provider
@@ -73,7 +73,7 @@ public class JsonParser implements IDeviceMappingParser {
             return parseRecords(root, base);
         } catch (IllegalArgumentException e) {
             throw new ParserException("Invalid JSON input", e);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             throw new ParserException("Error parsing JSON input", e);
         }
     }

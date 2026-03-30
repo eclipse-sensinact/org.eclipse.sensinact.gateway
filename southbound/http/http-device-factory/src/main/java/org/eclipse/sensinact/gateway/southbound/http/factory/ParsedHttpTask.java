@@ -13,17 +13,16 @@
 package org.eclipse.sensinact.gateway.southbound.http.factory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingConfigurationDTO;
 import org.eclipse.sensinact.gateway.southbound.http.factory.config.HttpDeviceFactoryConfigurationTaskDTO;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Parsed HTTP task configuration
@@ -112,7 +111,7 @@ public class ParsedHttpTask {
     public final DeviceMappingConfigurationDTO mapping;
 
     public ParsedHttpTask(final HttpDeviceFactoryConfigurationTaskDTO task)
-            throws JsonMappingException, JsonProcessingException {
+            throws DatabindException, JacksonException {
         this.method = task.method != null && !task.method.isBlank() ? task.method : "GET";
 
         this.url = task.url;
@@ -155,7 +154,7 @@ public class ParsedHttpTask {
     /**
      * Parses the configured Headers
      */
-    private void parseHeaders(final JsonNode headersRoot) throws JsonMappingException, JsonProcessingException {
+    private void parseHeaders(final JsonNode headersRoot) throws DatabindException, JacksonException {
         if (headersRoot.isArray()) {
             for (int i = 0; i < headersRoot.size(); i++) {
                 final JsonNode header = headersRoot.get(i);
@@ -163,15 +162,13 @@ public class ParsedHttpTask {
                     throw new IllegalArgumentException("Headers should be an array of objects");
                 }
 
-                this.headers.add(new KeyValue<>(header.get("header").asText(), header.get("value").asText()));
+                this.headers.add(new KeyValue<>(header.get("header").asString(), header.get("value").asString()));
             }
         } else {
-            final Iterator<Entry<String, JsonNode>> iterator = headersRoot.fields();
-            while (iterator.hasNext()) {
-                final Entry<String, JsonNode> entry = iterator.next();
+            for (Entry<String, JsonNode> entry : headersRoot.properties()) {
                 final String header = entry.getKey();
                 if (header != null && !header.isBlank()) {
-                    this.headers.add(new KeyValue<String, String>(header, entry.getValue().asText()));
+                    this.headers.add(new KeyValue<String, String>(header, entry.getValue().asString()));
                 }
             }
         }
