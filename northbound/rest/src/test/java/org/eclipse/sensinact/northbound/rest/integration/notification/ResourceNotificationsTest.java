@@ -42,8 +42,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.jakartars.client.SseEventSourceFactory;
+import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
@@ -113,6 +115,9 @@ public class ResourceNotificationsTest {
     @InjectService
     ClientBuilder clientBuilder;
 
+    @InjectBundleContext
+    BundleContext ctx;
+
     BlockingQueue<ResourceDataNotification> queue;
 
     final TestUtils utils = new TestUtils();
@@ -150,7 +155,13 @@ public class ResourceNotificationsTest {
         final BlockingArrayQueue<ResourceLifecycleNotificationDTO> lifeCycleEvents = new BlockingArrayQueue<>();
         final BlockingArrayQueue<ResourceDataNotificationDTO> dataEvents = new BlockingArrayQueue<>();
         sseSource.register(ise -> {
-            switch (ise.getName()) {
+            String name = ise.getName();
+            if (name == null) {
+                // Liveness checks don't have a name
+                return;
+            }
+
+            switch (name) {
                 case "lifecycle":
                     lifeCycleEvents.add(ise.readData(ResourceLifecycleNotificationDTO.class));
                     break;
@@ -162,7 +173,7 @@ public class ResourceNotificationsTest {
                 default:
                     break;
             }
-        });
+        }, Throwable::printStackTrace);
         sseSource.open();
 
         try {

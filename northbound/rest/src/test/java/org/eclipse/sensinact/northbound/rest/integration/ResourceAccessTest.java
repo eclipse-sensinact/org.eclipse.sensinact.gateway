@@ -234,6 +234,7 @@ public class ResourceAccessTest {
     /**
      * Update the resource value from the REST endpoint
      */
+    @SuppressWarnings("null")
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     void locationSet(boolean wrapParams) throws Exception {

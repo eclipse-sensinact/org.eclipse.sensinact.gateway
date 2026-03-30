@@ -51,6 +51,7 @@ import org.osgi.test.common.service.ServiceAware;
 
 import jakarta.ws.rs.core.Application;
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.ObjectWriteContext;
 import tools.jackson.core.json.JsonFactory;
 import tools.jackson.databind.JsonNode;
 
@@ -168,9 +169,9 @@ public class DescriptionsTest {
 
         // TODO enable this when we can add to the admin service
 //        assertTrue(providerDto.has("icon"));
-//        assertEquals("rolling-eyes", providerDto.get("icon").asText());
+//        assertEquals("rolling-eyes", providerDto.get("icon").asString());
         assertTrue(providerDto.has("friendlyName"));
-        assertEquals("Bob", providerDto.get("friendlyName").asText());
+        assertEquals("Bob", providerDto.get("friendlyName").asString());
         assertFalse(providerDto.has("location"));
 
         providerDto = checkAndFindProvider(
@@ -178,9 +179,9 @@ public class DescriptionsTest {
 
         // TODO enable this when we can add to the admin service
 //        assertTrue(providerDto.has("icon"));
-//        assertEquals("rolling-eyes", providerDto.get("icon").asText());
+//        assertEquals("rolling-eyes", providerDto.get("icon").asString());
         assertTrue(providerDto.has("friendlyName"));
-        assertEquals("Bob", providerDto.get("friendlyName").asText());
+        assertEquals("Bob", providerDto.get("friendlyName").asString());
         assertTrue(providerDto.has("location"));
         assertEquals(normalizedJson(location), normalizedJson(providerDto.get("location")));
     }
@@ -192,13 +193,13 @@ public class DescriptionsTest {
 
         // Check content
         final JsonNode providerDto = StreamSupport.stream(providers.spliterator(), false)
-                .filter(p -> PROVIDER.equals(p.get("name").asText())).findFirst().get();
+                .filter(p -> PROVIDER.equals(p.get("name").asString())).findFirst().get();
         return providerDto;
     }
 
     private String normalizedJson(Object o) throws Exception {
         StringWriter sw = new StringWriter();
-        JsonGenerator gen = JsonFactory.builder().build().createGenerator(sw);
+        JsonGenerator gen = JsonFactory.builder().build().createGenerator(ObjectWriteContext.empty(), sw);
         JsonNode node;
         if (o instanceof JsonNode) {
             node = (JsonNode) o;
