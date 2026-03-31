@@ -27,7 +27,7 @@ import tools.jackson.databind.json.JsonMapper;
 public class ResourceNotificationDeserializer extends StdDeserializer<AbstractResourceNotificationDTO> {
 
     public ResourceNotificationDeserializer() {
-        this(null);
+        this(AbstractResourceNotificationDTO.class);
     }
 
     protected ResourceNotificationDeserializer(final Class<?> vc) {
