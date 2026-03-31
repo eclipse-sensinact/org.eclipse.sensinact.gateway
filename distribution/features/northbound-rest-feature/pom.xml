@@ -89,6 +89,11 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
+      <groupId>tools.jackson.module</groupId>
+      <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
       <groupId>tools.jackson.jakarta.rs</groupId>
       <artifactId>jackson-jakarta-rs-base</artifactId>
       <version>${jackson.version}</version>
