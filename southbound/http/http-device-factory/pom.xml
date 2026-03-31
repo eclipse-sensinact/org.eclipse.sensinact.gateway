@@ -20,9 +20,7 @@
   <artifactId>http-device-factory</artifactId>
   <name>SensiNact Southbound :: HTTP :: Device Factory</name>
   <description>HTTP device factory</description>
-  <properties>
-    <jetty.version>11.0.13</jetty.version>
-  </properties>
+
   <dependencies>
     <!-- HTTP -->
     <dependency>

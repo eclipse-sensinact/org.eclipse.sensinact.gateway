@@ -136,6 +136,7 @@
     <logback.version>1.5.31</logback.version>
     <jackson.version>3.1.1</jackson.version>
     <jackson.annotations.version>2.21</jackson.annotations.version>
+    <compatibility.jackson.version>2.21.2</compatibility.jackson.version>
     <jjwt.version>0.13.0</jjwt.version>
 
     <!-- runtime dependencies -->
@@ -154,6 +155,22 @@
     <antlr.version>4.12.0</antlr.version>
     <metrics.version>4.2.19</metrics.version>
 
+    <!-- Northbound dependencies -->
+    <osgi.technology.rest.version>1.2.2</osgi.technology.rest.version>
+    <hk2.version>3.1.1</hk2.version>
+    <jersey.version>3.1.11</jersey.version>
+    <jetty.version>11.0.13</jetty.version>
+
+    <!-- Distribution versions -->
+    <hk2.osgi.version>1.0.4</hk2.osgi.version>
+    <javassist.version>3.30.2-GA</javassist.version>
+
+    <!-- Gogo shell -->
+    <org.apache.felix.gogo.command.version>1.1.2</org.apache.felix.gogo.command.version>
+    <org.apache.felix.gogo.shell.version>1.1.4</org.apache.felix.gogo.shell.version>
+    <org.apache.felix.gogo.jline.version>1.1.8</org.apache.felix.gogo.jline.version>
+    <org.apache.felix.gogo.runtime.version>1.1.6</org.apache.felix.gogo.runtime.version>
+
     <!-- test dependency versions -->
     <junit.version>5.14.3</junit.version>
     <mockito.version>5.21.0</mockito.version>
@@ -166,7 +183,6 @@
     <!-- Default properties for resolver setup in development -->
     <save.test.bndrun.changes>true</save.test.bndrun.changes>
     <verify.test.bndruns>false</verify.test.bndruns>
-
   </properties>
 
   <repositories>
