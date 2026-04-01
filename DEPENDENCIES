@@ -181,6 +181,6 @@ maven/mavencentral/org.testcontainers/testcontainers-r2dbc/2.0.3, MIT, approved,
 maven/mavencentral/org.testcontainers/testcontainers/2.0.3, MIT, approved, #25274
 maven/mavencentral/tools.jackson.core/jackson-core/3.1.1, Apache-2.0 AND MIT, approved, #26415
 maven/mavencentral/tools.jackson.core/jackson-databind/3.1.1, Apache-2.0, approved, #26439
-maven/mavencentral/tools.jackson.jakarta.rs/jackson-jakarta-rs-base/3.1.1, , restricted, clearlydefined
-maven/mavencentral/tools.jackson.jakarta.rs/jackson-jakarta-rs-json-provider/3.1.1, , restricted, clearlydefined
-maven/mavencentral/tools.jackson.module/jackson-module-jakarta-xmlbind-annotations/3.1.1, , restricted, clearlydefined
+maven/mavencentral/tools.jackson.jakarta.rs/jackson-jakarta-rs-base/3.1.1, Apache-2.0, approved, #26945
+maven/mavencentral/tools.jackson.jakarta.rs/jackson-jakarta-rs-json-provider/3.1.1, Apache-2.0, approved, #26947
+maven/mavencentral/tools.jackson.module/jackson-module-jakarta-xmlbind-annotations/3.1.1, Apache-2.0, approved, #26946
