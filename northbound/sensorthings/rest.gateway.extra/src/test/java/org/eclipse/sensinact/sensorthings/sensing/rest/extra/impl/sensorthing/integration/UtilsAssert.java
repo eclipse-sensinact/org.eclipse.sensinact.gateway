@@ -24,7 +24,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 public class UtilsAssert {
 

@@ -17,8 +17,8 @@ import java.time.Instant;
 import org.eclipse.sensinact.sensorthings.sensing.dto.jackson.TimeIntervalDeserializer;
 import org.eclipse.sensinact.sensorthings.sensing.dto.jackson.TimeIntervalSerializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 @JsonDeserialize(using = TimeIntervalDeserializer.class)
 @JsonSerialize(using = TimeIntervalSerializer.class)

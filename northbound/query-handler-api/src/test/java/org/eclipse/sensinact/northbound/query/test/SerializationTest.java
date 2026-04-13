@@ -54,10 +54,11 @@ import org.eclipse.sensinact.northbound.query.dto.result.ShortResourceDescriptio
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Tests DTOs serialization
@@ -65,7 +66,10 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 public class SerializationTest {
 
     private final ObjectMapper mapper = JsonMapper.builder()
-            .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true).build();
+            .configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, true)
+            .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true)
+            .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
+            .build();
 
     /**
      * Tests Act DTOs (de-)serialization
@@ -450,7 +454,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testWrappedAccessMethodCallParametesrDTO() throws JsonProcessingException {
+    void testWrappedAccessMethodCallParametesrDTO() throws JacksonException {
 
         final AccessMethodCallParameterDTO arg1 = new AccessMethodCallParameterDTO();
         arg1.name = "arg1";
@@ -479,7 +483,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testTypedResponseSerialization() throws JsonProcessingException {
+    void testTypedResponseSerialization() throws JacksonException {
         // Original version
         final TypedResponse<ResponseGetDTO> original = new TypedResponse<>(EResultType.GET_RESPONSE);
         original.statusCode = 218;
@@ -510,7 +514,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testProvidersList() throws JsonProcessingException {
+    void testProvidersList() throws JacksonException {
         final ResultListProvidersDTO original = new ResultListProvidersDTO();
         original.statusCode = 200;
         original.uri = "/";
@@ -534,7 +538,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testSubscribeRequestNoFilter() throws JsonProcessingException {
+    void testSubscribeRequestNoFilter() throws JacksonException {
         String request = """
                 {
                     "operation": "SUBSCRIBE",
@@ -555,7 +559,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testSubscribeRequestLDAP() throws JsonProcessingException {
+    void testSubscribeRequestLDAP() throws JacksonException {
         String request = """
                 {
                     "operation": "SUBSCRIBE",
@@ -572,7 +576,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testSubscribeRequestResourceSelector() throws JsonProcessingException {
+    void testSubscribeRequestResourceSelector() throws JacksonException {
         String request = """
                 {
                     "operation": "SUBSCRIBE",
@@ -595,7 +599,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testSubscribeRequestMultipleResourceSelector() throws JsonProcessingException {
+    void testSubscribeRequestMultipleResourceSelector() throws JacksonException {
         String request = """
                 {
                     "operation": "SUBSCRIBE",

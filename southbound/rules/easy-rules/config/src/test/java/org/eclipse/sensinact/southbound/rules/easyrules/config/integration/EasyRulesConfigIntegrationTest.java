@@ -45,7 +45,7 @@ import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class EasyRulesConfigIntegrationTest {

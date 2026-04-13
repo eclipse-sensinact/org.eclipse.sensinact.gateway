@@ -45,8 +45,8 @@ import org.eclipse.sensinact.gateway.southbound.wot.api.security.NoSecuritySchem
 import org.eclipse.sensinact.gateway.southbound.wot.api.security.SecurityScheme;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class ParserTest {
 

@@ -34,8 +34,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * MQTT device factory handler
@@ -100,7 +100,7 @@ public class MqttDeviceFactoryHandler implements IMqttMessageListener {
         try {
             mappingConfiguration = new ObjectMapper().readValue(configuration.mapping(),
                     DeviceMappingConfigurationDTO.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error("Error parsing MQTT mapping configuration", e);
             throw new IllegalArgumentException("Invalid mapping configuration", e);
         }

@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.integration;
 
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -58,13 +59,12 @@ import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.core.Application;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Common setup for the tests
@@ -259,12 +259,11 @@ public class AbstractIntegrationTest {
     }
 
     public static String toString(ExpandedObservation obs) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
+        ObjectMapper mapper = JsonMapper.builder().build();
 
         try {
             return mapper.writeValueAsString(obs);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
 

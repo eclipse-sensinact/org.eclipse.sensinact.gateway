@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
 
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -41,10 +43,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class PathHandler {
     public record PathContext(ObjectMapper mapper, ProviderSnapshot provider, SensiNactSession session,
@@ -52,7 +52,7 @@ public class PathHandler {
             IDtoMemoryCache<ExpandedObservation> cacheObs, IDtoMemoryCache<Instant> cacheHl) {
     }
 
-    protected static ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
+    protected static ObjectMapper MAPPER = JsonMapper.builder().build();
 
     private final String path;
 

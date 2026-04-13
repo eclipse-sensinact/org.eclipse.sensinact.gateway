@@ -1,13 +1,15 @@
 {
   "id":"org.eclipse.sensinact.gateway.distribution.features:northbound-oidc-authenticator-feature:osgifeature:${project.version}",
   "bundles":[
+    { "id": "com.fasterxml.jackson.core:jackson-core:${compatibility.jackson.version}" },
+    { "id": "com.fasterxml.jackson.core:jackson-databind:${compatibility.jackson.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.security:security-api:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.security:openid-connect:${gateway.version}" },
-    { "id": "org.eclipse.jetty:jetty-client:11.0.13" },
-    { "id": "org.eclipse.jetty:jetty-alpn-client:11.0.13" },
-    { "id": "org.eclipse.jetty:jetty-http:11.0.13" },
-    { "id": "org.eclipse.jetty:jetty-io:11.0.13" },
-    { "id": "org.eclipse.jetty:jetty-util:11.0.13" },
+    { "id": "org.eclipse.jetty:jetty-client:${jetty.version}" },
+    { "id": "org.eclipse.jetty:jetty-alpn-client:${jetty.version}" },
+    { "id": "org.eclipse.jetty:jetty-http:${jetty.version}" },
+    { "id": "org.eclipse.jetty:jetty-io:${jetty.version}" },
+    { "id": "org.eclipse.jetty:jetty-util:${jetty.version}" },
     { "id": "io.jsonwebtoken:jjwt-api:${jjwt.version}" },
     { "id": "io.jsonwebtoken:jjwt-impl:${jjwt.version}" },
     { "id": "io.jsonwebtoken:jjwt-jackson:${jjwt.version}" }

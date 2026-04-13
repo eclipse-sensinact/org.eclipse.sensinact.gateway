@@ -28,18 +28,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.net.URL;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.exc.MismatchedInputException;
 
 public class GeoJsonTest {
 
@@ -53,8 +53,12 @@ public class GeoJsonTest {
         mapper = new ObjectMapper(factory);
     }
 
-    private URL getFileResource(String name) {
-        return getClass().getResource("/" + name);
+    private String getFileResource(String name) {
+        try (InputStream is = getClass().getResource("/" + name).openStream()) {
+            return new String(is.readAllBytes());
+        } catch (Exception e) {
+            throw new RuntimeException("Could not read resource file: " + name, e);
+        }
     }
 
     @Test
@@ -160,15 +164,19 @@ public class GeoJsonTest {
 
     @Test
     void testNaN() throws Exception {
-        MismatchedInputException e = assertThrows(MismatchedInputException.class, () ->
-            mapper.readValue(getFileResource("test-pointNaN.json"), new TypeReference<List<Geometry>>() {}));
+        MismatchedInputException e = assertThrows(MismatchedInputException.class,
+                () -> mapper.readValue(getFileResource("test-pointNaN.json"), new TypeReference<List<Geometry>>() {
+                }));
         assertEquals("GeoJSON coordinates must have finite latitude and longitude\n"
-                + " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 7, column: 9] (through reference chain: java.util.ArrayList[0]->org.eclipse.sensinact.gateway.geojson.Point[\"coordinates\"])", e.getMessage());
+                + " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); byte offset: #UNKNOWN] (through reference chain: java.util.ArrayList[0]->org.eclipse.sensinact.gateway.geojson.Point[\"coordinates\"])",
+                e.getMessage());
     }
 
     @Test
     void testEmpty() throws Exception {
-        List<Geometry> value = mapper.readValue(getFileResource("test-pointEmpty.json"), new TypeReference<List<Geometry>>() {});
+        List<Geometry> value = mapper.readValue(getFileResource("test-pointEmpty.json"),
+                new TypeReference<List<Geometry>>() {
+                });
         assertEquals(1, value.size());
         assertEquals(Point, value.get(0).type());
         assertTrue(value.get(0).isEmpty());
@@ -180,7 +188,7 @@ public class GeoJsonTest {
                 new TypeReference<List<Geometry>>() {
                 });
 
-        for(GeoJsonObject gjo : geometries) {
+        for (GeoJsonObject gjo : geometries) {
             assertEquals(gjo, GeoJsonObject.fromJsonString(gjo.toJsonString()));
         }
     }

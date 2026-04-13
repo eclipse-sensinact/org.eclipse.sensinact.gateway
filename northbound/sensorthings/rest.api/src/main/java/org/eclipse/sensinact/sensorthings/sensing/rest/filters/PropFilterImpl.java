@@ -20,8 +20,8 @@ import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;

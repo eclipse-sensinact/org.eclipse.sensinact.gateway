@@ -26,7 +26,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Helper class for accessing historical observation data from the history

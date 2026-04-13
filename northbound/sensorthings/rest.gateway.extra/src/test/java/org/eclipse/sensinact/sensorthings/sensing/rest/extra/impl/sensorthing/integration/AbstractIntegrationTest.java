@@ -53,12 +53,6 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.Path;
@@ -67,6 +61,11 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Providers;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", properties = {
         @Property(key = "test.class", source = ValueSource.TestClass),
@@ -82,11 +81,9 @@ public abstract class AbstractIntegrationTest {
 
     public static ObjectMapper getMapper() {
         if (mapper == null) {
-            mapper = new ObjectMapper();
-            getMapper().registerModule(new JavaTimeModule());
+            mapper = JsonMapper.builder().build();
         }
         return mapper;
-
     }
 
     @Path("test")
@@ -161,7 +158,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected JsonNode getJsonResponseFromPost(Object dto, String SubUrl, int expectedStatus)
-            throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+            throws IOException, InterruptedException, JacksonException, DatabindException {
         HttpResponse<String> response = queryPost(SubUrl, dto);
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
@@ -173,7 +170,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected JsonNode getJsonResponseFromPut(Object dto, String SubUrl, int expectedStatus)
-            throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+            throws IOException, InterruptedException, JacksonException, DatabindException {
         HttpResponse<String> response = queryPut(SubUrl, dto);
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
@@ -185,7 +182,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected JsonNode getJsonResponseFromPatch(Object dto, String SubUrl, int expectedStatus)
-            throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+            throws IOException, InterruptedException, JacksonException, DatabindException {
         HttpResponse<String> response = queryPatch(SubUrl, dto);
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
@@ -243,7 +240,7 @@ public abstract class AbstractIntegrationTest {
         return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
     }
 
-    private String getRequestBody(Object dto) throws JsonProcessingException {
+    private String getRequestBody(Object dto) throws JacksonException {
 
         String body = getMapper().writeValueAsString(dto);
         return body;
@@ -276,7 +273,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     public static String getIdFromJson(JsonNode node) {
-        return node.get("@iot.id").asText();
+        return node.get("@iot.id").asString();
     }
 
     public static String getIdFromJsonValues(JsonNode node, int index) {

@@ -22,14 +22,35 @@ import org.eclipse.sensinact.northbound.query.dto.jackson.SensinactPathDeseriali
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 /**
  * Represents a path in the sensiNact nomenclature
  */
 @JsonInclude(Include.NON_NULL)
 @JsonDeserialize(using = SensinactPathDeserializer.class)
+@JsonSerialize(using = SensinactPath.Serializer.class)
 public class SensinactPath {
+
+    public static class Serializer extends StdSerializer<SensinactPath> {
+
+        public Serializer() {
+            super(SensinactPath.class);
+        }
+
+        @Override
+        public void serialize(SensinactPath value, JsonGenerator gen, SerializationContext ctxt)
+                throws JacksonException {
+            gen.writeString(value.toUri());
+        }
+    }
+
     /**
      * Target provider
      */

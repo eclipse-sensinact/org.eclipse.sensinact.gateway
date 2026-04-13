@@ -13,7 +13,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson.internal;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public final class JacksonHelper {
 

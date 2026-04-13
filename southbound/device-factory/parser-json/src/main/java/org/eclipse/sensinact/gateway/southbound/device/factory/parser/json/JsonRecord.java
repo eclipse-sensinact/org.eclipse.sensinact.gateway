@@ -19,8 +19,8 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRec
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Device factory JSON record handler

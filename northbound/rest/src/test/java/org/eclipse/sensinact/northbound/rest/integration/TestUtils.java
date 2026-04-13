@@ -33,7 +33,7 @@ import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 public class TestUtils {
 

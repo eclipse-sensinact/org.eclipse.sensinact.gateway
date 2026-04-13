@@ -19,13 +19,13 @@ import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.cfg.EnumFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.JsonNodeType;
 
 public class DefaultTimedValueTest {
 
@@ -34,8 +34,10 @@ public class DefaultTimedValueTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        mapper = JsonMapper.builder().addModule(new JavaTimeModule())
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        mapper = JsonMapper.builder()
+                .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .configure(EnumFeature.READ_ENUMS_USING_TO_STRING, false)
+                .configure(EnumFeature.WRITE_ENUMS_USING_TO_STRING, false)
                 .build();
     }
 
@@ -49,8 +51,8 @@ public class DefaultTimedValueTest {
         JsonNode node = mapper.convertValue(tv, JsonNode.class);
         assertEquals(JsonNodeType.OBJECT, node.getNodeType());
         assertEquals(2, node.properties().size());
-        assertEquals("test", node.get("value").asText());
-        assertEquals(TIME.toString(), node.get("timestamp").asText());
+        assertEquals("test", node.get("value").asString());
+        assertEquals(TIME.toString(), node.get("timestamp").asString());
 
         TimedValue<String> copy = mapper.convertValue(node,
                 new TypeReference<TimedValue<String>>() {});
@@ -70,7 +72,7 @@ public class DefaultTimedValueTest {
         assertEquals(JsonNodeType.OBJECT, node.getNodeType());
         assertEquals(2, node.properties().size());
         assertEquals(5, node.get("value").asInt());
-        assertEquals(TIME.toString(), node.get("timestamp").asText());
+        assertEquals(TIME.toString(), node.get("timestamp").asString());
 
         TimedValue<Integer> copy = mapper.convertValue(node,
                 new TypeReference<TimedValue<Integer>>() {});
@@ -90,8 +92,8 @@ public class DefaultTimedValueTest {
         assertEquals(JsonNodeType.OBJECT, node.getNodeType());
         assertEquals(2, node.properties().size());
         assertEquals(JsonNodeType.STRING, node.get("value").getNodeType());
-        assertEquals("5", node.get("value").asText());
-        assertEquals(TIME.toString(), node.get("timestamp").asText());
+        assertEquals("5", node.get("value").asString());
+        assertEquals(TIME.toString(), node.get("timestamp").asString());
 
         TimedValue<Integer> copy = mapper.convertValue(node,
                 new TypeReference<TimedValue<Integer>>() {});

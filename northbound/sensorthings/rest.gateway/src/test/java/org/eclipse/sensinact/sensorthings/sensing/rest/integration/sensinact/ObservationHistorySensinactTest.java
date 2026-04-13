@@ -62,7 +62,7 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 @RequirePostgresContainer
 public class ObservationHistorySensinactTest extends AbstractIntegrationTest {

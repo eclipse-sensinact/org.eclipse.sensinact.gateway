@@ -58,8 +58,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.UtilDto;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessProviderUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase.ExtraUseCaseRequest;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.core.UriInfo;
 
@@ -266,7 +266,7 @@ public class DtoToModelMapper {
      * @param lastObservation
      * @param featureOfInterest
      * @return
-     * @throws JsonProcessingException
+     * @throws JacksonException
      */
     public static List<SensorThingsUpdate> toDatastreamUpdate(ObjectMapper mapper, String providerId,
             GeoJsonObject observedArea, String thingId, ExpandedDataStream ds, String sensorId, Sensor sensor,
@@ -336,7 +336,7 @@ public class DtoToModelMapper {
      * @param lastObservationReceived
      * @param featureOfInterest
      * @return
-     * @throws JsonProcessingException
+     * @throws JacksonException
      */
     public static List<SensorThingsUpdate> toDatastreamUpdate(ObjectMapper mapper, String providerId,
             GeoJsonObject observedArea, String thingId, ExpandedDataStream ds, String sensorId, Sensor sensor,
@@ -489,7 +489,7 @@ public class DtoToModelMapper {
         String obsStr;
         try {
             obsStr = mapper.writeValueAsString(obs);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
         return obsStr;
@@ -858,7 +858,7 @@ public class DtoToModelMapper {
             } else if (rawValue instanceof String) {
                 try {
                     parsedLocation = mapper.readValue((String) rawValue, GeoJsonObject.class);
-                } catch (JsonProcessingException ex) {
+                } catch (JacksonException ex) {
                     if (allowNull) {
                         return null;
                     }

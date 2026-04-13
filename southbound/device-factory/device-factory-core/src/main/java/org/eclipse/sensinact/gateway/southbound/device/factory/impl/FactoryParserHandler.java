@@ -77,8 +77,8 @@ import org.osgi.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Handles the common code of device factory
@@ -357,7 +357,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             if (location != null) {
                 bulk.add(makeDto(modelPackageUri, model, provider, "admin", "location", location, timestamp));
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new ParserException("Error parsing location of " + provider, e);
         }
 
@@ -660,11 +660,11 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      * @param placeholders Defined mapping placeholders
      * @param options      Mapping options
      * @return The parsed location as a GeoJSON string or null
-     * @throws JsonProcessingException Error parsing GeoJSON
+     * @throws JacksonException Error parsing GeoJSON
      */
     private GeoJsonObject computeLocation(final IDeviceMappingRecord record,
             final Map<String, IResourceMapping> placeholders, final DeviceMappingOptionsDTO options)
-            throws JsonProcessingException {
+            throws JacksonException {
 
         final IResourceMapping locationPath = placeholders.get(KEY_LOCATION);
         if (locationPath != null) {

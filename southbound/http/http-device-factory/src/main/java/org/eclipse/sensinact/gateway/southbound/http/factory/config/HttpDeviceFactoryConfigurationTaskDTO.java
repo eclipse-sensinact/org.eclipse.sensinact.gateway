@@ -15,7 +15,7 @@ package org.eclipse.sensinact.gateway.southbound.http.factory.config;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingConfigurationDTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Root configuration of a device factory

@@ -70,9 +70,9 @@ import org.osgi.util.converter.Converters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Some Helper methods to work with Ecores.
@@ -451,7 +451,7 @@ public class EMFUtil {
                 try {
                     converted = o instanceof String ? mapper.readValue((String) o, (Class<?>) targetType)
                             : mapper.convertValue(o, (Class<?>) targetType);
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                     LOG.error("Unable to process location data {} into target type {}", o, targetType);
                     throw new ConversionException("Unable to convert location data", e);
                 }

@@ -12,6 +12,13 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.northbound.sensorthings.mqtt.integration;
 
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.net.ConnectException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -44,7 +51,6 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonType;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -56,11 +62,6 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.junit.jupiter.api.AfterEach;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -70,12 +71,11 @@ import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 @WithFactoryConfiguration(factoryPid = "sensiNact.northbound.sensorthings.mqtt", properties = {
         @Property(key = "port", value = "13579"), @Property(key = "websocket.enable", value = "false") })
@@ -123,8 +123,8 @@ public class InsecureMqttNotificationsSensorthingsTest {
 
         listener = (t, m) -> messages.put(new String(m.getPayload(), StandardCharsets.UTF_8));
 
-        mapper = JsonMapper.builder().addModule(new JavaTimeModule())
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true).build();
+        mapper = JsonMapper.builder()
+                .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, true).build();
     }
 
     protected String getMqttURL() {
@@ -284,12 +284,10 @@ public class InsecureMqttNotificationsSensorthingsTest {
     }
 
     public static String toString(ExpandedObservation obs) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-
+        ObjectMapper mapper = JsonMapper.builder().build();
         try {
             return mapper.writeValueAsString(obs);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
 
@@ -390,7 +388,7 @@ public class InsecureMqttNotificationsSensorthingsTest {
     }
 
     private <T> List<T> readMessages(Class<T> type)
-            throws InterruptedException, JsonProcessingException, JsonMappingException {
+            throws InterruptedException, JacksonException, DatabindException {
         List<T> streams = new ArrayList<>();
 
         String message = messages.poll(1500, TimeUnit.MILLISECONDS);

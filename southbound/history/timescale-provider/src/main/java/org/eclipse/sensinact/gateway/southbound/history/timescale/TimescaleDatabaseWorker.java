@@ -37,10 +37,10 @@ import org.osgi.service.typedevent.TypedEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.ObjectMapper;
 
 public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNotification>, HistoricalQueries {
 
@@ -176,7 +176,7 @@ public class TimescaleDatabaseWorker implements TypedEventHandler<ResourceDataNo
             } else if (event.newValue() instanceof GeoJsonObject) {
                 try {
                     tmpValue = mapper.writeValueAsString(event.newValue());
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                     if (logger.isWarnEnabled()) {
                         logger.warn("Unable to serialize geographic data for {}", topic, e);
                     }

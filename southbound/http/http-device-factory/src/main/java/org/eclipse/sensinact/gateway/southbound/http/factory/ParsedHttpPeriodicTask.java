@@ -16,8 +16,8 @@ import java.time.Duration;
 
 import org.eclipse.sensinact.gateway.southbound.http.factory.config.HttpDeviceFactoryConfigurationPeriodicDTO;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
 
 /**
  * Parsed HTTP periodic task configuration
@@ -30,7 +30,7 @@ public class ParsedHttpPeriodicTask extends ParsedHttpTask {
     public final long period;
 
     public ParsedHttpPeriodicTask(final HttpDeviceFactoryConfigurationPeriodicDTO task)
-            throws JsonMappingException, JsonProcessingException {
+            throws DatabindException, JacksonException {
         super(task);
         this.period = Duration.of(task.period, task.periodUnit).toSeconds();
     }

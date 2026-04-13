@@ -55,8 +55,8 @@ import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @WithConfiguration(pid = "sensinact.northbound.websocket", properties = @Property(key = "allow.anonymous", value = "true"))
 @WithConfiguration(pid = "sensinact.session.manager", properties = {
@@ -151,7 +151,7 @@ public class WebSocketTest {
             try {
                 resultHolder.set(mapper.readValue(m, AbstractResultDTO.class));
                 barrier.countDown();
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 fail("Error parsing WS response", e);
             }
         };
@@ -201,7 +201,7 @@ public class WebSocketTest {
         handler.onMessage = (s, m) -> {
             try {
                 resultsHolder.add(mapper.readValue(m, AbstractResultDTO.class));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 error.set(new Exception("Error parsing WS response", e));
             }
         };
@@ -347,7 +347,7 @@ public class WebSocketTest {
         handler.onMessage = (s, m) -> {
             try {
                 resultsHolder.add(mapper.readValue(m, AbstractResultDTO.class));
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 error.set(new Exception("Error parsing WS response", e));
             }
         };

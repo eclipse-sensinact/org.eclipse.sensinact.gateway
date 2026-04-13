@@ -40,8 +40,8 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Feature;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Component(configurationPid = "sensinact.rules.easyrules")
 public class EasyRulesComponent implements RuleDefinition {
@@ -99,7 +99,7 @@ public class EasyRulesComponent implements RuleDefinition {
     private ResourceSelector readResourceSelector(String s) {
         try {
             return mapper.readValue(s, ResourceSelector.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("The resource selector is not valid: " + s, e);
         }
     }
@@ -107,7 +107,7 @@ public class EasyRulesComponent implements RuleDefinition {
     private RuleDTO readRuleDTO(String s) {
         try {
             return mapper.readValue(s, RuleDTO.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("The rule definition is not valid: " + s, e);
         }
     }

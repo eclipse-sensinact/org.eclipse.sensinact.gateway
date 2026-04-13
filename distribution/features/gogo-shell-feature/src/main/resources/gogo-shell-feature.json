@@ -1,8 +1,8 @@
 {
   "id":"org.eclipse.sensinact.gateway.distribution.features:gogo-shell:osgifeature:${project.version}",
   "bundles":[
-    { "id": "org.apache.felix:org.apache.felix.gogo.shell:1.1.4" },
-    { "id": "org.apache.felix:org.apache.felix.gogo.runtime:1.1.6" },
-    { "id": "org.apache.felix:org.apache.felix.gogo.command:1.1.2" }
+    { "id": "org.apache.felix:org.apache.felix.gogo.shell:${org.apache.felix.gogo.shell.version}" },
+    { "id": "org.apache.felix:org.apache.felix.gogo.runtime:${org.apache.felix.gogo.runtime.version}" },
+    { "id": "org.apache.felix:org.apache.felix.gogo.command:${org.apache.felix.gogo.command.version}" }
   ]
 }

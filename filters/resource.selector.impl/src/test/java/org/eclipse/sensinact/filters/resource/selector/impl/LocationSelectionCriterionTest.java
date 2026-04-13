@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * This class tests a subset of the location selection function.
@@ -140,8 +141,9 @@ public class LocationSelectionCriterionTest {
 
     @BeforeEach
     public void loadJSON() throws Exception {
-        locations = JsonMapper.builder().build()
-                .readValue(getClass().getResource("/geojson/london-parks-landmarks.json"), FeatureCollection.class);
+        try (InputStream is = getClass().getResourceAsStream("/geojson/london-parks-landmarks.json")) {
+            locations = JsonMapper.builder().build().readValue(is, FeatureCollection.class);
+        }
     }
 
     private Feature getFeature(String id) {

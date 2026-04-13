@@ -25,7 +25,6 @@
     <bnd-tests.skip>true</bnd-tests.skip>
   </properties>
 
-
   <dependencies>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -44,11 +43,6 @@
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.ecore</artifactId>
     </dependency>
-    <!-- <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>geo-json</artifactId>
-      <version>${project.version}</version>
-    </dependency> -->
     <dependency>
       <groupId>${project.groupId}.models</groupId>
       <artifactId>provider</artifactId>

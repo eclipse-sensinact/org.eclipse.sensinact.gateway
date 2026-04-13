@@ -19,7 +19,7 @@ import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.osgi.util.promise.Promise;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 public class ThingMapper extends ThingsMapper {
 

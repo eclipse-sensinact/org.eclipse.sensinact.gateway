@@ -12,26 +12,24 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.resource.selector.jackson;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.deser.std.StdNodeBasedDeserializer;
 
 public abstract class AbstractSelectionDeserializer<T> extends StdNodeBasedDeserializer<T> {
-
-    private static final long serialVersionUID = 2805370682011614734L;
 
     protected AbstractSelectionDeserializer(Class<T> clazz) {
         super(clazz);
     }
 
-    protected String toString(JsonNode root, String key, DeserializationContext ctxt) throws JsonMappingException {
+    protected String toString(JsonNode root, String key, DeserializationContext ctxt) throws DatabindException {
         JsonNode value = root.get(key);
         String result;
         if(value == null) {
@@ -41,7 +39,7 @@ public abstract class AbstractSelectionDeserializer<T> extends StdNodeBasedDeser
                 case NULL: yield null;
                 case BOOLEAN:
                 case NUMBER:
-                case STRING: yield value.asText();
+                case STRING: yield value.asString();
                 default:
                     ctxt.reportPropertyInputMismatch(handledType(), key, "The %s property of a %s must be one of [String, Number, Boolean, null]; the deserializer encountered %s", key, handledType(), value.getNodeType());
                     yield null;
@@ -50,7 +48,7 @@ public abstract class AbstractSelectionDeserializer<T> extends StdNodeBasedDeser
         return result;
     }
 
-    protected String toString(JsonNode node, DeserializationContext ctxt) throws JsonMappingException {
+    protected String toString(JsonNode node, DeserializationContext ctxt) throws DatabindException {
         String result;
         if(node == null) {
             result = null;
@@ -59,7 +57,7 @@ public abstract class AbstractSelectionDeserializer<T> extends StdNodeBasedDeser
             case NULL: yield null;
             case BOOLEAN:
             case NUMBER:
-            case STRING: yield node.asText();
+            case STRING: yield node.asString();
             default:
                 ctxt.reportInputMismatch(handledType(), "A %s must be one of [String, Number, Boolean, null]; the deserializer encountered %s", handledType(), node.getNodeType());
                 yield null;
@@ -68,7 +66,7 @@ public abstract class AbstractSelectionDeserializer<T> extends StdNodeBasedDeser
         return result;
     }
 
-    protected List<String> toListOfString(JsonNode value, DeserializationContext ctxt) throws IOException {
+    protected List<String> toListOfString(JsonNode value, DeserializationContext ctxt) throws JacksonException {
         if (value == null || value.isNull()) {
             return null;
         }
@@ -84,7 +82,7 @@ public abstract class AbstractSelectionDeserializer<T> extends StdNodeBasedDeser
         }
     }
 
-    protected boolean toBoolean(JsonNode root, String key, DeserializationContext ctxt) throws JsonMappingException {
+    protected boolean toBoolean(JsonNode root, String key, DeserializationContext ctxt) throws DatabindException {
         JsonNode value = root.get(key);
         boolean result;
         if(value == null) {

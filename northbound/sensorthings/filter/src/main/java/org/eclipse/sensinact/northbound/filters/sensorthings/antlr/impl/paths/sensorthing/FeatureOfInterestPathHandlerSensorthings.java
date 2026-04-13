@@ -25,7 +25,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 public class FeatureOfInterestPathHandlerSensorthings extends AbstractPathHandlerSensorthings {
 

@@ -19,7 +19,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.IExtraDelegate;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase.ExtraUseCaseRequest;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.IExtraUseCase.ExtraUseCaseResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.core.MediaType;

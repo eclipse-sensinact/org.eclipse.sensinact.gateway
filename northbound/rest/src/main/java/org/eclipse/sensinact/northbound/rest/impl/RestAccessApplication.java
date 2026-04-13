@@ -28,10 +28,9 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
 
-import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
-import com.fasterxml.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
-
 import jakarta.ws.rs.core.Application;
+import tools.jackson.jakarta.rs.json.JacksonJsonProvider;
+import tools.jackson.jakarta.rs.json.JacksonXmlBindJsonProvider;
 
 @Component(service = Application.class, configurationPid = "sensinact.northbound.rest")
 @JakartarsName("sensinact-rest")

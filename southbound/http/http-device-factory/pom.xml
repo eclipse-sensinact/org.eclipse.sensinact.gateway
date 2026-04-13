@@ -20,9 +20,7 @@
   <artifactId>http-device-factory</artifactId>
   <name>SensiNact Southbound :: HTTP :: Device Factory</name>
   <description>HTTP device factory</description>
-  <properties>
-    <jetty.version>11.0.13</jetty.version>
-  </properties>
+
   <dependencies>
     <!-- HTTP -->
     <dependency>
@@ -88,7 +86,6 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.component.annotations</artifactId>
     </dependency>
-    <!-- OSGi -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
@@ -100,6 +97,10 @@
       <scope>test</scope>
     </dependency>
     <!-- JSON provider -->
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.eclipse.parsson</groupId>
       <artifactId>jakarta.json</artifactId>

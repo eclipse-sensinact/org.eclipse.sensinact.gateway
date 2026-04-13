@@ -12,6 +12,18 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.northbount.sensorthings.mqtt;
 
+import static io.moquette.broker.config.IConfig.HOST_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.JKS_PATH_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.KEY_STORE_TYPE;
+import static io.moquette.broker.config.IConfig.PERSISTENCE_ENABLED_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.PORT_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.SSL_PORT_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.WEB_SOCKET_PORT_PROPERTY_NAME;
+import static io.moquette.broker.config.IConfig.WSS_PORT_PROPERTY_NAME;
+import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -35,24 +47,8 @@ import org.osgi.service.typedevent.propertytypes.EventTopics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
-import static io.moquette.broker.config.IConfig.HOST_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.JKS_PATH_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.KEY_STORE_TYPE;
-import static io.moquette.broker.config.IConfig.PERSISTENCE_ENABLED_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.PORT_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.SSL_PORT_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.WEB_SOCKET_PORT_PROPERTY_NAME;
-import static io.moquette.broker.config.IConfig.WSS_PORT_PROPERTY_NAME;
 import io.moquette.broker.config.MemoryConfig;
 import io.moquette.interception.AbstractInterceptHandler;
 import io.moquette.interception.messages.InterceptSubscribeMessage;
@@ -61,7 +57,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import static io.netty.handler.codec.mqtt.MqttQoS.AT_MOST_ONCE;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 @Component(service = TypedEventHandler.class, configurationPid = "sensiNact.northbound.sensorthings.mqtt", configurationPolicy = ConfigurationPolicy.REQUIRE)
 @EventTopics({ "DATA/*", "LIFECYCLE/*", "METADATA/*" })
@@ -76,8 +75,8 @@ public class SensorthingsMqttNorthbound extends AbstractInterceptHandler
     @Reference
     private GatewayThread gatewayThread;
 
-    private final ObjectMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).build();
+    private final ObjectMapper mapper = JsonMapper.builder()
+            .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false).build();
 
     private final Object lock = new Object();
     private final Map<String, Integer> subscriptionCounts = new HashMap<>();
@@ -228,7 +227,7 @@ public class SensorthingsMqttNorthbound extends AbstractInterceptHandler
                     .retained(false).payload(payload).build();
 
             mqttBroker.internalPublish(message, "sensinact.sensorthings");
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOG.warn("An error occurred creating a notification for topic {}", topic, e);
         }
     }

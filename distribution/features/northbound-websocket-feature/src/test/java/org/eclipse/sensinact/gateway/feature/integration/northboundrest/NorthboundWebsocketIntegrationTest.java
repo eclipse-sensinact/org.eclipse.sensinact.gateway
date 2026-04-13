@@ -30,8 +30,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 class NorthboundWebsocketIntegrationTest {
 
@@ -100,7 +100,7 @@ class NorthboundWebsocketIntegrationTest {
                     try {
                         resultHolder.set(mapper.readValue(m, AbstractResultDTO.class));
                         barrier.countDown();
-                    } catch (JsonProcessingException e) {
+                    } catch (JacksonException e) {
                         fail("Error parsing WS response", e);
                     }
                 };

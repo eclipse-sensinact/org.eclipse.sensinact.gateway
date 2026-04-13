@@ -40,8 +40,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.UnitOfMeasurement;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 public class DtoMapperSensinact {
 
@@ -232,7 +232,7 @@ public class DtoMapperSensinact {
             } else if (rawValue instanceof String) {
                 try {
                     parsedLocation = mapper.readValue((String) rawValue, GeoJsonObject.class);
-                } catch (JsonProcessingException ex) {
+                } catch (JacksonException ex) {
                     if (allowNull) {
                         return null;
                     }

@@ -57,8 +57,8 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 import org.eclipse.sensinact.sensorthings.sensing.rest.snapshot.GenericResourceSnapshot;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
@@ -510,7 +510,7 @@ public class DtoMapper {
             } else if (rawValue instanceof String) {
                 try {
                     parsedLocation = mapper.readValue((String) rawValue, GeoJsonObject.class);
-                } catch (JsonProcessingException ex) {
+                } catch (JacksonException ex) {
                     if (allowNull) {
                         return null;
                     }

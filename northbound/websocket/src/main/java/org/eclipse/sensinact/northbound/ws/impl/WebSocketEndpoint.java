@@ -67,11 +67,10 @@ import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Websocket endpoint
@@ -84,8 +83,8 @@ public class WebSocketEndpoint {
     /**
      * JSON mapper
      */
-    private final ObjectMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false).build();
+    private final ObjectMapper mapper = JsonMapper.builder()
+            .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false).build();
 
     /**
      * Current WebSocket session
@@ -585,7 +584,7 @@ public class WebSocketEndpoint {
         String payload;
         try {
             payload = mapper.writeValueAsString(dto);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error("Error preparing error message payload to client: {}", e.getMessage(), e);
             payload = "{\"uri\": null, \"statusCode\": 500, \"error\": \"Error sending error\", \"result\": null}";
         }

@@ -16,7 +16,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;

@@ -18,7 +18,8 @@ import org.eclipse.sensinact.northbound.query.dto.query.jackson.NestedValueAsStr
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Subscription query
@@ -28,7 +29,7 @@ public class QuerySubscribeDTO extends AbstractQueryDTO {
     /**
      * Resource filter
      */
-    @JsonDeserialize(using = NestedValueAsStringDeserializer.class )
+    @JsonDeserialize(using = NestedValueAsStringDeserializer.class)
     public String filter;
 
     /**

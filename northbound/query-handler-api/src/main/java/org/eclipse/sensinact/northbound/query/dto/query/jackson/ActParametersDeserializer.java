@@ -12,33 +12,30 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.query.jackson;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.deser.std.StdNodeBasedDeserializer;
+import tools.jackson.databind.type.TypeFactory;
 
 /**
  * Handles the deserialization of method parameters
  */
 public class ActParametersDeserializer extends StdNodeBasedDeserializer<Map<String, Object>> {
 
-    private static final long serialVersionUID = 1L;
-
     public ActParametersDeserializer() {
-        super(TypeFactory.defaultInstance().constructMapLikeType(Map.class, String.class, Object.class));
+        super(TypeFactory.createDefaultInstance().constructMapLikeType(Map.class, String.class, Object.class));
     }
 
     @Override
-    public Map<String, Object> convert(JsonNode node, DeserializationContext ctxt) throws IOException, JacksonException {
+    public Map<String, Object> convert(JsonNode node, DeserializationContext ctxt) throws JacksonException {
 
         if (node.isNull()) {
             return Map.of();
@@ -66,6 +63,6 @@ public class ActParametersDeserializer extends StdNodeBasedDeserializer<Map<Stri
             return parameters;
         }
 
-        throw new IOException("Invalid arguments list/map");
+        throw new RuntimeException("Invalid arguments list/map");
     }
 }

@@ -53,7 +53,7 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
 
 @RequirePostgresContainer

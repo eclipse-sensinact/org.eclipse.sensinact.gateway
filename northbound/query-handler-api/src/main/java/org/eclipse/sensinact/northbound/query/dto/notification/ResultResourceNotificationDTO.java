@@ -15,7 +15,7 @@ package org.eclipse.sensinact.northbound.query.dto.notification;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Notification result DTO send on each event

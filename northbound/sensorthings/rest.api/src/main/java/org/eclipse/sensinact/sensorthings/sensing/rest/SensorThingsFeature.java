@@ -24,7 +24,7 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.filters.SelectFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.filters.SkipFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.filters.TopFilter;
 
-import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
+import tools.jackson.jakarta.rs.json.JacksonJsonProvider;
 
 import jakarta.ws.rs.core.Feature;
 import jakarta.ws.rs.core.FeatureContext;

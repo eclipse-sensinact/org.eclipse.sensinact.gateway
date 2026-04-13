@@ -24,8 +24,8 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

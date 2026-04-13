@@ -21,14 +21,6 @@
   <packaging>pom</packaging>
   <name>SensiNact Distribution :: Features :: Jakarta REST Whiteboard</name>
   <description>This project contains a feature providing a Jakarta RESTful Web Services whiteboard</description>
-  <properties>
-    <osgi.technology.rest.version>1.2.2</osgi.technology.rest.version>
-    <hk2.version>3.0.5</hk2.version>
-    <hk2.osgi.version>1.0.3</hk2.osgi.version>
-    <jersey.version>3.1.3</jersey.version>
-    <asm.version>9.6</asm.version>
-    <javassist.version>3.29.2-GA</javassist.version>
-  </properties>
 
   <dependencies>
     <!-- Jersey based OSGi REST Whiteboard -->

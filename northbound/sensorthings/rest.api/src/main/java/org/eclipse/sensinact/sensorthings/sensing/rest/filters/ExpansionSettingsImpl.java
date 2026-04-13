@@ -25,10 +25,10 @@ import java.util.stream.Stream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.JsonNodeType;
+import tools.jackson.databind.node.ObjectNode;
 
 public final class ExpansionSettingsImpl implements ExpansionSettings {
 
