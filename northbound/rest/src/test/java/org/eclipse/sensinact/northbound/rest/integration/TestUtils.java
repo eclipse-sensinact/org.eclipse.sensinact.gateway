@@ -34,10 +34,11 @@ import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class TestUtils {
 
-    private final ObjectMapper mapper = new ObjectMapper();
+    public final ObjectMapper mapper = JsonMapper.builder().build();
 
     static final HttpClient client = HttpClient.newHttpClient();
 
@@ -126,8 +127,9 @@ public class TestUtils {
         }
 
         final HttpRequest req = HttpRequest.newBuilder(targetUri).header("Content-Type", "application/json")
-                .method(method, body == null ? BodyPublishers.noBody() :
-                    BodyPublishers.ofString(mapper.writeValueAsString(body))).build();
+                .method(method, body == null ? BodyPublishers.noBody()
+                        : BodyPublishers.ofString(mapper.writeValueAsString(body)))
+                .build();
         final HttpResponse<InputStream> response = client.send(req, (x) -> BodySubscribers.ofInputStream());
         return mapper.createParser(response.body()).readValueAs(resultType);
     }

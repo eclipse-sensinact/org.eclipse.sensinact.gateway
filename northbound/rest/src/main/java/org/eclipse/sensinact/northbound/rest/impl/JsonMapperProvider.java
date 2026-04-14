@@ -14,7 +14,6 @@ package org.eclipse.sensinact.northbound.rest.impl;
 
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.DateTimeFeature;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -22,18 +21,17 @@ import tools.jackson.databind.json.JsonMapper;
  * Provides a suitable ObjectMapper for JSON serialization
  */
 @Provider
-public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
+public class JsonMapperProvider implements ContextResolver<JsonMapper> {
 
-    private final ObjectMapper mapper;
+    private final JsonMapper mapper;
 
-    public ObjectMapperProvider() {
+    public JsonMapperProvider() {
         this.mapper = JsonMapper.builder()
                 .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false).build();
     }
 
     @Override
-    public ObjectMapper getContext(Class<?> type) {
+    public JsonMapper getContext(Class<?> type) {
         return mapper;
     }
-
 }
