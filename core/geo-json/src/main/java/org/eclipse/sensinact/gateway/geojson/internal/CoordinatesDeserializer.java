@@ -26,7 +26,6 @@ import tools.jackson.databind.exc.MismatchedInputException;
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1.1">the GeoJSON
  * specification</a>
  */
-@SuppressWarnings("serial")
 public class CoordinatesDeserializer extends StdNodeBasedDeserializer<Coordinates> {
 
     public CoordinatesDeserializer() {

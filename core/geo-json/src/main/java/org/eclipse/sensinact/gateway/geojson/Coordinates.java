@@ -32,7 +32,7 @@ public record Coordinates(double longitude, double latitude, double elevation) {
     /**
      * A ready made marker for an empty point using NaN for all coordinate values.
      * This will (de)serialize to/from an empty array in GeoJSON as described in
-     * Section 3.1 of the GeoJSON specifcation:
+     * Section 3.1 of the GeoJSON specification:
      * <p>
      * <i>GeoJSON processors MAY interpret Geometry objects with
      * empty "coordinates" arrays as null objects.</i>
