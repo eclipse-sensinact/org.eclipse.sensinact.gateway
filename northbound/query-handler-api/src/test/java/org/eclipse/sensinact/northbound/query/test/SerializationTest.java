@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -47,6 +48,7 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeResourc
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeServiceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseSetDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseSnapshotDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultDescribeProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
@@ -626,5 +628,40 @@ public class SerializationTest {
         assertEquals("""
                 [{"provider":{"value":"foo"}},{"provider":{"value":"bar"}}]""", query.filter);
         assertNull(query.uri);
+    }
+
+    @Test
+    void testResponseSnapshot() throws JacksonException {
+        String response = """
+                {
+                    "statusCode": 200,
+                    "type": "SNAPSHOT_RESPONSE",
+                    "providers": {
+                        "foo": {
+                            "name": "foo",
+                            "modelName": "fooModel",
+                            "services": {
+                                "bar": {
+                                    "name": "bar",
+                                    "resources": {
+                                        "foobar": {
+                                            "name": "foobar",
+                                            "timestamp": null,
+                                            "value": null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                """;
+        ResponseSnapshotDTO resp = mapper.readValue(response, ResponseSnapshotDTO.class);
+
+        assertEquals(EResultType.SNAPSHOT_RESPONSE, resp.type);
+        assertEquals(200, resp.statusCode);
+        assertEquals(Set.of("foo"), resp.providers.keySet());
+        assertEquals("foobar", resp.providers.get("foo").services.get("bar").resources.get("foobar").name);
+        assertNull(resp.uri);
     }
 }
