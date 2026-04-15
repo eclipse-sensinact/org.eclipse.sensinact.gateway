@@ -60,7 +60,7 @@ public class RestAccessApplication extends Application {
             SensinactSessionProvider.class,
             SensinactSessionManagerProvider.class,
             QueryHandlerProvider.class,
-            ObjectMapperProvider.class,
+            JsonMapperProvider.class,
             JacksonJsonProvider.class,
             JacksonXmlBindJsonProvider.class,
             RestNorthbound.class,

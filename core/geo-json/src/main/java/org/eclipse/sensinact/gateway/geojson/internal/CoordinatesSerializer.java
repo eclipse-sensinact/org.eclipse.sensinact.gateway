@@ -25,7 +25,6 @@ import tools.jackson.databind.ser.std.StdSerializer;
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1.1">the GeoJSON
  * specification</a>
  */
-@SuppressWarnings("serial")
 public class CoordinatesSerializer extends StdSerializer<Coordinates> {
 
     private static final double[] EMPTY = new double[0];
