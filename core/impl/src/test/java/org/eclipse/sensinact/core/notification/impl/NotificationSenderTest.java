@@ -578,6 +578,32 @@ class NotificationSenderTest {
 
             assertTrue(thrown.getMessage().contains("out of temporal order"), "Wrong message: " + thrown.getMessage());
         }
+
+        @Test
+        void testCollectionValueIsSnapshotted() {
+            // Regression test: when newValue/oldValue is a mutable Collection (e.g. an
+            // EMF EDataTypeUniqueEList), the notification must hold an immutable snapshot
+            // taken at call-time. Without the fix, mutating the list before serialization
+            // causes BasicIndexOutOfBoundsException in Jackson.
+            Instant now = Instant.now();
+
+            List<String> mutableNew = new java.util.ArrayList<>(List.of("a", "b"));
+            List<String> mutableOld = new java.util.ArrayList<>(List.of("x"));
+
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, List.class,
+                    mutableOld, mutableNew, null, now);
+
+            // Simulate concurrent EMF model mutation before the notification is delivered
+            mutableNew.clear();
+            mutableOld.clear();
+
+            accumulator.completeAndSend();
+
+            Mockito.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
+                    argThat(isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, List.class,
+                            List.of("x"), List.of("a", "b"), null, now)));
+            Mockito.verifyNoMoreInteractions(bus);
+        }
     }
 
     @Nested

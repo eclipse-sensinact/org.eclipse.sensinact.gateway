@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.core.notification.impl;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +60,18 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
     protected ResourceDataNotification createResourceDataNotification(String modelPackageUri, String model, String provider, String service,
             String resource, Class<?> type, Object oldValue, Object newValue, Map<String, Object> metadata, Instant timestamp) {
         return new ResourceDataNotification(modelPackageUri, model, provider, service,
-                resource, oldValue, newValue, timestamp, type, metadata);
+                resource, snapshotValue(oldValue), snapshotValue(newValue), timestamp, type, metadata);
+    }
+
+    /**
+     * Returns an immutable snapshot of the value if it is a {@link Collection},
+     * to prevent race conditions when the underlying EMF list is later modified.
+     */
+    private static Object snapshotValue(Object value) {
+        if (value instanceof Collection<?>) {
+            return List.copyOf(new ArrayList<>((Collection<?>) value));
+        }
+        return value;
     }
 
     protected ResourceActionNotification createResourceActionNotification(String modelPackageUri, String model, String provider, String service,
