@@ -475,13 +475,23 @@ public class SensiNactSessionImpl implements SensiNactSession {
                             break;
 
                         default:
-                            val = sensinactResource.getValue(Object.class, GetLevel.NORMAL).map(tv -> {
-                                // Add the current value
-                                result.valueType = ValueType.UPDATABLE;
-                                result.value = tv.getValue();
-                                result.timestamp = tv.getTimestamp();
-                                return result;
-                            });
+                            if (sensinactResource.isMultiple()) {
+                                val = sensinactResource.getMultiValue(Object.class, GetLevel.NORMAL).map(tv -> {
+                                    // Add the current values
+                                    result.valueType = ValueType.UPDATABLE;
+                                    result.value = tv.getValue();
+                                    result.timestamp = tv.getTimestamp();
+                                    return result;
+                                });
+                            } else {
+                                val = sensinactResource.getValue(Object.class, GetLevel.NORMAL).map(tv -> {
+                                    // Add the current value
+                                    result.valueType = ValueType.UPDATABLE;
+                                    result.value = tv.getValue();
+                                    result.timestamp = tv.getTimestamp();
+                                    return result;
+                                });
+                            }
                             break;
                         }
 
