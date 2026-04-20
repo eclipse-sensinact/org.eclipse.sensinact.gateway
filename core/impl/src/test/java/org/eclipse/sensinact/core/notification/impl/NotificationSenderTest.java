@@ -1,15 +1,15 @@
 /*********************************************************************
-* Copyright (c) 2025 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.core.notification.impl;
 
 import static java.util.Collections.emptyMap;
@@ -581,10 +581,6 @@ class NotificationSenderTest {
 
         @Test
         void testCollectionValueIsSnapshotted() {
-            // Regression test: when newValue/oldValue is a mutable Collection (e.g. an
-            // EMF EDataTypeUniqueEList), the notification must hold an immutable snapshot
-            // taken at call-time. Without the fix, mutating the list before serialization
-            // causes BasicIndexOutOfBoundsException in Jackson.
             Instant now = Instant.now();
 
             List<String> mutableNew = new java.util.ArrayList<>(List.of("a", "b"));
@@ -593,10 +589,12 @@ class NotificationSenderTest {
             accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, List.class,
                     mutableOld, mutableNew, null, now);
 
-            // Simulate concurrent EMF model mutation before the notification is delivered
+            // Simulate concurrent EMF model mutation after registration
             mutableNew.clear();
             mutableOld.clear();
 
+            // Without snapshotting, the notification would carry the mutated (empty) lists.
+            // With snapshotting, the original values ["a","b"] and ["x"] must be preserved.
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
