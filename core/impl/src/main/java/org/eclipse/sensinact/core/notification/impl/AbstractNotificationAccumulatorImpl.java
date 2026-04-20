@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.core.notification.impl;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +68,7 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
      */
     private static Object snapshotValue(Object value) {
         if (value instanceof Collection<?> col) {
-            return List.copyOf(new ArrayList<>(col));
+            return List.copyOf(col);
         }
         return value;
     }
