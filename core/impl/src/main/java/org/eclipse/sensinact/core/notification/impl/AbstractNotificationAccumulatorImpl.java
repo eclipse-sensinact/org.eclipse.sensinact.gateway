@@ -1,18 +1,19 @@
 /*********************************************************************
-* Copyright (c) 2025 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.core.notification.impl;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +59,18 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
     protected ResourceDataNotification createResourceDataNotification(String modelPackageUri, String model, String provider, String service,
             String resource, Class<?> type, Object oldValue, Object newValue, Map<String, Object> metadata, Instant timestamp) {
         return new ResourceDataNotification(modelPackageUri, model, provider, service,
-                resource, oldValue, newValue, timestamp, type, metadata);
+                resource, snapshotValue(oldValue), snapshotValue(newValue), timestamp, type, metadata);
+    }
+
+    /**
+     * Returns an immutable snapshot of the value if it is a {@link Collection},
+     * to prevent race conditions when the underlying EMF list is later modified.
+     */
+    private static Object snapshotValue(Object value) {
+        if (value instanceof Collection<?> col) {
+            return List.copyOf(col);
+        }
+        return value;
     }
 
     protected ResourceActionNotification createResourceActionNotification(String modelPackageUri, String model, String provider, String service,
