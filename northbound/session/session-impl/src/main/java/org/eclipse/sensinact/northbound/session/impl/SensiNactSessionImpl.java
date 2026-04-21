@@ -472,17 +472,26 @@ public class SensiNactSessionImpl implements SensiNactSession {
                         case ACTION:
                             result.actMethodArgumentsTypes = sensinactResource.getArguments();
                             val = pf.resolved(result);
-                            break;
+                                break;
 
-                        default:
-                            val = sensinactResource.getValue(Object.class, GetLevel.NORMAL).map(tv -> {
-                                // Add the current value
-                                result.valueType = ValueType.UPDATABLE;
-                                result.value = tv.getValue();
-                                result.timestamp = tv.getTimestamp();
-                                return result;
-                            });
-                            break;
+                            default: {
+                                Promise<? extends TimedValue<?>> promise;
+                                if (sensinactResource.isMultiple()) {
+                                    promise = sensinactResource.getMultiValue(Object.class, GetLevel.NORMAL);
+                                } else {
+                                    promise = sensinactResource.getValue(Object.class, GetLevel.NORMAL);
+                                }
+
+                                val = promise.map(tv -> {
+                                    // Add the current value
+                                    result.valueType = ValueType.UPDATABLE;
+                                    result.value = tv.getValue();
+                                    result.timestamp = tv.getTimestamp();
+                                    return result;
+                                });
+
+                                break;
+                            }
                         }
 
                         final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
