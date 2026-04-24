@@ -157,7 +157,7 @@
 
     <!-- Northbound dependencies -->
     <osgi.technology.rest.version>1.2.2</osgi.technology.rest.version>
-    <hk2.version>3.1.1</hk2.version>
+    <hk2.version>4.0.0</hk2.version>
     <jersey.version>3.1.11</jersey.version>
     <jetty.version>11.0.13</jetty.version>
 
