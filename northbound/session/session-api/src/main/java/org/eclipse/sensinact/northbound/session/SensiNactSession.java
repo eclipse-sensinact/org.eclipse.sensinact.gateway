@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.notification.ClientActionListener;
@@ -24,7 +25,6 @@ import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.ClientMetadataListener;
 import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -95,12 +95,34 @@ public interface SensiNactSession {
     String addListener(List<String> topics, ClientDataListener cdl, ClientMetadataListener cml,
             ClientLifecycleListener cll, ClientActionListener cal);
 
+
     /**
      * Remove a registered listener
      *
      * @param id the registration identifier
      */
     void removeListener(String id);
+
+    /**
+     * Create a filtered subscription. On first connection the consumer will be called with
+     * an event containing the full set of initial matches. The consumer will then be called
+     * each time that there is a relevant update to the set of subscribed data.
+     *
+     * @param filter The filter to determine what data should be listened to
+     * @param updateListener  a listener which will be notified of updates in the set of filtered data
+     * @return a new registration identifier
+     */
+    String subscribe(ICriterion filter, Consumer<SnapshotUpdate> updateListener);
+
+    /**
+     * Remove a registered subscription
+     * Note that this method is an alias for {@link #removeListener(String)}
+     *
+     * @param id the registration identifier
+     */
+    default void unsubscribe(String id) {
+        removeListener(id);
+    }
 
     /**
      * Get the value of a resource with with a {@link GetLevel#NORMAL} operation.

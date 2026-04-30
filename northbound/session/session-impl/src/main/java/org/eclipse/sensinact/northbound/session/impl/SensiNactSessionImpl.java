@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -80,6 +81,7 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionActivityChecker;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionExpirationListener;
 import org.eclipse.sensinact.northbound.session.ServiceDescription;
+import org.eclipse.sensinact.northbound.session.SnapshotUpdate;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableLinkedProviderSnapshot;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableProviderSnapshot;
 import org.osgi.framework.BundleContext;
@@ -98,7 +100,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private final String sessionId = UUID.randomUUID().toString();
 
-    private final Map<String, SensinactSessionEventManager> listenerRegistrations = new HashMap<>();
+    private final Map<String, AbstractSensinactSessionEventManager> listenerRegistrations = new HashMap<>();
 
     private Instant expiry;
 
@@ -152,6 +154,11 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public String addListener(List<String> topics, ClientDataListener cdl, ClientMetadataListener cml,
             ClientLifecycleListener cll, ClientActionListener cal) {
+        return doAddListener(subId -> new SensinactSessionEventListener(context, sessionId,
+                subId, topics, authorizer, cll, cdl, cml, cal));
+    }
+
+    private String doAddListener(Function<String, AbstractSensinactSessionEventManager> creator) {
         synchronized (lock) {
             if(expired) {
                 throw new IllegalStateException("The session is expired");
@@ -160,8 +167,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
         String subscriptionId = UUID.randomUUID().toString();
 
-        SensinactSessionEventManager ssem = new SensinactSessionEventManager(context, sessionId,
-                subscriptionId, topics, authorizer, cll, cdl, cml, cal);
+        AbstractSensinactSessionEventManager ssem = creator.apply(subscriptionId);
         boolean destroy;
         synchronized (lock) {
             if(expired) {
@@ -185,7 +191,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public void removeListener(String id) {
-        SensinactSessionEventManager ssem;
+        AbstractSensinactSessionEventManager ssem;
         synchronized (lock) {
             ssem = listenerRegistrations.remove(id);
         }
@@ -194,13 +200,25 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
     }
 
+    @Override
+    public String subscribe(ICriterion filter, Consumer<SnapshotUpdate> updateListener) {
+        return doAddListener(subId -> new SensinactSessionSnapshotListener(context, sessionId,
+                subId, List.of(), authorizer, filter, updateListener,
+                () -> asyncFilteredSnapshot(filter, EnumSet.of(SnapshotOption.INCLUDE_LINKED_PROVIDERS_FULL))));
+    }
+
     private <I, T> T executeGetCommand(Function<SensinactDigitalTwin, I> caller, Function<I, T> converter) {
         return executeGetCommand(caller, converter, null);
     }
 
     private <I, T> T executeGetCommand(Function<SensinactDigitalTwin, I> caller, Function<I, T> converter,
             T defaultValue) {
-        return safeExecute(new AbstractTwinCommand<T>() {
+        return safeExecute(getCommand(caller, converter, defaultValue));
+    }
+
+    private <I, T> AbstractTwinCommand<T> getCommand(Function<SensinactDigitalTwin, I> caller, Function<I, T> converter,
+            T defaultValue) {
+        return new AbstractTwinCommand<T>() {
             @Override
             protected Promise<T> call(SensinactDigitalTwin model, PromiseFactory pf) {
                 try {
@@ -216,7 +234,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     return pf.failed(e);
                 }
             }
-        });
+        };
     }
 
     private <T> T safeExecute(AbstractTwinCommand<T> command) {
@@ -607,31 +625,39 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public List<ProviderSnapshot> filteredSnapshot(ICriterion filter, EnumSet<SnapshotOption> snapshotOptions) {
+        return safeGetValue(asyncFilteredSnapshot(filter, snapshotOptions));
+    }
+
+    private Promise<List<ProviderSnapshot>> asyncFilteredSnapshot(ICriterion filter, EnumSet<SnapshotOption> snapshotOptions) {
+        // We check validity here as we don't use the blocking safeExecute
+        checkWithException();
         Predicate<ServiceSnapshot> service = this::authorizeService;
         Predicate<ResourceSnapshot> resource = this::authorizeResource;
 
-        Stream<ProviderSnapshot> snapshots;
+        Promise<Stream<ProviderSnapshot>> snapshots;
         if (filter == null) {
-            snapshots = executeGetCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false),
-                    service, resource, snapshotOptions), Function.identity()).stream();
+            snapshots = thread.execute(getCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false),
+                    service, resource, snapshotOptions), List::stream, null));
         } else {
             BiPredicate<ProviderSnapshot, GeoJsonObject> location = filter.getLocationFilter();
             Predicate<ProviderSnapshot> provider = ps -> authorizeProvider(ps, location != null);
             Predicate<ProviderSnapshot> pf = filter.getProviderFilter();
             Predicate<ServiceSnapshot> sf = filter.getServiceFilter();
             Predicate<ResourceSnapshot> rf = filter.getResourceFilter();
-            snapshots = executeGetCommand((m) -> m.filteredSnapshot(location, pf == null ? provider : provider.and(pf),
-                    sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf)), Function.identity()).stream();
+            snapshots = thread.execute(getCommand((m) -> m.filteredSnapshot(location, pf == null ? provider : provider.and(pf),
+                    sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf)), List::stream, null));
             final ResourceValueFilter rcFilter = filter.getResourceValueFilter();
             if (rcFilter != null) {
-                snapshots = snapshots.filter(p -> rcFilter.test(p, p.getServices().stream()
-                        .flatMap(s -> s.getResources().stream()).toList()));
+                snapshots = snapshots
+                        .map(providerStream -> providerStream
+                                .filter(p -> rcFilter.test(p, p.getServices().stream()
+                                        .flatMap(s -> s.getResources().stream()).toList())));
             }
         }
 
-        return snapshots
-            .map(this::safeProviderSnapshot)
-            .toList();
+        return snapshots.map(providerStream -> providerStream
+                .map(this::safeProviderSnapshot)
+                .toList());
     }
 
     /**
@@ -795,7 +821,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public void expire() {
         final List<SensiNactSessionExpirationListener> listenersToNotify;
-        final List<SensinactSessionEventManager> eventManagersToClose;
+        final List<AbstractSensinactSessionEventManager> eventManagersToClose;
         synchronized (lock) {
             if (expired) {
                 // Nothing to do
@@ -810,7 +836,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
 
         // Close the registrations outside of the synchronized block
-        for (SensinactSessionEventManager ssem : eventManagersToClose) {
+        for (AbstractSensinactSessionEventManager ssem : eventManagersToClose) {
             try {
                 ssem.destroy();
             } catch (Exception e) {

@@ -28,11 +28,12 @@ public record ImmutableServiceSnapshot(ProviderSnapshot provider, String name,
 
     public ImmutableServiceSnapshot {
         resources = resources == null ? List.of() : resources.stream()
-                .map(r -> r instanceof ImmutableResourceSnapshot ? r : new ImmutableResourceSnapshot(this, r))
+                .map(r -> r instanceof ImmutableResourceSnapshot ir && ir.getService() == this ?
+                        r : new ImmutableResourceSnapshot(this, r))
                 .toList();
     }
 
-    public ImmutableServiceSnapshot(ImmutableProviderSnapshot ps, ServiceSnapshot s) {
+    ImmutableServiceSnapshot(ImmutableProviderSnapshot ps, ServiceSnapshot s) {
         this(ps, s.getName(), s.getResources());
     }
 
