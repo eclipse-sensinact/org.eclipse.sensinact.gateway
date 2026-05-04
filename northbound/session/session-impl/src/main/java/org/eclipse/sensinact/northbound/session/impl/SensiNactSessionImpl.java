@@ -348,7 +348,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                                 }
                             }
                         }
-                        return pf.resolved(null);
+                        return pf.failed(new IllegalArgumentException("Resource not found"));
                     }
                 } catch (Throwable t) {
                     return pf.failed(t);
