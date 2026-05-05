@@ -37,6 +37,14 @@ public record Selection(
          */
         boolean negate) {
 
+    /**
+     * Shortcut constructor for an exact selection
+     * @param value
+     */
+    public Selection(String value) {
+        this(value, MatchType.EXACT, false);
+    }
+
     public Selection {
         if(type == null) {
             type = MatchType.EXACT;

@@ -15,12 +15,9 @@ package org.eclipse.sensinact.northbound.session.impl;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.ACT;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.DESCRIBE;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.READ;
-import static org.osgi.service.typedevent.TypedEventConstants.TYPED_EVENT_TOPICS;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.notification.ClientActionListener;
@@ -33,36 +30,28 @@ import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.typedevent.TypedEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SensinactSessionEventManager
+public class SensinactSessionEventListener extends AbstractSensinactSessionEventManager
         implements TypedEventHandler<ResourceNotification> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SensinactSessionEventManager.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SensinactSessionEventListener.class);
 
-    private final String sessionId;
-    private final String subscriptionId;
-    private final Authorizer authorizer;
     private final ClientLifecycleListener lifecycleListener;
     private final ClientDataListener dataListener;
     private final ClientMetadataListener metadataListener;
     private final ClientActionListener actionListener;
 
-    private final List<String> requestedTopics;
     private final List<String> registeredTopics;
-    private final ServiceRegistration<?> registration;
 
 
-    public SensinactSessionEventManager(BundleContext context, String sessionId,
+    public SensinactSessionEventListener(BundleContext context, String sessionId,
             String subscriptionId, List<String> topics, Authorizer authorizer,
             ClientLifecycleListener lifecycleListener, ClientDataListener dataListener,
             ClientMetadataListener metadataListener, ClientActionListener actionListener) {
-        this.sessionId = sessionId;
-        this.subscriptionId = subscriptionId;
-        this.authorizer = authorizer;
+        super(sessionId, subscriptionId, topics, authorizer);
 
         List<String> prefixes = new ArrayList<>(4);
 
@@ -97,43 +86,15 @@ public class SensinactSessionEventManager
         if(prefixes.isEmpty()) {
             throw new IllegalArgumentException("At least one listener type must be specified");
         }
-        requestedTopics = List.copyOf(topics);
         registeredTopics = prefixes.stream().flatMap(p -> topics.stream().map(p::concat)).toList();
-        registration = context.registerService(TypedEventHandler.class, this, new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, registeredTopics)));
-    }
-
-    public List<String> getRequestedTopics() {
-        return requestedTopics;
+        register(context);
     }
 
     public List<String> getRegisteredTopics() {
         return registeredTopics;
     }
 
-    public void destroy() {
-        try {
-            registration.unregister();
-        } catch (Exception e) {
-            LOG.warn("Unexpected error tidying up session {}", subscriptionId);
-        }
-    }
-
-    @Override
-    public void notify(String topic, ResourceNotification event) {
-        if(event instanceof ResourceDataNotification rdn) {
-            notifyData(topic, rdn);
-        } else if (event instanceof ResourceMetaDataNotification rmn) {
-            notifyMetdata(topic, rmn);
-        } else if (event instanceof LifecycleNotification ln) {
-            notifyLifecycle(topic, ln);
-        } else if (event instanceof ResourceActionNotification ran) {
-            notifyAction(topic, ran);
-        } else {
-            LOG.error("Unknown event with data {}", event);
-        }
-    }
-
-    private void notifyLifecycle(String topic, LifecycleNotification ln) {
+    protected void notifyLifecycle(String topic, LifecycleNotification ln) {
 
         switch(ln.status()) {
             case PROVIDER_CREATED:
@@ -161,15 +122,14 @@ public class SensinactSessionEventManager
         lifecycleListener.notify(topic, ln);
     }
 
-    private void notifyData(String topic, ResourceDataNotification notification) {
+    protected void notifyData(String topic, ResourceDataNotification notification) {
         if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
             return;
         }
-
         dataListener.notify(topic, notification);
     }
 
-    private void notifyMetdata(String topic, ResourceMetaDataNotification notification) {
+    protected void notifyMetdata(String topic, ResourceMetaDataNotification notification) {
         if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
             return;
         }
@@ -177,7 +137,7 @@ public class SensinactSessionEventManager
         metadataListener.notify(topic, notification);
     }
 
-    private void notifyAction(String topic, ResourceActionNotification notification) {
+    protected void notifyAction(String topic, ResourceActionNotification notification) {
         if(!authorizer.hasResourcePermission(ACT, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
             return;
         }

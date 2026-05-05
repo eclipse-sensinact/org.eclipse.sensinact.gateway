@@ -24,20 +24,30 @@ import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 
 /**
  * A default immutable representation of a provider snapshot
  */
-record ImmutableResourceSnapshot(ServiceSnapshot service, String name, ValueType valueType, ResourceType resourceType,
+public record ImmutableResourceSnapshot(ServiceSnapshot service, String name, ValueType valueType, ResourceType resourceType,
         Class<?> type, TimedValue<?> value, Map<String, Object> metadata, List<Entry<String, Class<?>>> arguments,
         boolean multiple) implements ResourceSnapshot {
 
-    ImmutableResourceSnapshot {
+    public ImmutableResourceSnapshot {
         // We must be careful as <code>null</code> is a valid metadata value
         metadata = metadata == null ? Map.of() :
             metadata.entrySet().stream().anyMatch(e -> e.getValue() == null || e.getKey() == null) ?
             Collections.unmodifiableMap(new HashMap<>(metadata)) : Map.copyOf(metadata);
+    }
+
+    /**
+     * A constructor for making a fake resource snapshot, typically used as input to a
+     * fake {@link ImmutableServiceSnapshot}
+     * @param name
+     */
+    public ImmutableResourceSnapshot(String name) {
+        this(null, name, ValueType.FIXED, ResourceType.PROPERTY, Integer.class, new DefaultTimedValue<>(), null, null, false);
     }
 
     ImmutableResourceSnapshot(ImmutableServiceSnapshot ss, ResourceSnapshot r) {

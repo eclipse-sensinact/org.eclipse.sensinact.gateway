@@ -13,10 +13,12 @@
 package org.eclipse.sensinact.northbound.session.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -26,12 +28,22 @@ import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ProviderSelection;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ResourceSelection;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
+import org.eclipse.sensinact.filters.resource.selector.api.Selection;
+import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection;
+import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.CheckType;
+import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.OperationType;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.northbound.session.SnapshotUpdate;
 import org.eclipse.sensinact.northbound.session.impl.SessionManager;
 import org.eclipse.sensinact.northbound.session.impl.TestUserInfo;
 import org.junit.jupiter.api.AfterEach;
@@ -48,6 +60,7 @@ public class SessionSubscribeTest {
     private static final UserInfo ANON = new TestUserInfo("<ANON>", false);
     private static final UserInfo BOB = new TestUserInfo("bob", true);
 
+    private static final String MODEL_URI = "https://sensinact.eclipse.org/test/model";
     private static final String MODEL = "model";
     private static final String PROVIDER = "provider";
     private static final String PROVIDER_TOPIC = MODEL + "/" + PROVIDER + "/*";
@@ -60,7 +73,13 @@ public class SessionSubscribeTest {
     SensiNactSessionManager sessionManager;
 
     @InjectService
+    GatewayThread thread;
+
+    @InjectService
     DataUpdate push;
+
+    @InjectService
+    ResourceSelectorFilterFactory filterFactory;
 
     @AfterEach
     void stop() {
@@ -99,15 +118,7 @@ public class SessionSubscribeTest {
 
         assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 
-        GenericDto dto = new GenericDto();
-        dto.model = MODEL;
-        dto.provider = PROVIDER;
-        dto.service = SERVICE;
-        dto.resource = RESOURCE;
-        dto.value = VALUE;
-        dto.type = Integer.class;
-
-        push.pushUpdate(dto);
+        pushDto(VALUE);
 
         ResourceDataNotification notification = queue.poll(1, TimeUnit.SECONDS);
 
@@ -152,9 +163,7 @@ public class SessionSubscribeTest {
 
         assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 
-        dto.value = VALUE_2;
-
-        push.pushUpdate(dto);
+        pushDto(VALUE_2);
 
         notification = queue.poll(1, TimeUnit.SECONDS);
 
@@ -168,6 +177,23 @@ public class SessionSubscribeTest {
 
         assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 
+    }
+
+    private void pushDto(Integer value) {
+        pushDto(PROVIDER, value);
+    }
+
+    private void pushDto(String provider, Integer value) {
+        GenericDto dto = new GenericDto();
+        dto.modelPackageUri = MODEL_URI;
+        dto.model = MODEL;
+        dto.provider = provider;
+        dto.service = SERVICE;
+        dto.resource = RESOURCE;
+        dto.value = value;
+        dto.type = Integer.class;
+
+        push.pushUpdate(dto);
     }
 
     /**
@@ -185,16 +211,153 @@ public class SessionSubscribeTest {
 
         assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
 
-        GenericDto dto = new GenericDto();
-        dto.model = MODEL;
-        dto.provider = PROVIDER;
-        dto.service = SERVICE;
-        dto.resource = RESOURCE;
-        dto.value = VALUE;
-        dto.type = Integer.class;
+        pushDto(VALUE);
 
-        push.pushUpdate(dto);
+        assertNull(queue.poll(1, TimeUnit.SECONDS));
+    }
 
+    /**
+     * Show that data updates result in events received by subscribers
+     *
+     * @throws Exception
+     */
+    @Test
+    void snapshotSubscribe() throws Exception {
+
+        final String beforeProvider = "before";
+        final String beforeNoMatch = "beforeNoMatch";
+
+        BlockingQueue<SnapshotUpdate> queue = new ArrayBlockingQueue<>(32);
+
+        ResourceSelection friendlyName = new ResourceSelection(new Selection(ProviderPackage.Literals.PROVIDER__ADMIN.getName()),
+                new Selection(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()),
+                List.of());
+
+        ResourceSelection highValue = new ResourceSelection(new Selection(SERVICE), new Selection(RESOURCE),
+                List.of(new ValueSelection(VALUE.toString(), OperationType.GREATER_THAN, false, CheckType.VALUE)));
+
+        ICriterion criterion = filterFactory.parseResourceSelector(
+                new ResourceSelector(List.of(new ProviderSelection(new Selection(MODEL_URI), new Selection(MODEL), null,
+                        List.of(friendlyName, highValue), List.of())), List.of()));
+
+        pushDto(beforeProvider, VALUE_2);
+        pushDto(beforeNoMatch, VALUE);
+
+        SensiNactSession session = sessionManager.getDefaultSession(BOB);
+        session.subscribe(criterion, queue::add);
+
+        SnapshotUpdate update = queue.poll(1, TimeUnit.SECONDS);
+        assertNotNull(update);
+
+        // Just the initial matching provider
+        assertEquals(1, update.arriving().size());
+        assertEquals(0, update.modified().size());
+        assertEquals(0, update.departing().size());
+
+        assertEquals(Set.of(beforeProvider), update.arriving().keySet());
+        assertEquals(VALUE_2,
+                update.arriving().get(beforeProvider).getResource(SERVICE, RESOURCE).getValue().getValue());
+        assertFalse(update.arriving().get(beforeProvider).getResource(
+                ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()).getValue().isEmpty());
+
+        // Modified match
+        pushDto(beforeProvider, VALUE + 1);
+
+        update = queue.poll(1, TimeUnit.SECONDS);
+        assertNotNull(update);
+
+        assertEquals(0, update.arriving().size());
+        assertEquals(1, update.modified().size());
+        assertEquals(0, update.departing().size());
+
+        assertEquals(Set.of(beforeProvider), update.modified().keySet());
+        assertEquals(VALUE + 1,
+                update.modified().get(beforeProvider).getResource(SERVICE, RESOURCE).getValue().getValue());
+        assertFalse(update.modified().get(beforeProvider).getResource(
+                ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()).getValue().isEmpty());
+
+        // New match
+        pushDto(beforeNoMatch, VALUE_2);
+
+        update = queue.poll(1, TimeUnit.SECONDS);
+        assertNotNull(update);
+
+        assertEquals(1, update.arriving().size());
+        assertEquals(0, update.modified().size());
+        assertEquals(0, update.departing().size());
+
+        assertEquals(Set.of(beforeNoMatch), update.arriving().keySet());
+        assertEquals(VALUE_2,
+                update.arriving().get(beforeNoMatch).getResource(SERVICE, RESOURCE).getValue().getValue());
+        assertFalse(update.arriving().get(beforeNoMatch).getResource(
+                ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()).getValue().isEmpty());
+
+        thread.execute(new AbstractTwinCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                SensinactProvider sp = twin.getProvider(beforeProvider);
+                if(sp != null) {
+                    sp.delete();
+                }
+                return pf.resolved(null);
+            }
+        });
+
+        update = queue.poll(1, TimeUnit.SECONDS);
+        assertNotNull(update);
+
+        assertEquals(0, update.arriving().size());
+        assertEquals(0, update.modified().size());
+        assertEquals(1, update.departing().size());
+
+        assertEquals(Set.of(beforeProvider), update.departing());
+
+        assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
+    }
+
+    /**
+     * Show that data updates result in events received by subscribers
+     *
+     * @throws Exception
+     */
+    @Test
+    void basicSnapshotSubscribeWithoutPermission() throws Exception {
+
+        final String beforeProvider = "before";
+        final String beforeNoMatch = "beforeNoMatch";
+
+        BlockingQueue<SnapshotUpdate> queue = new ArrayBlockingQueue<>(32);
+
+        ResourceSelection friendlyName = new ResourceSelection(new Selection(ProviderPackage.Literals.PROVIDER__ADMIN.getName()),
+                new Selection(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()),
+                List.of());
+
+        ResourceSelection highValue = new ResourceSelection(new Selection(SERVICE), new Selection(RESOURCE),
+                List.of(new ValueSelection(VALUE.toString(), OperationType.GREATER_THAN, false, CheckType.VALUE)));
+
+        ICriterion criterion = filterFactory.parseResourceSelector(
+                new ResourceSelector(List.of(new ProviderSelection(new Selection(MODEL_URI), new Selection(MODEL), null,
+                        List.of(friendlyName, highValue), List.of())), List.of()));
+
+        pushDto(beforeProvider, VALUE_2);
+        pushDto(beforeNoMatch, VALUE);
+
+        SensiNactSession session = sessionManager.getDefaultSession(ANON);
+        session.subscribe(criterion, queue::add);
+
+        SnapshotUpdate update = queue.poll(1, TimeUnit.SECONDS);
+        assertNotNull(update);
+
+        // No providers visible at all
+        assertEquals(0, update.arriving().size());
+        assertEquals(0, update.modified().size());
+        assertEquals(0, update.departing().size());
+
+        // New match not visible either
+        pushDto(beforeNoMatch, VALUE_2);
         assertNull(queue.poll(1, TimeUnit.SECONDS));
     }
 }
