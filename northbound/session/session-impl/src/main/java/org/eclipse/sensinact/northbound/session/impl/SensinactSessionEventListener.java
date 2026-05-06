@@ -47,7 +47,7 @@ public class SensinactSessionEventListener extends AbstractSensinactSessionEvent
     private final List<String> registeredTopics;
 
 
-    public SensinactSessionEventListener(BundleContext context, String sessionId,
+    public SensinactSessionEventListener(String sessionId,
             String subscriptionId, List<String> topics, Authorizer authorizer,
             ClientLifecycleListener lifecycleListener, ClientDataListener dataListener,
             ClientMetadataListener metadataListener, ClientActionListener actionListener) {
@@ -87,7 +87,6 @@ public class SensinactSessionEventListener extends AbstractSensinactSessionEvent
             throw new IllegalArgumentException("At least one listener type must be specified");
         }
         registeredTopics = prefixes.stream().flatMap(p -> topics.stream().map(p::concat)).toList();
-        register(context);
     }
 
     public List<String> getRegisteredTopics() {

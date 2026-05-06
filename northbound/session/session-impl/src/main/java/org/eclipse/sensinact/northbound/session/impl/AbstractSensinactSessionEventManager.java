@@ -17,6 +17,7 @@ import static org.osgi.service.typedevent.TypedEventConstants.TYPED_EVENT_TOPICS
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.sensinact.core.authorization.Authorizer;
@@ -41,7 +42,8 @@ public abstract class AbstractSensinactSessionEventManager
     protected final Authorizer authorizer;
 
     private final List<String> requestedTopics;
-    private AtomicReference<ServiceRegistration<?>> registration = new AtomicReference<ServiceRegistration<?>>();
+    private final AtomicInteger state = new AtomicInteger(0);
+    private final AtomicReference<ServiceRegistration<?>> registration = new AtomicReference<ServiceRegistration<?>>();
 
 
     public AbstractSensinactSessionEventManager(String sessionId,
@@ -56,7 +58,10 @@ public abstract class AbstractSensinactSessionEventManager
      * To be called in the sub-class constructor once registered topics are available
      * @param context
      */
-    protected void register(BundleContext context) {
+    public void register(BundleContext context) {
+        if(!state.compareAndSet(0, 1)) {
+            throw new IllegalStateException("This listener has already been registered");
+        }
         List<String> registeredTopics = getRegisteredTopics();
         if(registeredTopics.isEmpty()) {
             throw new IllegalArgumentException("No topics are registered");
@@ -64,6 +69,9 @@ public abstract class AbstractSensinactSessionEventManager
         registration.set(
                 context.registerService(TypedEventHandler.class, this,
                         new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, registeredTopics))));
+        if(state.get() != 1) {
+            destroy();
+        }
     }
 
     public List<String> getRequestedTopics() {
@@ -73,6 +81,7 @@ public abstract class AbstractSensinactSessionEventManager
     public abstract List<String> getRegisteredTopics();
 
     public void destroy() {
+        state.set(2);
         try {
             ServiceRegistration<?> reg = registration.getAndSet(null);
             if(reg != null) {

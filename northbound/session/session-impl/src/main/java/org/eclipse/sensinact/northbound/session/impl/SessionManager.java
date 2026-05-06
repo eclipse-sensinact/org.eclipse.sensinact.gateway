@@ -107,7 +107,7 @@ public class SessionManager
     /**
      * Scheduler for session expiration checks
      */
-    private ScheduledExecutorService activityCheckScheduler;
+    private ScheduledExecutorService sessionWorkers;
 
     /**
      * Promise factory for scheduling session expiration checks
@@ -244,10 +244,10 @@ public class SessionManager
                     activityCheckPeriod, sessionActivityThreshold, sessionActivityExtension);
 
             // Schedule the periodic activity check task
-            this.activityCheckScheduler = Executors.newScheduledThreadPool(4,
-                    r -> new Thread(r, "sensinact-session-activity-checker"));
-            this.promiseFactory = new PromiseFactory(this.activityCheckScheduler);
-            this.activityCheckScheduler.scheduleAtFixedRate(this::checkSessionsLiveness, activityCheckPeriod,
+            this.sessionWorkers = Executors.newScheduledThreadPool(4,
+                    r -> new Thread(r, "sensinact-session-workers"));
+            this.promiseFactory = new PromiseFactory(this.sessionWorkers);
+            this.sessionWorkers.scheduleAtFixedRate(this::checkSessionsLiveness, activityCheckPeriod,
                     activityCheckPeriod, TimeUnit.SECONDS);
         }
 
@@ -264,9 +264,9 @@ public class SessionManager
         }
 
         // Stop the scheduler for session expiration checks
-        if (activityCheckScheduler != null) {
-            activityCheckScheduler.shutdownNow();
-            activityCheckScheduler = null;
+        if (sessionWorkers != null) {
+            sessionWorkers.shutdownNow();
+            sessionWorkers = null;
         }
 
         List<SensiNactSessionImpl> toInvalidate;
@@ -586,7 +586,7 @@ public class SessionManager
         }
 
         final SensiNactSessionImpl session = new SensiNactSessionImpl(user, preAuthorizer, authorizer, thread, expiry,
-                activityChecker, context);
+                activityChecker, context, promiseFactory);
         String sessionId = session.getSessionId();
 
         // Add an expiration listener to clean up session when explicitly expired
