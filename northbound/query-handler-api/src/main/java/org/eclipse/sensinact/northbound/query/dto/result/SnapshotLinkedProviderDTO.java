@@ -32,6 +32,12 @@ public class SnapshotLinkedProviderDTO {
     public String modelName;
 
     /**
+     * Model URI
+     */
+    @JsonInclude(NON_NULL)
+    public String modelPackageUri;
+
+    /**
      * Provider location, if available
      */
     @JsonInclude(NON_NULL)

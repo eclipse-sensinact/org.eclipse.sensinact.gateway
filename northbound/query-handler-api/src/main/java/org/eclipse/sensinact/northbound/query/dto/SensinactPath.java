@@ -12,10 +12,9 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.northbound.query.dto.jackson.SensinactPathDeserializer;
 
@@ -205,16 +204,9 @@ public class SensinactPath {
      * Returns the path as a URI
      */
     public String toUri() {
-
-        final List<String> items = new ArrayList<>(4);
-        for (final String item : Arrays.asList(provider, service, resource, metadata)) {
-            if (item == null) {
-                break;
-            }
-            items.add(item);
-        }
-
-        return "/" + String.join("/", items);
+        return Stream.of(provider, service, resource, metadata)
+            .takeWhile(Objects::nonNull)
+            .collect(Collectors.joining("/", "/", ""));
     }
 
     /**

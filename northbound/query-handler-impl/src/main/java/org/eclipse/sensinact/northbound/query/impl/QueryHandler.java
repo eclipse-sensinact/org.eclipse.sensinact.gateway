@@ -470,41 +470,46 @@ public class QueryHandler implements IQueryHandler {
         for (var filter : query.filter) {
             ICriterion criterion = resourceSelectorFilterFactory.parseResourceSelector(filter);
             for (var providerSnapshot : executeFilter(userSession, criterion, query.linkOptions)) {
-                SnapshotProviderDTO providerDTO = result.providers
-                        .computeIfAbsent(providerSnapshot.getName(), (name) -> {
-                            var dto = new SnapshotProviderDTO();
-                            dto.name = providerSnapshot.getName();
-                            dto.modelName = providerSnapshot.getModelName();
-                            dto.services = new HashMap<>();
-                            return dto;
-                        });
-                providerDTO.linkedProviders = handleLinkedProviders(providerSnapshot.getLinkedProviders(), query.linkOptions);
-                for (var serviceSnapshot : providerSnapshot.getServices()) {
-                    SnapshotServiceDTO serviceDTO = providerDTO.services
-                            .computeIfAbsent(serviceSnapshot.getName(), (name) -> {
-                                var dto = new SnapshotServiceDTO();
-                                dto.name = serviceSnapshot.getName();
-                                dto.resources = new HashMap<>();
-                                return dto;
-                            });
-                    for (var resourceSnapshot : serviceSnapshot.getResources()) {
-                        SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
-                        resourceDTO.name = resourceSnapshot.getName();
-                        resourceDTO.type = resourceSnapshot.getType().getName();
-                        Optional<TimedValue<?>> value = Optional.ofNullable(resourceSnapshot.getValue());
-                        resourceDTO.timestamp = value.map(TimedValue::getTimestamp).map(Instant::toEpochMilli)
-                                .orElse(0L);
-                        resourceDTO.value = value.map(TimedValue::getValue).orElse(null);
-                        if (query.includeMetadata) {
-                            resourceDTO.attributes = generateMetadataDescriptions(resourceSnapshot.getMetadata());
-                        }
-                        serviceDTO.resources.put(resourceSnapshot.getName(), resourceDTO);
-                    }
-                }
+                result.providers.computeIfAbsent(providerSnapshot.getName(),
+                        x -> toSnapshotProviderDTO(providerSnapshot, query.linkOptions, query.includeMetadata));
             }
         }
 
         return result;
+    }
+
+    public SnapshotProviderDTO toSnapshotProviderDTO(ProviderSnapshot providerSnapshot,
+            List<SnapshotLinkOption> linkOptions, boolean includeMetadata) {
+        SnapshotProviderDTO providerDTO = new SnapshotProviderDTO();
+        providerDTO.name = providerSnapshot.getName();
+        providerDTO.modelName = providerSnapshot.getModelName();
+        providerDTO.modelPackageUri = providerSnapshot.getModelPackageUri();
+        providerDTO.services = new HashMap<>();
+
+        providerDTO.linkedProviders = handleLinkedProviders(providerSnapshot.getLinkedProviders(), linkOptions);
+        for (var serviceSnapshot : providerSnapshot.getServices()) {
+            SnapshotServiceDTO serviceDTO = providerDTO.services
+                    .computeIfAbsent(serviceSnapshot.getName(), (name) -> {
+                        var dto = new SnapshotServiceDTO();
+                        dto.name = serviceSnapshot.getName();
+                        dto.resources = new HashMap<>();
+                        return dto;
+                    });
+            for (var resourceSnapshot : serviceSnapshot.getResources()) {
+                SnapshotResourceDTO resourceDTO = new SnapshotResourceDTO();
+                resourceDTO.name = resourceSnapshot.getName();
+                resourceDTO.type = resourceSnapshot.getType().getName();
+                Optional<TimedValue<?>> value = Optional.ofNullable(resourceSnapshot.getValue());
+                resourceDTO.timestamp = value.map(TimedValue::getTimestamp).map(Instant::toEpochMilli)
+                        .orElse(0L);
+                resourceDTO.value = value.map(TimedValue::getValue).orElse(null);
+                if (includeMetadata) {
+                    resourceDTO.attributes = generateMetadataDescriptions(resourceSnapshot.getMetadata());
+                }
+                serviceDTO.resources.put(resourceSnapshot.getName(), resourceDTO);
+            }
+        }
+        return providerDTO;
     }
 
     private List<SnapshotLinkedProviderDTO> handleLinkedProviders(List<LinkedProviderSnapshot> linkedProviders,
@@ -528,6 +533,7 @@ public class QueryHandler implements IQueryHandler {
                 }
                 if(options.contains(SnapshotLinkOption.MODEL) || options.contains(SnapshotLinkOption.FULL)) {
                     dto.modelName = lp.getModelName();
+                    dto.modelPackageUri = lp.getModelPackageUri();
                 }
                 return dto;
             }).toList();

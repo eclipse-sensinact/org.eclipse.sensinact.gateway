@@ -14,6 +14,7 @@ package org.eclipse.sensinact.northbound.websocket.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,14 +43,17 @@ import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.SensinactPath;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceDataNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResultResourceNotificationDTO;
+import org.eclipse.sensinact.northbound.query.dto.notification.ResultSnapshotNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySubscribeDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySubscribeDTO.SubscriptionType;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryUnsubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListServicesDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultSubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultUnsubscribeDTO;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
@@ -176,285 +180,406 @@ public class WebSocketTest {
         assertTrue(svcList.services.contains(dto.service), "Provider service is missing");
     }
 
-    @Test
-    void testSubscription() throws Exception {
-        GenericDto dto = makeDto("wsTestProviderSub", "svc", "data", 42, Integer.class);
-        push.pushUpdate(dto).getValue();
-
-        final WSHandler handler = new WSHandler();
-        final CountDownLatch barrier = new CountDownLatch(1);
-
-        final AtomicReference<Session> sessionRef = new AtomicReference<>();
-        handler.onConnect = s -> {
-            sessionRef.set(s);
-            barrier.countDown();
-        };
-
-        final AtomicReference<Throwable> error = new AtomicReference<>();
-        handler.onError = (s, t) -> {
-            error.set(t);
-            barrier.countDown();
-        };
-        handler.onClose = (s, c) -> barrier.countDown();
-
-        final BlockingQueue<AbstractResultDTO> resultsHolder = new BlockingArrayQueue<>();
-        handler.onMessage = (s, m) -> {
-            try {
-                resultsHolder.add(mapper.readValue(m, AbstractResultDTO.class));
-            } catch (JacksonException e) {
-                error.set(new Exception("Error parsing WS response", e));
-            }
-        };
-
-        try (final WSClient client = new WSClient()) {
-            client.ws.connect(handler, wsUri).get();
-
-            // Wait for the websocket to connect connection
-            barrier.await(2, TimeUnit.SECONDS);
-            final Session session = sessionRef.get();
-
-            // Send the notification
-            final QuerySubscribeDTO querySub = new QuerySubscribeDTO();
-            querySub.uri = new SensinactPath(dto.provider, dto.service, dto.resource);
-            querySub.requestId = String.valueOf(new Random().nextInt());
-            sendDTO(session, querySub);
-
-            // Result must be the subscription result
-            AbstractResultDTO rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
-            assertNotNull(rawResult, "No result to subscribe");
-            ResultSubscribeDTO subscribeResult = (ResultSubscribeDTO) rawResult;
-            assertEquals(querySub.requestId, rawResult.requestId);
-            assertNotNull(subscribeResult.subscriptionId, "No subscription ID");
-
-            // Update the value
-            Instant updateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-            Object oldValue = dto.value;
-            dto.value = -12;
+    @Nested
+    class EventSubscriptions {
+        @Test
+        void testSubscription() throws Exception {
+            GenericDto dto = makeDto("wsTestProviderSub", "svc", "data", 42, Integer.class);
             push.pushUpdate(dto).getValue();
 
-            // Second result must be the notification
-            rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
-            if (rawResult == null && error.get() != null) {
-                fail(error.get());
-            }
-            assertNotNull(rawResult, "No notification");
-            ResultResourceNotificationDTO notif = (ResultResourceNotificationDTO) rawResult;
-            assertEquals(querySub.requestId, subscribeResult.requestId);
-            assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
-            assertNotNull(notif.notification);
-            assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
-            assertEquals(dto.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
-            assertEquals(dto.provider, notif.notification.provider);
-            assertEquals(dto.service, notif.notification.service);
-            assertEquals(dto.resource, notif.notification.resource);
-            final Instant firstNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
-            assertFalse(updateTime.isAfter(firstNotifTime));
+            final WSHandler handler = new WSHandler();
+            final CountDownLatch barrier = new CountDownLatch(1);
 
-            // New update
-            Instant updateTime2 = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-            oldValue = dto.value;
-            dto.value = 128;
-            push.pushUpdate(dto).getValue();
+            final AtomicReference<Session> sessionRef = new AtomicReference<>();
+            handler.onConnect = s -> {
+                sessionRef.set(s);
+                barrier.countDown();
+            };
 
-            // Second result must be the notification
-            rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
-            assertNotNull(rawResult, "No notification");
-            notif = (ResultResourceNotificationDTO) rawResult;
-            assertEquals(querySub.requestId, subscribeResult.requestId);
-            assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
-            assertNotNull(notif.notification);
-            assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
-            assertEquals(dto.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
-            final Instant secondNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
-            assertFalse(firstNotifTime.isAfter(secondNotifTime));
-            assertFalse(updateTime2.isAfter(secondNotifTime));
+            final AtomicReference<Throwable> error = new AtomicReference<>();
+            handler.onError = (s, t) -> {
+                error.set(t);
+                barrier.countDown();
+            };
+            handler.onClose = (s, c) -> barrier.countDown();
 
-            // Unsubscribe
-            final QueryUnsubscribeDTO unsubQuery = new QueryUnsubscribeDTO();
-            unsubQuery.subscriptionId = subscribeResult.subscriptionId;
-            sendDTO(session, unsubQuery);
-
-            // Wait for the result
-            final Instant timeout = Instant.now().plus(5, ChronoUnit.SECONDS);
-            boolean found = false;
-            while (Instant.now().isBefore(timeout)) {
-                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
-                if (rawResult != null && rawResult.type == EResultType.UNSUBSCRIPTION_RESPONSE) {
-                    // Got it
-                    found = true;
-                    break;
+            final BlockingQueue<AbstractResultDTO> resultsHolder = new BlockingArrayQueue<>();
+            handler.onMessage = (s, m) -> {
+                try {
+                    resultsHolder.add(mapper.readValue(m, AbstractResultDTO.class));
+                } catch (JacksonException e) {
+                    error.set(new Exception("Error parsing WS response", e));
                 }
+            };
+
+            try (final WSClient client = new WSClient()) {
+                client.ws.connect(handler, wsUri).get();
+
+                // Wait for the websocket to connect connection
+                barrier.await(2, TimeUnit.SECONDS);
+                final Session session = sessionRef.get();
+
+                // Send the notification
+                final QuerySubscribeDTO querySub = new QuerySubscribeDTO();
+                querySub.uri = new SensinactPath(dto.provider, dto.service, dto.resource);
+                querySub.requestId = String.valueOf(new Random().nextInt());
+                sendDTO(session, querySub);
+
+                // Result must be the subscription result
+                AbstractResultDTO rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                assertNotNull(rawResult, "No result to subscribe");
+                ResultSubscribeDTO subscribeResult = (ResultSubscribeDTO) rawResult;
+                assertEquals(querySub.requestId, rawResult.requestId);
+                assertNotNull(subscribeResult.subscriptionId, "No subscription ID");
+
+                // Update the value
+                Instant updateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+                Object oldValue = dto.value;
+                dto.value = -12;
+                push.pushUpdate(dto).getValue();
+
+                // Second result must be the notification
+                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                if (rawResult == null && error.get() != null) {
+                    fail(error.get());
+                }
+                assertNotNull(rawResult, "No notification");
+                ResultResourceNotificationDTO notif = (ResultResourceNotificationDTO) rawResult;
+                assertEquals(querySub.requestId, subscribeResult.requestId);
+                assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
+                assertNotNull(notif.notification);
+                assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
+                assertEquals(dto.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
+                assertEquals(dto.provider, notif.notification.provider);
+                assertEquals(dto.service, notif.notification.service);
+                assertEquals(dto.resource, notif.notification.resource);
+                final Instant firstNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
+                assertFalse(updateTime.isAfter(firstNotifTime));
+
+                // New update
+                Instant updateTime2 = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+                oldValue = dto.value;
+                dto.value = 128;
+                push.pushUpdate(dto).getValue();
+
+                // Second result must be the notification
+                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                assertNotNull(rawResult, "No notification");
+                notif = (ResultResourceNotificationDTO) rawResult;
+                assertEquals(querySub.requestId, subscribeResult.requestId);
+                assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
+                assertNotNull(notif.notification);
+                assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
+                assertEquals(dto.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
+                final Instant secondNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
+                assertFalse(firstNotifTime.isAfter(secondNotifTime));
+                assertFalse(updateTime2.isAfter(secondNotifTime));
+
+                // Unsubscribe
+                final QueryUnsubscribeDTO unsubQuery = new QueryUnsubscribeDTO();
+                unsubQuery.subscriptionId = subscribeResult.subscriptionId;
+                sendDTO(session, unsubQuery);
+
+                // Wait for the result
+                final Instant timeout = Instant.now().plus(5, ChronoUnit.SECONDS);
+                boolean found = false;
+                while (Instant.now().isBefore(timeout)) {
+                    rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                    if (rawResult != null && rawResult.type == EResultType.UNSUBSCRIPTION_RESPONSE) {
+                        // Got it
+                        found = true;
+                        break;
+                    }
+                }
+
+                assertTrue(found, "Didn't get the unsubscription response");
+
+                ResultUnsubscribeDTO unsubResult = (ResultUnsubscribeDTO) rawResult;
+                assertEquals(subscribeResult.subscriptionId, unsubResult.subscriptionId);
+
+                // New update
+                dto.value = 512;
+                push.pushUpdate(dto).getValue();
+
+                // Wait of a notification
+                assertNull(resultsHolder.poll(1, TimeUnit.SECONDS), "Got a notification");
             }
-
-            assertTrue(found, "Didn't get the unsubscription response");
-
-            ResultUnsubscribeDTO unsubResult = (ResultUnsubscribeDTO) rawResult;
-            assertEquals(subscribeResult.subscriptionId, unsubResult.subscriptionId);
-
-            // New update
-            dto.value = 512;
-            push.pushUpdate(dto).getValue();
-
-            // Wait of a notification
-            assertNull(resultsHolder.poll(1, TimeUnit.SECONDS), "Got a notification");
         }
-    }
 
-    private static final String SUBSCRIBE_PROVIDER_1 = "wsTestProviderSubFilter1";
-    private static final String SUBSCRIBE_PROVIDER_2 = "wsTestProviderSubFilter2";
+        private static final String SUBSCRIBE_PROVIDER_1 = "wsTestProviderSubFilter1";
+        private static final String SUBSCRIBE_PROVIDER_2 = "wsTestProviderSubFilter2";
 
-    @Test
-    void subscriptionWithLDAPFilter() throws Exception {
-        doSubscriptionTestWithFilter("(PROVIDER=" + SUBSCRIBE_PROVIDER_1 + ")", "ldap");
-    }
+        @Test
+        void subscriptionWithLDAPFilter() throws Exception {
+            doSubscriptionTestWithFilter("(PROVIDER=" + SUBSCRIBE_PROVIDER_1 + ")", "ldap");
+        }
 
-    @Test
-    void subscriptionWithResourceSelector() throws Exception {
-        doSubscriptionTestWithFilter("""
+        @Test
+        void subscriptionWithResourceSelector() throws Exception {
+            doSubscriptionTestWithFilter("""
                 {
                     "provider": {
                         "value": \"%s\"
                     }
                 }
                 """.formatted(SUBSCRIBE_PROVIDER_1), "resource.selector");
-    }
+        }
 
-    void doSubscriptionTestWithFilter(String filter, String filterLanguage) throws Exception {
-        // Push 2 providers
-        final GenericDto dto1 = makeDto(SUBSCRIBE_PROVIDER_1, "svc", "data", 42, Integer.class);
-        final GenericDto dto2 = makeDto(SUBSCRIBE_PROVIDER_2, "svc", "data", 21, Integer.class);
-        final BulkGenericDto bulk = new BulkGenericDto();
-        bulk.dtos = List.of(dto1, dto2);
-        push.pushUpdate(bulk).getValue();
-
-        final WSHandler handler = new WSHandler();
-        final CountDownLatch barrier = new CountDownLatch(1);
-
-        final AtomicReference<Session> sessionRef = new AtomicReference<>();
-        handler.onConnect = s -> {
-            sessionRef.set(s);
-            barrier.countDown();
-        };
-
-        final AtomicReference<Throwable> error = new AtomicReference<>();
-        handler.onError = (s, t) -> {
-            error.set(t);
-            barrier.countDown();
-        };
-        handler.onClose = (s, c) -> barrier.countDown();
-
-        final BlockingQueue<AbstractResultDTO> resultsHolder = new BlockingArrayQueue<>();
-        handler.onMessage = (s, m) -> {
-            try {
-                resultsHolder.add(mapper.readValue(m, AbstractResultDTO.class));
-            } catch (JacksonException e) {
-                error.set(new Exception("Error parsing WS response", e));
-            }
-        };
-
-        try (final WSClient client = new WSClient()) {
-            client.ws.connect(handler, wsUri).get();
-
-            // Wait for the websocket to connect connection
-            barrier.await(2, TimeUnit.SECONDS);
-            final Session session = sessionRef.get();
-
-            // Send the notification
-            final QuerySubscribeDTO querySub = new QuerySubscribeDTO();
-            querySub.uri = new SensinactPath();
-            querySub.requestId = String.valueOf(new Random().nextInt());
-            querySub.filter = filter;
-            querySub.filterLanguage = filterLanguage;
-            sendDTO(session, querySub);
-
-            // Result must be the subscription result
-            AbstractResultDTO rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
-            assertNotNull(rawResult, "No result to subscribe");
-            ResultSubscribeDTO subscribeResult = (ResultSubscribeDTO) rawResult;
-            assertEquals(querySub.requestId, rawResult.requestId);
-            assertNotNull(subscribeResult.subscriptionId, "No subscription ID");
-
-            // Update the value
-            Instant updateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-            Object oldValue = dto1.value;
-            dto1.value = -12;
-            push.pushUpdate(dto1).getValue();
-
-            // Second result must be the notification
-            rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
-            if (rawResult == null && error.get() != null) {
-                fail(error.get());
-            }
-            assertNotNull(rawResult, "No notification");
-            ResultResourceNotificationDTO notif = (ResultResourceNotificationDTO) rawResult;
-            assertEquals(querySub.requestId, subscribeResult.requestId);
-            assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
-            assertNotNull(notif.notification);
-            assertEquals(dto1.provider, notif.notification.provider);
-            assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
-            assertEquals(dto1.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
-            assertEquals(dto1.provider, notif.notification.provider);
-            assertEquals(dto1.service, notif.notification.service);
-            assertEquals(dto1.resource, notif.notification.resource);
-            final Instant firstNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
-            assertFalse(updateTime.isAfter(firstNotifTime));
-
-            // New update on second provider
-            dto2.value = 128;
-            push.pushUpdate(dto2).getValue();
-
-            // Notification shouldn't be sent
-            rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
-            assertNull(rawResult, "Got notified on filtered out provider");
-
-            // Second result must be the notification
-            Instant updateTime2 = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-            oldValue = dto1.value;
-            dto1.value = -128;
-            push.pushUpdate(dto1).getValue();
-
-            rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
-            assertNotNull(rawResult, "No notification");
-            notif = (ResultResourceNotificationDTO) rawResult;
-            assertEquals(querySub.requestId, subscribeResult.requestId);
-            assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
-            assertNotNull(notif.notification);
-            assertEquals(dto1.provider, notif.notification.provider);
-            assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
-            assertEquals(dto1.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
-            final Instant secondNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
-            assertFalse(firstNotifTime.isAfter(secondNotifTime));
-            assertFalse(updateTime2.isAfter(secondNotifTime));
-
-            // Unsubscribe
-            final QueryUnsubscribeDTO unsubQuery = new QueryUnsubscribeDTO();
-            unsubQuery.subscriptionId = subscribeResult.subscriptionId;
-            sendDTO(session, unsubQuery);
-
-            // Wait for the result
-            final Instant timeout = Instant.now().plus(5, ChronoUnit.SECONDS);
-            boolean found = false;
-            while (Instant.now().isBefore(timeout)) {
-                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
-                if (rawResult != null && rawResult.type == EResultType.UNSUBSCRIPTION_RESPONSE) {
-                    // Got it
-                    found = true;
-                    break;
-                }
-            }
-
-            assertTrue(found, "Didn't get the unsubscription response");
-
-            ResultUnsubscribeDTO unsubResult = (ResultUnsubscribeDTO) rawResult;
-            assertEquals(subscribeResult.subscriptionId, unsubResult.subscriptionId);
-
-            // New update for both
-            dto1.value = 512;
-            dto2.value = 256;
+        void doSubscriptionTestWithFilter(String filter, String filterLanguage) throws Exception {
+            // Push 2 providers
+            final GenericDto dto1 = makeDto(SUBSCRIBE_PROVIDER_1, "svc", "data", 42, Integer.class);
+            final GenericDto dto2 = makeDto(SUBSCRIBE_PROVIDER_2, "svc", "data", 21, Integer.class);
+            final BulkGenericDto bulk = new BulkGenericDto();
+            bulk.dtos = List.of(dto1, dto2);
             push.pushUpdate(bulk).getValue();
 
-            // Wait of a notification
-            assertNull(resultsHolder.poll(1, TimeUnit.SECONDS), "Got a notification");
+            final WSHandler handler = new WSHandler();
+            final CountDownLatch barrier = new CountDownLatch(1);
+
+            final AtomicReference<Session> sessionRef = new AtomicReference<>();
+            handler.onConnect = s -> {
+                sessionRef.set(s);
+                barrier.countDown();
+            };
+
+            final AtomicReference<Throwable> error = new AtomicReference<>();
+            handler.onError = (s, t) -> {
+                error.set(t);
+                barrier.countDown();
+            };
+            handler.onClose = (s, c) -> barrier.countDown();
+
+            final BlockingQueue<AbstractResultDTO> resultsHolder = new BlockingArrayQueue<>();
+            handler.onMessage = (s, m) -> {
+                try {
+                    resultsHolder.add(mapper.readValue(m, AbstractResultDTO.class));
+                } catch (JacksonException e) {
+                    error.set(new Exception("Error parsing WS response", e));
+                }
+            };
+
+            try (final WSClient client = new WSClient()) {
+                client.ws.connect(handler, wsUri).get();
+
+                // Wait for the websocket to connect connection
+                barrier.await(2, TimeUnit.SECONDS);
+                final Session session = sessionRef.get();
+
+                // Send the notification
+                final QuerySubscribeDTO querySub = new QuerySubscribeDTO();
+                querySub.uri = new SensinactPath();
+                querySub.requestId = String.valueOf(new Random().nextInt());
+                querySub.filter = filter;
+                querySub.filterLanguage = filterLanguage;
+                sendDTO(session, querySub);
+
+                // Result must be the subscription result
+                AbstractResultDTO rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                assertNotNull(rawResult, "No result to subscribe");
+                ResultSubscribeDTO subscribeResult = (ResultSubscribeDTO) rawResult;
+                assertEquals(querySub.requestId, rawResult.requestId);
+                assertNotNull(subscribeResult.subscriptionId, "No subscription ID");
+
+                // Update the value
+                Instant updateTime = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+                Object oldValue = dto1.value;
+                dto1.value = -12;
+                push.pushUpdate(dto1).getValue();
+
+                // Second result must be the notification
+                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                if (rawResult == null && error.get() != null) {
+                    fail(error.get());
+                }
+                assertNotNull(rawResult, "No notification");
+                ResultResourceNotificationDTO notif = (ResultResourceNotificationDTO) rawResult;
+                assertEquals(querySub.requestId, subscribeResult.requestId);
+                assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
+                assertNotNull(notif.notification);
+                assertEquals(dto1.provider, notif.notification.provider);
+                assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
+                assertEquals(dto1.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
+                assertEquals(dto1.provider, notif.notification.provider);
+                assertEquals(dto1.service, notif.notification.service);
+                assertEquals(dto1.resource, notif.notification.resource);
+                final Instant firstNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
+                assertFalse(updateTime.isAfter(firstNotifTime));
+
+                // New update on second provider
+                dto2.value = 128;
+                push.pushUpdate(dto2).getValue();
+
+                // Notification shouldn't be sent
+                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                assertNull(rawResult, "Got notified on filtered out provider");
+
+                // Second result must be the notification
+                Instant updateTime2 = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+                oldValue = dto1.value;
+                dto1.value = -128;
+                push.pushUpdate(dto1).getValue();
+
+                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                assertNotNull(rawResult, "No notification");
+                notif = (ResultResourceNotificationDTO) rawResult;
+                assertEquals(querySub.requestId, subscribeResult.requestId);
+                assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
+                assertNotNull(notif.notification);
+                assertEquals(dto1.provider, notif.notification.provider);
+                assertEquals(oldValue, ((ResourceDataNotificationDTO) notif.notification).oldValue);
+                assertEquals(dto1.value, ((ResourceDataNotificationDTO) notif.notification).newValue);
+                final Instant secondNotifTime = Instant.ofEpochMilli(notif.notification.timestamp);
+                assertFalse(firstNotifTime.isAfter(secondNotifTime));
+                assertFalse(updateTime2.isAfter(secondNotifTime));
+
+                // Unsubscribe
+                final QueryUnsubscribeDTO unsubQuery = new QueryUnsubscribeDTO();
+                unsubQuery.subscriptionId = subscribeResult.subscriptionId;
+                sendDTO(session, unsubQuery);
+
+                // Wait for the result
+                final Instant timeout = Instant.now().plus(5, ChronoUnit.SECONDS);
+                boolean found = false;
+                while (Instant.now().isBefore(timeout)) {
+                    rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                    if (rawResult != null && rawResult.type == EResultType.UNSUBSCRIPTION_RESPONSE) {
+                        // Got it
+                        found = true;
+                        break;
+                    }
+                }
+
+                assertTrue(found, "Didn't get the unsubscription response");
+
+                ResultUnsubscribeDTO unsubResult = (ResultUnsubscribeDTO) rawResult;
+                assertEquals(subscribeResult.subscriptionId, unsubResult.subscriptionId);
+
+                // New update for both
+                dto1.value = 512;
+                dto2.value = 256;
+                push.pushUpdate(bulk).getValue();
+
+                // Wait of a notification
+                assertNull(resultsHolder.poll(1, TimeUnit.SECONDS), "Got a notification");
+            }
+        }
+    }
+
+    @Nested
+    class SnapshotSubscriptions {
+        @Test
+        void testSubscription() throws Exception {
+            String provider = "wsTestProviderSnapshotSub";
+            String service = "svc";
+            String resource = "data";
+            GenericDto dto = makeDto(provider, service, resource, 42, Integer.class);
+            push.pushUpdate(dto).getValue();
+
+            final WSHandler handler = new WSHandler();
+            final CountDownLatch barrier = new CountDownLatch(1);
+
+            final AtomicReference<Session> sessionRef = new AtomicReference<>();
+            handler.onConnect = s -> {
+                sessionRef.set(s);
+                barrier.countDown();
+            };
+
+            final AtomicReference<Throwable> error = new AtomicReference<>();
+            handler.onError = (s, t) -> {
+                error.set(t);
+                barrier.countDown();
+            };
+            handler.onClose = (s, c) -> barrier.countDown();
+
+            final BlockingQueue<AbstractResultDTO> resultsHolder = new BlockingArrayQueue<>();
+            handler.onMessage = (s, m) -> {
+                try {
+                    resultsHolder.add(mapper.readValue(m, AbstractResultDTO.class));
+                } catch (JacksonException e) {
+                    error.set(new Exception("Error parsing WS response", e));
+                }
+            };
+
+            try (final WSClient client = new WSClient()) {
+                client.ws.connect(handler, wsUri).get();
+
+                // Wait for the websocket to connect connection
+                barrier.await(2, TimeUnit.SECONDS);
+                final Session session = sessionRef.get();
+
+                // Send the notification
+                final QuerySubscribeDTO querySub = new QuerySubscribeDTO();
+                querySub.subscriptionType = SubscriptionType.SNAPSHOTS;
+                querySub.filter = """
+                        {
+                            "providers": { "provider": "%s"},
+                            "resources": { "service": "%s", "resource": "%s" }
+                        }
+                        """.formatted(provider, service, resource);
+                querySub.requestId = String.valueOf(new Random().nextInt());
+                sendDTO(session, querySub);
+
+                // Result must be the subscription result
+                AbstractResultDTO rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                assertNotNull(rawResult, "No result to subscribe");
+                ResultSubscribeDTO subscribeResult = (ResultSubscribeDTO) rawResult;
+                assertEquals(querySub.requestId, rawResult.requestId);
+                assertNotNull(subscribeResult.subscriptionId, "No subscription ID");
+                // Next result must be initial state
+                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                ResultSnapshotNotificationDTO notification = assertInstanceOf(ResultSnapshotNotificationDTO.class,
+                        rawResult, "Not a subscription notification");
+                assertEquals(subscribeResult.subscriptionId, notification.subscriptionId);
+                assertEquals(1, notification.notification.arriving().size());
+                assertTrue(notification.notification.modified().isEmpty());
+                assertTrue(notification.notification.departing().isEmpty());
+                assertEquals(42, notification.notification.arriving().get(provider).services.get(service).resources.get(resource).value);
+
+                assertNull(resultsHolder.poll(1, TimeUnit.SECONDS));
+
+                // Update the value
+                dto.value = -12;
+                push.pushUpdate(dto).getValue();
+
+                // Another notification
+                rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                notification = assertInstanceOf(ResultSnapshotNotificationDTO.class,
+                        rawResult, "Not a subscription notification");
+                assertEquals(subscribeResult.subscriptionId, notification.subscriptionId);
+                assertEquals(0, notification.notification.arriving().size());
+                assertEquals(1, notification.notification.modified().size());
+                assertTrue(notification.notification.departing().isEmpty());
+                assertEquals(-12, notification.notification.modified().get(provider).services.get(service).resources.get(resource).value);
+
+                // Unsubscribe
+                final QueryUnsubscribeDTO unsubQuery = new QueryUnsubscribeDTO();
+                unsubQuery.subscriptionId = subscribeResult.subscriptionId;
+                sendDTO(session, unsubQuery);
+
+                // Wait for the result
+                final Instant timeout = Instant.now().plus(5, ChronoUnit.SECONDS);
+                boolean found = false;
+                while (Instant.now().isBefore(timeout)) {
+                    rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                    if (rawResult != null && rawResult.type == EResultType.UNSUBSCRIPTION_RESPONSE) {
+                        // Got it
+                        found = true;
+                        break;
+                    }
+                }
+
+                assertTrue(found, "Didn't get the unsubscription response");
+
+                ResultUnsubscribeDTO unsubResult = (ResultUnsubscribeDTO) rawResult;
+                assertEquals(subscribeResult.subscriptionId, unsubResult.subscriptionId);
+
+                // New update
+                dto.value = 512;
+                push.pushUpdate(dto).getValue();
+
+                // Wait of a notification
+                assertNull(resultsHolder.poll(1, TimeUnit.SECONDS), "Got a notification");
+            }
         }
     }
 }
