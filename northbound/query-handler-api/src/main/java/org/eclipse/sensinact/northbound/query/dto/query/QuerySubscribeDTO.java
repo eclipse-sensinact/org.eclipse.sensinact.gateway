@@ -26,6 +26,8 @@ import tools.jackson.databind.annotation.JsonDeserialize;
  */
 public class QuerySubscribeDTO extends AbstractQueryDTO {
 
+    public static enum SubscriptionType { EVENTS, SNAPSHOTS };
+
     /**
      * Resource filter
      */
@@ -37,6 +39,9 @@ public class QuerySubscribeDTO extends AbstractQueryDTO {
      */
     @JsonInclude(Include.NON_NULL)
     public String filterLanguage;
+
+    @JsonInclude(Include.NON_NULL)
+    public SubscriptionType subscriptionType;
 
     public QuerySubscribeDTO() {
         super(EQueryType.SUBSCRIBE);

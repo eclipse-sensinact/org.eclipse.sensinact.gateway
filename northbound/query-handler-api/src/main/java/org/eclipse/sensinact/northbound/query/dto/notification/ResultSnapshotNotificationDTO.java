@@ -13,22 +13,20 @@
 package org.eclipse.sensinact.northbound.query.dto.notification;
 
 import org.eclipse.sensinact.northbound.query.api.EResultType;
-import org.eclipse.sensinact.northbound.query.dto.notification.jackson.ResourceNotificationDeserializer;
-
-import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Notification result DTO send on each event
  */
-public class ResultResourceNotificationDTO extends AbstractResultNotificationDTO {
+public class ResultSnapshotNotificationDTO extends AbstractResultNotificationDTO {
 
-    public ResultResourceNotificationDTO() {
-        super(EResultType.SUBSCRIPTION_NOTIFICATION);
+    public static final String RESULT_SNAPSHOT_TYPE = "snapshot";
+
+    public ResultSnapshotNotificationDTO() {
+        super(EResultType.SNAPSHOT_NOTIFICATION);
     }
 
     /**
      * Notification content
      */
-    @JsonDeserialize(using = ResourceNotificationDeserializer.class)
-    public AbstractResourceNotificationDTO notification;
+    public SnapshotUpdateNotificationDTO notification;
 }
