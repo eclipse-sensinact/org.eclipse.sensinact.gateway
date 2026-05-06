@@ -126,15 +126,18 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private final PreAuthorizer preAuthorizer;
 
+    private final PromiseFactory promiseFactory;
+
     public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer preAuthorizer, final Authorizer authorizer,
             final GatewayThread thread, final Duration expiry, final SensiNactSessionActivityChecker activityChecker,
-            final BundleContext context) {
+            final BundleContext context, PromiseFactory promiseFactory) {
         this.user = user;
         this.preAuthorizer = Objects.requireNonNull(preAuthorizer, "No PreAuthorizer given");
         this.authorizer = Objects.requireNonNull(authorizer, "No Authorizer given");
         this.thread = thread;
         this.activityChecker = activityChecker;
         this.context = context;
+        this.promiseFactory = promiseFactory;
         Objects.requireNonNull(expiry, "No session duration given");
         if(expiry.isZero() || expiry.isNegative()) {
             // Infinite session
@@ -154,7 +157,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public String addListener(List<String> topics, ClientDataListener cdl, ClientMetadataListener cml,
             ClientLifecycleListener cll, ClientActionListener cal) {
-        return doAddListener(subId -> new SensinactSessionEventListener(context, sessionId,
+        return doAddListener(subId -> new SensinactSessionEventListener(sessionId,
                 subId, topics, authorizer, cll, cdl, cml, cal));
     }
 
@@ -185,6 +188,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
         if(destroy) {
             ssem.destroy();
             throw new IllegalStateException("The session is expired");
+        } else {
+            // Asynchronously register to ensure that the session id can be returned
+            // while blocking calls in the listeners
+            promiseFactory.executor().execute(() -> ssem.register(context));
         }
         return subscriptionId;
     }
@@ -202,7 +209,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public String subscribe(ICriterion filter, Consumer<SnapshotUpdate> updateListener) {
-        return doAddListener(subId -> new SensinactSessionSnapshotListener(context, sessionId,
+        return doAddListener(subId -> new SensinactSessionSnapshotListener(sessionId,
                 subId, List.of(), authorizer, filter, updateListener,
                 () -> asyncFilteredSnapshot(filter, EnumSet.of(SnapshotOption.INCLUDE_LINKED_PROVIDERS_FULL))));
     }

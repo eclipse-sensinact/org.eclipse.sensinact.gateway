@@ -82,7 +82,7 @@ public class SensinactSessionSnapshotListener extends AbstractSensinactSessionEv
     private final Semaphore notificationSemaphore = new Semaphore(1);
 
 
-    public SensinactSessionSnapshotListener(BundleContext context, String sessionId,
+    public SensinactSessionSnapshotListener(String sessionId,
             String subscriptionId, List<String> topics, Authorizer authorizer,
             ICriterion filter, Consumer<SnapshotUpdate> snapshotUpdate,
             Supplier<Promise<List<ProviderSnapshot>>> updateRequest) {
@@ -100,8 +100,12 @@ public class SensinactSessionSnapshotListener extends AbstractSensinactSessionEv
             firstUpdateSent = false;
             snapshots.addLast(Map.of());
         }
+    }
+
+    @Override
+    public void register(BundleContext context) {
         // Register first so we never miss an update
-        register(context);
+        super.register(context);
         // Ensure that we always do an initial update
         tryUpdate();
     }
