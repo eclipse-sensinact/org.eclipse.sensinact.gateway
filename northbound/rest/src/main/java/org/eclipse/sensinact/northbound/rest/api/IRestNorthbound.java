@@ -44,6 +44,13 @@ public interface IRestNorthbound {
     @POST
     AbstractResultDTO getSnapshot(@QueryParam("metadata") @DefaultValue("false") boolean includeMetadata, List<ResourceSelector> filter);
 
+    @Path("snapshot/subscribe")
+    @GET
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    void watchSnapshots(@QueryParam("filter") String filter,
+            @QueryParam("filterLanguage") String filterLanguage,
+            @Context SseEventSink eventSink);
+
     @Path("providers")
     @GET
     AbstractResultDTO listProviders();

@@ -12,26 +12,38 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.rest.impl;
 
+import static java.util.stream.Collectors.toMap;
+import static org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory.RESOURCE_SELECTOR_FILTER;
 import static org.eclipse.sensinact.northbound.query.dto.query.QueryLinkDTO.LinkAction.ADD;
 import static org.eclipse.sensinact.northbound.query.dto.query.QueryLinkDTO.LinkAction.REMOVE;
+import static org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO.SnapshotLinkOption.FULL;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
+import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.northbound.query.api.AbstractQueryDTO;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.IQueryHandler;
+import org.eclipse.sensinact.northbound.query.api.StatusException;
 import org.eclipse.sensinact.northbound.query.dto.SensinactPath;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceDataNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceLifecycleNotificationDTO;
+import org.eclipse.sensinact.northbound.query.dto.notification.SnapshotUpdateNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryActDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryDescribeDTO;
@@ -41,20 +53,25 @@ import org.eclipse.sensinact.northbound.query.dto.query.QueryLinkDTO.LinkAction;
 import org.eclipse.sensinact.northbound.query.dto.query.QueryListDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySetDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO.SnapshotLinkOption;
 import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.SnapshotProviderDTO;
 import org.eclipse.sensinact.northbound.rest.api.IRestNorthbound;
 import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.northbound.session.SensiNactSessionActivityChecker;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.eclipse.sensinact.northbound.session.SnapshotUpdate;
 import org.osgi.util.promise.Deferred;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Providers;
 import jakarta.ws.rs.sse.Sse;
@@ -96,11 +113,57 @@ public class RestNorthbound implements IRestNorthbound {
      * Prepares a new sensiNact session for the current user, with the given
      * activity checker
      */
-    private SensiNactSession prepareSSESession(final SensiNactSessionActivityChecker activityChecker) {
+    private SensiNactSession prepareSSESession(final SseEventSink eventSink) {
         final SensiNactSessionManager sessionManager = providers
                 .getContextResolver(SensiNactSessionManager.class, MediaType.WILDCARD_TYPE).getContext(null);
         final SensiNactSession restSession = getSession();
-        return sessionManager.createNewSession(restSession.getUserInfo(), activityChecker);
+        SensiNactSession sseSession = sessionManager.createNewSession(restSession.getUserInfo(), (pf, s) -> {
+            try {
+                if (eventSink.isClosed()) {
+                    // Event sink is already closed: expire the session immediately
+                    logger.debug("Event sink is closed. Expiring session {} immediately", s.getSessionId());
+                    s.expire();
+                    return pf.resolved(false);
+                }
+
+                // Send a comment to check if the connection is still alive
+                final Deferred<Boolean> deferred = pf.deferred();
+                eventSink
+                        .send(sse.newEventBuilder().comment("liveness-check").build())
+                        .toCompletableFuture()
+                        .orTimeout(10, TimeUnit.SECONDS)
+                        .handle((r, t) -> {
+                            if (t != null) {
+                                logger.error("Error handling liveness check result. Considering session inactive",
+                                        t);
+                                s.expire();
+                                deferred.fail(t);
+                            } else {
+                                deferred.resolve(true);
+                            }
+                            return null;
+                        });
+                return deferred.getPromise();
+            } catch (Exception e) {
+                // The event sink closure detection can let us come here
+                logger.error("Error sending liveness check SSE comment. Expiring session immediately", e);
+                s.expire();
+                return pf.resolved(false);
+            }
+        });
+        sseSession.addExpirationListener(s -> {
+            // Session expired: close the event sink
+            try {
+                logger.debug("SSE session {} expired. Closing event sink.", s.getSessionId());
+                if (!eventSink.isClosed()) {
+                    eventSink.send(sse.newEventBuilder().comment("session-expired").build());
+                    eventSink.close();
+                }
+            } catch (Exception e) {
+                logger.error("Error closing SSE after sensiNact session expiration", e);
+            }
+        });
+        return sseSession;
     }
 
     /**
@@ -230,6 +293,60 @@ public class RestNorthbound implements IRestNorthbound {
         return handleQuery(query);
     }
 
+    @Override
+    public void watchSnapshots(String filter, String filterLanguage, SseEventSink eventSink) {
+        if(filter == null || filter.isBlank()) {
+            throw new BadRequestException("A filter must be supplied");
+        }
+        // Create a new session, specific to this SSE connection
+        final SensiNactSession sseSession = prepareSSESession(eventSink);
+
+        ICriterion criterion;
+        try {
+            criterion = getQueryHandler().parseFilter(filter,
+                    filterLanguage == null ? RESOURCE_SELECTOR_FILTER : filterLanguage);
+        } catch (StatusException e) {
+            ErrorResultDTO errorResult = e.toErrorResult();
+            throw new WebApplicationException(Response.status(e.statusCode)
+                    .type(MediaType.APPLICATION_JSON)
+                    .entity(errorResult).build());
+        }
+
+        MultivaluedMap<String,String> queryParameters = uriInfo.getQueryParameters(true);
+        List<SnapshotLinkOption> parsed = queryParameters
+                .getOrDefault("linkOption", List.of(FULL.name())).stream()
+                .map(SnapshotLinkOption::valueOf).toList();
+        boolean includeMetadata = Optional.ofNullable(queryParameters.getFirst("includeMetadata"))
+                    .map(Boolean::parseBoolean)
+                    .orElse(Boolean.TRUE).booleanValue();
+        final Consumer<SnapshotUpdate> handler = update -> {
+            try {
+                if (eventSink.isClosed()) {
+                    // Event sink is already closed: expire the session
+                    logger.debug("Expire SSE session, as the event sink is closed");
+                    sseSession.expire();
+                    return;
+                }
+
+                IQueryHandler queryHandler = getQueryHandler();
+                Function<ProviderSnapshot, SnapshotProviderDTO> mapper = ps -> queryHandler.toSnapshotProviderDTO(ps, parsed, includeMetadata);
+
+                eventSink.send(sse.newEventBuilder().name("update").mediaType(MediaType.APPLICATION_JSON_TYPE)
+                            .data(new SnapshotUpdateNotificationDTO(
+                                    update.arriving().entrySet().stream().collect(toMap(Entry::getKey, e -> mapper.apply(e.getValue()))),
+                                    update.modified().entrySet().stream().collect(toMap(Entry::getKey, e -> mapper.apply(e.getValue()))),
+                                    update.departing())).build());
+            } catch (Exception ex) {
+                logger.error("Error sending resource data notification SSE event. Closing connection and session.", ex);
+                sseSession.expire();
+                eventSink.close();
+            }
+        };
+
+        // Register the listener
+        sseSession.subscribe(criterion, handler);
+    }
+
     /**
      * Extract the new value to set to a resource according to the given arguments
      *
@@ -340,52 +457,7 @@ public class RestNorthbound implements IRestNorthbound {
     @Override
     public void watchResource(String providerId, String serviceName, String rcName, SseEventSink eventSink) {
         // Create a new session, specific to this SSE connection
-        final SensiNactSession sseSession = prepareSSESession((pf, s) -> {
-            try {
-                if (eventSink.isClosed()) {
-                    // Event sink is already closed: expire the session immediately
-                    logger.debug("Event sink is closed. Expiring session {} immediately", s.getSessionId());
-                    s.expire();
-                    return pf.resolved(false);
-                }
-
-                // Send a comment to check if the connection is still alive
-                final Deferred<Boolean> deferred = pf.deferred();
-                eventSink
-                        .send(sse.newEventBuilder().comment("liveness-check").build())
-                        .toCompletableFuture()
-                        .orTimeout(10, TimeUnit.SECONDS)
-                        .handle((r, t) -> {
-                            if (t != null) {
-                                logger.error("Error handling liveness check result. Considering session inactive",
-                                        t);
-                                s.expire();
-                                deferred.fail(t);
-                            } else {
-                                deferred.resolve(true);
-                            }
-                            return null;
-                        });
-                return deferred.getPromise();
-            } catch (Exception e) {
-                // The event sink closure detection can let us come here
-                logger.error("Error sending liveness check SSE comment. Expiring session immediately", e);
-                s.expire();
-                return pf.resolved(false);
-            }
-        });
-        sseSession.addExpirationListener(s -> {
-            // Session expired: close the event sink
-            try {
-                logger.debug("SSE session {} expired. Closing event sink.", s.getSessionId());
-                if (!eventSink.isClosed()) {
-                    eventSink.send(sse.newEventBuilder().comment("session-expired").build());
-                    eventSink.close();
-                }
-            } catch (Exception e) {
-                logger.error("Error closing SSE after sensiNact session expiration", e);
-            }
-        });
+        final SensiNactSession sseSession = prepareSSESession(eventSink);
 
         // TODO replace this with a single-level wildcard when typed events permits it
         Predicate<ResourceNotification> filter = e -> providerId.equals(e.provider()) &&
@@ -430,10 +502,18 @@ public class RestNorthbound implements IRestNorthbound {
             }
         };
 
+        ProviderSnapshot provider = null;
+        try {
+            provider = sseSession.providerSnapshot(providerId, EnumSet.noneOf(SnapshotOption.class));
+        } catch (Exception e)  {
+            // Just swallow it
+        }
+        String topic = provider == null ? "*" : String.format("%s/%s/%s/%s", provider.getModelName(),
+                providerId, serviceName, rcName);
         // Register the listener
         // TODO use single level wildcard final String topic = String.join("/",
         // providerId, serviceName, rcName);
-        sseSession.addListener(List.of("*"), cdl, null, cll, null);
+        sseSession.addListener(List.of(topic), cdl, null, cll, null);
     }
 
     @Override
