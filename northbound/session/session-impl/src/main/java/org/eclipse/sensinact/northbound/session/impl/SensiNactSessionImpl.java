@@ -37,7 +37,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.authorization.Authorizer;
@@ -211,7 +210,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
     public String subscribe(ICriterion filter, Consumer<SnapshotUpdate> updateListener) {
         return doAddListener(subId -> new SensinactSessionSnapshotListener(sessionId,
                 subId, List.of(), authorizer, filter, updateListener,
-                () -> asyncFilteredSnapshot(filter, EnumSet.of(SnapshotOption.INCLUDE_LINKED_PROVIDERS_FULL))));
+                () -> asyncFilteredSnapshot(filter, EnumSet.of(SnapshotOption.INCLUDE_LINKED_PROVIDERS_FULL), false)));
     }
 
     private <I, T> T executeGetCommand(Function<SensinactDigitalTwin, I> caller, Function<I, T> converter) {
@@ -632,19 +631,23 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public List<ProviderSnapshot> filteredSnapshot(ICriterion filter, EnumSet<SnapshotOption> snapshotOptions) {
-        return safeGetValue(asyncFilteredSnapshot(filter, snapshotOptions));
+        return safeGetValue(asyncFilteredSnapshot(filter, snapshotOptions, true));
     }
 
-    private Promise<List<ProviderSnapshot>> asyncFilteredSnapshot(ICriterion filter, EnumSet<SnapshotOption> snapshotOptions) {
+    private Promise<List<ProviderSnapshot>> asyncFilteredSnapshot(ICriterion filter,
+            EnumSet<SnapshotOption> snapshotOptions, boolean waitForGateway) {
         // We check validity here as we don't use the blocking safeExecute
         checkWithException();
         Predicate<ServiceSnapshot> service = this::authorizeService;
         Predicate<ResourceSnapshot> resource = this::authorizeResource;
 
-        Promise<Stream<ProviderSnapshot>> snapshots;
+        Promise<List<ProviderSnapshot>> snapshots;
         if (filter == null) {
             snapshots = thread.execute(getCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false),
-                    service, resource, snapshotOptions), List::stream, null));
+                    service, resource, snapshotOptions), Function.identity(), null));
+            if(waitForGateway) {
+                safeGetValue(snapshots);
+            }
         } else {
             BiPredicate<ProviderSnapshot, GeoJsonObject> location = filter.getLocationFilter();
             Predicate<ProviderSnapshot> provider = ps -> authorizeProvider(ps, location != null);
@@ -652,17 +655,23 @@ public class SensiNactSessionImpl implements SensiNactSession {
             Predicate<ServiceSnapshot> sf = filter.getServiceFilter();
             Predicate<ResourceSnapshot> rf = filter.getResourceFilter();
             snapshots = thread.execute(getCommand((m) -> m.filteredSnapshot(location, pf == null ? provider : provider.and(pf),
-                    sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf)), List::stream, null));
+                    sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf)), Function.identity(), null));
+            if(waitForGateway) {
+                safeGetValue(snapshots);
+            }
             final ResourceValueFilter rcFilter = filter.getResourceValueFilter();
             if (rcFilter != null) {
-                snapshots = snapshots
-                        .map(providerStream -> providerStream
-                                .filter(p -> rcFilter.test(p, p.getServices().stream()
-                                        .flatMap(s -> s.getResources().stream()).toList())));
+                // Ensure that we don't block the gateway callback thread with a callback that
+                // must be executed outside the gateway thread
+                snapshots = promiseFactory.resolvedWith(snapshots);
+                snapshots = snapshots.map(l -> l.stream()
+                    .filter(p -> rcFilter.test(p, p.getServices().stream()
+                            .flatMap(s -> s.getResources().stream()).toList()))
+                    .toList());
             }
         }
-
-        return snapshots.map(providerStream -> providerStream
+        return snapshots
+                .map(l -> l.stream()
                 .map(this::safeProviderSnapshot)
                 .toList());
     }
