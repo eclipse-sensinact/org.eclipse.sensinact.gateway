@@ -12,8 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.result;
 
+import org.eclipse.sensinact.core.authorization.NotPermittedException;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
+import org.eclipse.sensinact.northbound.session.NotFoundException;
 
 /**
  * An error DTO
@@ -29,7 +31,13 @@ public class ErrorResultDTO extends AbstractResultDTO {
      */
     public ErrorResultDTO(final Throwable error) {
         this();
-        this.statusCode = 500;
+        if (error instanceof NotPermittedException) {
+            this.statusCode = 403;
+        } else if (error instanceof NotFoundException) {
+            this.statusCode = 404;
+        } else {
+            this.statusCode = 500;
+        }
         this.error = error != null ? error.getMessage() : "n/a";
     }
 
