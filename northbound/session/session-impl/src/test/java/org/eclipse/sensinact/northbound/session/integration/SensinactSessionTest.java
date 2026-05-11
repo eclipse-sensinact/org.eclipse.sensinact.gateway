@@ -28,6 +28,7 @@ import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
+import org.eclipse.sensinact.northbound.session.NotFoundException;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
@@ -127,7 +128,7 @@ public class SensinactSessionTest {
         @Test
         void getNonExistentResource() {
             assertThrows(NotPermittedException.class, () -> anonSession.getResourceValue(PROVIDER, "svc", "nonExistent", String.class));
-            assertThrows(IllegalArgumentException.class, () -> bobSession.getResourceValue(PROVIDER, "svc", "nonExistent", String.class));
+            assertThrows(NotFoundException.class, () -> bobSession.getResourceValue(PROVIDER, "svc", "nonExistent", String.class));
         }
     }
 
@@ -157,7 +158,7 @@ public class SensinactSessionTest {
         @Test
         void describeNonExistentResource() {
             assertThrows(NotPermittedException.class, () -> anonSession.describeResource(PROVIDER, "svc", "nonExistent"));
-            assertThrows(IllegalArgumentException.class, () -> bobSession.describeResource(PROVIDER, "svc", "nonExistent"));
+            assertThrows(NotFoundException.class, () -> bobSession.describeResource(PROVIDER, "svc", "nonExistent"));
         }
     }
 
@@ -190,7 +191,7 @@ public class SensinactSessionTest {
         @Test
         void setNonExistentResource() {
             assertThrows(NotPermittedException.class, () -> anonSession.setResourceValue(PROVIDER, "svc", "nonExistent", "value", Instant.now()));
-            assertThrows(IllegalArgumentException.class, () -> bobSession.setResourceValue(PROVIDER, "svc", "nonExistent", "value", Instant.now()));
+            assertThrows(NotFoundException.class, () -> bobSession.setResourceValue(PROVIDER, "svc", "nonExistent", "value", Instant.now()));
         }
     }
 }

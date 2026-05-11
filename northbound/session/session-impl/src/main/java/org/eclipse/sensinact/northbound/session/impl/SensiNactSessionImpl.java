@@ -73,6 +73,7 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
+import org.eclipse.sensinact.northbound.session.NotFoundException;
 import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
@@ -348,7 +349,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                                 }
                             }
                         }
-                        return pf.failed(new IllegalArgumentException("Resource not found"));
+                        return pf.failed(new NotFoundException("Resource not found"));
                     }
                 } catch (Throwable t) {
                     return pf.failed(t);
@@ -483,7 +484,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                                 }
                             }
                         }
-                        return pf.failed(new IllegalArgumentException("Resource not found"));
+                        return pf.failed(new NotFoundException("Resource not found"));
                     }
                 } catch (Throwable t) {
                     return pf.failed(t);
