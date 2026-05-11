@@ -65,7 +65,7 @@ maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/3.0.1, BSD-3-Clause, ap
 maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/4.0.0, BSD-3-Clause, approved, ee4j.jaxb
 maven/mavencentral/net.java.dev.jna/jna/5.18.1, Apache-2.0 AND LGPL-2.1-or-later, approved, #23404
 maven/mavencentral/org.antlr/antlr4-runtime/4.12.0, BSD-3-Clause, approved, clearlydefined
-maven/mavencentral/org.apache.aries.tx-control/tx-control-provider-jdbc-local/1.0.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.aries.tx-control/tx-control-provider-jdbc-local/1.0.1, Apache-2.0 AND MIT, approved, clearlydefined
 maven/mavencentral/org.apache.aries.tx-control/tx-control-service-local/1.0.1, Apache-2.0, approved, #7410
 maven/mavencentral/org.apache.commons/commons-compress/1.28.0, Apache-2.0 AND (Apache-2.0 AND BSD-3-Clause), approved, #22677
 maven/mavencentral/org.apache.commons/commons-csv/1.12.0, Apache-2.0, approved, #16265
