@@ -123,6 +123,12 @@ public class SensinactSessionTest {
             String location = bobSession.getResourceValue(PROVIDER, "admin", "location", String.class);
             assertNull(location);
         }
+
+        @Test
+        void getNonExistentResource() {
+            assertThrows(NotPermittedException.class, () -> anonSession.getResourceValue(PROVIDER, "svc", "nonExistent", String.class));
+            assertThrows(IllegalArgumentException.class, () -> bobSession.getResourceValue(PROVIDER, "svc", "nonExistent", String.class));
+        }
     }
 
     @Nested
@@ -146,6 +152,12 @@ public class SensinactSessionTest {
             ResourceDescription descr = bobSession.describeResource(PROVIDER, "admin", "location");
             assertNull(descr.value);
             assertNull(descr.timestamp);
+        }
+
+        @Test
+        void describeNonExistentResource() {
+            assertThrows(NotPermittedException.class, () -> anonSession.describeResource(PROVIDER, "svc", "nonExistent"));
+            assertThrows(IllegalArgumentException.class, () -> bobSession.describeResource(PROVIDER, "svc", "nonExistent"));
         }
     }
 
@@ -173,6 +185,12 @@ public class SensinactSessionTest {
             ResourceDescription descr = bobSession.describeResource(PROVIDER, "admin", "friendlyName");
             assertNotEquals("foo", descr.value);
             assertEquals(timestamp, descr.timestamp);
+        }
+
+        @Test
+        void setNonExistentResource() {
+            assertThrows(NotPermittedException.class, () -> anonSession.setResourceValue(PROVIDER, "svc", "nonExistent", "value", Instant.now()));
+            assertThrows(IllegalArgumentException.class, () -> bobSession.setResourceValue(PROVIDER, "svc", "nonExistent", "value", Instant.now()));
         }
     }
 }
