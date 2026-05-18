@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.impl;
 
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDERS_FULL;
 import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDER_IDS;
 import static org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO.SnapshotLinkOption.ID_ONLY;
@@ -467,13 +468,9 @@ public class QueryHandler implements IQueryHandler {
         result.uri = "/";
         result.statusCode = 200;
 
-        for (var filter : query.filter) {
-            ICriterion criterion = resourceSelectorFilterFactory.parseResourceSelector(filter);
-            for (var providerSnapshot : executeFilter(userSession, criterion, query.linkOptions)) {
-                result.providers.computeIfAbsent(providerSnapshot.getName(),
-                        x -> toSnapshotProviderDTO(providerSnapshot, query.linkOptions, query.includeMetadata));
-            }
-        }
+        ICriterion criterion = resourceSelectorFilterFactory.parseResourceSelector(query.filter.stream());
+        result.providers = executeFilter(userSession, criterion, query.linkOptions).stream()
+            .collect(toMap(ps -> ps.getName(), ps -> toSnapshotProviderDTO(ps, query.linkOptions, query.includeMetadata)));
 
         return result;
     }
