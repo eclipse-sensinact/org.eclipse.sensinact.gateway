@@ -122,6 +122,47 @@ public class ResourceSnapshotTest {
         assertEquals("V1", resourceDTO.value);
     }
 
+    /**
+     * Get the resource value
+     */
+    @Test
+    void multipleFilters() throws Exception {
+        // Register the resources
+        GenericDto dto = utils.makeDto("M1", "P1", "S1", "R1", "V1", String.class);
+        push.pushUpdate(dto).getValue();
+        dto = utils.makeDto("M1", "P1", "S2", "R2", "V2", String.class);
+        push.pushUpdate(dto).getValue();
+
+        List<ResourceSelector> request = new ArrayList<>();
+        ResourceSelector rs = new CompactResourceSelector(null, null, new Selection("P1"),
+                new Selection("S1"), new Selection("R1"), List.of(), List.of()).toResourceSelector();
+        request.add(rs);
+        rs = new CompactResourceSelector(null, null, new Selection("P1"),
+                new Selection("S2"), new Selection("R2"), List.of(), List.of()).toResourceSelector();
+        request.add(rs);
+        ResponseSnapshotDTO response = utils.queryJson("snapshot", request, ResponseSnapshotDTO.class);
+
+        assertEquals(1, response.providers.size());
+        SnapshotProviderDTO providerDTO = response.providers.get("P1");
+        assertEquals("P1", providerDTO.name);
+        assertEquals("M1", providerDTO.modelName);
+        assertEquals(2, providerDTO.services.size());
+        SnapshotServiceDTO serviceDTO = providerDTO.services.get("S1");
+        assertEquals("S1", serviceDTO.name);
+        assertEquals(1, serviceDTO.resources.size());
+        SnapshotResourceDTO resourceDTO = serviceDTO.resources.get("R1");
+        assertEquals("R1", resourceDTO.name);
+        assertEquals("java.lang.String", resourceDTO.type);
+        assertEquals("V1", resourceDTO.value);
+        serviceDTO = providerDTO.services.get("S2");
+        assertEquals("S2", serviceDTO.name);
+        assertEquals(1, serviceDTO.resources.size());
+        resourceDTO = serviceDTO.resources.get("R2");
+        assertEquals("R2", resourceDTO.name);
+        assertEquals("java.lang.String", resourceDTO.type);
+        assertEquals("V2", resourceDTO.value);
+    }
+
     @Test
     void setProvider() throws Exception {
         // Set a provider
