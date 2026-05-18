@@ -40,7 +40,7 @@ public record LifecycleNotification(String modelPackageUri, String model, String
             Objects.requireNonNull(resource);
         }
 
-        return "LIFECYCLE/".concat(String.format(status.template, model, provider, service, resource));
+        return TopicUtils.escapeTopic("LIFECYCLE/".concat(String.format(status.template, model, provider, service, resource)));
     }
 
     public enum Status {

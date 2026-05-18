@@ -33,7 +33,7 @@ public record ResourceDataNotification(String modelPackageUri, String model, Str
         Objects.requireNonNull(provider);
         Objects.requireNonNull(service);
         Objects.requireNonNull(resource);
-        return String.format("DATA/%s/%s/%s/%s", model, provider, service, resource);
+        return TopicUtils.escapeTopic(String.format("DATA/%s/%s/%s/%s", model, provider, service, resource));
     }
 
 }

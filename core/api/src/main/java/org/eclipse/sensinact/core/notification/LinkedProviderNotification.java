@@ -36,7 +36,7 @@ public record LinkedProviderNotification(String modelPackageUri, String model, S
         Objects.requireNonNull(model);
         Objects.requireNonNull(provider);
 
-        return "LINKED/".concat(String.format("%s/%s", model, provider));
+        return TopicUtils.escapeTopic("LINKED/".concat(String.format("%s/%s", model, provider)));
     }
 
     @Override
