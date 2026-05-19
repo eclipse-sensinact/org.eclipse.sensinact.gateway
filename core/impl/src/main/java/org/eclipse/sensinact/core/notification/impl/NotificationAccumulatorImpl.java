@@ -40,6 +40,8 @@ import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.osgi.service.typedevent.TypedEventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is responsible for managing batches of update notifications. No
@@ -52,6 +54,8 @@ import org.osgi.service.typedevent.TypedEventBus;
  */
 public class NotificationAccumulatorImpl extends AbstractNotificationAccumulatorImpl
         implements NotificationAccumulator {
+
+    private static final Logger logger = LoggerFactory.getLogger(NotificationAccumulatorImpl.class);
 
     private final TypedEventBus eventBus;
 
@@ -375,6 +379,13 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
 
     @Override
     protected void doComplete() {
-        notifications.values().stream().flatMap(List::stream).forEach(n -> eventBus.deliver(n.getTopic(), n));
+        notifications.values().stream().flatMap(List::stream).forEach(n -> {
+            try {
+                eventBus.deliver(n.getTopic(), n);
+            } catch (Exception e) {
+                // Exception can occur if the topic is not valid
+                logger.error("Notification not delivered on topic {}", n.getTopic(), e);
+            }
+        });
     }
 }
