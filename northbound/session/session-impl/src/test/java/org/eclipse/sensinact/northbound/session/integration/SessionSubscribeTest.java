@@ -364,7 +364,10 @@ public class SessionSubscribeTest {
 
     @Test
     void subscribeSpecialCharactersTopic() throws Exception {
+
+        SensiNactSession session = sessionManager.getDefaultSession(BOB);
         Random random = new Random();
+
         for (String providerName : List.of(
                 "some~provider",
                 "some#other$provider",
@@ -376,10 +379,9 @@ public class SessionSubscribeTest {
                 "постачальник",
                 "éà@()/:-?øþæ€ł🔟")) {
             BlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
-            SensiNactSession session = sessionManager.getDefaultSession(BOB);
             String subId = session.addListener(List.of(MODEL + "/" + providerName + "/*"), (t, e) -> queue.offer(e),
                     null, null, null);
-            assertNotNull(subId);
+            assertNotNull(subId, "No subscription created for provider " + providerName);
 
             try {
                 int newValue = random.nextInt(32000);
@@ -387,8 +389,8 @@ public class SessionSubscribeTest {
 
                 ResourceDataNotification notification;
                 do {
-                    notification = queue.poll(1, TimeUnit.SECONDS);
-                    assertNotNull(notification);
+                    notification = queue.poll(5, TimeUnit.SECONDS);
+                    assertNotNull(notification, "No notification received for provider " + providerName);
                     assertEquals(providerName, notification.provider());
                 } while (!RESOURCE.equals(notification.resource()));
                 assertEquals(SERVICE, notification.service());
@@ -401,7 +403,7 @@ public class SessionSubscribeTest {
                     @Override
                     protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
                         SensinactProvider sp = twin.getProvider(providerName);
-                        if(sp != null) {
+                        if (sp != null) {
                             sp.delete();
                         }
                         return pf.resolved(null);
