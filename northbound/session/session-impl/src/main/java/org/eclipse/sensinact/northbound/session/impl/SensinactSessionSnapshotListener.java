@@ -436,7 +436,7 @@ public class SensinactSessionSnapshotListener extends AbstractSensinactSessionEv
         return wanted == true ? State.OUTDATED : State.SKIP;
     }
 
-    protected void notifyMetdata(String topic, ResourceMetaDataNotification rmn) {
+    protected void notifyMetadata(String topic, ResourceMetaDataNotification rmn) {
         if(!authorizer.hasResourcePermission(READ, rmn.modelPackageUri(), rmn.model(), rmn.provider(), rmn.service(), rmn.resource())) {
             return;
         }

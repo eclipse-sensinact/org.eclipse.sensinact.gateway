@@ -97,7 +97,7 @@ public abstract class AbstractSensinactSessionEventManager
         if(event instanceof ResourceDataNotification rdn) {
             notifyData(topic, rdn);
         } else if (event instanceof ResourceMetaDataNotification rmn) {
-            notifyMetdata(topic, rmn);
+            notifyMetadata(topic, rmn);
         } else if (event instanceof LifecycleNotification ln) {
             notifyLifecycle(topic, ln);
         } else if (event instanceof ResourceActionNotification ran) {
@@ -111,7 +111,7 @@ public abstract class AbstractSensinactSessionEventManager
 
     protected abstract void notifyData(String topic, ResourceDataNotification notification);
 
-    protected abstract void notifyMetdata(String topic, ResourceMetaDataNotification notification);
+    protected abstract void notifyMetadata(String topic, ResourceMetaDataNotification notification);
 
     protected abstract void notifyAction(String topic, ResourceActionNotification notification);
 }
