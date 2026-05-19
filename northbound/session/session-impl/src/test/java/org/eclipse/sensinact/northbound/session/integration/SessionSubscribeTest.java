@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -359,5 +360,56 @@ public class SessionSubscribeTest {
         // New match not visible either
         pushDto(beforeNoMatch, VALUE_2);
         assertNull(queue.poll(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    void subscribeSpecialCharactersTopic() throws Exception {
+
+        SensiNactSession session = sessionManager.getDefaultSession(BOB);
+        Random random = new Random();
+
+        for (String providerName : List.of(
+                "some~provider",
+                "some#other$provider",
+                "πάροχος",
+                "sağlayıcı",
+                "प्रदाता",
+                "المزود",
+                "供應商",
+                "постачальник",
+                "éà@()/:-?øþæ€ł🔟")) {
+            BlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
+            String subId = session.addListener(List.of(MODEL + "/" + providerName + "/*"), (t, e) -> queue.offer(e),
+                    null, null, null);
+            assertNotNull(subId, "No subscription created for provider " + providerName);
+
+            try {
+                int newValue = random.nextInt(32000);
+                pushDto(providerName, newValue);
+
+                ResourceDataNotification notification;
+                do {
+                    notification = queue.poll(5, TimeUnit.SECONDS);
+                    assertNotNull(notification, "No notification received for provider " + providerName);
+                    assertEquals(providerName, notification.provider());
+                } while (!RESOURCE.equals(notification.resource()));
+                assertEquals(SERVICE, notification.service());
+                assertNull(notification.oldValue(), "Got an old value");
+                assertEquals(newValue, notification.newValue());
+            } finally {
+                session.removeListener(subId);
+
+                thread.execute(new AbstractTwinCommand<Void>() {
+                    @Override
+                    protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                        SensinactProvider sp = twin.getProvider(providerName);
+                        if (sp != null) {
+                            sp.delete();
+                        }
+                        return pf.resolved(null);
+                    }
+                }).getValue();
+            }
+        }
     }
 }

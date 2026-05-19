@@ -29,7 +29,6 @@ import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.typedevent.TypedEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,7 +127,7 @@ public class SensinactSessionEventListener extends AbstractSensinactSessionEvent
         dataListener.notify(topic, notification);
     }
 
-    protected void notifyMetdata(String topic, ResourceMetaDataNotification notification) {
+    protected void notifyMetadata(String topic, ResourceMetaDataNotification notification) {
         if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
             return;
         }

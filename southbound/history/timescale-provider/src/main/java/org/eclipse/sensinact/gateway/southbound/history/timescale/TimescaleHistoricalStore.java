@@ -18,14 +18,17 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
+import org.eclipse.sensinact.core.notification.TopicUtils;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
@@ -320,9 +323,14 @@ public class TimescaleHistoricalStore {
             if (logger.isDebugEnabled()) {
                 logger.debug("Registering listener for data update events");
             }
+
+            List<String> dataTopics = Optional.ofNullable(include.dataTopics())
+                    .map(l -> l.stream().filter(Objects::nonNull).map(TopicUtils::escapeTopicFilter).toList())
+                    .orElse(null);
+
             reg = ctx.registerService(TypedEventHandler.class,
                     new TimescaleDatabaseWorker(txControl, connection::get, include, exclude),
-                    new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, include.dataTopics(), "sensiNact.whiteboard.resource",
+                    new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, dataTopics, "sensiNact.whiteboard.resource",
                             true, "sensiNact.provider.name", config.provider())));
             synchronized (this) {
                 if (this.reg == null) {
