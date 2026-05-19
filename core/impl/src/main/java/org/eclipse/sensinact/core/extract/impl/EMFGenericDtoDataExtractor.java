@@ -67,6 +67,7 @@ public class EMFGenericDtoDataExtractor implements DataExtractor {
             dud.data = dto.value;
             dud.upperBound = dto.upperBound;
             dud.modelEClass = dto.modelEClass;
+            dud.actionOnDuplicate = dto.duplicateDataAction;
             list.add(dud);
         }
 
@@ -75,6 +76,7 @@ public class EMFGenericDtoDataExtractor implements DataExtractor {
             MetadataUpdateDto dud = copyCommonFields(dto, instant, new MetadataUpdateDto());
             dud.metadata = dto.metadata;
             dud.removeNullValues = true;
+            dud.actionOnDuplicate = dto.duplicateMetadataAction;
             list.add(dud);
         }
 
