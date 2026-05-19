@@ -17,6 +17,7 @@ import static org.osgi.service.typedevent.TypedEventConstants.TYPED_EVENT_TOPICS
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -26,6 +27,7 @@ import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
+import org.eclipse.sensinact.core.notification.TopicUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.typedevent.TypedEventHandler;
@@ -59,17 +61,21 @@ public abstract class AbstractSensinactSessionEventManager
      * @param context
      */
     public void register(BundleContext context) {
-        if(!state.compareAndSet(0, 1)) {
+        if (!state.compareAndSet(0, 1)) {
             throw new IllegalStateException("This listener has already been registered");
         }
         List<String> registeredTopics = getRegisteredTopics();
-        if(registeredTopics.isEmpty()) {
+        if (registeredTopics == null || registeredTopics.isEmpty()) {
             throw new IllegalArgumentException("No topics are registered");
         }
+
+        List<String> filteredTopics = registeredTopics.stream().filter(Objects::nonNull)
+                .map(TopicUtils::escapeTopicFilter).toList();
+
         registration.set(
                 context.registerService(TypedEventHandler.class, this,
-                        new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, registeredTopics))));
-        if(state.get() != 1) {
+                        new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, filteredTopics))));
+        if (state.get() != 1) {
             destroy();
         }
     }
