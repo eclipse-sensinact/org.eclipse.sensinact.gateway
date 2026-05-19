@@ -31,5 +31,15 @@ public enum NullAction {
      *   <li>If the resource has never been set then ignore this field and do not update the value</li>
      * </ul>
      */
-    UPDATE_IF_PRESENT
+    UPDATE_IF_PRESENT,
+
+    /**
+     * If the data field is null and the action is applied on a resource, then
+     * remove the overlay metadata value to let the model-level metadata value take
+     * precedence. If the action is applied on a service or provider, then remove
+     * the overlay metadata value to let the model-level metadata value take
+     * precedence and remove all the overlay metadata values of the resources of the
+     * service or provider to let the model-level metadata values be accessible.
+     */
+    REMOVE_OVERLAY,
 }

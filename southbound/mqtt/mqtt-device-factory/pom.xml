@@ -90,8 +90,6 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.component.annotations</artifactId>
     </dependency>
-
-    <!-- OSGi -->
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
@@ -111,11 +109,15 @@
     <!-- SPI fly / Service loader -->
     <dependency>
       <groupId>org.apache.aries.spifly</groupId>
-      <artifactId>org.apache.aries.spifly.dynamic.framework.extension</artifactId>
+      <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
       <scope>test</scope>
     </dependency>
 
     <!-- JSON provider -->
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.eclipse.parsson</groupId>
       <artifactId>jakarta.json</artifactId>

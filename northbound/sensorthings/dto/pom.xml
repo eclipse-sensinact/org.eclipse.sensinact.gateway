@@ -36,10 +36,6 @@
       <artifactId>jackson-annotations</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
       <artifactId>models</artifactId>
       <version>${project.version}</version>
@@ -66,6 +62,24 @@
       <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
       <artifactId>extended</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <!-- OSGi -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.jakartars</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.northbound.session</groupId>
+      <artifactId>session-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
     </dependency>
   </dependencies>
 

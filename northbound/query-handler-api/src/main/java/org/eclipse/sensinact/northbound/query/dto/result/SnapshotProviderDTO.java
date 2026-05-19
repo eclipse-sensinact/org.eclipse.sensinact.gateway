@@ -28,6 +28,11 @@ public class SnapshotProviderDTO {
     public String modelName;
 
     /**
+     * Model Package URI
+     */
+    public String modelPackageUri;
+
+    /**
      * List of services
      */
     public Map<String, SnapshotServiceDTO> services;

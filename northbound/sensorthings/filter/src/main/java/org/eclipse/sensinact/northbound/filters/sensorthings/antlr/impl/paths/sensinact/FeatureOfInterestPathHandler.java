@@ -10,28 +10,29 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
+package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensinact;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 
-public class DatastreamPathHandler {
+public class FeatureOfInterestPathHandler {
 
     private final ProviderSnapshot provider;
-    private final ResourceSnapshot resource;
+    private final List<? extends ResourceSnapshot> resources;
 
-    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("observations", this::subObservations,
-            "observedproperty", this::subObservedProperty, "sensor", this::subSensor, "thing", this::subThing);
+    private final Map<String, Function<String, Object>> subPartHandlers = Map.of("observations", this::subObservations);
 
-    public DatastreamPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
+    public FeatureOfInterestPathHandler(final ProviderSnapshot provider, final List<? extends ResourceSnapshot> resources) {
         this.provider = provider;
-        this.resource = resource;
+        this.resources = resources;
     }
 
     public Object handle(final String path) {
@@ -39,11 +40,11 @@ public class DatastreamPathHandler {
         if (parts.length == 1) {
             switch (parts[0]) {
             case "id":
-                // Provider~Service~Resource
-                return String.join("~", provider.getName(), resource.getService().getName(), resource.getName());
+                // Provider
+                return provider.getName();
 
             default:
-                return PathUtils.getResourceLevelField(provider, resource, parts[0]);
+                return PathUtils.getProviderLevelField(provider, resources, parts[0]);
             }
         } else {
             final Function<String, Object> handler = subPartHandlers.get(parts[0]);
@@ -55,19 +56,11 @@ public class DatastreamPathHandler {
     }
 
     private Object subObservations(final String path) {
-        // Datastream = Observation in sensinact
-        return new ObservationPathHandler(provider, resource).handle(path);
-    }
-
-    private Object subObservedProperty(final String path) {
-        return new ObservedPropertyPathHandler(provider, resource).handle(path);
-    }
-
-    private Object subSensor(final String path) {
-        return new SensorPathHandler(provider, resource).handle(path);
-    }
-
-    private Object subThing(final String path) {
-        return new ThingPathHandler(provider, List.of(resource)).handle(path);
+        if (resources.size() == 1) {
+            return new ObservationPathHandler(provider, resources.get(0)).handle(path);
+        } else {
+            return new AnyMatch(resources.stream().map(r -> new ObservationPathHandler(provider, r).handle(path))
+                    .collect(Collectors.toList()));
+        }
     }
 }

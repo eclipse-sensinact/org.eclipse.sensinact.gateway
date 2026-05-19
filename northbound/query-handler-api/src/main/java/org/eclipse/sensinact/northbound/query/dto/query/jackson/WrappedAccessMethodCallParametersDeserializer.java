@@ -12,20 +12,18 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.query.jackson;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.sensinact.northbound.query.dto.query.AccessMethodCallParameterDTO;
 import org.eclipse.sensinact.northbound.query.dto.query.WrappedAccessMethodCallParametersDTO;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.deser.std.StdNodeBasedDeserializer;
+import tools.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.databind.node.JsonNodeType;
 
 /**
  * Handles the deserialization of method parameters
@@ -33,21 +31,17 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 public class WrappedAccessMethodCallParametersDeserializer
         extends StdNodeBasedDeserializer<WrappedAccessMethodCallParametersDTO> {
 
-    private static final long serialVersionUID = 1L;
-
     public WrappedAccessMethodCallParametersDeserializer() {
         super(WrappedAccessMethodCallParametersDTO.class);
     }
 
     @Override
-    public WrappedAccessMethodCallParametersDTO convert(JsonNode node, DeserializationContext ctxt) throws IOException, JacksonException {
+    public WrappedAccessMethodCallParametersDTO convert(JsonNode node, DeserializationContext ctxt) throws JacksonException {
 
         WrappedAccessMethodCallParametersDTO dto = new WrappedAccessMethodCallParametersDTO();
 
         if (node.getNodeType() == JsonNodeType.OBJECT) {
-            Iterator<Entry<String, JsonNode>> fieldNames = node.fields();
-            while(fieldNames.hasNext()) {
-                Entry<String, JsonNode> entry = fieldNames.next();
+            for(Entry<String, JsonNode> entry : node.properties()) {
                 if ("parameters".equals(entry.getKey())) {
                     // Look for the array
                     node = entry.getValue();

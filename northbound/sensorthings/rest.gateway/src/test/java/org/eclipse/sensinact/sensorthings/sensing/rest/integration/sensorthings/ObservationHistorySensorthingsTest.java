@@ -60,7 +60,7 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 @RequirePostgresContainer
 public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest {
@@ -140,7 +140,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         do {
             try {
                 for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
-                    waitForRowCount("sensinact." + table, 0, true);
+                    waitForRowCount("sensinact." + table, "", 0, true);
                 }
                 // Got a valid count
                 ready = true;
@@ -237,17 +237,24 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         return ds;
     }
 
-    private void waitForRowCount(String table, int count) {
-        waitForRowCount(table, count, false);
+    private void waitForRowCount(String table, String where, int count) {
+        waitForRowCount(table, where, count, false);
     }
 
-    private void waitForRowCount(String table, int count, boolean allowMore) {
+    private void waitForRowCount(final String table, final String where, final int count, final boolean allowMore) {
         int current = -1;
+        int currentUnchangedCount = 0;
         try (Connection conn = getDataSource().getConnection()) {
-            for (int i = 0; i < 60; i++) {
-                try (ResultSet rs = conn.createStatement().executeQuery("SELECT COUNT(*) FROM " + table)) {
+            for (int i = 0; i < 200; i++) {
+                try (ResultSet rs = conn.createStatement().executeQuery("SELECT COUNT(*) FROM " + table + " " + where)) {
                     assertTrue(rs.next());
-                    current = rs.getInt(1);
+                    int updated = rs.getInt(1);
+                    currentUnchangedCount = updated == current ? currentUnchangedCount + 1 : 0;
+                    if(currentUnchangedCount > 9) {
+                        throw new AssertionFailedError("The count for table " + table +
+                                " has stablised at " + current + " which is less than the expected " + count);
+                    }
+                    current = updated;
                     if (current == count) {
                         return;
                     } else if (current > count) {
@@ -289,8 +296,8 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
     @Test
     void getDataStreamObservations() throws Exception {
         String thingId = "getDataStreamObservations";
-        createDatastream("baz", thingId, String.valueOf(0), TS_2012);
-        createDatastream("foobar", thingId, 0, TS_2012);
+        createDatastream("baz", thingId, "sensor", "op", String.valueOf(0), TS_2012);
+        createDatastream("foobar", thingId, "sensor", "op", 0, TS_2012);
         createThing(thingId, List.of(), List.of("baz", "foobar"));
 
         for (int i = 0; i < 999; i++) {
@@ -303,7 +310,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         // 1008: 1000 updates + history provider name & description & model &
         // modelPackageUri + foo
         // provider name & description & modelUri
-        waitForRowCount("sensinact.text_data", 5046);
+        waitForRowCount("sensinact.text_data", "WHERE resource = 'lastObservation'", 5000);
 
         ResultList<Observation> observations = utils.queryJson("/Datastreams(baz)/Observations?$count=true",
                 RESULT_OBSERVATIONS);
@@ -347,16 +354,15 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
     void getHistoricObservationTest() throws Exception {
         String thingId = "navigateToObservationTest";
         String datastreamId = thingId + "_datastream";
-        createDatastream(datastreamId, thingId, 0, TS_2012);
+        createDatastream(datastreamId, thingId, "sensor", "op", 0, TS_2012);
 
         for (int i = 0; i < 10; i++) {
             createObservation(datastreamId, thingId, Integer.valueOf(i), TS_2012.plus(ofDays(i)));
 
         }
         createThing(thingId, List.of(), List.of(datastreamId), TS_2012);
-        // 16: 10 updates + history provider name & model & modelPackageUri + fizz
-        // provider name & modelUri
-        waitForRowCount("sensinact.text_data", 40);
+        waitForRowCount("sensinact.text_data",
+                String.format("WHERE provider = '%s' AND resource = 'lastObservation'", datastreamId), 11);
 
         String id = String.format("%s~%s~%s", datastreamId, "test",
                 Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
@@ -372,14 +378,15 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
     void navigateToObservationTest() throws Exception {
         String thingId = "navigateToObservationTest";
         String datastreamId = thingId + "_datastream";
-        createDatastream(datastreamId, thingId, 0, TS_2012);
+        createDatastream(datastreamId, thingId, "sensor", "op", 0, TS_2012);
 
         for (int i = 0; i < 10; i++) {
             createObservation(datastreamId, thingId, i, TS_2012.plus(ofDays(i)));
 
         }
         createThing(thingId, List.of(), List.of(datastreamId));
-        waitForRowCount("sensinact.text_data", 40);
+        waitForRowCount("sensinact.text_data",
+                String.format("WHERE provider = '%s' AND resource = 'lastObservation'", datastreamId), 11);
 
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
         });
@@ -415,12 +422,13 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         Instant laterTime = ZonedDateTime.of(2020, 6, 15, 12, 0, 0, 0, ZoneOffset.UTC).toInstant();
 
         // Create resources with different timestamps
-        createDatastream(testProvider, testProviderThing, 25.5, earlierTime);
-        createDatastream(testProvider, testProviderThing, 30.2, laterTime);
+        createDatastream(testProvider, testProviderThing, "sensor", "op", 25.5, earlierTime);
+        createDatastream(testProvider, testProviderThing, "sensor", "op", 30.2, laterTime);
         createLocation(testProviderLocation);
         createThing(testProviderThing, List.of(), List.of(testProvider));
 
-        waitForRowCount("sensinact.text_data", 49);
+        waitForRowCount("sensinact.text_data",
+                String.format("WHERE provider = '%s' AND resource = 'lastObservation'", testProvider), 2);
 
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils.queryJson(
@@ -451,13 +459,13 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
     @Test
     void testFilterLargerThanBlocksize() throws Exception {
         String thingId = "testFilterLargerThanBlocksize";
-        createDatastream("foobar", thingId, 0, TS_2012);
+        createDatastream("foobar", thingId, "sensor", "op", 0, TS_2012);
         createThing(thingId, List.of(), List.of("foobar"));
 
         for (int i = 0; i < 1000; i++) {
             createObservation("foobar", thingId, Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", 1030);
+        waitForRowCount("sensinact.text_data", "WHERE provider = 'foobar' AND resource = 'lastObservation'", 1001);
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils
                 .queryJson(String.format("/Datastreams(foobar)/Observations?$filter=%s",

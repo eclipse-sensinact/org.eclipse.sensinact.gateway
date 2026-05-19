@@ -75,7 +75,7 @@ class NotificationKey implements Comparable<NotificationKey> {
         if (LinkedProviderNotification.class == clazz) {
             return 5;
         }
-        throw new IllegalArgumentException("Unkown type " + clazz.getName());
+        throw new IllegalArgumentException("Unknown type " + clazz.getName());
     }
 
     private int safeCompare(String a, String b) {

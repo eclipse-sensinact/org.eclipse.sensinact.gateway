@@ -18,17 +18,20 @@ import org.eclipse.sensinact.northbound.query.dto.query.jackson.NestedValueAsStr
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Subscription query
  */
 public class QuerySubscribeDTO extends AbstractQueryDTO {
 
+    public static enum SubscriptionType { EVENTS, SNAPSHOTS };
+
     /**
      * Resource filter
      */
-    @JsonDeserialize(using = NestedValueAsStringDeserializer.class )
+    @JsonDeserialize(using = NestedValueAsStringDeserializer.class)
     public String filter;
 
     /**
@@ -36,6 +39,9 @@ public class QuerySubscribeDTO extends AbstractQueryDTO {
      */
     @JsonInclude(Include.NON_NULL)
     public String filterLanguage;
+
+    @JsonInclude(Include.NON_NULL)
+    public SubscriptionType subscriptionType;
 
     public QuerySubscribeDTO() {
         super(EQueryType.SUBSCRIBE);

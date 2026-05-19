@@ -13,22 +13,21 @@
 
 package org.eclipse.sensinact.gateway.southbound.wot.api;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.southbound.wot.api.dataschema.DataSchema;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.deser.std.StdDeserializer;
 
 /**
  * A property instance is both an InteractionAffordance and a DataSchema
@@ -55,13 +54,11 @@ public class PropertyAffordance extends InteractionAffordance {
         }
 
         @Override
-        public PropertyAffordance deserialize(JsonParser jp, DeserializationContext ctxt)
-                throws IOException, JacksonException {
-            ObjectCodec oc = jp.getCodec();
-            JsonNode node = oc.readTree(jp);
+        public PropertyAffordance deserialize(JsonParser jp, DeserializationContext ctxt) throws JacksonException {
+            JsonNode node = ctxt.readTree(jp);
 
             // Parse interaction affordance fields
-            InteractionAffordance ia = oc.readValue(node.traverse(), InteractionAffordance.class);
+            InteractionAffordance ia = ctxt.readValue(node.traverse(ctxt), InteractionAffordance.class);
             PropertyAffordance pa = new PropertyAffordance();
             pa.semanticType = ia.semanticType;
             pa.title = ia.title;
@@ -72,7 +69,7 @@ public class PropertyAffordance extends InteractionAffordance {
             JsonNode valueNode = node.get("observable");
             pa.observable = valueNode != null ? valueNode.asBoolean() : false;
 
-            pa.schema = oc.readValue(node.traverse(), DataSchema.class);
+            pa.schema = ctxt.readValue(node.traverse(ctxt), DataSchema.class);
             return pa;
         }
     }

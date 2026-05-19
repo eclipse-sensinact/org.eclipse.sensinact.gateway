@@ -15,10 +15,14 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.DependentCommand;
 import org.eclipse.sensinact.core.command.ResourceCommand;
@@ -30,7 +34,6 @@ import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Location;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
@@ -40,7 +43,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedThing;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.DatastreamUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -55,21 +58,14 @@ import jakarta.ws.rs.ext.Providers;
  */
 public class ThingsExtraUseCase extends AbstractExtraUseCaseModelDelete<ExpandedThing, ProviderSnapshot> {
 
-    private final IDtoMemoryCache<Sensor> sensorCache;
     private final IDtoMemoryCache<ExpandedObservation> cacheObs;
     private final IDtoMemoryCache<Instant> cacheHl;
-    private final IDtoMemoryCache<FeatureOfInterest> cacheFoi;
-
-    private final IDtoMemoryCache<ObservedProperty> observedPropertyCache;
 
     @SuppressWarnings("unchecked")
     public ThingsExtraUseCase(Providers providers, Application application) {
         super(providers, application);
-        sensorCache = resolve(providers, IDtoMemoryCache.class, Sensor.class);
-        observedPropertyCache = resolve(providers, IDtoMemoryCache.class, ObservedProperty.class);
         cacheObs = resolve(providers, IDtoMemoryCache.class, ExpandedObservation.class);
         cacheHl = resolve(providers, IDtoMemoryCache.class, Instant.class);
-        cacheFoi = resolve(providers, IDtoMemoryCache.class, FeatureOfInterest.class);
     }
 
     public ExtraUseCaseResponse<ProviderSnapshot> create(ExtraUseCaseRequest<ExpandedThing> request) {
@@ -103,14 +99,13 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseModelDelete<Expanded
         String id = request.id();
         ProviderSnapshot provider = providerUseCase.read(request.session(), id);
         if (provider != null) {
-            locationIds.addAll(getLocationIds(provider));
-            datastreamIds.addAll(getDatastreamIds(provider));
+            locationIds.addAll(DtoToModelMapper.getLocationIds(provider));
+            datastreamIds.addAll(DtoToModelMapper.getDatastreamIdsFromThing(provider));
         }
         List<ExpandedDataStream> listDatastream = Optional.ofNullable(request.model().datastreams()).orElseGet(List::of)
                 .stream().map(ds -> {
-                    Sensor sensor = getCachedExpandedSensor(request, sensorCache, ds);
-                    ObservedProperty observedProperty = getCachedExpandedObservedProperty(request,
-                            observedPropertyCache, ds);
+                    Sensor sensor = getCachedExpandedSensor(request, ds);
+                    ObservedProperty observedProperty = getCachedExpandedObservedProperty(request, ds);
                     if (!DtoMapperSimple.isRecordOnlyField(ds, "id")) {
                         checkRequireField(ds);
                         checkRequireLink(sensor, observedProperty);
@@ -134,7 +129,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseModelDelete<Expanded
 
                 }).toList();
 
-        return DtoToModelMapper.toThingUpdates(request, id, locationIds, datastreamIds, listDatastream,
+        return DtoToModelMapper.toThingUpdates(request, id, providerUseCase, locationIds, datastreamIds, listDatastream,
                 listNewLocation);
     }
 
@@ -181,8 +176,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseModelDelete<Expanded
     private void updateObservationHistoryMemory(ExtraUseCaseRequest<ExpandedThing> request,
             List<ResourceSnapshot> obsThingDatastream) {
         if (obsThingDatastream != null)
-            obsThingDatastream.stream()
-                    .forEach(u -> updateObservationMemoryHistory(cacheObs, cacheFoi, request.mapper(), u));
+            obsThingDatastream.stream().forEach(u -> updateObservationMemoryHistory(cacheObs, request.mapper(), u));
     }
 
     private void updateHistoricalLocationMemoryHistory(ExtraUseCaseRequest<ExpandedThing> request,
@@ -216,38 +210,107 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseModelDelete<Expanded
         }
     }
 
-    protected DependentCommand<TimedValue<List<String>>, Map<String, TimedValue<String>>> getContextDeleteDatastreamProvider(
-            ExtraUseCaseRequest<?> request, AbstractSensinactCommand<TimedValue<List<String>>> datastreamIdCommand) {
+    protected DependentCommand<Map<String, Map<String, TimedValue<?>>>, Map<String, List<?>>> getContextDeleteDatastreamProvider(
+            ExtraUseCaseRequest<?> request, ResourceCommand<TimedValue<List<String>>> datastreamIdCommand) {
+        DependentCommand<TimedValue<List<String>>, Map<String, Map<String, TimedValue<?>>>> parentCommand = new DependentCommand<TimedValue<List<String>>, Map<String, Map<String, TimedValue<?>>>>(
+                datastreamIdCommand) {
 
-        return new DependentCommand<>(datastreamIdCommand) {
+            @SuppressWarnings("unchecked")
+            @Override
+            protected Promise<Map<String, Map<String, TimedValue<?>>>> call(
+                    Promise<TimedValue<List<String>>> parentResult, SensinactDigitalTwin twin,
+                    SensinactModelManager modelMgr, PromiseFactory pf) {
+                try {
+                    // get list ofd opId and sensorId and lastObservation
+                    List<String> datastreamIds = parentResult.getValue().getValue();
+                    List<SensinactProvider> datastreamProvs = datastreamIds.stream().map(id -> twin.getProvider(id))
+                            .filter(Objects::nonNull).toList();
+
+                    List<Promise<List<TimedValue<?>>>> promisesOfLists = datastreamProvs.stream().map(sp -> {
+                        Promise<TimedValue<?>> lastObs = getPromiseLastObservation(sp);
+
+                        Promise<TimedValue<?>> opId = (Promise<TimedValue<?>>) (Promise<?>) sp
+                                .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "observedPropertyId")
+                                .getValue(String.class);
+
+                        Promise<TimedValue<?>> sensorId = (Promise<TimedValue<?>>) (Promise<?>) sp
+                                .getResource(DtoMapperSimple.SERVICE_DATASTREAM, "sensorId").getValue(String.class);
+
+                        return pf.all(List.of(lastObs, opId, sensorId));
+                    }).toList();
+
+                    return pf.all(promisesOfLists).map(resolvedLists -> {
+                        Map<String, Map<String, TimedValue<?>>> finalMap = new HashMap<>();
+
+                        for (int i = 0; i < datastreamIds.size(); i++) {
+                            List<TimedValue<?>> list = resolvedLists.get(i);
+                            finalMap.put(datastreamIds.get(i), Map.of("lastObservation", list.get(0), "opId",
+                                    list.get(1), "sensorId", list.get(2)));
+                        }
+                        return finalMap;
+                    });
+                } catch (Exception e) {
+                    return pf.failed(e);
+
+                }
+            }
+        };
+        DependentCommand<Map<String, Map<String, TimedValue<?>>>, Map<String, List<?>>> parent2 = new DependentCommand<Map<String, Map<String, TimedValue<?>>>, Map<String, List<?>>>(
+                parentCommand) {
 
             @Override
-            protected Promise<Map<String, TimedValue<String>>> call(Promise<TimedValue<List<String>>> parentResult,
+            protected Promise<Map<String, List<?>>> call(Promise<Map<String, Map<String, TimedValue<?>>>> parentResult,
                     SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
-
                 try {
-                    List<String> datastreamIds = parentResult.getValue().getValue();
+                    Map<String, Map<String, TimedValue<?>>> map = parentResult.getValue();
+                    List<String> datastreamIds = map.keySet().stream().toList();
 
-                    List<Promise<Map.Entry<String, TimedValue<String>>>> promises = datastreamIds.stream().map(id -> {
-                        SensinactProvider sp = twin.getProvider(id);
-                        if (sp != null) {
-                            SensinactResource resource = sp.getResource(DtoMapperSimple.SERVICE_DATASTREAM,
-                                    "lastObservation");
-                            if (resource != null) {
-                                return resource.getValue(String.class).map(tv -> Map.entry(id, tv));
-                            }
+                    Map<String, Promise<TimedValue<List<String>>>> promisesMap = new LinkedHashMap<>();
+                    // get datastreamId for sensor and observedproperty
+                    datastreamIds.stream().map(id -> twin.getProvider(id)).filter(Objects::nonNull)
+                            .forEach(spDatastream -> {
+
+                                String sensorId = (String) map.get(spDatastream.getName()).get("sensorId").getValue();
+                                String opId = (String) map.get(spDatastream.getName()).get("opId").getValue();
+
+                                promisesMap.put(sensorId,
+                                        twin.getProvider(sensorId)
+                                                .getResource(DtoMapperSimple.SERVICE_SENSOR, "datastreamIds")
+                                                .getMultiValue(String.class));
+                                promisesMap.put(opId,
+                                        twin.getProvider(opId)
+                                                .getResource(DtoMapperSimple.SERVICE_OBSERVED_PROPERTY, "datastreamIds")
+                                                .getMultiValue(String.class));
+                            });
+                    // delete datastreams
+                    datastreamIds.stream().forEach(id -> {
+                        SensinactProvider spDatastream = twin.getProvider(id);
+                        if (spDatastream != null) {
+
+                            spDatastream.delete();
                         }
-                        return null;
-                    }).filter(Objects::nonNull).toList();
+                    });
 
-                    return pf.all(promises).map(entries -> entries.stream()
-                            .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    List<String> keys = new ArrayList<>(promisesMap.keySet());
+                    List<Promise<TimedValue<List<String>>>> promises = new ArrayList<>(promisesMap.values());
 
-                } catch (InvocationTargetException | InterruptedException e) {
+                    return pf.all(promises).then(resolvedList -> {
+                        Map<String, List<?>> result = new LinkedHashMap<>();
+                        List<TimedValue<List<String>>> values = resolvedList.getValue();
+                        for (int i = 0; i < keys.size(); i++) {
+                            result.put(keys.get(i), List.of(values.get(i)));
+                        }
+                        result.put("datastreamIds", datastreamIds);
+                        return pf.resolved(result);
+                    });
+
+                } catch (Exception e) {
                     return pf.failed(e);
                 }
             }
         };
+        return parent2;
+
     }
 
     @Override
@@ -262,32 +325,49 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseModelDelete<Expanded
             }
 
         };
-        DependentCommand<TimedValue<List<String>>, Map<String, TimedValue<String>>> depend = getContextDeleteDatastreamProvider(
+        DependentCommand<Map<String, Map<String, TimedValue<?>>>, Map<String, List<?>>> depend = getContextDeleteDatastreamProvider(
                 request, listDatastreamIds);
-        return new DependentCommand<Map<String, TimedValue<String>>, List<Void>>(depend) {
-            // delete datastreams and thing
+        return new DependentCommand<Map<String, List<?>>, List<Void>>(depend) {
+            @SuppressWarnings("unchecked")
             @Override
-            protected Promise<List<Void>> call(Promise<Map<String, TimedValue<String>>> parentResult,
-                    SensinactDigitalTwin twin, SensinactModelManager modelMgr, PromiseFactory pf) {
+            protected Promise<List<Void>> call(Promise<Map<String, List<?>>> parentResult, SensinactDigitalTwin twin,
+                    SensinactModelManager modelMgr, PromiseFactory pf) {
                 SensinactProvider sp = twin.getProvider(request.id());
 
                 try {
-                    Map<String, TimedValue<String>> map = parentResult.getValue();
-                    List<Promise<Void>> list = map.keySet().stream().flatMap((String id) -> {
-                        Instant stamp = map.get(id).getTimestamp();
-                        ExpandedObservation obs = parseObservation(request.mapper(), map.get(id).getValue());
-                        if (obs != null) {
-                            ExpandedObservation obsDeleted = getObservationDeleted(obs);
-                            cacheObs.addDto(obsDeleted.id() + "~" + DtoMapperSimple.stampToId(stamp), obsDeleted);
-                        }
-                        return removeDatastream(twin, id).stream();
-                    }).toList();
+                    Map<String, List<?>> map = parentResult.getValue();
+                    Map<String, List<TimedValue<List<String>>>> mapDatastreamSensorOp = map.entrySet().stream()
+                            .filter(entry -> {
+                                List<?> list = entry.getValue();
+                                return !list.isEmpty() && list.get(0) instanceof TimedValue<?>;
+                            }).collect(Collectors.toMap(Map.Entry::getKey,
+                                    entry -> (List<TimedValue<List<String>>>) entry.getValue()));
+                    List<String> datastreamIds = map.entrySet().stream().filter(entry -> {
+                        List<?> list = entry.getValue();
+                        return !list.isEmpty() && list.get(0) instanceof String;
+                    }).flatMap(entry -> ((List<String>) entry.getValue()).stream()).toList();
+                    mapDatastreamSensorOp.entrySet().stream().forEach(entry -> {
+                        String idElem = entry.getKey();
+                        entry.getValue().stream().forEach(tv -> {
+                            List<String> currentDatastreamElemIds = tv.getValue();
+                            List<String> newList = currentDatastreamElemIds.stream()
+                                    .filter(id -> !datastreamIds.contains(id)).toList();
+                            SensinactProvider prov = twin.getProvider(idElem);
+                            SensinactResource datastreamToChangeIds = prov.getResource(DtoMapperSimple.SERVICE_SENSOR,
+                                    "datastreamIds") != null
+                                            ? prov.getResource(DtoMapperSimple.SERVICE_SENSOR, "datastreamIds")
+                                            : prov.getResource(DtoMapperSimple.SERVICE_OBSERVED_PROPERTY,
+                                                    "datastreamIds");
+                            datastreamToChangeIds.setValue(newList);
+                        });
+                    });
+
                     if (sp != null) {
                         sp.delete();
                         if (isHistoryMemory())
                             cacheHl.removeDtoContain(request.id());
                     }
-                    return pf.all(list);
+                    return pf.resolved(null);
 
                 } catch (InvocationTargetException | InterruptedException e) {
                     return pf.failed(e);

@@ -12,37 +12,38 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
-import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.container.ContainerRequestFilter;
-import jakarta.ws.rs.container.ContainerResponseContext;
-import jakarta.ws.rs.container.ContainerResponseFilter;
-import jakarta.ws.rs.ext.Provider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.container.ContainerResponseContext;
+import jakarta.ws.rs.container.ContainerResponseFilter;
+import jakarta.ws.rs.ext.Provider;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Provider
 public class LoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SensinactSensorthingsApplication.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingFilter.class);
     private static ObjectMapper MAPPER;
 
     private static ObjectMapper getMapper() {
         if (MAPPER == null) {
-            MAPPER = new ObjectMapper();
-            MAPPER.registerModule(new JavaTimeModule());
-            MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
+            MAPPER = JsonMapper.builder()
+                    .changeDefaultPropertyInclusion(i -> i.withValueInclusion(JsonInclude.Include.NON_NULL)
+                            .withContentInclusion(JsonInclude.Include.NON_NULL))
+                    .build();
         }
         return MAPPER;
     }
@@ -52,8 +53,8 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
         if (LOG.isTraceEnabled()) {
 
-            LOG.trace("{} - Query     {} : {}", Instant.now().toString(), request.getMethod(),
-                    request.getUriInfo().getRequestUri());
+            LOG.trace("{} - Query     {} : {}?{}", Instant.now().toString(), request.getMethod(),
+                    request.getUriInfo().getRequestUri(), request.getUriInfo().getQueryParameters());
 
             if (request.hasEntity()) {
                 String body = readStream(request.getEntityStream());

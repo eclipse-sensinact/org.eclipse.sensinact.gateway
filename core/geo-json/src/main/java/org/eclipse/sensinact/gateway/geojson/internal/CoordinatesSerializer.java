@@ -13,20 +13,18 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson.internal;
 
-import java.io.IOException;
-
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 /**
  * A Jackson serializer for {@link Coordinates} objects as defined in
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1.1">the GeoJSON
  * specification</a>
  */
-@SuppressWarnings("serial")
 public class CoordinatesSerializer extends StdSerializer<Coordinates> {
 
     private static final double[] EMPTY = new double[0];
@@ -36,7 +34,7 @@ public class CoordinatesSerializer extends StdSerializer<Coordinates> {
     }
 
     @Override
-    public void serialize(Coordinates value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Coordinates value, JsonGenerator gen, SerializationContext provider) throws JacksonException {
         double[] array = value.isEmpty() ? EMPTY : value.hasElevation() ?
                 new double[] { value.longitude(), value.latitude(), value.elevation() } : new double[] { value.longitude(), value.latitude() };
         gen.writeArray(array, 0, array.length);

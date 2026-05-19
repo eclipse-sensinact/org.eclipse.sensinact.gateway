@@ -27,7 +27,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriInfo;
@@ -48,7 +48,7 @@ class HistoryResourceHelperSensinact {
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
 
         if (historyProvider == null) {
-            return new ResultList<>(null, null, List.of());
+            return new ResultList<>(List.of());
         }
 
         Integer maxResults = getMaxResult(application, localResultLimit);
@@ -88,7 +88,7 @@ class HistoryResourceHelperSensinact {
             ProviderSnapshot provider, int localResultLimit) {
         String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
         if (historyProvider == null) {
-            return new ResultList<>(null, null, List.of());
+            return new ResultList<>(List.of());
         }
 
         Integer maxResults = getMaxResult(application, localResultLimit);

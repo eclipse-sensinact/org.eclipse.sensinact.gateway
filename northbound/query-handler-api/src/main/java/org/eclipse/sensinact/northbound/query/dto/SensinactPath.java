@@ -12,24 +12,44 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.northbound.query.dto.jackson.SensinactPathDeserializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 /**
  * Represents a path in the sensiNact nomenclature
  */
 @JsonInclude(Include.NON_NULL)
 @JsonDeserialize(using = SensinactPathDeserializer.class)
+@JsonSerialize(using = SensinactPath.Serializer.class)
 public class SensinactPath {
+
+    public static class Serializer extends StdSerializer<SensinactPath> {
+
+        public Serializer() {
+            super(SensinactPath.class);
+        }
+
+        @Override
+        public void serialize(SensinactPath value, JsonGenerator gen, SerializationContext ctxt)
+                throws JacksonException {
+            gen.writeString(value.toUri());
+        }
+    }
+
     /**
      * Target provider
      */
@@ -184,16 +204,9 @@ public class SensinactPath {
      * Returns the path as a URI
      */
     public String toUri() {
-
-        final List<String> items = new ArrayList<>(4);
-        for (final String item : Arrays.asList(provider, service, resource, metadata)) {
-            if (item == null) {
-                break;
-            }
-            items.add(item);
-        }
-
-        return "/" + String.join("/", items);
+        return Stream.of(provider, service, resource, metadata)
+            .takeWhile(Objects::nonNull)
+            .collect(Collectors.joining("/", "/", ""));
     }
 
     /**

@@ -26,13 +26,19 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.util.BlockingArrayQueue;
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceDataNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.notification.ResourceLifecycleNotificationDTO;
+import org.eclipse.sensinact.northbound.query.dto.notification.SnapshotUpdateNotificationDTO;
 import org.eclipse.sensinact.northbound.rest.integration.TestUtils;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
@@ -40,24 +46,31 @@ import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.jakartars.client.SseEventSourceFactory;
+import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
+import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.jakarta.rs.json.JacksonJsonProvider;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.sse.SseEventSource;
+import tools.jackson.jakarta.rs.cfg.JakartaRSFeature;
+import tools.jackson.jakarta.rs.json.JacksonJsonProvider;
 
 @WithConfiguration(pid = "sensinact.session.manager", properties = {
         @Property(key = "auth.policy", value = "ALLOW_ALL"),
@@ -114,6 +127,9 @@ public class ResourceNotificationsTest {
     @InjectService
     ClientBuilder clientBuilder;
 
+    @InjectBundleContext
+    BundleContext ctx;
+
     BlockingQueue<ResourceDataNotification> queue;
 
     final TestUtils utils = new TestUtils();
@@ -127,9 +143,27 @@ public class ResourceNotificationsTest {
     }
 
     @AfterEach
-    void stop() {
+    void stop(@InjectService GatewayThread gt) {
         SensiNactSession session = sessionManager.getDefaultSession(USER);
         session.activeListeners().keySet().forEach(session::removeListener);
+        gt.execute(new AbstractSensinactCommand<Void>() {
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                    PromiseFactory promiseFactory) {
+                SensinactProvider sp = twin.getProvider(PROVIDER);
+                if(sp != null) {
+                    sp.delete();
+                }
+                return promiseFactory.resolved(null);
+            }
+        });
+    }
+
+    public static class MediaTypeAgnosticJsonProvider extends JacksonJsonProvider {
+        public MediaTypeAgnosticJsonProvider() {
+            super();
+            enable(JakartaRSFeature.MATCH_ALL_IF_NO_MEDIA_TYPE);
+        }
     }
 
     /**
@@ -142,8 +176,10 @@ public class ResourceNotificationsTest {
         final String resource = "new-resource";
 
         // Subscribe to a non-existent resource
-        final Client client = clientBuilder.connectTimeout(3, TimeUnit.SECONDS).register(JacksonJsonProvider.class)
+        final Client client = clientBuilder.connectTimeout(3, TimeUnit.SECONDS)
+                .register(MediaTypeAgnosticJsonProvider.class)
                 .build();
+
         final SseEventSource sseSource = sseClient
                 .newSource(client.target("http://localhost:8185/sensinact/").path("providers").path(PROVIDER)
                         .path("services").path(service).path("resources").path(resource).path("SUBSCRIBE"));
@@ -151,7 +187,13 @@ public class ResourceNotificationsTest {
         final BlockingArrayQueue<ResourceLifecycleNotificationDTO> lifeCycleEvents = new BlockingArrayQueue<>();
         final BlockingArrayQueue<ResourceDataNotificationDTO> dataEvents = new BlockingArrayQueue<>();
         sseSource.register(ise -> {
-            switch (ise.getName()) {
+            String name = ise.getName();
+            if (name == null) {
+                // Liveness checks don't have a name
+                return;
+            }
+
+            switch (name) {
                 case "lifecycle":
                     lifeCycleEvents.add(ise.readData(ResourceLifecycleNotificationDTO.class));
                     break;
@@ -163,7 +205,7 @@ public class ResourceNotificationsTest {
                 default:
                     break;
             }
-        });
+        }, Throwable::printStackTrace);
         sseSource.open();
 
         try {
@@ -393,6 +435,156 @@ public class ResourceNotificationsTest {
         } finally {
             if (sseSource.isOpen()) {
                 sseSource.close();
+            }
+        }
+    }
+
+    @Nested
+    class Snapshots {
+        /**
+         * Check resource creation & update notification
+         */
+        @Test
+        void snapshotsNonExistent() throws Exception {
+
+            final String service = "new";
+            final String resource = "new-resource";
+            // We use an LDAP filter as Jersey can't cope with '{' in a query parameter
+            final String filter = "(&(PROVIDER=%s)(%s.%s=*)".formatted(PROVIDER, service, resource);
+
+            // Subscribe to a non-existent resource
+            final Client client = clientBuilder.connectTimeout(3, TimeUnit.SECONDS).register(JacksonJsonProvider.class)
+                    .build();
+            final SseEventSource sseSource = sseClient
+                    .newSource(client.target("http://localhost:8185/sensinact/").path("snapshot/subscribe")
+                            .queryParam("filter", filter).queryParam("filterLanguage", "ldap"));
+
+            final BlockingArrayQueue<SnapshotUpdateNotificationDTO> events = new BlockingArrayQueue<>();
+            sseSource.register(ise -> {
+                String name = ise.getName();
+                if (name == null) {
+                    // Liveness checks don't have a name
+                    return;
+                }
+
+                switch (name) {
+                    case "update":
+                        events.add(ise.readData(SnapshotUpdateNotificationDTO.class, MediaType.APPLICATION_JSON_TYPE));
+                        break;
+                    default:
+                        break;
+                }
+            }, Throwable::printStackTrace);
+            sseSource.open();
+
+            try {
+                SnapshotUpdateNotificationDTO update = events.poll(1, TimeUnit.SECONDS);
+                assertNotNull(update);
+                assertEquals(0, update.arriving().size());
+                assertEquals(0, update.modified().size());
+                assertEquals(0, update.departing().size());
+
+                // Register the resource
+                int initialValue = 42;
+                GenericDto dto = utils.makeDto(PROVIDER, service, resource, initialValue, Integer.class);
+                push.pushUpdate(dto);
+
+                // Wait for the SSE event
+                update = events.poll(1, TimeUnit.SECONDS);
+                assertNotNull(update);
+                assertEquals(1, update.arriving().size());
+                assertEquals(0, update.modified().size());
+                assertEquals(0, update.departing().size());
+
+                assertTrue(update.arriving().containsKey(PROVIDER));
+                assertEquals(initialValue, update.arriving().get(PROVIDER).services.get(service).resources.get(resource).value);
+
+                // Update value
+                dto.value = initialValue + 10;
+                push.pushUpdate(dto);
+
+                // Wait for the SSE Event
+                update = events.poll(1, TimeUnit.SECONDS);
+                assertNotNull(update);
+                assertEquals(0, update.arriving().size());
+                assertEquals(1, update.modified().size());
+                assertEquals(0, update.departing().size());
+
+                assertTrue(update.modified().containsKey(PROVIDER));
+                assertEquals(initialValue + 10, update.modified().get(PROVIDER).services.get(service).resources.get(resource).value);
+            } finally {
+                sseSource.close();
+            }
+        }
+
+        /**
+         * Ensure that SSE is closed when the server expires the session
+         */
+        @Test
+        void sseExpireOnServiceSide(@InjectService JakartarsServiceRuntime runtime) throws Exception {
+
+            // Ensure that no session is present at start
+            final SensiNactSession defaultSession = sessionManager.getDefaultSession(USER);
+            for (String sessionId : sessionManager.getSessionIds(USER)) {
+                SensiNactSession session = sessionManager.getSession(USER, sessionId);
+                if (session.getSessionId() != defaultSession.getSessionId()) {
+                    session.expire();
+                }
+            }
+            assertEquals(List.of(defaultSession.getSessionId()), sessionManager.getSessionIds(USER));
+
+            final String service = "new";
+            final String resource = "new-resource";
+            final String filter = "(&(PROVIDER=%s)(%s.%s=*)".formatted(PROVIDER, service, resource);
+
+            // Subscribe to a non-existent resource
+            final Client client = clientBuilder.connectTimeout(3, TimeUnit.SECONDS).register(JacksonJsonProvider.class)
+                    .build();
+            final SseEventSource sseSource = sseClient
+                    .newSource(client.target("http://localhost:8185/sensinact/").path("snapshot").path("subscribe")
+                            .queryParam("filter", filter).queryParam("filterLanguage", "ldap"));
+
+            final BlockingArrayQueue<Instant> expirationEvent = new BlockingArrayQueue<>();
+            sseSource.register(ise -> {
+                final String comment = ise.getComment();
+                if ("session-expired".equals(comment)) {
+                    expirationEvent.add(Instant.now());
+                }
+            }, Throwable::printStackTrace, () -> System.out.println("SSE Closed"));
+            sseSource.open();
+
+            try {
+                // Wait a bit to ensure the session is up
+                Thread.sleep(100);
+
+                // Look for the session
+                SensiNactSession sseSession = null;
+                for (String sessionId : sessionManager.getSessionIds(USER)) {
+                    SensiNactSession session = sessionManager.getSession(USER, sessionId);
+                    if (session != defaultSession && !sessionId.equals(defaultSession.getSessionId())) {
+                        sseSession = session;
+                        break;
+                    }
+                }
+                assertNotNull(sseSession, "SSE session not found");
+
+                // Wait for session to pass first expiry check
+                Instant expiration = expirationEvent.poll(SESSION_EXPIRY_SECONDS + SESSION_ACTIVITY_INTERVAL_SECONDS + 1,
+                        TimeUnit.SECONDS);
+                assertNull(expiration, "Session expired too early");
+
+                // Expire the session on the server side
+                final Instant closingTime = Instant.now();
+                sseSession.expire();
+
+                // Expiration should be received quickly
+                expiration = expirationEvent.poll(500, TimeUnit.MILLISECONDS);
+                assertNotNull(expiration, "Session expired event not received");
+                assertFalse(expiration.isBefore(closingTime), "Session expired too early");
+            } finally {
+                if (sseSource.isOpen()) {
+                    sseSource.close();
+                }
             }
         }
     }

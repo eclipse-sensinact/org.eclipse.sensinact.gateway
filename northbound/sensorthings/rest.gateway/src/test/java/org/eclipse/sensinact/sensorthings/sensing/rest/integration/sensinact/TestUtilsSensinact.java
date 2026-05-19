@@ -35,15 +35,15 @@ import java.util.Arrays;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class TestUtilsSensinact {
 
     private final Method[] objectMethods = Object.class.getMethods();
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper mapper = JsonMapper.builder().build();
 
     static final HttpClient client = HttpClient.newHttpClient();
 

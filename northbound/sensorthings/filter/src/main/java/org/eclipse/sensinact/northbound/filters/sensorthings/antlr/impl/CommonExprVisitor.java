@@ -22,7 +22,6 @@ import java.util.function.Function;
 
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterBaseVisitor;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.AddexprContext;
@@ -37,6 +36,8 @@ import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterPa
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.PrimitiveliteralContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.ODataFilterParser.SubexprContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler;
+
+import com.esri.core.geometry.Geometry;
 
 public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceValueFilterInputHolder, Object>> {
 
@@ -74,7 +75,10 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
         }
 
         case ODataFilterParser.RULE_string_1: {
-            final String value = new StringVisitor().visitChildren(ctx);
+            String raw = ctx.getText();
+
+            final String value = (raw.length() >= 2) ? raw.substring(1, raw.length() - 1) : raw;
+
             return x -> value;
         }
 
@@ -105,7 +109,7 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
         case ODataFilterParser.RULE_geographymultipolygon:
         case ODataFilterParser.RULE_geographypolygon:
         case ODataFilterParser.RULE_geographypoint: {
-            final GeoJsonObject value = visitor.visit(element);
+            final Geometry value = visitor.visit(element);
             return x -> value;
         }
 
@@ -180,8 +184,8 @@ public class CommonExprVisitor extends ODataFilterBaseVisitor<Function<ResourceV
         case ODataFilterParser.RULE_divexpr:
             rightExpr = rightVisitor.visit(((DivexprContext) rightElement).commonexpr());
             subOperation = this::div;
-            break;
 
+            break;
         case ODataFilterParser.RULE_modexpr:
             rightExpr = rightVisitor.visit(((ModexprContext) rightElement).commonexpr());
             subOperation = this::mod;

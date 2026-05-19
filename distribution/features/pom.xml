@@ -45,6 +45,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${compatibility.jackson.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.distribution</groupId>
       <artifactId>test-utils</artifactId>
       <version>${project.version}</version>

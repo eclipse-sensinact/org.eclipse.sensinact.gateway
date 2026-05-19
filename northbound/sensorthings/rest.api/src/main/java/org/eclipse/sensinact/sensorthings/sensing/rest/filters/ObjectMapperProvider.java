@@ -12,11 +12,10 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import jakarta.ws.rs.ext.ContextResolver;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Provides a suitable ObjectMapper for JSON serialization
@@ -26,9 +25,9 @@ public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
     private final ObjectMapper mapper;
 
     public ObjectMapperProvider() {
-        this.mapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        this.mapper = JsonMapper.builder()
+                .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .build();
     }
 
     @Override

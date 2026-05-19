@@ -19,7 +19,7 @@ import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.osgi.util.promise.Promise;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 public class HistoricalLocationMapper extends HistoricalLocationsMapper {
 
@@ -39,7 +39,7 @@ public class HistoricalLocationMapper extends HistoricalLocationsMapper {
     public Promise<Stream<HistoricalLocation>> toPayload(ResourceNotification notification) {
         // TODO what do we do about the timestamp? Do we have the wrong id mapping in
         // sensinact?
-        if (provider.equals(notification.provider())) {
+        if (provider.equals(notification.provider()) && "location".equals(notification.resource())) {
             return super.toPayload(notification);
         }
         return emptyStream();

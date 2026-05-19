@@ -361,7 +361,7 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRec
 import org.eclipse.sensinact.gateway.southbound.device.factory.ParserException;
 import org.osgi.service.component.annotations.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Implementation of the custom parser

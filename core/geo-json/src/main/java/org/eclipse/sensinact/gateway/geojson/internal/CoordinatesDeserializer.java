@@ -13,21 +13,19 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.geojson.internal;
 
-import java.io.IOException;
-
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.deser.std.StdNodeBasedDeserializer;
+import tools.jackson.databind.exc.MismatchedInputException;
 
 /**
  * A Jackson deserializer for {@link Coordinates} objects as defined in
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1.1">the GeoJSON
  * specification</a>
  */
-@SuppressWarnings("serial")
 public class CoordinatesDeserializer extends StdNodeBasedDeserializer<Coordinates> {
 
     public CoordinatesDeserializer() {
@@ -36,7 +34,7 @@ public class CoordinatesDeserializer extends StdNodeBasedDeserializer<Coordinate
 
     @SuppressWarnings("resource")
     @Override
-    public Coordinates convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+    public Coordinates convert(JsonNode root, DeserializationContext ctxt) throws JacksonException {
         if (root.isArray()) {
             if(root.isEmpty()) {
                 // GeoJSON specification 3.1 - GeoJSON processors MAY interpret Geometry objects with

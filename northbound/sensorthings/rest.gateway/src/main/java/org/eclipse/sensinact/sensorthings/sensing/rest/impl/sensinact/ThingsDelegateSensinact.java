@@ -21,7 +21,7 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.SENSORS;
 import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.THINGS;
 import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.extractFirstIdSegment;
-import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.DtoMapper.getTimestampFromId;
+import static org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple.getTimestampFromId;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +56,7 @@ public class ThingsDelegateSensinact extends AbstractDelegate {
         // TODO Auto-generated constructor stub
     }
 
+    @Override
     public Thing getThing(String id) {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(id);
 
@@ -201,7 +202,7 @@ public class ThingsDelegateSensinact extends AbstractDelegate {
 
         getTimestampFromId(id2);
 
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
+        ResultList<Location> list = new ResultList<>(List.of(DtoMapper.toLocation(getSession(), application,
                 getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider))));
 
         return list;
@@ -210,7 +211,7 @@ public class ThingsDelegateSensinact extends AbstractDelegate {
     public ResultList<Location> getThingLocations(String id) {
         String provider = extractFirstIdSegment(id);
 
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
+        ResultList<Location> list = new ResultList<>(List.of(DtoMapper.toLocation(getSession(), application,
                 getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider))));
 
         return list;
@@ -221,7 +222,7 @@ public class ThingsDelegateSensinact extends AbstractDelegate {
 
         List<ProviderSnapshot> providerLocations = AbstractDelegate.getLocationThingsProvider(getSession(),
                 id3.value());
-        return new ResultList<Thing>(null, null, providerLocations.stream()
+        return new ResultList<Thing>(providerLocations.stream()
                 .map(p -> DtoMapper.toThing(getSession(), application, getMapper(), uriInfo, getExpansions(), null, p))
                 .toList());
     }
@@ -267,7 +268,7 @@ public class ThingsDelegateSensinact extends AbstractDelegate {
         if (!id.equals(provider)) {
             throw new NotFoundException();
         }
-        return new ResultList<>(null, null, List.of(getThing(id)));
+        return new ResultList<>(List.of(getThing(id)));
     }
 
     public ResultList<HistoricalLocation> getThingLocationHistoricalLocations(String id, String id2) {
@@ -278,9 +279,8 @@ public class ThingsDelegateSensinact extends AbstractDelegate {
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {

@@ -47,9 +47,9 @@ import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.ObjectMapper;
 
 public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, WhiteboardAct<Object> {
 
@@ -176,7 +176,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
         try {
             request.body(new StringRequestContent(MimeTypes.Type.APPLICATION_JSON.asString(),
                     mapper.writeValueAsString(content)));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error("Invalid value for property {} on thing {}", resource, thing.id);
             return pf.failed(e);
         }
@@ -203,7 +203,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
 
                 try {
                     promise.resolve(findResultValue(uri, action.output, resultClass, getContentAsString()));
-                } catch (IOException e) {
+                } catch (JacksonException e) {
                     logger.error("Failed to parse response from action {} on thing {}", resource, thing.id, e);
                     promise.fail(e);
                 }
@@ -334,7 +334,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
         try {
             request.body(new StringRequestContent(MimeTypes.Type.APPLICATION_JSON.asString(),
                     mapper.writeValueAsString(body)));
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             logger.error("Invalid value for property {} on thing {}", resource, thing.id);
             return pf.failed(e);
         }
@@ -454,7 +454,7 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
                             return value;
                         }
                     });
-                } catch (IOException e) {
+                } catch (JacksonException e) {
                     logger.error("Failed to parse response from property {} on thing {}", resource, thing.id, e);
                     logger.debug("Response content from {}:\n{}", thing.id, responseContent);
                     promise.fail(e);
@@ -472,11 +472,11 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
      * @param resultClass Expected result class
      * @param strResponse Endpoint response as a string
      * @return The found value
-     * @throws JsonMappingException    Error parsing response
-     * @throws JsonProcessingException Error parsing response
+     * @throws DatabindException    Error parsing response
+     * @throws JacksonException Error parsing response
      */
     private Object findPropertyValue(final URI targetUri, final DataSchema schema, final Class<?> resultClass,
-            final String strResponse) throws JsonMappingException, JsonProcessingException {
+            final String strResponse) throws DatabindException, JacksonException {
         final Object rawResponse = mapper.readValue(strResponse, Object.class);
         if (rawResponse == null) {
             return null;
@@ -509,11 +509,11 @@ public class ThingHttpWhiteboardHandler implements WhiteboardSet<Object>, Whiteb
      * @param resultClass Expected result class
      * @param strResponse Endpoint response as a string
      * @return The found value
-     * @throws JsonMappingException    Error parsing response
-     * @throws JsonProcessingException Error parsing response
+     * @throws DatabindException    Error parsing response
+     * @throws JacksonException Error parsing response
      */
     private Object findResultValue(final URI targetUri, final DataSchema schema, final Class<?> resultClass,
-            final String strResponse) throws JsonMappingException, JsonProcessingException {
+            final String strResponse) throws DatabindException, JacksonException {
         final Object rawResponse = mapper.readValue(strResponse, Object.class);
         if (rawResponse == null) {
             return null;

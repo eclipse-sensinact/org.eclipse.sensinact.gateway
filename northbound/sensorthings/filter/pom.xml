@@ -41,9 +41,9 @@
     </dependency>
     <!-- Spatial4J -->
     <dependency>
-      <groupId>org.locationtech.spatial4j</groupId>
-      <artifactId>spatial4j</artifactId>
-      <version>0.8</version>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>esri.geometry</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <!-- SL4J -->
     <dependency>

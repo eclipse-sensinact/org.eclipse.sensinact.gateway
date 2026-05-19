@@ -20,8 +20,8 @@ import java.util.Map;
 
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
@@ -83,7 +83,7 @@ public class PropFilterImpl implements WriterInterceptor {
             }
             context.setEntity(rawValue ? prop : Map.of(propName, prop));
         } catch (Exception e) {
-            if (rawValue) {
+            if (!rawValue) {
                 Map<String, Object> map = new HashMap<>();
                 map.put(propName, null);
                 context.setEntity(map);

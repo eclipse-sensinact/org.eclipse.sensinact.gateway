@@ -41,12 +41,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 class SensorthingsMqttIntegrationTest {
 
@@ -92,8 +91,8 @@ class SensorthingsMqttIntegrationTest {
 
         listener = (t, m) -> messages.put(new String(m.getPayload(), StandardCharsets.UTF_8));
 
-        mapper = JsonMapper.builder().addModule(new JavaTimeModule())
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true).build();
+        mapper = JsonMapper.builder()
+                .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, true).build();
     }
 
     @AfterEach
@@ -107,7 +106,7 @@ class SensorthingsMqttIntegrationTest {
     }
 
     private <T> List<T> pollMessages(int expected, Class<T> type)
-            throws InterruptedException, JsonProcessingException, JsonMappingException {
+            throws InterruptedException, JacksonException, DatabindException {
         List<T> streams = new ArrayList<>();
 
         String message = messages.poll(3000, TimeUnit.MILLISECONDS);

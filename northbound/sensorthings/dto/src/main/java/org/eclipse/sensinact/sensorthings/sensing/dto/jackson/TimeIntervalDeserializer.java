@@ -12,34 +12,32 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.dto.jackson;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.TimeInterval;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.exc.InvalidFormatException;
+import tools.jackson.databind.exc.MismatchedInputException;
 
-public class TimeIntervalDeserializer extends JsonDeserializer<TimeInterval> {
+public class TimeIntervalDeserializer extends ValueDeserializer<TimeInterval> {
 
     @Override
-    public TimeInterval deserialize(JsonParser p, DeserializationContext ctxt)
-            throws IOException, JacksonException {
+    public TimeInterval deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
         if(p.currentToken() != JsonToken.VALUE_STRING) {
             throw MismatchedInputException.from(p, TimeInterval.class,
                     "Must be serialized as an ISO 8601 Time Interval String, not " + p.currentToken());
         }
-        String value = p.getText();
+        String value = p.getString();
 
         int slash = value.indexOf('/');
         if(slash < 0) {
-            failFormat(p, value);
+            throw failFormat(p, value);
         }
 
         String first = value.substring(0, slash);

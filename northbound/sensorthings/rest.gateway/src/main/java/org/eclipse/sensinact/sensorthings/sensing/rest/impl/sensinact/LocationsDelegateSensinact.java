@@ -51,7 +51,7 @@ public class LocationsDelegateSensinact extends AbstractDelegate {
 
     public ResultList<Location> getThingLocations(String id) {
         // TODO
-        return new ResultList<Location>(null, null, List.of());
+        return new ResultList<Location>(List.of());
     }
 
     public Location getLocation(String id) {
@@ -75,9 +75,8 @@ public class LocationsDelegateSensinact extends AbstractDelegate {
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {
@@ -108,11 +107,11 @@ public class LocationsDelegateSensinact extends AbstractDelegate {
     }
 
     public ResultList<Location> getLocationHistoricalLocationLocations(String id, String id2) {
-        return new ResultList<>(null, null, List.of(getLocation(id)));
+        return new ResultList<>(List.of(getLocation(id)));
     }
 
     public ResultList<Thing> getLocationThings(String id) {
-        return new ResultList<>(null, null, List.of(getLocationThing(id, id)));
+        return new ResultList<>(List.of(getLocationThing(id, id)));
     }
 
     public Thing getLocationThing(String id, String id2) {
@@ -136,9 +135,8 @@ public class LocationsDelegateSensinact extends AbstractDelegate {
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty()) {
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             }
             return list;
         } catch (IllegalArgumentException iae) {

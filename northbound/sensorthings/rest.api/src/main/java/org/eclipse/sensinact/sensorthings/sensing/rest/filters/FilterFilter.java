@@ -15,8 +15,6 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 import static jakarta.ws.rs.Priorities.ENTITY_CODER;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
@@ -39,13 +37,11 @@ public class FilterFilter implements ContainerRequestFilter {
         int nbFilters = list.size();
         if (nbFilters == 1) {
             // Store the decoded filter
-            final String filter = URLDecoder.decode(list.get(0), StandardCharsets.UTF_8);
+            final String filter = list.get(0);
             requestContext.setProperty(IFilterConstants.PROP_FILTER_STRING, filter);
         } else if (nbFilters > 1) {
-            requestContext.abortWith(Response
-                    .status(Status.BAD_REQUEST)
-                    .entity("Only one filter can be given at a time")
-                    .build());
+            requestContext.abortWith(
+                    Response.status(Status.BAD_REQUEST).entity("Only one filter can be given at a time").build());
         }
     }
 

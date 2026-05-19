@@ -41,8 +41,8 @@ import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.core.Application;
 
@@ -108,6 +108,6 @@ public class RestRuntimeTest {
         assertTrue(bundles.size() < 150);
         List<BundleDTO> jakartaBundles = bundles.stream().filter(v -> v.name.equals("jakarta.activation-api")).toList();
         assertEquals(1, jakartaBundles.size());
-        assertEquals("2.1.0", jakartaBundles.get(0).version);
+        assertEquals("2.1.3", jakartaBundles.get(0).version);
     }
 }

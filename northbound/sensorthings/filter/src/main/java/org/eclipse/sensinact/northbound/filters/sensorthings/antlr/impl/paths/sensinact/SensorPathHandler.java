@@ -10,7 +10,7 @@
 * Contributors:
 *   Kentyou - initial implementation
 **********************************************************************/
-package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths;
+package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensinact;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -20,14 +20,14 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
 
-public class ObservedPropertyPathHandler {
+public class SensorPathHandler {
 
     private final ProviderSnapshot provider;
     private final ResourceSnapshot resource;
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams);
 
-    public ObservedPropertyPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
+    public SensorPathHandler(final ProviderSnapshot provider, final ResourceSnapshot resource) {
         this.provider = provider;
         this.resource = resource;
     }

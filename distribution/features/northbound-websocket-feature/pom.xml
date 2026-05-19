@@ -13,7 +13,6 @@
 
   <properties>
     <rest.version>${revision}${changelist}</rest.version>
-    <jetty.version>11.0.13</jetty.version>
   </properties>
 
   <dependencies>

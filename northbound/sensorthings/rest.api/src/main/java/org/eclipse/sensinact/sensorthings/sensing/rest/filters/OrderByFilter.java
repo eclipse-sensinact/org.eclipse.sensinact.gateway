@@ -23,8 +23,8 @@ import java.util.List;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.BadRequestException;
@@ -141,7 +141,13 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
                 throw new BadRequestException("Failed to order objects by " + Arrays.toString(path));
             }
         }
-        return (Comparable<Object>) result;
+        if (result == null)
+            return null;
+        if (result instanceof Comparable<?>) {
+            return (Comparable<Object>) result;
+        }
+        return (Comparable<Object>) (Comparable<?>) result.toString();
+
     }
 
 }

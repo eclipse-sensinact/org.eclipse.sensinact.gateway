@@ -29,9 +29,9 @@ import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 import org.eclipse.sensinact.model.core.testdata.TestdataPackage;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class EMFUtilTest {
 

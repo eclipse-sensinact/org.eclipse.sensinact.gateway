@@ -12,7 +12,12 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.api;
 
+import java.util.List;
+
 import org.eclipse.sensinact.core.snapshot.ICriterion;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO.SnapshotLinkOption;
+import org.eclipse.sensinact.northbound.query.dto.result.SnapshotProviderDTO;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 
 /**
@@ -42,4 +47,14 @@ public interface IQueryHandler {
      *                         500 for parser exception
      */
     ICriterion parseFilter(String filter, String filterLanguage) throws StatusException;
+
+    /**
+     * Creates a {@link SnapshotProviderDTO} from the given {@link ProviderSnapshot}
+     * @param providerSnapshot
+     * @param linkOptions
+     * @param includeMetadata
+     * @return
+     */
+    SnapshotProviderDTO toSnapshotProviderDTO(ProviderSnapshot providerSnapshot,
+            List<SnapshotLinkOption> linkOptions, boolean includeMetadata);
 }

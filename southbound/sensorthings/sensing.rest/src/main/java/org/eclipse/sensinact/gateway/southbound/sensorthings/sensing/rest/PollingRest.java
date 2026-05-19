@@ -64,10 +64,9 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Reference;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @Component(configurationPid = "sensinact.sensorthings.southbound.rest", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class PollingRest {
@@ -94,7 +93,7 @@ public class PollingRest {
     @Reference
     DataUpdate dataUpdate;
 
-    private final ObjectMapper mapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
+    private final ObjectMapper mapper = JsonMapper.builder().build();
 
     ScheduledExecutorService worker;
 

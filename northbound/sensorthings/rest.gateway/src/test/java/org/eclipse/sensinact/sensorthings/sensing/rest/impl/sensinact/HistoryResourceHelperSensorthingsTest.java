@@ -12,9 +12,23 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
+import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import static java.time.temporal.ChronoUnit.DAYS;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +41,6 @@ import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.gateway.geojson.Point;
-import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
-
-import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext.OBSERVATIONS;
 import org.eclipse.sensinact.northbound.filters.sensorthings.impl.SensorthingsFilterComponent;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
@@ -37,33 +48,21 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.HistoryResourceHelperSensorthings;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.startsWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @ExtendWith(MockitoExtension.class)
 class HistoryResourceHelperSensorthingsTest {
@@ -75,6 +74,7 @@ class HistoryResourceHelperSensorthingsTest {
     private Application application;
 
     private static ObjectMapper mapper;
+    private static DtoMapper dtoMapper;
 
     @Mock
     private UriInfo uriInfo;
@@ -102,10 +102,16 @@ class HistoryResourceHelperSensorthingsTest {
 
     private ObjectMapper getMapper() {
         if (mapper == null) {
-            mapper = new ObjectMapper();
-            mapper.registerModule(new JavaTimeModule());
+            mapper = JsonMapper.builder().build();
         }
         return mapper;
+    }
+
+    private DtoMapper getDtoMapper() {
+        if (dtoMapper == null) {
+            dtoMapper = new DtoMapper(null, 0, null, null);
+        }
+        return dtoMapper;
     }
 
     private String getObservation(String id, Object result, Instant instant) {
@@ -117,7 +123,7 @@ class HistoryResourceHelperSensorthingsTest {
                 new FeatureOfInterest(null, "test", "test", "test", "test", new Point(0, 0), null, null), false);
         try {
             return mapper.writeValueAsString(obs);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e);
         }
     }
@@ -146,10 +152,9 @@ class HistoryResourceHelperSensorthingsTest {
         @Test
         @DisplayName("Should return empty result when no history provider is configured")
         void noHistoryProvider() {
-            when(application.getProperties()).thenReturn(Map.of());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, null, 0, null);
 
             assertNotNull(result);
             assertTrue(result.value().isEmpty());
@@ -165,10 +170,6 @@ class HistoryResourceHelperSensorthingsTest {
             Integer maxResults = 1000;
             Long count = 5L;
 
-            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
-                    "sensinact.history.result.limit", maxResults);
-            when(application.getProperties()).thenReturn(appProperties);
-
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
                     .thenReturn(count);
 
@@ -179,7 +180,8 @@ class HistoryResourceHelperSensorthingsTest {
                     .thenReturn(timedValues);
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, historyProvider,
+                    maxResults, null);
 
             assertNotNull(result);
             assertEquals(count.intValue(), result.count().intValue());
@@ -193,19 +195,15 @@ class HistoryResourceHelperSensorthingsTest {
         void withLocalResultLimit() {
             setupResourceSnapshotMocks();
             String historyProvider = "test-history-provider";
-            Integer maxResults = 1000;
             int localResultLimit = 100;
 
-            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
-                    "sensinact.history.result.limit", maxResults);
-            when(application.getProperties()).thenReturn(appProperties);
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
                     .thenReturn(50L);
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(Arrays.asList());
 
-            HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession, application, getMapper(), uriInfo,
-                    expansions, resourceSnapshot, null, localResultLimit);
+            HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession, getDtoMapper(), getMapper(),
+                    uriInfo, expansions, resourceSnapshot, null, historyProvider, localResultLimit, null);
 
             verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams());
         }
@@ -220,10 +218,6 @@ class HistoryResourceHelperSensorthingsTest {
             Integer maxResults = 1000;
             Long count = 6L;
             when(providerSnapshot.getModelPackageUri()).thenReturn(eNS_URI);
-
-            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
-                    "sensinact.history.result.limit", maxResults);
-            when(application.getProperties()).thenReturn(appProperties);
 
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
                     .thenReturn(count);
@@ -246,7 +240,8 @@ class HistoryResourceHelperSensorthingsTest {
                             List.of());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    application, getMapper(), uriInfo, expansions, resourceSnapshot, filter, 0);
+                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, filter, historyProvider,
+                    maxResults, null);
 
             assertNotNull(result);
             assertEquals(4, result.value().size(), "resource size " + result.value().size());
@@ -273,16 +268,14 @@ class HistoryResourceHelperSensorthingsTest {
             String historyProvider = "test-history-provider";
             Long largeCount = (long) Integer.MAX_VALUE + 1;
 
-            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
-                    "sensinact.history.result.limit", 1000);
-            when(application.getProperties()).thenReturn(appProperties);
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
                     .thenReturn(largeCount);
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(Arrays.asList());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, historyProvider, 1000,
+                    null);
 
             assertNotNull(result);
             assertEquals(Integer.MAX_VALUE, result.count().intValue());
@@ -294,16 +287,13 @@ class HistoryResourceHelperSensorthingsTest {
             setupResourceSnapshotMocks();
             String historyProvider = "test-history-provider";
 
-            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
-                    "sensinact.history.result.limit", 1000);
-            when(application.getProperties()).thenReturn(appProperties);
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
                     .thenReturn(null);
             when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
                     .thenReturn(Arrays.asList());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    application, getMapper(), uriInfo, expansions, resourceSnapshot, null, 0);
+                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, historyProvider, 0, null);
 
             assertNotNull(result);
             assertEquals(null, result.count());

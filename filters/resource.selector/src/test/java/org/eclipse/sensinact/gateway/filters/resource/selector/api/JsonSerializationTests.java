@@ -37,9 +37,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.databind.DatabindException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.json.JsonMapper;
 
 class JsonSerializationTests {
 

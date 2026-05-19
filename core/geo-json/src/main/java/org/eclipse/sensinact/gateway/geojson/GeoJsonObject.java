@@ -27,7 +27,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
+import tools.jackson.core.JacksonException;
 
 /**
  * A GeoJSON object as defined in
@@ -79,7 +80,7 @@ public sealed interface GeoJsonObject permits Geometry, Feature, FeatureCollecti
     public default String toJsonString() {
         try {
             return JacksonHelper.MAPPER.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("This object could not be serialized to JSON", e);
         }
     }
@@ -87,7 +88,7 @@ public sealed interface GeoJsonObject permits Geometry, Feature, FeatureCollecti
     public static GeoJsonObject fromJsonString(String s) {
         try {
             return JacksonHelper.MAPPER.readValue(s, GeoJsonObject.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalArgumentException("This object could not be deserialized from JSON", e);
         }
     }

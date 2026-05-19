@@ -41,8 +41,8 @@ import org.osgi.test.common.annotation.InjectService;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 public class WoTManagerIntegrationTest {
 

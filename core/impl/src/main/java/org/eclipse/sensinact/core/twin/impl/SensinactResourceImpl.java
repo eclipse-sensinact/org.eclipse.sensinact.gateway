@@ -149,7 +149,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
 
         try {
             final boolean hasExternalSetter;
-            ResourceMetadata metadata = (ResourceMetadata) EMFUtil.getModelMetadata(resource);
+            ResourceMetadata metadata = (ResourceMetadata) EMFUtil.getMergedModelMetadataView(resource);
             if (metadata != null) {
                 // Resource created by ResourceBuilder
                 hasExternalSetter = metadata.isExternalSet();
@@ -203,7 +203,7 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
         // Check if the resource is pull based
         final boolean hasExternalGetter;
         final Duration cacheThreshold;
-        ResourceMetadata metadata = (ResourceMetadata) EMFUtil.getModelMetadata(resource);
+        ResourceMetadata metadata = (ResourceMetadata) EMFUtil.getMergedModelMetadataView(resource);
         if (metadata != null) {
             // Resource created by ResourceBuilder
             hasExternalGetter = metadata.isExternalGet();
@@ -246,6 +246,22 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
             }
 
             modelNexus.setResourceMetadata(provider, serviceName, resource, name, value, timestamp);
+            return promiseFactory.resolved(null);
+        } catch (Throwable t) {
+            return promiseFactory.failed(t);
+        }
+    }
+
+    @Override
+    public Promise<Void> unsetMetadataValue(String name, Instant timestamp) {
+        checkValid();
+
+        try {
+            if (!svc.isSet()) {
+                modelNexus.createServiceInstance(provider, serviceName, svc.getServiceEClass());
+            }
+
+            modelNexus.unsetResourceMetadata(provider, serviceName, resource, name, timestamp);
             return promiseFactory.resolved(null);
         } catch (Throwable t) {
             return promiseFactory.failed(t);

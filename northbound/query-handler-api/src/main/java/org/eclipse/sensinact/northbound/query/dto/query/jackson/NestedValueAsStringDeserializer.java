@@ -12,31 +12,29 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.query.jackson;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.deser.std.StdNodeBasedDeserializer;
 
 /**
  * Handles the deserialization of nested values which should be strings
  */
 public class NestedValueAsStringDeserializer extends StdNodeBasedDeserializer<String> {
 
-    private static final long serialVersionUID = 1L;
-
     public NestedValueAsStringDeserializer() {
         super(String.class);
     }
 
     @Override
-    public String convert(JsonNode node, DeserializationContext ctxt) throws IOException, JacksonException {
+    public String convert(JsonNode node, DeserializationContext ctxt) throws JacksonException {
+
+        System.out.println("Deserializing node " + node);
 
         if (node.isNull()) {
             return null;
         } else if(node.isValueNode()) {
-            return node.asText();
+            return node.asString();
         } else {
             return node.toString();
         }

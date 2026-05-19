@@ -40,18 +40,10 @@ public record DatastreamUpdate(@Model EClass model, @Provider String providerId,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String thingId,
 // sensor
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String sensorId,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String sensorName,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String sensorDescription,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String sensorEncodingType,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Object sensorMetadata,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Map<String, Object> sensorProperties,
 
 // observed property
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String observedPropertyId,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String observedPropertyName,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String observedPropertyDescription,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String observedPropertyDefinition,
-        @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) Map<String, Object> observedPropertyProperties,
+
 // unit
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String unitName,
         @Service("datastream") @Data(onDuplicate = UPDATE_IF_DIFFERENT) String unitSymbol,
@@ -74,17 +66,13 @@ public record DatastreamUpdate(@Model EClass model, @Provider String providerId,
 
     public DatastreamUpdate(String providerId, Object id, String name, String description, String observationType,
             Map<String, Object> properties, Instant timestamp, GeoJsonObject observedArea, String thingId,
-            String sensorId, String sensorName, String sensorDescription, String sensorEncodingType,
-            Object sensorMetadata, Map<String, Object> sensorProperties,
+            String sensorId,
             // observed property
-            String observedPropertyId, String observedPropertyName, String observedPropertyDescription,
-            String observedPropertyDefinition, Map<String, Object> observedPropertyProperties,
+            String observedPropertyId,
             // unit
             String unitName, String unitSymbol, String unitDefinition, String lastObservsation) {
         this(SENSOR_THING_DATASTREAM, providerId, id, observationType, properties, name, description, timestamp,
-                observedArea, thingId, sensorId, sensorName, sensorDescription, sensorEncodingType, sensorMetadata,
-                sensorProperties, observedPropertyId, observedPropertyName, observedPropertyDescription,
-                observedPropertyDefinition, observedPropertyProperties, unitName, unitSymbol, unitDefinition,
+                observedArea, thingId, sensorId, observedPropertyId, unitName, unitSymbol, unitDefinition,
                 lastObservsation);
     }
 

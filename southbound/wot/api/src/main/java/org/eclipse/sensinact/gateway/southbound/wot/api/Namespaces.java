@@ -13,27 +13,25 @@
 
 package org.eclipse.sensinact.gateway.southbound.wot.api;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Spliterators;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.deser.std.StdNodeBasedDeserializer;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 @JsonDeserialize(using = Namespaces.Deserializer.class)
 @JsonSerialize(using = Namespaces.Serializer.class)
@@ -74,7 +72,7 @@ public class Namespaces {
         }
 
         @Override
-        public Namespaces convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+        public Namespaces convert(JsonNode root, DeserializationContext ctxt) throws JacksonException {
             if (root.isNull()) {
                 return null;
             }
@@ -82,14 +80,13 @@ public class Namespaces {
             Namespaces ns = new Namespaces();
             ns.prefixes = Map.of();
 
-            if (root.isTextual()) {
-                ns.defaultNs = root.textValue();
+            if (root.isString()) {
+                ns.defaultNs = root.stringValue();
                 ns.prefixes = Map.of();
                 ns.contexts = List.of();
             } else if (root.isObject()) {
                 ns.defaultNs = null;
-                ns.prefixes = StreamSupport.stream(Spliterators.spliteratorUnknownSize(root.fields(), 0), false)
-                        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().textValue()));
+                ns.prefixes = root.propertyStream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue().stringValue()));
                 ns.contexts = List.of();
             } else if (root.isArray()) {
                 ns.defaultNs = null;
@@ -100,20 +97,18 @@ public class Namespaces {
                 int idx = 0;
                 while (iter.hasNext()) {
                     var node = iter.next();
-                    if (node.isTextual()) {
+                    if (node.isString()) {
                         if (idx == 0) {
                             // First entry is a URI: use it as default
-                            ns.defaultNs = node.textValue();
+                            ns.defaultNs = node.stringValue();
                         } else {
                             // Other entries are context
-                            contexts.add(node.textValue());
+                            contexts.add(node.stringValue());
                         }
                     } else if (node.isObject()) {
-                        prefixes.putAll(
-                                StreamSupport.stream(Spliterators.spliteratorUnknownSize(node.fields(), 0), false)
-                                        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().textValue())));
+                        prefixes.putAll(node.propertyStream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue().stringValue())));
                     } else {
-                        throw new JsonParseException("Invalid namespaces: " + root);
+                        throw new RuntimeException("Invalid namespaces: " + root);
                     }
                     idx++;
                 }
@@ -122,7 +117,7 @@ public class Namespaces {
                 ns.prefixes = Collections.unmodifiableMap(prefixes);
                 ns.contexts = Collections.unmodifiableList(contexts);
             } else {
-                throw new JsonParseException("Invalid namespaces: " + root);
+                throw new RuntimeException("Invalid namespaces: " + root);
             }
             return ns;
         }
@@ -135,7 +130,7 @@ public class Namespaces {
         }
 
         @Override
-        public void serialize(Namespaces value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        public void serialize(Namespaces value, JsonGenerator gen, SerializationContext provider) throws JacksonException {
             if (value == null) {
                 gen.writeNull();
                 return;
@@ -150,14 +145,14 @@ public class Namespaces {
             }
 
             if (value.defaultNs == null && !hasContexts) {
-                gen.writeObject(value.prefixes);
+                gen.writePOJO(value.prefixes);
                 return;
             }
 
             gen.writeStartArray();
             gen.writeString(value.defaultNs);
             if (value.prefixes != null && !value.prefixes.isEmpty()) {
-                gen.writeObject(value.prefixes);
+                gen.writePOJO(value.prefixes);
             }
             if (value.contexts != null && !value.contexts.isEmpty()) {
                 for (String ns : value.contexts) {

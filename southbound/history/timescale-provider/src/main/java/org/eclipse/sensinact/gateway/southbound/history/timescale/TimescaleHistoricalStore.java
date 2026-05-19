@@ -51,8 +51,8 @@ import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 @Component(service = {}, immediate = true, configurationPid = "sensinact.history.timescale", configurationPolicy = ConfigurationPolicy.REQUIRE)
 @RequireTypedEvent
@@ -145,7 +145,7 @@ public class TimescaleHistoricalStore {
     private ResourceSelector fromString(String s) {
         try {
             return mapper.readValue(s, ResourceSelector.class);
-        } catch (JsonProcessingException j) {
+        } catch (JacksonException j) {
             throw new IllegalArgumentException("Unable to read Resource Selector " + s);
         }
     }

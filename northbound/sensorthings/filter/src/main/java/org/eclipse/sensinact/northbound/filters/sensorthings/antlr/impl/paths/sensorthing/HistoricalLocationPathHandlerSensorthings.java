@@ -19,9 +19,8 @@ import java.util.function.Function;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
-import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class HistoricalLocationPathHandlerSensorthings extends AbstractPathHandlerSensorthings {
@@ -29,11 +28,12 @@ public class HistoricalLocationPathHandlerSensorthings extends AbstractPathHandl
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("things", this::subThings, "locations",
             this::subLocations);
 
-    public HistoricalLocationPathHandlerSensorthings(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
+    public HistoricalLocationPathHandlerSensorthings(final PathContext pathContext) {
+        super(pathContext);
     }
 
     public Object handle(final String path) {
+        ProviderSnapshot provider = pathContext.provider();
         final String[] parts = path.toLowerCase().split("/");
         ServiceSnapshot service = DtoMapperSimple.getThingService(provider);
         ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
@@ -81,13 +81,13 @@ public class HistoricalLocationPathHandlerSensorthings extends AbstractPathHandl
     }
 
     private Object subThings(final String path) {
-        return new ThingPathHandlerSensorthings(provider, session).handle(path);
+        return new ThingPathHandlerSensorthings(pathContext).handle(path);
     }
 
     private Object subLocations(final String path) {
-        // todo need to call from location provider with reviewed path
-        return new AnyMatch(getLocationsProviderFromThing(provider).stream()
-                .map(p -> new LocationPathHandlerSensorthings(p, session).handle(path)).toList());
+        ProviderSnapshot provider = pathContext.provider();
+        return getLocationsProviderFromThing(provider).stream().map(p -> withProvider(pathContext, p))
+                .map(pc -> new LocationPathHandlerSensorthings(pc).handle(path)).toList();
 
     }
 }

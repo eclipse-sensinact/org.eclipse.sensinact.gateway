@@ -27,10 +27,9 @@ import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilte
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Provides the ResourceSelector filter creation service
@@ -71,10 +70,10 @@ public class ResourceSelectorComponent implements ResourceSelectorFilterFactory,
                     list.add(parser.readValueAs(ResourceSelector.class));
                 }
                 if (parser.currentToken() != JsonToken.END_ARRAY) {
-                    throw new JsonParseException(parser, "Expected a complete array of Resource Selector objects");
+                    throw new FilterParserException("Expected a complete array of Resource Selector objects");
                 }
                 if (parser.nextToken() != null) {
-                    throw new JsonParseException(parser, "Unexpected additional content after the array");
+                    throw new FilterParserException("Unexpected additional content after the array");
                 }
                 return parseResourceSelector(list.stream());
             } else {

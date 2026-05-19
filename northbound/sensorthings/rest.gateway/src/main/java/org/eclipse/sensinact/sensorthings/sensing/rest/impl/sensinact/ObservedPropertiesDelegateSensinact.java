@@ -64,7 +64,7 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate {
     }
 
     public ResultList<Datastream> getObservedPropertyDatastreams(String id) {
-        return new ResultList<>(null, null, List.of(getObservedPropertyDatastream(id, id)));
+        return new ResultList<>(List.of(getObservedPropertyDatastream(id, id)));
     }
 
     public Datastream getObservedPropertyDatastream(String id, String id2) {
@@ -113,7 +113,7 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate {
     }
 
     public ResultList<Datastream> getObservedPropertyDatastreamThingDatastreams(String value, String value2) {
-        return new ResultList<Datastream>(null, null, List.of(getObservedPropertyDatastream(value, value2)));
+        return new ResultList<Datastream>(List.of(getObservedPropertyDatastream(value, value2)));
     }
 
     public ResultList<HistoricalLocation> getObservedPropertyDatastreamThingHistoricalLocations(String value,
@@ -125,9 +125,8 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate {
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
                     application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
             if (list.value().isEmpty())
-                list = new ResultList<>(null, null,
-                        DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo, getExpansions(),
-                                filter, providerSnapshot).map(List::of).orElse(List.of()));
+                list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
+                        getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
         } catch (IllegalArgumentException iae) {
             throw new NotFoundException();
@@ -137,7 +136,7 @@ public class ObservedPropertiesDelegateSensinact extends AbstractDelegate {
     public ResultList<Location> getObservedPropertyDatastreamThingLocations(String value, String value2) {
         String provider = extractFirstIdSegment(value2);
 
-        ResultList<Location> list = new ResultList<>(null, null, List.of(DtoMapper.toLocation(getSession(), application,
+        ResultList<Location> list = new ResultList<>(List.of(DtoMapper.toLocation(getSession(), application,
                 getMapper(), uriInfo, getExpansions(), parseFilter(LOCATIONS), validateAndGetProvider(provider))));
 
         return list;

@@ -134,8 +134,9 @@
     <emf.ecore.xmi.version>2.36.0</emf.ecore.xmi.version>
     <slf4j.version>2.0.17</slf4j.version>
     <logback.version>1.5.31</logback.version>
-    <jackson.version>2.21.0</jackson.version>
+    <jackson.version>3.1.1</jackson.version>
     <jackson.annotations.version>2.21</jackson.annotations.version>
+    <compatibility.jackson.version>2.21.2</compatibility.jackson.version>
     <jjwt.version>0.13.0</jjwt.version>
 
     <!-- runtime dependencies -->
@@ -147,11 +148,28 @@
     <johnzon.version>2.0.0</johnzon.version>
     <aries.component-dsl.version>1.2.2</aries.component-dsl.version>
     <aries.typedevent.version>1.0.1</aries.typedevent.version>
+    <asm.version>9.9.1</asm.version>
     <aries.spifly.version>1.3.7</aries.spifly.version>
     <aries.tx-control.version>1.0.1</aries.tx-control.version>
     <felix.servlet.version>2.1.0</felix.servlet.version>
     <antlr.version>4.12.0</antlr.version>
     <metrics.version>4.2.19</metrics.version>
+
+    <!-- Northbound dependencies -->
+    <osgi.technology.rest.version>1.2.2</osgi.technology.rest.version>
+    <hk2.version>3.1.1</hk2.version>
+    <jersey.version>3.1.11</jersey.version>
+    <jetty.version>11.0.13</jetty.version>
+
+    <!-- Distribution versions -->
+    <hk2.osgi.version>1.0.4</hk2.osgi.version>
+    <javassist.version>3.30.2-GA</javassist.version>
+
+    <!-- Gogo shell -->
+    <org.apache.felix.gogo.command.version>1.1.2</org.apache.felix.gogo.command.version>
+    <org.apache.felix.gogo.shell.version>1.1.4</org.apache.felix.gogo.shell.version>
+    <org.apache.felix.gogo.jline.version>1.1.8</org.apache.felix.gogo.jline.version>
+    <org.apache.felix.gogo.runtime.version>1.1.6</org.apache.felix.gogo.runtime.version>
 
     <!-- test dependency versions -->
     <junit.version>5.14.3</junit.version>
@@ -159,13 +177,12 @@
     <osgi.test.version>1.3.0</osgi.test.version>
 
     <!-- plugin dependency versions -->
-    <bnd.version>7.0.0</bnd.version>
-    <bnd.resolver.version>7.1.0</bnd.resolver.version>
+    <bnd.version>7.2.1</bnd.version>
+    <bnd.resolver.version>7.2.1</bnd.resolver.version>
 
     <!-- Default properties for resolver setup in development -->
     <save.test.bndrun.changes>true</save.test.bndrun.changes>
     <verify.test.bndruns>false</verify.test.bndruns>
-
   </properties>
 
   <repositories>
@@ -335,23 +352,23 @@
         <version>${jackson.annotations.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
+        <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-core</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
+        <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
+        <groupId>tools.jackson.jakarta.rs</groupId>
+        <artifactId>jackson-jakarta-rs-json-provider</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
-        <artifactId>jackson-jakarta-rs-json-provider</artifactId>
+        <groupId>tools.jackson.module</groupId>
+        <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
         <version>${jackson.version}</version>
       </dependency>
       <dependency>
@@ -415,8 +432,23 @@
         <scope>runtime</scope>
       </dependency>
       <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm</artifactId>
+        <version>${asm.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm-commons</artifactId>
+        <version>${asm.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm-util</artifactId>
+        <version>${asm.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.aries.spifly</groupId>
-        <artifactId>org.apache.aries.spifly.dynamic.framework.extension</artifactId>
+        <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
         <version>${aries.spifly.version}</version>
         <scope>runtime</scope>
       </dependency>
@@ -608,7 +640,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.3.0</version>
+          <version>3.5.0</version>
           <configuration>
             <archive>
               <manifestFile>
@@ -684,6 +716,10 @@
                   <scope>compile</scope>
                   <scope>runtime</scope>
                 </scopes>
+                <bndruns>
+                  <include>export.bndrun</include>
+                  <include>*-check.bndrun</include>
+                </bndruns>
               </configuration>
             </execution>
           </executions>

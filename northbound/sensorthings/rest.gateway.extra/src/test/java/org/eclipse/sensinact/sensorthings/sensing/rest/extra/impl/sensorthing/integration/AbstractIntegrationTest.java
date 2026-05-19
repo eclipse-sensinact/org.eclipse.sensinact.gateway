@@ -35,11 +35,8 @@ import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
-import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
-import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.access.IAccessServiceUseCase;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
@@ -56,12 +53,6 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.Path;
@@ -70,6 +61,11 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Providers;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", properties = {
         @Property(key = "test.class", source = ValueSource.TestClass),
@@ -85,22 +81,16 @@ public abstract class AbstractIntegrationTest {
 
     public static ObjectMapper getMapper() {
         if (mapper == null) {
-            mapper = new ObjectMapper();
-            getMapper().registerModule(new JavaTimeModule());
+            mapper = JsonMapper.builder().build();
         }
         return mapper;
-
     }
 
     @Path("test")
     public static class TestTypeExfiltrator {
-        public IDtoMemoryCache<FeatureOfInterest> foiCache;
-        public IDtoMemoryCache<ObservedProperty> observedPropertyCache;
-        public IDtoMemoryCache<Sensor> sensorCache;
         public IAccessServiceUseCase serviceUseCase;
         public SensiNactSession session;
 
-        @SuppressWarnings("unchecked")
         @GET
         public void exfiltrate(@Context Providers providers) {
             ContextResolver<SensiNactSession> sessionResolver = providers.getContextResolver(SensiNactSession.class,
@@ -116,9 +106,6 @@ public abstract class AbstractIntegrationTest {
             @SuppressWarnings("rawtypes")
             ContextResolver<IDtoMemoryCache> resolverCache = providers.getContextResolver(IDtoMemoryCache.class,
                     MediaType.WILDCARD_TYPE);
-            sensorCache = resolverCache != null ? resolverCache.getContext(Sensor.class) : null;
-            observedPropertyCache = resolverCache != null ? resolverCache.getContext(ObservedProperty.class) : null;
-            foiCache = resolverCache != null ? resolverCache.getContext(FeatureOfInterest.class) : null;
 
         }
     }
@@ -134,13 +121,9 @@ public abstract class AbstractIntegrationTest {
         for (int i = 0; i < 20; i++) {
             result = queryGet("http://localhost:8185/test");
             if (result.statusCode() == 204) {
-                this.sensorCache = exfiltrator.sensorCache;
-                this.observedPropertyCache = exfiltrator.observedPropertyCache;
-                this.foiCache = exfiltrator.foiCache;
                 this.serviceUseCase = exfiltrator.serviceUseCase;
                 this.session = exfiltrator.session;
-                if (this.serviceUseCase != null && this.foiCache != null && this.observedPropertyCache != null
-                        && this.sensorCache != null && this.session != null) {
+                if (this.serviceUseCase != null && this.session != null) {
                     success = true;
                     break;
                 }
@@ -175,7 +158,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected JsonNode getJsonResponseFromPost(Object dto, String SubUrl, int expectedStatus)
-            throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+            throws IOException, InterruptedException, JacksonException, DatabindException {
         HttpResponse<String> response = queryPost(SubUrl, dto);
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
@@ -187,7 +170,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected JsonNode getJsonResponseFromPut(Object dto, String SubUrl, int expectedStatus)
-            throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+            throws IOException, InterruptedException, JacksonException, DatabindException {
         HttpResponse<String> response = queryPut(SubUrl, dto);
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
@@ -199,7 +182,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected JsonNode getJsonResponseFromPatch(Object dto, String SubUrl, int expectedStatus)
-            throws IOException, InterruptedException, JsonProcessingException, JsonMappingException {
+            throws IOException, InterruptedException, JacksonException, DatabindException {
         HttpResponse<String> response = queryPatch(SubUrl, dto);
         // Then
         assertEquals(expectedStatus, response.statusCode(), response.body());
@@ -217,9 +200,6 @@ public abstract class AbstractIntegrationTest {
     protected JakartarsServiceRuntime jakartarsRuntime;
     public IAccessServiceUseCase serviceUseCase;
 
-    public IDtoMemoryCache<FeatureOfInterest> foiCache;
-    public IDtoMemoryCache<ObservedProperty> observedPropertyCache;
-    public IDtoMemoryCache<Sensor> sensorCache;
     public SensiNactSession session;
 
     public HttpResponse<String> queryGet(final String path) throws IOException, InterruptedException {
@@ -260,7 +240,7 @@ public abstract class AbstractIntegrationTest {
         return client.send(req, (x) -> BodySubscribers.ofString(StandardCharsets.UTF_8));
     }
 
-    private String getRequestBody(Object dto) throws JsonProcessingException {
+    private String getRequestBody(Object dto) throws JacksonException {
 
         String body = getMapper().writeValueAsString(dto);
         return body;
@@ -293,7 +273,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     public static String getIdFromJson(JsonNode node) {
-        return node.get("@iot.id").asText();
+        return node.get("@iot.id").asString();
     }
 
     public static String getIdFromJsonValues(JsonNode node, int index) {

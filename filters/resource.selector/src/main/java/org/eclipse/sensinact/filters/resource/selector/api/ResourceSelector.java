@@ -20,7 +20,7 @@ import org.eclipse.sensinact.filters.resource.selector.jackson.ResourceSelectorD
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Feature;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Describes the selection of resources based on their attributes:

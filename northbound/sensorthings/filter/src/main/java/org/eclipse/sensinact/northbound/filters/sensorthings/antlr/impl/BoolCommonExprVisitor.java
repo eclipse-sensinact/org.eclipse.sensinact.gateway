@@ -13,6 +13,8 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -53,6 +55,42 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
     public Predicate<ResourceValueFilterInputHolder> visitIsofexpr(IsofexprContext ctx) {
         // TODO Auto-generated method stub
         return super.visitIsofexpr(ctx);
+    }
+
+    /**
+     * ensure the comparison even if r and l are not the same type convert the r
+     * argument to the same type if possible else return
+     *
+     * @param l
+     * @param r
+     * @return
+     */
+    public int compareTo(Object l, Object r) {
+        if (l == null || r == null)
+            return 0; // Or handle as needed
+
+        // If types already match, just compare
+        if (l.getClass().equals(r.getClass())) {
+            return ((Comparable<Object>) l).compareTo(r);
+        }
+
+        // If types don't match, convert R (the String/Query value) to L's type
+        String rString = r.toString();
+
+        if (l instanceof Integer) {
+            return ((Integer) l).compareTo(Integer.parseInt(rString));
+        } else if (l instanceof Long) {
+            return ((Long) l).compareTo(Long.parseLong(rString));
+        } else if (l instanceof Double) {
+            return ((Double) l).compareTo(Double.parseDouble(rString));
+        } else if (l instanceof Float) {
+            return ((Float) l).compareTo(Float.parseFloat(rString));
+        } else if (l instanceof Boolean) {
+            return ((Boolean) l).compareTo(Boolean.parseBoolean(rString));
+        }
+        // Fallback to String comparison if type is unknown
+        return l.toString().compareTo(rString);
+
     }
 
     @SuppressWarnings("unchecked")
@@ -104,19 +142,19 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
                     break;
                 case ODataFilterParser.RULE_ltexpr:
                     rightExpr = rightVisitor.visit(((LtexprContext) secondElement).commonexpr());
-                    subPredicate = (l, r) -> (l != null && ((Comparable<Object>) l).compareTo(r) < 0);
+                    subPredicate = (l, r) -> (compareTo(l, r) < 0);
                     break;
                 case ODataFilterParser.RULE_leexpr:
                     rightExpr = rightVisitor.visit(((LeexprContext) secondElement).commonexpr());
-                    subPredicate = (l, r) -> (l != null && ((Comparable<Object>) l).compareTo(r) <= 0);
+                    subPredicate = (l, r) -> (compareTo(l, r) <= 0);
                     break;
                 case ODataFilterParser.RULE_gtexpr:
                     rightExpr = rightVisitor.visit(((GtexprContext) secondElement).commonexpr());
-                    subPredicate = (l, r) -> (l != null && ((Comparable<Object>) l).compareTo(r) > 0);
+                    subPredicate = (l, r) -> compareTo(l, r) > 0;
                     break;
                 case ODataFilterParser.RULE_geexpr:
                     rightExpr = rightVisitor.visit(((GeexprContext) secondElement).commonexpr());
-                    subPredicate = (l, r) -> (l != null && ((Comparable<Object>) l).compareTo(r) >= 0);
+                    subPredicate = (l, r) -> (compareTo(l, r) >= 0);
                     break;
 
                 case ODataFilterParser.RULE_hasexpr:
@@ -131,37 +169,61 @@ public class BoolCommonExprVisitor extends ODataFilterBaseVisitor<Predicate<Reso
 
                 if (rightExpr != null && subPredicate != null) {
                     predicate = x -> {
-                        Object leftValue = leftExpr.apply(x);
-                        Object rightValue = rightExpr.apply(x);
-
-                        if (leftValue instanceof AnyMatch) {
-                            return ((AnyMatch) leftValue).compare(rightValue, comparatorRuleIndex);
-                        } else if (rightValue instanceof AnyMatch) {
-                            return ((AnyMatch) rightValue).compare(leftValue, comparatorRuleIndex, true);
+                        Object leftValues = leftExpr.apply(x);
+                        List<Object> leftValuesCol;
+                        if (leftValues instanceof List<?>) {
+                            leftValuesCol = (List<Object>) leftValues;
                         } else {
-                            if (leftValue instanceof Number && rightValue instanceof Number) {
-                                // Ensure both sides are ints or doubles
-                                if (leftValue instanceof Double || rightValue instanceof Double) {
-                                    leftValue = ((Number) leftValue).doubleValue();
-                                    rightValue = ((Number) rightValue).doubleValue();
-                                }
-                            } else {
-                                // Convert dates to Instant (to compare with resource timestamps)
-                                if (leftValue instanceof OffsetDateTime) {
-                                    leftValue = ((OffsetDateTime) leftValue).toInstant();
-                                }
-                                if (rightValue instanceof OffsetDateTime) {
-                                    rightValue = ((OffsetDateTime) rightValue).toInstant();
-                                }
-                            }
-
-                            try {
-                                return subPredicate.apply(leftValue, rightValue);
-                            } catch (ClassCastException e) {
-                                // Comparing different types
+                            if (leftValues == null) {
                                 return false;
                             }
+                            leftValuesCol = Collections.singletonList(leftValues);
                         }
+                        final Object rightValueApplied = rightExpr.apply(x);
+                        return leftValuesCol.stream().anyMatch(leftValue -> {
+                            Object rightValue = rightValueApplied;
+                            if (leftValue == null || rightValue == null) {
+                                try {
+                                    return subPredicate.apply(leftValue, rightValue);
+                                } catch (Exception e) {
+                                    return false;
+                                }
+                            }
+                            if (leftValue instanceof AnyMatch) {
+                                return ((AnyMatch) leftValue).compare(rightValue, comparatorRuleIndex);
+                            } else if (rightValue instanceof AnyMatch) {
+                                return ((AnyMatch) rightValue).compare(leftValue, comparatorRuleIndex, true);
+                            } else {
+                                if (rightValue instanceof String) {
+                                    String lStr = (leftValue == null) ? "" : String.valueOf(leftValue);
+                                    String rStr = (String) rightValue;
+
+                                    return subPredicate.apply(lStr, rStr);
+                                }
+                                if (leftValue instanceof Number && rightValue instanceof Number) {
+                                    // Ensure both sides are ints or doubles
+                                    if (leftValue instanceof Double || rightValue instanceof Double) {
+                                        leftValue = ((Number) leftValue).doubleValue();
+                                        rightValue = ((Number) rightValue).doubleValue();
+                                    }
+                                } else {
+                                    // Convert dates to Instant (to compare with resource timestamps)
+                                    if (leftValue instanceof OffsetDateTime) {
+                                        leftValue = ((OffsetDateTime) leftValue).toInstant();
+                                    }
+                                    if (rightValue instanceof OffsetDateTime) {
+                                        rightValue = ((OffsetDateTime) rightValue).toInstant();
+                                    }
+                                }
+
+                                try {
+                                    return subPredicate.apply(leftValue, rightValue);
+                                } catch (ClassCastException e) {
+                                    // Comparing different types
+                                    return false;
+                                }
+                            }
+                        });
                     };
                 }
             }

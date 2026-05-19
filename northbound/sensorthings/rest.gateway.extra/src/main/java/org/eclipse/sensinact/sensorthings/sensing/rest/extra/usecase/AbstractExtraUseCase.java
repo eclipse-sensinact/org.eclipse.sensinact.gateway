@@ -18,8 +18,8 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Id;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Application;
@@ -73,7 +73,7 @@ public abstract class AbstractExtraUseCase<M extends Id, S> implements IExtraUse
         }
         try {
             existingObservation = mapper.readValue(obsStr, ExpandedObservation.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return null;
         }
 

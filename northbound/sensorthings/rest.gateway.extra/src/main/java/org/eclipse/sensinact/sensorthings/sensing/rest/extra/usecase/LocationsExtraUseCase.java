@@ -40,7 +40,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.SensorThingsUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.LocationUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.update.ThingUpdate;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
-import org.eclipse.sensinact.sensorthings.sensing.rest.access.IDtoMemoryCache;
+import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.extra.usecase.mapper.DtoToModelMapper;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -134,7 +134,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseModelDelete<Expan
             listThingIds.stream().map(providerId -> {
                 ProviderSnapshot provider = providerUseCase.read(request.session(), providerId);
 
-                List<String> ids = getLocationIds(provider);
+                List<String> ids = DtoToModelMapper.getLocationIds(provider);
                 String locationId = request.id();
                 if (!ids.contains(locationId)) {
                     ids = Stream.concat(ids.stream(), Stream.of(locationId)).toList();

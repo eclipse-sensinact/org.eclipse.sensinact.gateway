@@ -12,8 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.session.impl;
 
-import static java.util.stream.Collectors.toList;
-import static org.eclipse.sensinact.core.authorization.PermissionLevel.ACT;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.DESCRIBE;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.READ;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.UPDATE;
@@ -30,17 +28,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NavigableMap;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 import org.eclipse.sensinact.core.authorization.Authorizer;
@@ -56,11 +52,6 @@ import org.eclipse.sensinact.core.notification.ClientActionListener;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.ClientMetadataListener;
-import org.eclipse.sensinact.core.notification.LifecycleNotification;
-import org.eclipse.sensinact.core.notification.ResourceActionNotification;
-import org.eclipse.sensinact.core.notification.ResourceDataNotification;
-import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
-import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
@@ -82,6 +73,7 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
+import org.eclipse.sensinact.northbound.session.NotFoundException;
 import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.northbound.session.ResourceDescription;
 import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
@@ -89,14 +81,16 @@ import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionActivityChecker;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionExpirationListener;
 import org.eclipse.sensinact.northbound.session.ServiceDescription;
+import org.eclipse.sensinact.northbound.session.SnapshotUpdate;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableLinkedProviderSnapshot;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableProviderSnapshot;
+import org.osgi.framework.BundleContext;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 public class SensiNactSessionImpl implements SensiNactSession {
 
@@ -106,10 +100,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private final String sessionId = UUID.randomUUID().toString();
 
-    private final Map<String, List<String>> listenerRegistrations = new HashMap<>();
-
-    private final NavigableMap<String, List<SessionListenerRegistration>> listenersByWildcardTopic = new TreeMap<>();
-    private final Map<String, List<SessionListenerRegistration>> listenersByTopic = new HashMap<>();
+    private final Map<String, AbstractSensinactSessionEventManager> listenerRegistrations = new HashMap<>();
 
     private Instant expiry;
 
@@ -125,6 +116,8 @@ public class SensiNactSessionImpl implements SensiNactSession {
      */
     private final SensiNactSessionActivityChecker activityChecker;
 
+    private final BundleContext context;
+
     private final GatewayThread thread;
 
     private final UserInfo user;
@@ -133,13 +126,18 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private final PreAuthorizer preAuthorizer;
 
+    private final PromiseFactory promiseFactory;
+
     public SensiNactSessionImpl(final UserInfo user, final PreAuthorizer preAuthorizer, final Authorizer authorizer,
-            final GatewayThread thread, final Duration expiry, final SensiNactSessionActivityChecker activityChecker) {
+            final GatewayThread thread, final Duration expiry, final SensiNactSessionActivityChecker activityChecker,
+            final BundleContext context, PromiseFactory promiseFactory) {
         this.user = user;
         this.preAuthorizer = Objects.requireNonNull(preAuthorizer, "No PreAuthorizer given");
         this.authorizer = Objects.requireNonNull(authorizer, "No Authorizer given");
         this.thread = thread;
         this.activityChecker = activityChecker;
+        this.context = context;
+        this.promiseFactory = promiseFactory;
         Objects.requireNonNull(expiry, "No session duration given");
         if(expiry.isZero() || expiry.isNegative()) {
             // Infinite session
@@ -152,98 +150,68 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public Map<String, List<String>> activeListeners() {
         synchronized (lock) {
-            return new HashMap<>(listenerRegistrations);
+            return listenerRegistrations.entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getRequestedTopics()));
         }
     }
 
     @Override
     public String addListener(List<String> topics, ClientDataListener cdl, ClientMetadataListener cml,
             ClientLifecycleListener cll, ClientActionListener cal) {
-        String subscriptionId = UUID.randomUUID().toString();
+        return doAddListener(subId -> new SensinactSessionEventListener(sessionId,
+                subId, topics, authorizer, cll, cdl, cml, cal));
+    }
 
+    private String doAddListener(Function<String, AbstractSensinactSessionEventManager> creator) {
         synchronized (lock) {
-
-            if (cdl != null) {
-                addListenerTopic(topics, "DATA/", new SessionDataListener(subscriptionId, authorizer, cdl));
+            if(expired) {
+                throw new IllegalStateException("The session is expired");
             }
-
-            if (cml != null) {
-                addListenerTopic(topics, "METADATA/", new SessionMetadataListener(subscriptionId, authorizer, cml));
-            }
-
-            if (cll != null) {
-                addListenerTopic(topics, "LIFECYCLE/", new SessionLifecycleListener(subscriptionId, authorizer, cll));
-            }
-
-            if (cal != null) {
-                addListenerTopic(topics, "ACTION/", new SessionActionListener(subscriptionId, authorizer, cal));
-            }
-
-            listenerRegistrations.put(subscriptionId, List.copyOf(topics));
         }
 
-        return subscriptionId;
-    }
+        String subscriptionId = UUID.randomUUID().toString();
 
-    /**
-     * Must be called holding {@link #lock}
-     *
-     * @param topics
-     * @param prefix
-     * @param reg
-     */
-    private void addListenerTopic(List<String> topics, String prefix, SessionListenerRegistration reg) {
-        topics.stream().map(prefix::concat).forEach(s -> {
-            if (s.endsWith("*")) {
-                listenersByWildcardTopic.merge(s.substring(0, s.length() - 1), List.of(reg), this::mergeLists);
+        AbstractSensinactSessionEventManager ssem = creator.apply(subscriptionId);
+        boolean destroy;
+        synchronized (lock) {
+            if(expired) {
+                destroy = true;
             } else {
-                listenersByTopic.merge(s, List.of(reg), this::mergeLists);
+                try {
+                    listenerRegistrations.put(subscriptionId, ssem);
+                    destroy = false;
+                } catch (Exception e) {
+                    destroy = true;
+                }
             }
-        });
-    }
+        }
 
-    private List<SessionListenerRegistration> mergeLists(List<SessionListenerRegistration> a,
-            List<SessionListenerRegistration> b) {
-        return Stream.of(a, b).flatMap(List::stream).collect(toList());
+        if(destroy) {
+            ssem.destroy();
+            throw new IllegalStateException("The session is expired");
+        } else {
+            // Asynchronously register to ensure that the session id can be returned
+            // while blocking calls in the listeners
+            promiseFactory.executor().execute(() -> ssem.register(context));
+        }
+        return subscriptionId;
     }
 
     @Override
     public void removeListener(String id) {
+        AbstractSensinactSessionEventManager ssem;
         synchronized (lock) {
-            List<String> topics = listenerRegistrations.remove(id);
-
-            if (topics != null) {
-                removeListener(id, "DATA/", topics);
-                removeListener(id, "METADATA/", topics);
-                removeListener(id, "LIFECYCLE/", topics);
-                removeListener(id, "ACTION/", topics);
-            }
+            ssem = listenerRegistrations.remove(id);
+        }
+        if(ssem != null) {
+            ssem.destroy();
         }
     }
 
-    private void removeListener(String subscriptionId, String prefix, List<String> topics) {
-        topics.stream().map(prefix::concat).forEach(s -> {
-            if (s.endsWith("*")) {
-                listenersByWildcardTopic.computeIfPresent(s.substring(0, s.length() - 1),
-                        (topic, regs) -> this.removeSubscription(subscriptionId, regs));
-            } else {
-                listenersByTopic.computeIfPresent(s, (topic, regs) -> this.removeSubscription(subscriptionId, regs));
-            }
-        });
-    }
-
-    /**
-     * Must be called holding {@link #lock}
-     *
-     * @param subscriptionId
-     * @param regs
-     */
-    private List<SessionListenerRegistration> removeSubscription(String subscriptionId,
-            List<SessionListenerRegistration> regs) {
-        List<SessionListenerRegistration> list = regs.stream().filter(r -> !r.subscriptionId.equals(subscriptionId))
-                .collect(toList());
-
-        return list.isEmpty() ? null : list;
+    @Override
+    public String subscribe(ICriterion filter, Consumer<SnapshotUpdate> updateListener) {
+        return doAddListener(subId -> new SensinactSessionSnapshotListener(sessionId,
+                subId, List.of(), authorizer, filter, updateListener,
+                () -> asyncFilteredSnapshot(filter, EnumSet.of(SnapshotOption.INCLUDE_LINKED_PROVIDERS_FULL), false)));
     }
 
     private <I, T> T executeGetCommand(Function<SensinactDigitalTwin, I> caller, Function<I, T> converter) {
@@ -252,7 +220,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     private <I, T> T executeGetCommand(Function<SensinactDigitalTwin, I> caller, Function<I, T> converter,
             T defaultValue) {
-        return safeExecute(new AbstractTwinCommand<T>() {
+        return safeExecute(getCommand(caller, converter, defaultValue));
+    }
+
+    private <I, T> AbstractTwinCommand<T> getCommand(Function<SensinactDigitalTwin, I> caller, Function<I, T> converter,
+            T defaultValue) {
+        return new AbstractTwinCommand<T>() {
             @Override
             protected Promise<T> call(SensinactDigitalTwin model, PromiseFactory pf) {
                 try {
@@ -268,7 +241,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     return pf.failed(e);
                 }
             }
-        });
+        };
     }
 
     private <T> T safeExecute(AbstractTwinCommand<T> command) {
@@ -376,7 +349,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                                 }
                             }
                         }
-                        return pf.resolved(null);
+                        return pf.failed(new NotFoundException("Resource not found"));
                     }
                 } catch (Throwable t) {
                     return pf.failed(t);
@@ -472,17 +445,26 @@ public class SensiNactSessionImpl implements SensiNactSession {
                         case ACTION:
                             result.actMethodArgumentsTypes = sensinactResource.getArguments();
                             val = pf.resolved(result);
-                            break;
+                                break;
 
-                        default:
-                            val = sensinactResource.getValue(Object.class, GetLevel.NORMAL).map(tv -> {
-                                // Add the current value
-                                result.valueType = ValueType.UPDATABLE;
-                                result.value = tv.getValue();
-                                result.timestamp = tv.getTimestamp();
-                                return result;
-                            });
-                            break;
+                            default: {
+                                Promise<? extends TimedValue<?>> promise;
+                                if (sensinactResource.isMultiple()) {
+                                    promise = sensinactResource.getMultiValue(Object.class, GetLevel.NORMAL);
+                                } else {
+                                    promise = sensinactResource.getValue(Object.class, GetLevel.NORMAL);
+                                }
+
+                                val = promise.map(tv -> {
+                                    // Add the current value
+                                    result.valueType = ValueType.UPDATABLE;
+                                    result.value = tv.getValue();
+                                    result.timestamp = tv.getTimestamp();
+                                    return result;
+                                });
+
+                                break;
+                            }
                         }
 
                         final Promise<Map<String, Object>> metadata = sensinactResource.getMetadataValues();
@@ -502,7 +484,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                                 }
                             }
                         }
-                        return pf.resolved(null);
+                        return pf.failed(new NotFoundException("Resource not found"));
                     }
                 } catch (Throwable t) {
                     return pf.failed(t);
@@ -650,31 +632,49 @@ public class SensiNactSessionImpl implements SensiNactSession {
 
     @Override
     public List<ProviderSnapshot> filteredSnapshot(ICriterion filter, EnumSet<SnapshotOption> snapshotOptions) {
+        return safeGetValue(asyncFilteredSnapshot(filter, snapshotOptions, true));
+    }
+
+    private Promise<List<ProviderSnapshot>> asyncFilteredSnapshot(ICriterion filter,
+            EnumSet<SnapshotOption> snapshotOptions, boolean waitForGateway) {
+        // We check validity here as we don't use the blocking safeExecute
+        checkWithException();
         Predicate<ServiceSnapshot> service = this::authorizeService;
         Predicate<ResourceSnapshot> resource = this::authorizeResource;
 
-        Stream<ProviderSnapshot> snapshots;
+        Promise<List<ProviderSnapshot>> snapshots;
         if (filter == null) {
-            snapshots = executeGetCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false),
-                    service, resource, snapshotOptions), Function.identity()).stream();
+            snapshots = thread.execute(getCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false),
+                    service, resource, snapshotOptions), Function.identity(), null));
+            if(waitForGateway) {
+                safeGetValue(snapshots);
+            }
         } else {
             BiPredicate<ProviderSnapshot, GeoJsonObject> location = filter.getLocationFilter();
             Predicate<ProviderSnapshot> provider = ps -> authorizeProvider(ps, location != null);
             Predicate<ProviderSnapshot> pf = filter.getProviderFilter();
             Predicate<ServiceSnapshot> sf = filter.getServiceFilter();
             Predicate<ResourceSnapshot> rf = filter.getResourceFilter();
-            snapshots = executeGetCommand((m) -> m.filteredSnapshot(location, pf == null ? provider : provider.and(pf),
-                    sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf)), Function.identity()).stream();
+            snapshots = thread.execute(getCommand((m) -> m.filteredSnapshot(location, pf == null ? provider : provider.and(pf),
+                    sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf)), Function.identity(), null));
+            if(waitForGateway) {
+                safeGetValue(snapshots);
+            }
             final ResourceValueFilter rcFilter = filter.getResourceValueFilter();
             if (rcFilter != null) {
-                snapshots = snapshots.filter(p -> rcFilter.test(p, p.getServices().stream()
-                        .flatMap(s -> s.getResources().stream()).toList()));
+                // Ensure that we don't block the gateway callback thread with a callback that
+                // must be executed outside the gateway thread
+                snapshots = promiseFactory.resolvedWith(snapshots);
+                snapshots = snapshots.map(l -> l.stream()
+                    .filter(p -> rcFilter.test(p, p.getServices().stream()
+                            .flatMap(s -> s.getResources().stream()).toList()))
+                    .toList());
             }
         }
-
         return snapshots
-            .map(this::safeProviderSnapshot)
-            .toList();
+                .map(l -> l.stream()
+                .map(this::safeProviderSnapshot)
+                .toList());
     }
 
     /**
@@ -795,28 +795,6 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 ss.getName(), sr.getName());
     }
 
-    public void notify(String topic, ResourceNotification event) {
-        List<SessionListenerRegistration> toNotify;
-        synchronized (lock) {
-            if (!isExpired()) {
-                toNotify = new ArrayList<>();
-                toNotify.addAll(listenersByTopic.getOrDefault(topic, List.of()));
-                for (Entry<String, List<SessionListenerRegistration>> e : listenersByWildcardTopic.headMap(topic, true)
-                        .descendingMap().entrySet()) {
-                    if (topic.startsWith(e.getKey())) {
-                        toNotify.addAll(e.getValue());
-                    } else {
-                        break;
-                    }
-                }
-            } else {
-                toNotify = List.of();
-            }
-        }
-
-        toNotify.forEach(s -> s.notify(topic, event));
-    }
-
     @Override
     public String getSessionId() {
         return sessionId;
@@ -860,16 +838,27 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public void expire() {
         final List<SensiNactSessionExpirationListener> listenersToNotify;
+        final List<AbstractSensinactSessionEventManager> eventManagersToClose;
         synchronized (lock) {
             if (expired) {
                 // Nothing to do
                 return;
             }
 
-            listenersToNotify = new ArrayList<>(expirationListeners);
+            listenersToNotify = List.copyOf(expirationListeners);
+            eventManagersToClose = List.copyOf(listenerRegistrations.values());
             expired = true;
             LOG.debug("Session {} of user {} expires. {} expiration listeners to notify", sessionId, user.getUserId(),
                     listenersToNotify.size());
+        }
+
+        // Close the registrations outside of the synchronized block
+        for (AbstractSensinactSessionEventManager ssem : eventManagersToClose) {
+            try {
+                ssem.destroy();
+            } catch (Exception e) {
+                LOG.error("Exception while closing session event manager", e);
+            }
         }
 
         // Notify listeners outside of the synchronized block
@@ -944,117 +933,6 @@ public class SensiNactSessionImpl implements SensiNactSession {
     private void checkWithException() throws IllegalStateException {
         if (isExpired()) {
             throw new IllegalStateException("Session is expired");
-        }
-    }
-
-    private static abstract class SessionListenerRegistration {
-
-        private final String subscriptionId;
-        protected final Authorizer authorizer;
-
-        public SessionListenerRegistration(String subscriptionId, Authorizer authorizer) {
-            this.subscriptionId = subscriptionId;
-            this.authorizer = authorizer;
-        }
-
-        public abstract void notify(String topic, ResourceNotification notification);
-
-    }
-
-    private static class SessionLifecycleListener extends SessionListenerRegistration {
-
-        private final ClientLifecycleListener listener;
-
-        public SessionLifecycleListener(String subscriptionId, Authorizer authorizer, ClientLifecycleListener listener) {
-            super(subscriptionId, authorizer);
-            this.listener = listener;
-        }
-
-        @Override
-        public void notify(String topic, ResourceNotification notification) {
-
-            LifecycleNotification ln = (LifecycleNotification) notification;
-
-            switch(ln.status()) {
-                case PROVIDER_CREATED:
-                case PROVIDER_DELETED:
-                    if(!authorizer.hasProviderPermission(DESCRIBE, ln.modelPackageUri(), ln.model(), ln.provider())) {
-                        return;
-                    }
-                    break;
-                case RESOURCE_CREATED:
-                case RESOURCE_DELETED:
-                    if(!authorizer.hasResourcePermission(DESCRIBE, ln.modelPackageUri(), ln.model(), ln.provider(), ln.service(), ln.resource())) {
-                        return;
-                    }
-                    break;
-                case SERVICE_CREATED:
-                case SERVICE_DELETED:
-                    if(!authorizer.hasServicePermission(DESCRIBE, ln.modelPackageUri(), ln.model(), ln.provider(), ln.service())) {
-                        return;
-                    }
-                    break;
-                default:
-                    LOG.warn("Unrecognised lifecycle status {}. Denying access to the notification", ln.status());
-                    return;
-            }
-            listener.notify(topic, ln);
-        }
-    }
-
-    private static class SessionMetadataListener extends SessionListenerRegistration {
-
-        private final ClientMetadataListener listener;
-
-        public SessionMetadataListener(String subscriptionId, Authorizer authorizer, ClientMetadataListener listener) {
-            super(subscriptionId, authorizer);
-            this.listener = listener;
-        }
-
-        @Override
-        public void notify(String topic, ResourceNotification notification) {
-            if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
-                return;
-            }
-
-            listener.notify(topic, (ResourceMetaDataNotification) notification);
-        }
-    }
-
-    private static class SessionDataListener extends SessionListenerRegistration {
-
-        private final ClientDataListener listener;
-
-        public SessionDataListener(String subscriptionId, Authorizer authorizer, ClientDataListener listener) {
-            super(subscriptionId, authorizer);
-            this.listener = listener;
-        }
-
-        @Override
-        public void notify(String topic, ResourceNotification notification) {
-            if(!authorizer.hasResourcePermission(READ, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
-                return;
-            }
-
-            listener.notify(topic, (ResourceDataNotification) notification);
-        }
-    }
-
-    private static class SessionActionListener extends SessionListenerRegistration {
-
-        private final ClientActionListener listener;
-
-        public SessionActionListener(String subscriptionId, Authorizer authorizer, ClientActionListener listener) {
-            super(subscriptionId, authorizer);
-            this.listener = listener;
-        }
-
-        @Override
-        public void notify(String topic, ResourceNotification notification) {
-            if(!authorizer.hasResourcePermission(ACT, notification.modelPackageUri(), notification.model(), notification.provider(), notification.service(), notification.resource())) {
-                return;
-            }
-            listener.notify(topic, (ResourceActionNotification) notification);
         }
     }
 

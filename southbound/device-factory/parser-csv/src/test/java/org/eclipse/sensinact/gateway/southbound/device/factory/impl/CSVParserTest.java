@@ -43,7 +43,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentServiceObjects;
 import org.osgi.util.promise.Promises;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tests CSV-based mapping

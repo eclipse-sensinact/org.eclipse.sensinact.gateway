@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -47,6 +48,7 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeResourc
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseDescribeServiceDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseSetDTO;
+import org.eclipse.sensinact.northbound.query.dto.result.ResponseSnapshotDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultDescribeProvidersDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultListProvidersDTO;
@@ -54,10 +56,11 @@ import org.eclipse.sensinact.northbound.query.dto.result.ShortResourceDescriptio
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Tests DTOs serialization
@@ -65,7 +68,10 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 public class SerializationTest {
 
     private final ObjectMapper mapper = JsonMapper.builder()
-            .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true).build();
+            .configure(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION, true)
+            .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, true)
+            .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
+            .build();
 
     /**
      * Tests Act DTOs (de-)serialization
@@ -450,7 +456,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testWrappedAccessMethodCallParametesrDTO() throws JsonProcessingException {
+    void testWrappedAccessMethodCallParametesrDTO() throws JacksonException {
 
         final AccessMethodCallParameterDTO arg1 = new AccessMethodCallParameterDTO();
         arg1.name = "arg1";
@@ -479,7 +485,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testTypedResponseSerialization() throws JsonProcessingException {
+    void testTypedResponseSerialization() throws JacksonException {
         // Original version
         final TypedResponse<ResponseGetDTO> original = new TypedResponse<>(EResultType.GET_RESPONSE);
         original.statusCode = 218;
@@ -510,7 +516,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testProvidersList() throws JsonProcessingException {
+    void testProvidersList() throws JacksonException {
         final ResultListProvidersDTO original = new ResultListProvidersDTO();
         original.statusCode = 200;
         original.uri = "/";
@@ -534,7 +540,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testSubscribeRequestNoFilter() throws JsonProcessingException {
+    void testSubscribeRequestNoFilter() throws JacksonException {
         String request = """
                 {
                     "operation": "SUBSCRIBE",
@@ -555,7 +561,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testSubscribeRequestLDAP() throws JsonProcessingException {
+    void testSubscribeRequestLDAP() throws JacksonException {
         String request = """
                 {
                     "operation": "SUBSCRIBE",
@@ -572,7 +578,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testSubscribeRequestResourceSelector() throws JsonProcessingException {
+    void testSubscribeRequestResourceSelector() throws JacksonException {
         String request = """
                 {
                     "operation": "SUBSCRIBE",
@@ -595,7 +601,7 @@ public class SerializationTest {
     }
 
     @Test
-    void testSubscribeRequestMultipleResourceSelector() throws JsonProcessingException {
+    void testSubscribeRequestMultipleResourceSelector() throws JacksonException {
         String request = """
                 {
                     "operation": "SUBSCRIBE",
@@ -622,5 +628,40 @@ public class SerializationTest {
         assertEquals("""
                 [{"provider":{"value":"foo"}},{"provider":{"value":"bar"}}]""", query.filter);
         assertNull(query.uri);
+    }
+
+    @Test
+    void testResponseSnapshot() throws JacksonException {
+        String response = """
+                {
+                    "statusCode": 200,
+                    "type": "SNAPSHOT_RESPONSE",
+                    "providers": {
+                        "foo": {
+                            "name": "foo",
+                            "modelName": "fooModel",
+                            "services": {
+                                "bar": {
+                                    "name": "bar",
+                                    "resources": {
+                                        "foobar": {
+                                            "name": "foobar",
+                                            "timestamp": null,
+                                            "value": null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                """;
+        ResponseSnapshotDTO resp = mapper.readValue(response, ResponseSnapshotDTO.class);
+
+        assertEquals(EResultType.SNAPSHOT_RESPONSE, resp.type);
+        assertEquals(200, resp.statusCode);
+        assertEquals(Set.of("foo"), resp.providers.keySet());
+        assertEquals("foobar", resp.providers.get("foo").services.get("bar").resources.get("foobar").name);
+        assertNull(resp.uri);
     }
 }

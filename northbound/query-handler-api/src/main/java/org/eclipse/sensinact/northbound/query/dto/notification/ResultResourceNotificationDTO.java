@@ -12,28 +12,23 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.query.dto.notification;
 
-import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
+import org.eclipse.sensinact.northbound.query.dto.notification.jackson.ResourceNotificationDeserializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Notification result DTO send on each event
  */
-public class ResultResourceNotificationDTO extends AbstractResultDTO {
+public class ResultResourceNotificationDTO extends AbstractResultNotificationDTO {
 
-    /**
-     * Subscription ID
-     */
-    public String subscriptionId;
+    public ResultResourceNotificationDTO() {
+        super(EResultType.SUBSCRIPTION_NOTIFICATION);
+    }
 
     /**
      * Notification content
      */
     @JsonDeserialize(using = ResourceNotificationDeserializer.class)
     public AbstractResourceNotificationDTO notification;
-
-    public ResultResourceNotificationDTO() {
-        super(EResultType.SUBSCRIPTION_NOTIFICATION);
-    }
 }

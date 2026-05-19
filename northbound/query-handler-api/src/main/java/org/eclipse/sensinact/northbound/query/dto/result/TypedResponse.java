@@ -16,7 +16,7 @@ import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.result.jackson.TypedResponseDeserializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Holds a response of a given type

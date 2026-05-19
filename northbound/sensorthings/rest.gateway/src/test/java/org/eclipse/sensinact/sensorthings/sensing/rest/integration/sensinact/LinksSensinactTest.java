@@ -44,8 +44,8 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.integration.AbstractInteg
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Tests that all links related to a thing are valid

@@ -36,28 +36,25 @@ import java.util.stream.Stream;
 import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.metrics.IMetricsGauge;
-import org.eclipse.sensinact.core.notification.ResourceNotification;
 import org.eclipse.sensinact.northbound.security.api.AuthorizationEngine;
 import org.eclipse.sensinact.northbound.security.api.PreAuthorizer;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionActivityChecker;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.typedevent.TypedEventHandler;
-import org.osgi.service.typedevent.propertytypes.EventTopics;
 import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(configurationPid = SessionManager.CONFIGURATION_PID, property = IMetricsGauge.NAME + "=sensinact.sessions")
-@EventTopics({ "LIFECYCLE/*", "METADATA/*", "DATA/*", "ACTION/*" })
 public class SessionManager
-        implements SensiNactSessionManager, TypedEventHandler<ResourceNotification>, IMetricsGauge {
+        implements SensiNactSessionManager, IMetricsGauge {
 
     /**
      * Session Manager OSGi Configuration Admin PID
@@ -110,7 +107,7 @@ public class SessionManager
     /**
      * Scheduler for session expiration checks
      */
-    private ScheduledExecutorService activityCheckScheduler;
+    private ScheduledExecutorService sessionWorkers;
 
     /**
      * Promise factory for scheduling session expiration checks
@@ -126,6 +123,11 @@ public class SessionManager
      * Threshold to trigger to the activity check
      */
     private Duration sessionActivityThreshold;
+
+    /**
+     * The bundle context for registering listeners
+     */
+    private BundleContext context;
 
     /**
      * Definition of the component configuration properties
@@ -203,7 +205,8 @@ public class SessionManager
     }
 
     @Activate
-    void start(Config config) {
+    void start(BundleContext context, Config config) {
+        this.context = context;
         final int expiry = config.expiry();
         if (LOG.isDebugEnabled()) {
             LOG.debug("Starting the Session Manager with session lifetime {}s and default authorization policy {}",
@@ -241,10 +244,10 @@ public class SessionManager
                     activityCheckPeriod, sessionActivityThreshold, sessionActivityExtension);
 
             // Schedule the periodic activity check task
-            this.activityCheckScheduler = Executors.newScheduledThreadPool(4,
-                    r -> new Thread(r, "sensinact-session-activity-checker"));
-            this.promiseFactory = new PromiseFactory(this.activityCheckScheduler);
-            this.activityCheckScheduler.scheduleAtFixedRate(this::checkSessionsLiveness, activityCheckPeriod,
+            this.sessionWorkers = Executors.newScheduledThreadPool(4,
+                    r -> new Thread(r, "sensinact-session-workers"));
+            this.promiseFactory = new PromiseFactory(this.sessionWorkers);
+            this.sessionWorkers.scheduleAtFixedRate(this::checkSessionsLiveness, activityCheckPeriod,
                     activityCheckPeriod, TimeUnit.SECONDS);
         }
 
@@ -261,9 +264,9 @@ public class SessionManager
         }
 
         // Stop the scheduler for session expiration checks
-        if (activityCheckScheduler != null) {
-            activityCheckScheduler.shutdownNow();
-            activityCheckScheduler = null;
+        if (sessionWorkers != null) {
+            sessionWorkers.shutdownNow();
+            sessionWorkers = null;
         }
 
         List<SensiNactSessionImpl> toInvalidate;
@@ -583,7 +586,7 @@ public class SessionManager
         }
 
         final SensiNactSessionImpl session = new SensiNactSessionImpl(user, preAuthorizer, authorizer, thread, expiry,
-                activityChecker);
+                activityChecker, context, promiseFactory);
         String sessionId = session.getSessionId();
 
         // Add an expiration listener to clean up session when explicitly expired
@@ -621,28 +624,6 @@ public class SessionManager
      */
     private void handleExplicitSessionExpiration(final SensiNactSession session) {
         removeSession(session.getUserInfo().getUserId(), session.getSessionId(), false);
-    }
-
-    @Override
-    public void notify(String topic, ResourceNotification event) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Session Manager received a notification on topic {}", topic);
-        }
-        List<SensiNactSessionImpl> sessions;
-        synchronized (lock) {
-            sessions = new ArrayList<>(this.sessions.values());
-        }
-        for (SensiNactSessionImpl session : sessions) {
-            if (!session.isExpired()) {
-                try {
-                    session.notify(topic, event);
-                } catch (Exception e) {
-                    LOG.error("Error notifying session {} on topic {}", session.getSessionId(), topic);
-                }
-            } else {
-                removeSession(session.getUserInfo().getUserId(), session.getSessionId());
-            }
-        }
     }
 
     @Override

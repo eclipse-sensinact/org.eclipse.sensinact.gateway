@@ -42,6 +42,7 @@
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>geo-json</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>api</artifactId>
@@ -65,10 +66,6 @@
       <artifactId>impl</artifactId>
       <version>${sensinact.core.version}</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.datatype</groupId>
-      <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.sensorthings</groupId>
@@ -123,7 +120,7 @@
     <!-- SPI fly / Service loader -->
     <dependency>
       <groupId>org.apache.aries.spifly</groupId>
-      <artifactId>org.apache.aries.spifly.dynamic.framework.extension</artifactId>
+      <artifactId>org.apache.aries.spifly.dynamic.bundle</artifactId>
       <scope>test</scope>
     </dependency>
 
@@ -138,7 +135,7 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.fasterxml.jackson.jakarta.rs</groupId>
+      <groupId>tools.jackson.jakarta.rs</groupId>
       <artifactId>jackson-jakarta-rs-json-provider</artifactId>
     </dependency>
 

@@ -6,7 +6,7 @@
 	bnd.identity;id='ch.qos.logback.classic'
 -resolve.effective: active
 
--runee: JavaSE-17
+-runee: JavaSE-25
 -runfw: org.apache.felix.framework
 -runproperties: \
 	org.osgi.framework.bootdelegation=org.mockito.internal.creation.bytebuddy.inject,\
@@ -20,8 +20,7 @@
 	ch.qos.logback.classic;version='[1.5.31,1.5.32)',\
 	ch.qos.logback.core;version='[1.5.31,1.5.32)',\
 	com.fasterxml.jackson.core.jackson-annotations;version='[2.21.0,2.21.1)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.21.0,2.21.1)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.21.0,2.21.1)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.12.7,2.12.8)',\
 	io.dropwizard.metrics.core;version='[4.2.19,4.2.20)',\
 	junit-jupiter-api;version='[5.14.3,5.14.4)',\
 	junit-jupiter-engine;version='[5.14.3,5.14.4)',\
@@ -32,7 +31,7 @@
 	net.bytebuddy.byte-buddy;version='[1.17.7,1.17.8)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.17.7,1.17.8)',\
 	org.apache.aries.component-dsl.component-dsl;version='[1.2.2,1.2.3)',\
-	org.apache.aries.spifly.dynamic.framework.extension;version='[1.3.7,1.3.8)',\
+	org.apache.aries.spifly.dynamic.bundle;version='[1.3.7,1.3.8)',\
 	org.apache.aries.typedevent.bus;version='[1.0.1,1.0.2)',\
 	org.apache.commons.commons-jexl3;version='[3.3.0,3.3.1)',\
 	org.apache.commons.logging;version='[1.2.0,1.2.1)',\
@@ -58,6 +57,11 @@
 	org.gecko.emf.osgi.component.minimal;version='[6.3.0,6.3.1)',\
 	org.mockito.junit-jupiter;version='[5.21.0,5.21.1)',\
 	org.mockito.mockito-core;version='[5.21.0,5.21.1)',\
+	org.objectweb.asm;version='[9.9.1,9.9.2)',\
+	org.objectweb.asm.commons;version='[9.9.1,9.9.2)',\
+	org.objectweb.asm.tree;version='[9.9.1,9.9.2)',\
+	org.objectweb.asm.tree.analysis;version='[9.9.1,9.9.2)',\
+	org.objectweb.asm.util;version='[9.9.1,9.9.2)',\
 	org.objenesis;version='[3.3.0,3.3.1)',\
 	org.opentest4j;version='[1.3.0,1.3.1)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
@@ -69,4 +73,6 @@
 	org.osgi.util.function;version='[1.2.0,1.2.1)',\
 	org.osgi.util.promise;version='[1.3.0,1.3.1)',\
 	org.osgi.util.pushstream;version='[1.1.0,1.1.1)',\
-	slf4j.api;version='[2.0.17,2.0.18)'
+	slf4j.api;version='[2.0.17,2.0.18)',\
+	tools.jackson.core.jackson-core;version='[3.1.1,3.1.2)',\
+	tools.jackson.core.jackson-databind;version='[3.1.1,3.1.2)'

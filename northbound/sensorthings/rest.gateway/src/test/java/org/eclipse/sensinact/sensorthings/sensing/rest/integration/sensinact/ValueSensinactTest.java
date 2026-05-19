@@ -38,7 +38,7 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
 import org.eclipse.sensinact.sensorthings.sensing.rest.integration.AbstractIntegrationTest;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
 /**
  * Tests that resource value changes are shown correctly

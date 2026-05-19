@@ -12,7 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.filters.sensorthings;
 
-import java.time.Duration;
+import static org.mockito.Answers.CALLS_REAL_METHODS;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -21,15 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.sensinact.core.command.GetLevel;
 import org.eclipse.sensinact.core.model.ResourceType;
 import org.eclipse.sensinact.core.model.ValueType;
-import org.eclipse.sensinact.core.notification.ClientActionListener;
-import org.eclipse.sensinact.core.notification.ClientDataListener;
-import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
-import org.eclipse.sensinact.core.notification.ClientMetadataListener;
-import org.eclipse.sensinact.core.push.DataUpdate;
-import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.LinkedProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -37,182 +31,16 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.core.twin.TimedValue;
-import org.eclipse.sensinact.northbound.security.api.UserInfo;
-import org.eclipse.sensinact.northbound.session.ProviderDescription;
-import org.eclipse.sensinact.northbound.session.ResourceDescription;
-import org.eclipse.sensinact.northbound.session.ResourceShortDescription;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
-import org.eclipse.sensinact.northbound.session.SensiNactSessionExpirationListener;
-import org.eclipse.sensinact.northbound.session.ServiceDescription;
+import org.mockito.Answers;
+import org.mockito.Mockito;
 
 /**
  * Utility methods for tests
  */
 public class RcUtils {
 
-    private static final class TestSensinactSession implements SensiNactSession {
-
-        @Override
-        public String getSessionId() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public Instant getExpiry() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void extend(Duration duration) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public boolean isExpired() {
-            // TODO Auto-generated method stub
-            return false;
-        }
-
-        @Override
-        public void expire() {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public Map<String, List<String>> activeListeners() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public String addListener(List<String> topics, ClientDataListener cdl, ClientMetadataListener cml,
-                ClientLifecycleListener cll, ClientActionListener cal) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void removeListener(String id) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public <T> TimedValue<T> getResourceTimedValue(String provider, String service, String resource, Class<T> clazz,
-                GetLevel getLevel) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public <T> TimedValue<List<T>> getResourceTimedMultiValue(String provider, String service, String resource,
-                Class<T> clazz, GetLevel getLevel) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void setResourceValue(String provider, String service, String resource, Object o) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void setResourceValue(String provider, String service, String resource, Object o, Instant instant) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public Map<String, Object> getResourceMetadata(String provider, String service, String resource) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void setResourceMetadata(String provider, String service, String resource,
-                Map<String, Object> metadata) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public TimedValue<Object> getResourceMetadataValue(String provider, String service, String resource,
-                String metadata) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void setResourceMetadata(String provider, String service, String resource, String metadata,
-                Object value) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public Object actOnResource(String provider, String service, String resource, Map<String, Object> parameters) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public ResourceDescription describeResource(String provider, String service, String resource) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public ResourceShortDescription describeResourceShort(String provider, String service, String resource) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public ServiceDescription describeService(String provider, String service) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public ProviderDescription describeProvider(String provider) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public ProviderDescription linkProviders(String parent, String child) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public ProviderDescription unlinkProviders(String parent, String child) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<ProviderDescription> listProviders() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<ProviderSnapshot> filteredSnapshot(ICriterion filter) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<ProviderSnapshot> filteredSnapshot(ICriterion filter, EnumSet<SnapshotOption> snapshotOptions) {
-            // TODO Auto-generated method stub
-            return null;
-        }
+    private static abstract class TestSensinactSession implements SensiNactSession {
 
         private Map<String, ProviderSnapshot> map = new HashMap<String, ProviderSnapshot>();
 
@@ -224,42 +52,6 @@ public class RcUtils {
         public ProviderSnapshot providerSnapshot(String provider, EnumSet<SnapshotOption> snapshotOptions) {
 
             return map.get(provider);
-        }
-
-        @Override
-        public ServiceSnapshot serviceSnapshot(String provider, String service) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public ResourceSnapshot resourceSnapshot(String provider, String service, String resource) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public UserInfo getUserInfo() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void addExpirationListener(SensiNactSessionExpirationListener listener) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void removeExpirationListener(SensiNactSessionExpirationListener listener) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public ProviderDescription setProvider(String provider, Map<String, Object> rcValues, DataUpdate push) {
-            // TODO Auto-generated method stub
-            return null;
         }
 
     }
@@ -369,7 +161,8 @@ public class RcUtils {
 
     static TestSensinactSession getSession() {
         if (session == null) {
-            session = new TestSensinactSession();
+            session = Mockito.mock(TestSensinactSession.class);
+            Mockito.lenient().when(session.providerSnapshot(Mockito.anyString(), Mockito.any())).then(CALLS_REAL_METHODS);
         }
         return session;
     }
@@ -392,6 +185,7 @@ public class RcUtils {
     static TestServiceSnapshot addService(final ProviderSnapshot provider, final String svcName) {
         TestProviderSnapshot test = (TestProviderSnapshot) provider;
         TestServiceSnapshot svc = new TestServiceSnapshot(test, svcName);
+        test.getServices().removeIf(s -> svcName.equals(s.getName()));
         test.getServices().add(svc);
         return svc;
     }
@@ -465,7 +259,7 @@ public class RcUtils {
                 return value instanceof List;
             }
         };
-
+        test.getResources().removeIf(r -> rcName.equals(r.getName()));
         test.getResources().add(rc);
         return rc;
     }

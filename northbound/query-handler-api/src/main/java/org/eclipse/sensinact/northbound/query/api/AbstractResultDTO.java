@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.northbound.query.api;
 
 import org.eclipse.sensinact.northbound.query.dto.notification.ResultResourceNotificationDTO;
+import org.eclipse.sensinact.northbound.query.dto.notification.ResultSnapshotNotificationDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ErrorResultDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseSnapshotDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultActDTO;
@@ -24,6 +25,7 @@ import org.eclipse.sensinact.northbound.query.dto.result.ResultSubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.ResultUnsubscribeDTO;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -47,8 +49,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
         @Type(value = ResultActDTO.class, name = "ACT_RESPONSE"),
         @Type(value = ResultSubscribeDTO.class, name = "SUBSCRIPTION_RESPONSE"),
         @Type(value = ResultResourceNotificationDTO.class, name = "SUBSCRIPTION_NOTIFICATION"),
+        @Type(value = ResultSnapshotNotificationDTO.class, name = "SNAPSHOT_NOTIFICATION"),
         @Type(value = ResultUnsubscribeDTO.class, name = "UNSUBSCRIPTION_RESPONSE") })
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "type", visible = true)
+@JsonIgnoreProperties("type")
 public abstract class AbstractResultDTO {
 
     /**

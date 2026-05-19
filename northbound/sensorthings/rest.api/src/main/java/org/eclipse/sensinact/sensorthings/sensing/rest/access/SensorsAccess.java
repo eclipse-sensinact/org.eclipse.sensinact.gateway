@@ -26,13 +26,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.ObservedProperty;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Sensor;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Thing;
-import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ODataId;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PropFilter;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.RefFilter;
 
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -159,12 +157,8 @@ public interface SensorsAccess {
     @GET
     default public ResultList<Datastream> getSensorDatastreamObservedPropertyDatastreams(@PathParam("id") ODataId id,
             @PathParam("id2") ODataId id2) {
-        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
-        String providerId2 = DtoMapperSimple.extractFirstIdSegment(id2.value());
-        if (!providerId.equals(providerId2)) {
-            throw new NotFoundException();
-        }
-        return new ResultList<Datastream>(null, null, List.of(getSensorDatastream(id, id2)));
+
+        return new ResultList<Datastream>(List.of(getSensorDatastream(id, id2)));
     }
 
     @Path("Datastreams({id2})/Sensor/Datastreams")

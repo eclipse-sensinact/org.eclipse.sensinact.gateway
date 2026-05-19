@@ -103,7 +103,7 @@ class NotificationSnapshot {
 
         @Override
         public String getModelPackageUri() {
-            return "https://eclipse.org/sensinact/test/";
+            return notification.modelPackageUri();
         }
 
         @Override

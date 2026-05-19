@@ -13,16 +13,17 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
-import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.AnyMatch;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class ThingPathHandlerSensorthings extends AbstractPathHandlerSensorthings {
@@ -30,12 +31,12 @@ public class ThingPathHandlerSensorthings extends AbstractPathHandlerSensorthing
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams,
             "locations", this::subLocations);
 
-    public ThingPathHandlerSensorthings(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
-
+    public ThingPathHandlerSensorthings(final PathContext pathContext) {
+        super(pathContext);
     }
 
     public Object handle(final String path) {
+        ProviderSnapshot provider = pathContext.provider();
         final String[] parts = path.toLowerCase().split("/");
         ServiceSnapshot service = DtoMapperSimple.getThingService(provider);
         ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
@@ -60,6 +61,10 @@ public class ThingPathHandlerSensorthings extends AbstractPathHandlerSensorthing
 
             case "location":
                 return DtoMapperSimple.getResourceField(serviceAdmin, "location", GeoJsonObject.class);
+            case "time":
+                return service.getResource("location") != null && service.getResource("location").getValue() != null
+                        ? service.getResource("location").getValue().getTimestamp()
+                        : null;
 
             default:
                 throw new UnsupportedRuleException("Unexpected resource level field: " + path);
@@ -80,15 +85,24 @@ public class ThingPathHandlerSensorthings extends AbstractPathHandlerSensorthing
     }
 
     private Object subDatastreams(final String path) {
+        ProviderSnapshot provider = pathContext.provider();
 
-        return new AnyMatch(getDatastreamsProviderFromThing(provider).stream()
-                .map(p -> new DatastreamPathHandlerSensorthings(p, session).handle(path)).collect(Collectors.toList()));
+        return getDatastreamsProviderFromThing(provider).stream().map(p -> withProvider(pathContext, p)).flatMap(pc -> {
+            Object result = new DatastreamPathHandlerSensorthings(pc).handle(path);
 
+            if (result instanceof List<?>) {
+                return ((List<?>) result).stream();
+            } else if (result != null) {
+                return Stream.of(result);
+            } else {
+                return Stream.empty();
+            }
+        }).collect(Collectors.toList());
     }
 
     private Object subLocations(final String path) {
-
-        return new AnyMatch(getLocationsProviderFromThing(provider).stream()
-                .map(p -> new LocationPathHandlerSensorthings(p, session).handle(path)).collect(Collectors.toList()));
+        ProviderSnapshot provider = pathContext.provider();
+        return getLocationsProviderFromThing(provider).stream().map(p -> withProvider(pathContext, p))
+                .map(pc -> new LocationPathHandlerSensorthings(pc).handle(path)).collect(Collectors.toList());
     }
 }

@@ -12,9 +12,6 @@
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -114,7 +111,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         ResultList<Thing> resultSensinact = getSensinactHandler().getThings();
         ResultList<Thing> resultSensorthing = getSensorthingsHandler().getThings();
-        return new ResultList<Thing>(null, null,
+        return new ResultList<Thing>(
                 Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
     }
 
@@ -123,7 +120,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         ResultList<Location> resultSensinact = getSensinactHandler().getLocations();
         ResultList<Location> resultSensorthing = getSensorthingsHandler().getLocations();
-        return new ResultList<Location>(null, null,
+        return new ResultList<Location>(
                 Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
     }
 
@@ -132,7 +129,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         ResultList<HistoricalLocation> resultSensinact = getSensinactHandler().getHistoricalLocations();
         ResultList<HistoricalLocation> resultSensorthing = getSensorthingsHandler().getHistoricalLocations();
-        return new ResultList<HistoricalLocation>(null, null,
+        return new ResultList<HistoricalLocation>(
                 Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
     }
 
@@ -141,7 +138,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         ResultList<Datastream> resultSensinact = getSensinactHandler().getDatastreams();
         ResultList<Datastream> resultSensorthing = getSensorthingsHandler().getDatastreams();
-        return new ResultList<Datastream>(null, null,
+        return new ResultList<Datastream>(
                 Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
     }
 
@@ -150,16 +147,11 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         ResultList<Sensor> resultSensinact = getSensinactHandler().getSensors();
         ResultList<Sensor> resultSensorthing = getSensorthingsHandler().getSensors();
-        List<Sensor> cachesSensor = getCacheSensor().values();
 
-        Set<String> cacheIds = cachesSensor.stream().map(sc -> sc.id().toString()).collect(Collectors.toSet());
-
-        Stream<Sensor> listSensorthing = resultSensorthing.value().stream().map(s -> (Sensor) s)
-                .filter(s -> cacheIds.stream().noneMatch(cacheId -> s.id().toString().endsWith(cacheId)));
+        Stream<Sensor> listSensorthing = resultSensorthing.value().stream().map(s -> (Sensor) s);
 
         Stream<Sensor> list = Stream.concat(resultSensinact.value().stream(), listSensorthing);
-        list = Stream.concat(list, cachesSensor.stream());
-        return new ResultList<Sensor>(null, null, list.toList());
+        return new ResultList<Sensor>(list.toList());
     }
 
     @Override
@@ -170,7 +162,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         Stream<Observation> result = Stream.concat(resultSensinact.value().stream(),
                 resultSensorthing.value().stream());
 
-        return new ResultList<Observation>(null, null, result.toList());
+        return new ResultList<Observation>(result.toList());
     }
 
     @Override
@@ -179,16 +171,10 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
         ResultList<ObservedProperty> resultSensinact = getSensinactHandler().getObservedProperties();
         ResultList<ObservedProperty> resultSensorthing = getSensorthingsHandler().getObservedProperties();
 
-        List<ObservedProperty> cacheObsProp = getCacheObservedProperty().values();
-
-        Set<String> cacheIds = cacheObsProp.stream().map(sc -> sc.id().toString()).collect(Collectors.toSet());
-
-        Stream<ObservedProperty> listSensorthing = resultSensorthing.value().stream().map(s -> (ObservedProperty) s)
-                .filter(s -> cacheIds.stream().noneMatch(cacheId -> s.id().toString().endsWith(cacheId)));
+        Stream<ObservedProperty> listSensorthing = resultSensorthing.value().stream().map(s -> (ObservedProperty) s);
 
         Stream<ObservedProperty> list = Stream.concat(resultSensinact.value().stream(), listSensorthing);
-        list = Stream.concat(list, cacheObsProp.stream());
-        return new ResultList<ObservedProperty>(null, null, list.toList());
+        return new ResultList<ObservedProperty>(list.toList());
     }
 
     @Override
@@ -196,7 +182,7 @@ public class RootResourceAccessImpl extends AbstractAccess implements RootResour
 
         ResultList<FeatureOfInterest> resultSensinact = getSensinactHandler().getFeaturesOfInterest();
         ResultList<FeatureOfInterest> resultSensorthing = getSensorthingsHandler().getFeaturesOfInterest();
-        return new ResultList<FeatureOfInterest>(null, null,
+        return new ResultList<FeatureOfInterest>(
                 Stream.concat(resultSensinact.value().stream(), resultSensorthing.value().stream()).toList());
     }
 

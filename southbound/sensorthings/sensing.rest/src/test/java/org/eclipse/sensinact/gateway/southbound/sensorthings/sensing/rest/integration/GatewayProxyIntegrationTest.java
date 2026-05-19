@@ -13,7 +13,9 @@
 package org.eclipse.sensinact.gateway.southbound.sensorthings.sensing.rest.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.abort;
 import static org.osgi.test.common.annotation.Property.ValueSource.SystemProperty;
 
@@ -57,7 +59,13 @@ import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.ComposeContainer;
+import org.testcontainers.containers.ContainerState;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.containers.wait.strategy.WaitStrategyTarget;
+
+import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.Ports.Binding;
 
 @WithConfiguration(pid = "sensinact.session.manager", properties = {
         @Property(key = "auth.policy", value = "ALLOW_ALL"),
@@ -94,20 +102,27 @@ class GatewayProxyIntegrationTest {
             } catch (Throwable t) {
                 abort("No docker executable on the path, so tests will be skipped");
             }
-            FROST_RUNTIME =
-                    new ComposeContainer(resourcesDir.resolve("frost-compose.yaml").toFile())
-                    .withExposedService("web",
-                            8080,
-                            Wait.forLogMessage(".*org.apache.catalina.startup.Catalina.start Server startup in.*\\n",
-                                    1));
-
+            FROST_RUNTIME = new ComposeContainer(resourcesDir.resolve("frost-compose.yaml").toFile());
             FROST_RUNTIME.start();
+
+            ContainerState webContainer = FROST_RUNTIME.getContainerByServiceName("web").orElseThrow();
+            Wait.forLogMessage(".*org.apache.catalina.startup.Catalina.start Server startup in.*\n",
+                    1).waitUntilReady((WaitStrategyTarget) webContainer);
         } finally {
             Thread.currentThread().setContextClassLoader(cl);
         }
 
-        FROST_URL = URI.create(String.format("http://%s:%d/FROST-Server/v1.1/", FROST_RUNTIME.getServiceHost("web", 8080),
-                FROST_RUNTIME.getServicePort("web", 8080)));
+        InspectContainerResponse containerInfo = FROST_RUNTIME.getContainerByServiceName("web").map(c -> c.getContainerInfo()).orElseThrow();
+        Binding[] bindings = containerInfo.getNetworkSettings().getPorts().getBindings().get(ExposedPort.tcp(8080));
+        assertNotNull(bindings, "No web container bindings found");
+        assertTrue(bindings.length > 0, "No web container bindings opened");
+        Binding binding = bindings[0];
+        String hostPort = binding.getHostPortSpec();
+        assertNotNull(hostPort);
+        assertFalse(hostPort.isEmpty() || hostPort.contains("-"), "Invalid host port: " + hostPort);
+
+        final int hostPortInt = Integer.parseInt(hostPort);
+        FROST_URL = URI.create(String.format("http://%s:%d/FROST-Server/v1.1/", "localhost", hostPortInt));
 
         HttpRequest request = HttpRequest.newBuilder().uri(FROST_URL.resolve("Things"))
             .header("Content-Type", "application/json")

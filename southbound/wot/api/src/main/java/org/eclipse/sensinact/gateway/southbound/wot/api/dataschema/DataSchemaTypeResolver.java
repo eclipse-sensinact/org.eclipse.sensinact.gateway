@@ -13,13 +13,14 @@
 
 package org.eclipse.sensinact.gateway.southbound.wot.api.dataschema;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.databind.DatabindContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.jsontype.impl.TypeIdResolverBase;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindContext;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.jsontype.impl.TypeIdResolverBase;
 
 public class DataSchemaTypeResolver extends TypeIdResolverBase {
 
@@ -34,7 +35,7 @@ public class DataSchemaTypeResolver extends TypeIdResolverBase {
     }
 
     @Override
-    public JavaType typeFromId(final DatabindContext context, final String id) throws IOException {
+    public JavaType typeFromId(final DatabindContext context, final String id) throws JacksonException {
         // Look for a namespace
         final String typeName;
         final String[] parts = id.split(":");
@@ -83,7 +84,7 @@ public class DataSchemaTypeResolver extends TypeIdResolverBase {
     }
 
     @Override
-    public String idFromValue(final Object value) {
+    public String idFromValue(DatabindContext ctxt, final Object value) {
         if (value instanceof DataSchema ds) {
             // Don't return null here, or Jackson will complain on OneOfDataSchema
             return Optional.ofNullable(ds.type).orElse("oneOf");
@@ -93,8 +94,8 @@ public class DataSchemaTypeResolver extends TypeIdResolverBase {
     }
 
     @Override
-    public String idFromValueAndType(Object value, Class<?> suggestedType) {
-        return idFromValue(value);
+    public String idFromValueAndType(DatabindContext ctxt, Object value, Class<?> suggestedType) {
+        return idFromValue(ctxt, value);
     }
 
     @Override

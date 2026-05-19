@@ -13,27 +13,30 @@
 package org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.sensorthing;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.UnsupportedRuleException;
-import org.eclipse.sensinact.northbound.session.SensiNactSession;
+import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 
 public class SensorPathHandlerSensorthings extends AbstractPathHandlerSensorthings {
 
     private final Map<String, Function<String, Object>> subPartHandlers = Map.of("datastreams", this::subDatastreams);
 
-    public SensorPathHandlerSensorthings(final ProviderSnapshot provider, SensiNactSession session) {
-        super(provider, session);
-
+    public SensorPathHandlerSensorthings(final PathContext pathContext) {
+        super(pathContext);
     }
 
     public Object handle(final String path) {
+        ProviderSnapshot provider = pathContext.provider();
         final String[] parts = path.toLowerCase().split("/");
-        ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
+        ServiceSnapshot service = DtoMapperSimple.getSensorService(provider);
         if (service == null) {
             return null;
         }
@@ -51,19 +54,17 @@ public class SensorPathHandlerSensorthings extends AbstractPathHandlerSensorthin
 
     public Object getResourceLevelField(final ProviderSnapshot provider, final ServiceSnapshot service,
             final String path) {
-        switch (path) {
+        ServiceSnapshot serviceAdmin = DtoMapperSimple.getAdminService(provider);
+        switch (path.toLowerCase()) {
         case "id":
-            String id = DtoMapperSimple.getResourceField(service, "sensorId", String.class);
-            if (id != null)
-                return String.join("~", provider.getName(), id);
-            return null;
+            return provider.getName();
 
         case "name":
-            return DtoMapperSimple.getResourceField(service, "sensorName", String.class);
+            return DtoMapperSimple.getResourceField(serviceAdmin, "friendlyName", String.class);
 
         case "description":
-            return DtoMapperSimple.getResourceField(service, "sensorDescription", String.class);
-        case "encodingType":
+            return DtoMapperSimple.getResourceField(serviceAdmin, "description", String.class);
+        case "encodingtype":
             return DtoMapperSimple.getResourceField(service, "sensorEncodingType", String.class);
 
         case "metadata":
@@ -79,7 +80,17 @@ public class SensorPathHandlerSensorthings extends AbstractPathHandlerSensorthin
     }
 
     private Object subDatastreams(final String path) {
-        // Only one datastream per observed property
-        return new DatastreamPathHandlerSensorthings(provider, session).handle(path);
+        return getDatastreamsProviderFromSensor(pathContext.provider()).stream().map(p -> withProvider(pathContext, p))
+                .flatMap(pc -> {
+                    Object result = new DatastreamPathHandlerSensorthings(pc).handle(path);
+
+                    if (result instanceof List<?>) {
+                        return ((List<?>) result).stream();
+                    } else if (result != null) {
+                        return Stream.of(result);
+                    } else {
+                        return Stream.empty();
+                    }
+                }).collect(Collectors.toList());
     }
 }

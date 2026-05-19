@@ -128,7 +128,7 @@ public interface FeaturesOfInterestAccess {
     @GET
     default public ResultList<Observation> getFeatureOfInterestObservationFeatureOfInterestObserations(
             @PathParam("id") ODataId id, @PathParam("id2") ODataId id2) {
-        return getFeatureOfInterestObservations(id2);
+        return getFeatureOfInterestObservations(id);
     }
 
     @Path("Observations({id2})/FeatureOfInterest/Observations/$ref")

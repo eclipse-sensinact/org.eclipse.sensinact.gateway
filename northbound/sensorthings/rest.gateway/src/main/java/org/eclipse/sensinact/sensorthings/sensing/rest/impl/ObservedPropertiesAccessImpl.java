@@ -68,18 +68,16 @@ public class ObservedPropertiesAccessImpl extends AbstractAccess
 
     @Override
     public ObservedProperty getObservedProperty(ODataId id) {
-        if (getCacheObservedProperty().getDto(id.value()) != null) {
-            return getCacheObservedProperty().getDto(id.value());
-        } else {
-            String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
-            ProviderSnapshot provider = validateAndGetProvider(providerId);
-            if (!isSensorthingModel(provider)) {
-                return getSensinactHandler().getObservedProperty(id.value());
-            } else {
-                return getSensorthingsHandler().getObservedProperty(id.value());
 
-            }
+        String providerId = DtoMapperSimple.extractFirstIdSegment(id.value());
+        ProviderSnapshot provider = validateAndGetProvider(providerId);
+        if (!isSensorthingModel(provider)) {
+            return getSensinactHandler().getObservedProperty(id.value());
+        } else {
+            return getSensorthingsHandler().getObservedProperty(id.value());
+
         }
+
     }
 
     @Override

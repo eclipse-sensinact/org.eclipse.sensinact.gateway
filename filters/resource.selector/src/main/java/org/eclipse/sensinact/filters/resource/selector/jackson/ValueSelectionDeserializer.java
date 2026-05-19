@@ -12,14 +12,13 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.resource.selector.jackson;
 
-import java.io.IOException;
-
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.CheckType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.OperationType;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
 
 public class ValueSelectionDeserializer extends AbstractSelectionDeserializer<ValueSelection> {
 
@@ -27,10 +26,8 @@ public class ValueSelectionDeserializer extends AbstractSelectionDeserializer<Va
         super(ValueSelection.class);
     }
 
-    private static final long serialVersionUID = -4402801442280922151L;
-
     @Override
-    public ValueSelection convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+    public ValueSelection convert(JsonNode root, DeserializationContext ctxt) throws JacksonException {
         return switch (root.getNodeType()) {
             case OBJECT:
                 yield new ValueSelection(

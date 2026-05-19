@@ -21,4 +21,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record ResultList<T extends Self>(@JsonInclude(NON_NULL) @JsonProperty("@iot.count") Integer count,
         @JsonInclude(NON_NULL) @JsonProperty("@iot.nextLink") String nextLink, List<? extends T> value) {
+    public ResultList(List<? extends T> value) {
+        this(null, null, value);
+    }
+
+    public ResultList(Integer count, List<? extends T> value) {
+        this(count, null, value);
+    }
+
+    public ResultList(String nextLink, List<? extends T> value) {
+        this(null, nextLink, value);
+    }
 }

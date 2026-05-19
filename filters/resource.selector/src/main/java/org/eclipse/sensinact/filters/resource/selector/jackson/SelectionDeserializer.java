@@ -12,28 +12,26 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.resource.selector.jackson;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection.MatchType;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.JsonNode;
 
 public class SelectionDeserializer extends AbstractSelectionDeserializer<Selection> {
-
-    private static final long serialVersionUID = 2805370682011614734L;
 
     protected SelectionDeserializer() {
         super(Selection.class);
     }
 
     @Override
-    public Selection convert(JsonNode root, DeserializationContext ctxt) throws IOException {
+    public Selection convert(JsonNode root, DeserializationContext ctxt) throws JacksonException {
         return switch (root.getNodeType()) {
         case STRING:
-            yield new Selection(root.textValue(), MatchType.EXACT, false);
+            yield new Selection(root.stringValue(), MatchType.EXACT, false);
         case OBJECT:
             yield new Selection(toString(root, "value", ctxt),
                     ctxt.readTreeAsValue(
