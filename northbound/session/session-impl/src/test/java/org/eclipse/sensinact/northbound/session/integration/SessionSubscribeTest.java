@@ -396,6 +396,17 @@ public class SessionSubscribeTest {
                 assertEquals(newValue, notification.newValue());
             } finally {
                 session.removeListener(subId);
+
+                thread.execute(new AbstractTwinCommand<Void>() {
+                    @Override
+                    protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                        SensinactProvider sp = twin.getProvider(providerName);
+                        if(sp != null) {
+                            sp.delete();
+                        }
+                        return pf.resolved(null);
+                    }
+                }).getValue();
             }
         }
     }
