@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -35,6 +36,7 @@ import org.eclipse.sensinact.core.metrics.IMetricTimer;
 import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.notification.TopicUtils;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -98,8 +100,12 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
         this.eventRejection = metrics.getMeter(sanitizedMetricPrefix + ".rejection");
         this.timerName = sanitizedMetricPrefix + ".execution";
 
+        List<String> dataTopics = Optional.ofNullable(criterion.dataTopics())
+                .map(l -> l.stream().filter(Objects::nonNull).map(TopicUtils::escapeTopicFilter).toList())
+                .orElse(null);
+
         reg = context.registerService(TypedEventHandler.class, this,
-                new Hashtable<>(Map.of(TypedEventConstants.TYPED_EVENT_TOPICS, criterion.dataTopics())));
+                new Hashtable<>(Map.of(TypedEventConstants.TYPED_EVENT_TOPICS, dataTopics)));
 
         updateSnapshot(1);
     }
