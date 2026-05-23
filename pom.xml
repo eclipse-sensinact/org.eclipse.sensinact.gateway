@@ -153,7 +153,7 @@
     <aries.tx-control.version>1.0.1</aries.tx-control.version>
     <felix.servlet.version>2.1.0</felix.servlet.version>
     <antlr.version>4.12.0</antlr.version>
-    <metrics.version>4.2.19</metrics.version>
+    <metrics.version>4.2.38</metrics.version>
 
     <!-- Northbound dependencies -->
     <osgi.technology.rest.version>1.2.2</osgi.technology.rest.version>
