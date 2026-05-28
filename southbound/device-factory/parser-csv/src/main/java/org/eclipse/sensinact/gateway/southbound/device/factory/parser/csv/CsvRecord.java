@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CsvRecord implements IDeviceMappingRecord {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(CsvRecord.class);
 
     /**
      * Current CSV record

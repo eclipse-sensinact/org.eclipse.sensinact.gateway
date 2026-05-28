@@ -71,6 +71,12 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.device-factory</groupId>
+      <artifactId>parser-json</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
     <!-- SL4J -->
     <dependency>
       <groupId>org.slf4j</groupId>
