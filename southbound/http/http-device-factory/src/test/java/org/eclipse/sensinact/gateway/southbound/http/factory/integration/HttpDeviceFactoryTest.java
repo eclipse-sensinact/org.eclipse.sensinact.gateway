@@ -320,20 +320,16 @@ public class HttpDeviceFactoryTest {
 
     @Test
     void testBigFileJsonTask() throws Exception {
-        // Excepted providers
-        List<String> providerList = new ArrayList<>();
-        for (int i = 1; i < 5445; i++) {
-            providerList.add(Integer.toString(i));
-        }
-        // Register listener — model is "it-model-building", so topic pattern must
-        // include it
-        for (String provider : providerList) {
-            ArrayBlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
-            queues.add(queue);
-            assertNull(session.describeProvider(provider));
-            session.addListener(List.of("it-model-building/" + provider + "/*"),
-                    (t, e) -> queue.offer(e), null, null, null);
-        }
+        // The JSON has 1 building. base "content/content" creates 1 provider.
+        final String providerName = "0h_CmIgJT4gA4dCfbayrkV";
+
+        // Register listener — model is "it-model-building"
+        ArrayBlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
+        queues.add(queue);
+        assertNull(session.describeProvider(providerName));
+        session.addListener(List.of("it-model-building/" + providerName + "/*"),
+                (t, e) -> queue.offer(e), null, null, null);
+
         final String inputFileName = "json-header-typed-big-file";
         final String mappingConfig = new String(readFile(inputFileName + "-mapping.json"));
         handler.setData("/data", readFile(inputFileName + ".json"));
@@ -342,17 +338,19 @@ public class HttpDeviceFactoryTest {
             config.update(new Hashtable<>(Map.of("tasks.oneshot",
                     "[{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + mappingConfig
                             + ", \"body\": [{\"A\": 1}], \"bufferSize\": 8024}]")));
-            // Wait for the providers to appear
-            for (BlockingQueue<ResourceDataNotification> queue : queues) {
-                assertNotNull(queue.poll(60, TimeUnit.SECONDS));
-            }
 
-            // Verify the last provider ("5444") was correctly created
-            final String providerName = "5444";
+            // Wait for the building provider to appear
+            assertNotNull(queue.poll(10, TimeUnit.SECONDS));
+
+            // Provider exists
             assertNotNull(session.describeProvider(providerName));
 
-            // bim/globalId must match the JSON GlobalId field
-            assertEquals("5444", session.getResourceValue(providerName, "bim", "globalId", String.class));
+            // bim/globalId matches the JSON GlobalId field
+            assertEquals(providerName, session.getResourceValue(providerName, "bim", "globalId", String.class));
+
+            // Building data from JSON (NumberOfStoreys is an integer in the JSON)
+            assertEquals(32, session.getResourceValue(providerName, "building", "storeysNo", Integer.class));
+            assertEquals("NO", session.getResourceValue(providerName, "building", "isLandmarked", String.class));
 
             // Literal values from mapping
             assertEquals("B", session.getResourceValue(providerName, "performance", "ratingEPC", String.class));
@@ -366,7 +364,7 @@ public class HttpDeviceFactoryTest {
             assertEquals("200",
                     session.getResourceValue(providerName, "operation", "productionRenewableEnergy", String.class));
 
-            // Location is set from mapping literals
+            // Location from mapping literals
             ResourceDescription location = session.describeResource(providerName, "admin", "location");
             assertNotNull(location.value);
             Point geoPoint = (Point) location.value;
@@ -374,10 +372,7 @@ public class HttpDeviceFactoryTest {
             assertEquals(11.1244126, geoPoint.coordinates().longitude(), 0.0001);
             assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
 
-            // Also verify the first provider ("1")
-            assertEquals("1", session.getResourceValue("1", "bim", "globalId", String.class));
-
-            // Verify HTTP call
+            // HTTP call
             assertEquals(1, requestBodyList.size());
             assertEquals("[{\"A\":1}]", requestBodyList.get(0));
             assertEquals(1, handler.nbVisitedPaths());
