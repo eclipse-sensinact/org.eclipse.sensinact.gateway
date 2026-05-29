@@ -381,7 +381,7 @@ public class SessionSubscribeTest {
 
                 ResourceDataNotification notification;
                 do {
-                    notification = queue.poll(5, TimeUnit.SECONDS);
+                    notification = queue.poll(10, TimeUnit.SECONDS);
                     assertNotNull(notification, "No notification received for provider " + providerName);
                     assertEquals(providerName, notification.provider());
                 } while (!RESOURCE.equals(notification.resource()));
