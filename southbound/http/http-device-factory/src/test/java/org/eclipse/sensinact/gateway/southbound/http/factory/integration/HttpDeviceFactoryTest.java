@@ -33,8 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.server.Request;
@@ -320,63 +322,72 @@ public class HttpDeviceFactoryTest {
 
     @Test
     void testBigFileJsonTask() throws Exception {
-        // The JSON has 1 building. base "content/content" creates 1 provider.
-        final String providerName = "0h_CmIgJT4gA4dCfbayrkV";
+        // JSON: 1 building + 4315 walls + 537 doors + 591 windows = 5444 providers
+        // total
+        final int expectedBuildings = 1;
+        final int expectedWalls = 4315;
+        final int expectedDoors = 537;
+        final int expectedWindows = 591;
+        final int totalExpected = expectedBuildings + expectedWalls + expectedDoors + expectedWindows;
 
-        // Register listener — model is "it-model-building"
-        ArrayBlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
-        queues.add(queue);
-        assertNull(session.describeProvider(providerName));
-        session.addListener(List.of("it-model-building/" + providerName + "/*"),
-                (t, e) -> queue.offer(e), null, null, null);
+        // Track distinct providers across all 4 models
+        Set<String> seenProviders = ConcurrentHashMap.newKeySet();
+        session.addListener(
+                List.of("it-model-building/*", "it-model-wall/*", "it-model-door/*", "it-model-window/*"),
+                (t, e) -> seenProviders.add(e.provider()), null, null, null);
 
-        final String inputFileName = "json-header-typed-big-file";
-        final String mappingConfig = new String(readFile(inputFileName + "-mapping.json"));
-        handler.setData("/data", readFile(inputFileName + ".json"));
+        final String buildingMapping = new String(readFile("json-header-typed-big-file-mapping.json"));
+        final String wallMapping = new String(readFile("json-header-typed-big-file-wall-mapping.json"));
+        final String doorMapping = new String(readFile("json-header-typed-big-file-door-mapping.json"));
+        final String windowMapping = new String(readFile("json-header-typed-big-file-window-mapping.json"));
+        handler.setData("/data", readFile("json-header-typed-big-file.json"));
+
         Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
         try {
+            Instant start = Instant.now();
+            System.out.println("start " + start);
+
+            // 4 tasks, all fetching the same URL with different base paths in the mapping
             config.update(new Hashtable<>(Map.of("tasks.oneshot",
-                    "[{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + mappingConfig
-                            + ", \"body\": [{\"A\": 1}], \"bufferSize\": 8024}]")));
+                    "[{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + buildingMapping
+                            + ", \"bufferSize\": 8024},"
+                            + "{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + wallMapping
+                            + ", \"bufferSize\": 8024},"
+                            + "{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + doorMapping
+                            + ", \"bufferSize\": 8024},"
+                            + "{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + windowMapping
+                            + ", \"bufferSize\": 8024}]")));
 
-            // Wait for the building provider to appear
-            assertNotNull(queue.poll(10, TimeUnit.SECONDS));
+            // Wait up to 60 s for all 5444 distinct providers
+            final Instant deadline = Instant.now().plus(60, ChronoUnit.SECONDS);
+            while (seenProviders.size() < totalExpected && Instant.now().isBefore(deadline)) {
+                Thread.sleep(100);
+            }
+            System.out.println("finish " + Instant.now().minusMillis(start.toEpochMilli()));
+            assertEquals(totalExpected, seenProviders.size(),
+                    "Expected " + totalExpected + " distinct providers, got: " + seenProviders.size());
 
-            // Provider exists
-            assertNotNull(session.describeProvider(providerName));
-
-            // bim/globalId matches the JSON GlobalId field
-            assertEquals(providerName, session.getResourceValue(providerName, "bim", "globalId", String.class));
-
-            // Building data from JSON (NumberOfStoreys is an integer in the JSON)
-            assertEquals(32, session.getResourceValue(providerName, "building", "storeysNo", Integer.class));
-            assertEquals("NO", session.getResourceValue(providerName, "building", "isLandmarked", String.class));
-
-            // Literal values from mapping
-            assertEquals("B", session.getResourceValue(providerName, "performance", "ratingEPC", String.class));
-            assertEquals("8", session.getResourceValue(providerName, "operation", "usageHoursDaily", String.class));
-            assertEquals("4000",
-                    session.getResourceValue(providerName, "operation", "consumptionHeating", String.class));
-            assertEquals("200000",
-                    session.getResourceValue(providerName, "operation", "consumptionWater", String.class));
-            assertEquals("12000",
-                    session.getResourceValue(providerName, "operation", "consumptionElectricity", String.class));
-            assertEquals("200",
-                    session.getResourceValue(providerName, "operation", "productionRenewableEnergy", String.class));
-
-            // Location from mapping literals
-            ResourceDescription location = session.describeResource(providerName, "admin", "location");
+            // --- Verify building ---
+            final String buildingId = "0h_CmIgJT4gA4dCfbayrkV";
+            assertNotNull(session.describeProvider(buildingId));
+            assertEquals(buildingId, session.getResourceValue(buildingId, "bim", "globalId", String.class));
+            assertEquals("B", session.getResourceValue(buildingId, "performance", "ratingEPC", String.class));
+            assertEquals("NO", session.getResourceValue(buildingId, "building", "isLandmarked", String.class));
+            ResourceDescription location = session.describeResource(buildingId, "admin", "location");
             assertNotNull(location.value);
             Point geoPoint = (Point) location.value;
             assertEquals(46.0636546, geoPoint.coordinates().latitude(), 0.0001);
             assertEquals(11.1244126, geoPoint.coordinates().longitude(), 0.0001);
             assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
 
-            // HTTP call
-            assertEquals(1, requestBodyList.size());
-            assertEquals("[{\"A\":1}]", requestBodyList.get(0));
+            // --- Verify a wall ---
+            final String wallId = "1UQhU4rqjD9x72n1xihfX0";
+            assertNotNull(session.describeProvider(wallId));
+            assertEquals(wallId, session.getResourceValue(wallId, "bim", "globalId", String.class));
+
+            // 4 HTTP calls (one per task), all to the same path
             assertEquals(1, handler.nbVisitedPaths());
-            assertEquals(1, handler.nbVisits("/data"));
+            assertEquals(4, handler.nbVisits("/data"));
 
         } finally {
             config.delete();

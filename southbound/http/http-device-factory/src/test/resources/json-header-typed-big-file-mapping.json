@@ -1,7 +1,7 @@
 {
   "parser": "json",
   "parser.options": {
-    "base": "content/content/0"
+    "base": "content/content"
   },
   "mapping": {
     "@model": {

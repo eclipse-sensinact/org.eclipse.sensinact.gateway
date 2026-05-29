@@ -1,0 +1,19 @@
+{
+  "parser": "json",
+  "parser.options": {
+    "base": "content/content/0/Doors"
+  },
+  "mapping": {
+    "@model": {
+      "literal": "it-model-door"
+    },
+    "@provider": "GlobalId",
+    "bim/globalId": "GlobalId",
+    "door/name": "Name",
+    "door/overallHeight": "OverallHeight",
+    "door/overallWidth": "OverallWidth",
+    "door/operationType": "OperationType",
+    "door/isExternal": "Pset_DoorCommon.IsExternal",
+    "door/thermalTransmittance": "Pset_DoorCommon.ThermalTransmittance"
+  }
+}
