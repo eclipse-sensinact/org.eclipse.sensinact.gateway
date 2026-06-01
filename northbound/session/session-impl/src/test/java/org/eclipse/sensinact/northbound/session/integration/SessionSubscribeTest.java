@@ -376,6 +376,11 @@ public class SessionSubscribeTest {
             assertNotNull(subId, "No subscription created for provider " + providerName);
 
             try {
+                // Wait for the listener to be registered in the OSGi service registry
+                // (registration is asynchronous in doAddListener)
+                assertNull(queue.poll(500, TimeUnit.MILLISECONDS),
+                        "Unexpected early notification for provider " + providerName);
+
                 int newValue = random.nextInt(32000);
                 pushDto(providerName, newValue);
 
