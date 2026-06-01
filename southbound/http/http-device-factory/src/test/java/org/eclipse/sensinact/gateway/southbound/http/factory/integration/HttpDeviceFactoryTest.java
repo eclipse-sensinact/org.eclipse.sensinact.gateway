@@ -1,15 +1,15 @@
 /*********************************************************************
-* Copyright (c) 2022 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.http.factory.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,8 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jetty.server.Request;
@@ -90,7 +92,7 @@ public class HttpDeviceFactoryTest {
     @InjectService(filter = "(name=test-session)", timeout = 1000)
     SensiNactSessionManager sessionManager;
     SensiNactSession session;
-    BlockingQueue<ResourceDataNotification> queue, queue2;
+    List<BlockingQueue<ResourceDataNotification>> queues = new ArrayList<>();
 
     @InjectService
     ConfigurationAdmin configAdmin;
@@ -132,8 +134,7 @@ public class HttpDeviceFactoryTest {
     void start() throws InterruptedException {
         session = sessionManager.getDefaultSession(UserInfo.ANONYMOUS);
         requestBodyList = new ArrayList<>();
-        queue = new ArrayBlockingQueue<>(32);
-        queue2 = new ArrayBlockingQueue<>(32);
+
     }
 
     @AfterEach
@@ -143,13 +144,14 @@ public class HttpDeviceFactoryTest {
         handler.clear();
     }
 
-    void setupProvidersHandling(final String provider1, final String provider2) {
-        assertNull(session.describeProvider(provider1));
-        session.addListener(List.of(provider1 + "/*"), (t, e) -> queue.offer(e), null, null, null);
+    void setupProvidersHandling(final String... providers) {
 
-        if (provider2 != null) {
-            assertNull(session.describeProvider(provider2));
-            session.addListener(List.of(provider2 + "/*"), (t, e) -> queue2.offer(e), null, null, null);
+        for (String provider : providers) {
+            ArrayBlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
+            queues.add(queue);
+
+            assertNull(session.describeProvider(provider));
+            session.addListener(List.of(provider + "/*"), (t, e) -> queue.offer(e), null, null, null);
         }
     }
 
@@ -178,13 +180,13 @@ public class HttpDeviceFactoryTest {
         // Wait for an update (wait 4 seconds to be fair with the 2-seconds poll)
         while (Instant.now().isBefore(timeout) && !(got1 && got2)) {
             if (!got1) {
-                ResourceDataNotification notif = queue.poll(1, TimeUnit.SECONDS);
+                ResourceDataNotification notif = queues.get(0).poll(1, TimeUnit.SECONDS);
                 if (notif != null) {
                     got1 = Objects.equals(providerValue1, notif.newValue());
                 }
             }
             if (!got2) {
-                ResourceDataNotification notif = queue2.poll(1, TimeUnit.SECONDS);
+                ResourceDataNotification notif = queues.get(1).poll(1, TimeUnit.SECONDS);
                 if (notif != null) {
                     got2 = Objects.equals(providerValue2, notif.newValue());
                 }
@@ -209,10 +211,11 @@ public class HttpDeviceFactoryTest {
         Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
         try {
             config.update(new Hashtable<>(Map.of("tasks.oneshot",
-                    "[{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + mappingConfig + ", \"body\": [{\"A\": 1}]}]")));
+                    "[{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + mappingConfig
+                            + ", \"body\": [{\"A\": 1}]}]")));
             // Wait for the providers to appear
-            assertNotNull(queue.poll(1, TimeUnit.SECONDS));
-            assertNotNull(queue2.poll(1, TimeUnit.SECONDS));
+            assertNotNull(queues.get(0).poll(1, TimeUnit.SECONDS));
+            assertNotNull(queues.get(1).poll(1, TimeUnit.SECONDS));
 
             // Ensure resource type
             assertEquals(42, session.getResourceValue(provider1, "data", "value", Integer.class));
@@ -250,6 +253,144 @@ public class HttpDeviceFactoryTest {
             assertEquals(1, handler.nbVisits("/data"));
         } finally {
             config.delete();
+            queues.clear();
+        }
+    }
+
+    @Test
+    void testBigFileCsvTask() throws Exception {
+        // Excepted providers
+        final String provider = "big-provider";
+        List<String> providerList = new ArrayList<>();
+        for (int i = 1; i < 101; i++) {
+            providerList.add(provider + i);
+
+        }
+        // Register listener
+        setupProvidersHandling(providerList.toArray(new String[0]));
+        final String inputFileName = "csv-header-typed-big-file";
+        final String mappingConfig = new String(readFile(inputFileName + "-mapping.json"));
+        handler.setData("/data", readFile(inputFileName + ".csv"));
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            config.update(new Hashtable<>(Map.of("tasks.oneshot",
+                    "[{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + mappingConfig
+                            + ", \"body\": [{\"A\": 1}], \"bufferSize\": 8024}]")));
+            // Wait for the providers to appear
+            for (BlockingQueue<ResourceDataNotification> queue : queues) {
+                assertNotNull(queue.poll(10, TimeUnit.SECONDS));
+            }
+            String providerName = provider + "100";
+            // Ensure resource type
+            assertEquals(42, session.getResourceValue(providerName, "data", "value", Integer.class));
+
+            // Ensure timestamp
+            Instant timestamp1 = Instant.from(LocalDateTime.of(2021, 11, 23, 20, 33, 0).atOffset(ZoneOffset.UTC));
+            assertEquals(timestamp1, session.describeResource(providerName, "data", "value").timestamp);
+
+            Instant timestamp2 = Instant.from(LocalDateTime.of(2021, 11, 23, 20, 33, 0).atOffset(ZoneOffset.UTC));
+            assertEquals(timestamp2, session.describeResource(providerName, "data", "value").timestamp);
+
+            // Ensure location update (and its timestamp)
+            ResourceDescription location1 = session.describeResource(providerName, "admin", "location");
+            assertEquals(timestamp1, location1.timestamp);
+            assertNotNull(location1.value);
+            Point geoPoint = (Point) location1.value;
+            assertEquals(2.2007999420166016, geoPoint.coordinates().latitude(), 0.001);
+            assertEquals(4.399400234222412, geoPoint.coordinates().longitude(), 0.001);
+            assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
+
+            ResourceDescription location2 = session.describeResource(providerName, "admin", "location");
+            assertNotNull(location2.value);
+            assertEquals(timestamp2, location2.timestamp);
+            geoPoint = (Point) location2.value;
+            assertEquals(2.2007999420166016, geoPoint.coordinates().latitude(), 0.001);
+            assertEquals(4.399400234222412, geoPoint.coordinates().longitude(), 0.001);
+            assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
+
+            // assert json body was sent
+            assertEquals(1, requestBodyList.size());
+            assertEquals("[{\"A\":1}]", requestBodyList.get(0));
+            // Only 1 call should have been made
+            assertEquals(1, handler.nbVisitedPaths());
+            assertEquals(1, handler.nbVisits("/data"));
+
+        } finally {
+            config.delete();
+        }
+    }
+
+    @Test
+    void testBigFileJsonTask() throws Exception {
+        // JSON: 1 building + 4315 walls + 537 doors + 591 windows = 5444 providers
+        // total
+        final int expectedBuildings = 1;
+        final int expectedWalls = 4315;
+        final int expectedDoors = 537;
+        final int expectedWindows = 591;
+        final int totalExpected = expectedBuildings + expectedWalls + expectedDoors + expectedWindows;
+
+        // Track distinct providers across all 4 models
+        Set<String> seenProviders = ConcurrentHashMap.newKeySet();
+        session.addListener(
+                List.of("it-model-building/*", "it-model-wall/*", "it-model-door/*", "it-model-window/*"),
+                (t, e) -> seenProviders.add(e.provider()), null, null, null);
+
+        final String buildingMapping = new String(readFile("json-header-typed-big-file-mapping.json"));
+        final String wallMapping = new String(readFile("json-header-typed-big-file-wall-mapping.json"));
+        final String doorMapping = new String(readFile("json-header-typed-big-file-door-mapping.json"));
+        final String windowMapping = new String(readFile("json-header-typed-big-file-window-mapping.json"));
+        handler.setData("/data", readFile("json-header-typed-big-file.json"));
+
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            Instant start = Instant.now();
+            System.out.println("start " + start);
+
+            // 4 tasks, all fetching the same URL with different base paths in the mapping
+            config.update(new Hashtable<>(Map.of("tasks.oneshot",
+                    "[{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + buildingMapping
+                            + ", \"bufferSize\": 8024},"
+                            + "{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + wallMapping
+                            + ", \"bufferSize\": 8024},"
+                            + "{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + doorMapping
+                            + ", \"bufferSize\": 8024},"
+                            + "{\"url\": \"http://localhost:" + httpPort + "/data\", \"mapping\": " + windowMapping
+                            + ", \"bufferSize\": 8024}]")));
+
+            // Wait up to 60 s for all 5444 distinct providers
+            final Instant deadline = Instant.now().plus(60, ChronoUnit.SECONDS);
+            while (seenProviders.size() < totalExpected && Instant.now().isBefore(deadline)) {
+                Thread.sleep(100);
+            }
+            System.out.println("finish " + Instant.now().minusMillis(start.toEpochMilli()));
+            assertEquals(totalExpected, seenProviders.size(),
+                    "Expected " + totalExpected + " distinct providers, got: " + seenProviders.size());
+
+            // --- Verify building ---
+            final String buildingId = "0h_CmIgJT4gA4dCfbayrkV";
+            assertNotNull(session.describeProvider(buildingId));
+            assertEquals(buildingId, session.getResourceValue(buildingId, "bim", "globalId", String.class));
+            assertEquals("B", session.getResourceValue(buildingId, "performance", "ratingEPC", String.class));
+            assertEquals("NO", session.getResourceValue(buildingId, "building", "isLandmarked", String.class));
+            ResourceDescription location = session.describeResource(buildingId, "admin", "location");
+            assertNotNull(location.value);
+            Point geoPoint = (Point) location.value;
+            assertEquals(46.0636546, geoPoint.coordinates().latitude(), 0.0001);
+            assertEquals(11.1244126, geoPoint.coordinates().longitude(), 0.0001);
+            assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
+
+            // --- Verify a wall ---
+            final String wallId = "1UQhU4rqjD9x72n1xihfX0";
+            assertNotNull(session.describeProvider(wallId));
+            assertEquals(wallId, session.getResourceValue(wallId, "bim", "globalId", String.class));
+
+            // 4 HTTP calls (one per task), all to the same path
+            assertEquals(1, handler.nbVisitedPaths());
+            assertEquals(4, handler.nbVisits("/data"));
+
+        } finally {
+            config.delete();
         }
     }
 
@@ -279,7 +420,7 @@ public class HttpDeviceFactoryTest {
                     + httpPort + "/data\", \"mapping\": " + mappingConfig + "}]")));
 
             // Wait for the provider to appear
-            assertNotNull(queue.poll(1, TimeUnit.SECONDS));
+            assertNotNull(queues.get(0).poll(1, TimeUnit.SECONDS));
 
             // 1 call should have been made yet
             assertEquals(1, handler.nbVisitedPaths());
@@ -294,16 +435,16 @@ public class HttpDeviceFactoryTest {
             assertEquals(2, session.getResourceValue(provider2, "data", "value", Integer.class));
 
             // Clear the queue
-            queue.clear();
-            queue2.clear();
+            queues.get(0).clear();
+            queues.get(1).clear();
 
             // Update value
             content = template.replace("$val1$", "10").replace("$val2$", "20");
             handler.setData("/data", content);
 
             // Wait for an update (wait 4 seconds to be fair with the 2-seconds poll)
-            assertNotNull(queue.poll(5, TimeUnit.SECONDS));
-            assertNotNull(queue2.poll(1, TimeUnit.SECONDS));
+            assertNotNull(queues.get(0).poll(5, TimeUnit.SECONDS));
+            assertNotNull(queues.get(1).poll(1, TimeUnit.SECONDS));
             // Wait for notifications
             assertNotifications(10, 20, 10);
 
@@ -365,26 +506,26 @@ public class HttpDeviceFactoryTest {
             boolean gotLocation = false;
             boolean gotValue = false;
             while (!gotLocation || !gotValue) {
-                final ResourceDataNotification notif = queue.poll(1, TimeUnit.SECONDS);
+                final ResourceDataNotification notif = queues.get(0).poll(1, TimeUnit.SECONDS);
                 assertNotNull(notif);
                 switch (notif.resource()) {
-                case "value":
-                    gotValue = true;
-                    break;
+                    case "value":
+                        gotValue = true;
+                        break;
 
-                case "location":
-                    gotLocation = true;
-                    break;
+                    case "location":
+                        gotLocation = true;
+                        break;
 
-                default:
-                    if (Duration.between(start, Instant.now()).toMillis() > 1500) {
-                        // Too slow
-                        fail("Timeout waiting for updates");
-                    }
-                    break;
+                    default:
+                        if (Duration.between(start, Instant.now()).toMillis() > 1500) {
+                            // Too slow
+                            fail("Timeout waiting for updates");
+                        }
+                        break;
                 }
             }
-            assertNotNull(queue2.poll(1, TimeUnit.SECONDS));
+            assertNotNull(queues.get(1).poll(1, TimeUnit.SECONDS));
 
             // 2 calls should have been made yet
             assertEquals(2, handler.nbVisitedPaths());
@@ -409,8 +550,8 @@ public class HttpDeviceFactoryTest {
             assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
 
             // Clear the queue to wait for next event
-            queue.clear();
-            queue2.clear();
+            queues.get(0).clear();
+            queues.get(0).clear();
 
             // Update returned value
             handler.setData("/dynamic", template.replace("$val1$", "38").replace("$val2$", "15"));

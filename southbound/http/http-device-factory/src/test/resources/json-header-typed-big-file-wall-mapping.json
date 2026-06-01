@@ -1,0 +1,19 @@
+{
+  "parser": "json",
+  "parser.options": {
+    "base": "content/content/0/Walls"
+  },
+  "mapping": {
+    "@model": {
+      "literal": "it-model-wall"
+    },
+    "@provider": "GlobalId",
+    "bim/globalId": "GlobalId",
+    "wall/name": "Name",
+    "wall/height": "Pset_WallCommon.Height",
+    "wall/isExternal": "Pset_WallCommon.IsExternal",
+    "wall/reference": "Pset_WallCommon.Reference",
+    "wall/thermalTransmittance": "Pset_WallCommon.ThermalTransmittance",
+    "wall/loadBearing": "Pset_WallCommon.LoadBearing"
+  }
+}

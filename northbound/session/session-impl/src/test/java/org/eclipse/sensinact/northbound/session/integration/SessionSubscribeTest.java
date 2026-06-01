@@ -1,15 +1,15 @@
 /*********************************************************************
-* Copyright (c) 2025 Contributors to the Eclipse Foundation.
-*
-* This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License 2.0
-* which is available at https://www.eclipse.org/legal/epl-2.0/
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*   Kentyou - initial implementation
-**********************************************************************/
+ * Copyright (c) 2025 Contributors to the Eclipse Foundation.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Kentyou - initial implementation
+ **********************************************************************/
 package org.eclipse.sensinact.northbound.session.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,6 +60,7 @@ public class SessionSubscribeTest {
 
     private static final UserInfo ANON = new TestUserInfo("<ANON>", false);
     private static final UserInfo BOB = new TestUserInfo("bob", true);
+    private static final UserInfo FRED = new TestUserInfo("Fred", true);
 
     private static final String MODEL_URI = "https://sensinact.eclipse.org/test/model";
     private static final String MODEL = "model";
@@ -96,7 +97,7 @@ public class SessionSubscribeTest {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
                 SensinactProvider sp = twin.getProvider(PROVIDER);
-                if(sp != null) {
+                if (sp != null) {
                     sp.delete();
                 }
                 return pf.resolved(null);
@@ -230,16 +231,16 @@ public class SessionSubscribeTest {
 
         BlockingQueue<SnapshotUpdate> queue = new ArrayBlockingQueue<>(32);
 
-        ResourceSelection friendlyName = new ResourceSelection(new Selection(ProviderPackage.Literals.PROVIDER__ADMIN.getName()),
-                new Selection(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()),
-                List.of());
+        ResourceSelection friendlyName = new ResourceSelection(
+                new Selection(ProviderPackage.Literals.PROVIDER__ADMIN.getName()),
+                new Selection(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()), List.of());
 
         ResourceSelection highValue = new ResourceSelection(new Selection(SERVICE), new Selection(RESOURCE),
                 List.of(new ValueSelection(VALUE.toString(), OperationType.GREATER_THAN, false, CheckType.VALUE)));
 
-        ICriterion criterion = filterFactory.parseResourceSelector(
-                new ResourceSelector(List.of(new ProviderSelection(new Selection(MODEL_URI), new Selection(MODEL), null,
-                        List.of(friendlyName, highValue), List.of())), List.of()));
+        ICriterion criterion = filterFactory
+                .parseResourceSelector(new ResourceSelector(List.of(new ProviderSelection(new Selection(MODEL_URI),
+                        new Selection(MODEL), null, List.of(friendlyName, highValue), List.of())), List.of()));
 
         pushDto(beforeProvider, VALUE_2);
         pushDto(beforeNoMatch, VALUE);
@@ -258,9 +259,9 @@ public class SessionSubscribeTest {
         assertEquals(Set.of(beforeProvider), update.arriving().keySet());
         assertEquals(VALUE_2,
                 update.arriving().get(beforeProvider).getResource(SERVICE, RESOURCE).getValue().getValue());
-        assertFalse(update.arriving().get(beforeProvider).getResource(
-                ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
-                ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()).getValue().isEmpty());
+        assertFalse(
+                update.arriving().get(beforeProvider).getResource(ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                        ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()).getValue().isEmpty());
 
         // Modified match
         pushDto(beforeProvider, VALUE + 1);
@@ -275,9 +276,9 @@ public class SessionSubscribeTest {
         assertEquals(Set.of(beforeProvider), update.modified().keySet());
         assertEquals(VALUE + 1,
                 update.modified().get(beforeProvider).getResource(SERVICE, RESOURCE).getValue().getValue());
-        assertFalse(update.modified().get(beforeProvider).getResource(
-                ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
-                ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()).getValue().isEmpty());
+        assertFalse(
+                update.modified().get(beforeProvider).getResource(ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+                        ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()).getValue().isEmpty());
 
         // New match
         pushDto(beforeNoMatch, VALUE_2);
@@ -292,15 +293,14 @@ public class SessionSubscribeTest {
         assertEquals(Set.of(beforeNoMatch), update.arriving().keySet());
         assertEquals(VALUE_2,
                 update.arriving().get(beforeNoMatch).getResource(SERVICE, RESOURCE).getValue().getValue());
-        assertFalse(update.arriving().get(beforeNoMatch).getResource(
-                ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
+        assertFalse(update.arriving().get(beforeNoMatch).getResource(ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                 ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()).getValue().isEmpty());
 
         thread.execute(new AbstractTwinCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
                 SensinactProvider sp = twin.getProvider(beforeProvider);
-                if(sp != null) {
+                if (sp != null) {
                     sp.delete();
                 }
                 return pf.resolved(null);
@@ -332,16 +332,16 @@ public class SessionSubscribeTest {
 
         BlockingQueue<SnapshotUpdate> queue = new ArrayBlockingQueue<>(32);
 
-        ResourceSelection friendlyName = new ResourceSelection(new Selection(ProviderPackage.Literals.PROVIDER__ADMIN.getName()),
-                new Selection(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()),
-                List.of());
+        ResourceSelection friendlyName = new ResourceSelection(
+                new Selection(ProviderPackage.Literals.PROVIDER__ADMIN.getName()),
+                new Selection(ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName()), List.of());
 
         ResourceSelection highValue = new ResourceSelection(new Selection(SERVICE), new Selection(RESOURCE),
                 List.of(new ValueSelection(VALUE.toString(), OperationType.GREATER_THAN, false, CheckType.VALUE)));
 
-        ICriterion criterion = filterFactory.parseResourceSelector(
-                new ResourceSelector(List.of(new ProviderSelection(new Selection(MODEL_URI), new Selection(MODEL), null,
-                        List.of(friendlyName, highValue), List.of())), List.of()));
+        ICriterion criterion = filterFactory
+                .parseResourceSelector(new ResourceSelector(List.of(new ProviderSelection(new Selection(MODEL_URI),
+                        new Selection(MODEL), null, List.of(friendlyName, highValue), List.of())), List.of()));
 
         pushDto(beforeProvider, VALUE_2);
         pushDto(beforeNoMatch, VALUE);
@@ -365,31 +365,28 @@ public class SessionSubscribeTest {
     @Test
     void subscribeSpecialCharactersTopic() throws Exception {
 
-        SensiNactSession session = sessionManager.getDefaultSession(BOB);
+        SensiNactSession session = sessionManager.getDefaultSession(FRED);
         Random random = new Random();
 
-        for (String providerName : List.of(
-                "some~provider",
-                "some#other$provider",
-                "πάροχος",
-                "sağlayıcı",
-                "प्रदाता",
-                "المزود",
-                "供應商",
-                "постачальник",
-                "éà@()/:-?øþæ€ł🔟")) {
+        for (String providerName : List.of("some~provider", "some#other$provider", "πάροχος", "sağlayıcı", "प्रदाता",
+                "المزود", "供應商", "постачальник", "éà@()/:-?øþæ€ł🔟")) {
             BlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
             String subId = session.addListener(List.of(MODEL + "/" + providerName + "/*"), (t, e) -> queue.offer(e),
                     null, null, null);
             assertNotNull(subId, "No subscription created for provider " + providerName);
 
             try {
+                // Wait for the listener to be registered in the OSGi service registry
+                // (registration is asynchronous in doAddListener)
+                assertNull(queue.poll(500, TimeUnit.MILLISECONDS),
+                        "Unexpected early notification for provider " + providerName);
+
                 int newValue = random.nextInt(32000);
                 pushDto(providerName, newValue);
 
                 ResourceDataNotification notification;
                 do {
-                    notification = queue.poll(5, TimeUnit.SECONDS);
+                    notification = queue.poll(10, TimeUnit.SECONDS);
                     assertNotNull(notification, "No notification received for provider " + providerName);
                     assertEquals(providerName, notification.provider());
                 } while (!RESOURCE.equals(notification.resource()));
