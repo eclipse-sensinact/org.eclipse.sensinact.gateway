@@ -155,10 +155,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     @Override
-    public String addListener(List<String> topics, ClientDataListener cdl, ClientMetadataListener cml,
+    public String addListener(List<String> topics, boolean escapeTopics, ClientDataListener cdl, ClientMetadataListener cml,
             ClientLifecycleListener cll, ClientActionListener cal) {
         return doAddListener(subId -> new SensinactSessionEventListener(sessionId,
-                subId, topics, authorizer, cll, cdl, cml, cal));
+                subId, topics, escapeTopics, authorizer, cll, cdl, cml, cal));
     }
 
     private String doAddListener(Function<String, AbstractSensinactSessionEventManager> creator) {
@@ -189,9 +189,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
             ssem.destroy();
             throw new IllegalStateException("The session is expired");
         } else {
-            // Asynchronously register to ensure that the session id can be returned
-            // while blocking calls in the listeners
-            promiseFactory.executor().execute(() -> ssem.register(context));
+            // Synchronously register to ensure that the session is immediately
+            // responsive to events. Note that callers may receive events before
+            // the id is returned and must handle this in a non-blocking fashion
+            ssem.register(context);
         }
         return subscriptionId;
     }

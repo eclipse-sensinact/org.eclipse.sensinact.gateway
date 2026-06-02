@@ -18,13 +18,17 @@ import static org.eclipse.sensinact.northbound.query.dto.query.QuerySnapshotDTO.
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
@@ -41,8 +45,6 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketFrame;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import org.eclipse.sensinact.core.notification.ClientDataListener;
-import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.LifecycleNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
@@ -121,7 +123,7 @@ public class WebSocketEndpoint {
     /**
      * Active subscriptions
      */
-    private final Set<String> subscriptions = new HashSet<>();
+    private final Set<String> subscriptions = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     /**
      * Activity check in progress flag
@@ -423,6 +425,7 @@ public class WebSocketEndpoint {
         final SensinactPath path = query.uri;
         CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<String> listenerId = new AtomicReference<>();
+        final BlockingQueue<Entry<AbstractResultNotificationDTO, String>> queuedNotifications = new LinkedBlockingQueue<>();
 
         final ResultSubscribeDTO result = new ResultSubscribeDTO();
         if(path != null) {
@@ -431,20 +434,19 @@ public class WebSocketEndpoint {
 
         String id = switch(query.subscriptionType == null ? SubscriptionType.EVENTS : query.subscriptionType) {
         case SNAPSHOTS:
-            yield handleSnapshotSubscription(query, path, latch, listenerId);
+            yield handleSnapshotSubscription(query, path, latch, listenerId, queuedNotifications);
         case EVENTS:
         default:
-            yield handleEventSubscription(query, path, latch, listenerId);
+            yield handleEventSubscription(query, path, latch, listenerId, queuedNotifications);
         };
         if(id == null) {
             // The error will already have been sent
             return;
         }
-        listenerId.set(id);
 
         // Store listener details
         subscriptions.add(id);
-        // Send the subscription response to the client
+        // First send the subscription response to the client
         result.statusCode = 200;
         result.subscriptionId = id;
         result.requestId = requestId;
@@ -455,6 +457,12 @@ public class WebSocketEndpoint {
                 userSession.removeListener(id);
             } else {
                 sendResult(ws, result);
+            }
+            // Now tell the listener the id and dequeue any pending work
+            listenerId.set(id);
+            Entry<AbstractResultNotificationDTO, String> toSend;
+            while((toSend = queuedNotifications.poll(5, TimeUnit.MILLISECONDS)) != null) {
+                sendNotification(ws, id, toSend.getKey(), toSend.getValue());
             }
         } catch (Exception e) {
             subscriptions.remove(id);
@@ -469,7 +477,7 @@ public class WebSocketEndpoint {
     }
 
     private String handleSnapshotSubscription(QuerySubscribeDTO query, SensinactPath path, CountDownLatch latch,
-            AtomicReference<String> listenerId) throws StatusException {
+            AtomicReference<String> listenerId, BlockingQueue<Entry<AbstractResultNotificationDTO, String>> pending) throws StatusException {
         if(query.filter == null || query.filter.isBlank()) {
             sendError(wsSession.get(), path, 400, "A filter is required for snapshot subscriptions");
             return null;
@@ -484,30 +492,24 @@ public class WebSocketEndpoint {
                 query.filterLanguage == null ? RESOURCE_SELECTOR_FILTER : query.filterLanguage);
 
         Function<ProviderSnapshot, SnapshotProviderDTO> mapper = ps -> queryHandler.toSnapshotProviderDTO(ps, List.of(FULL), true);
-
-        Consumer<SnapshotUpdate> handler = update -> {
-            try {
-                Session ws = wsSession.get();
-                if (ws == null || !ws.isOpen()) {
-                    logger.warn("Detected closed WebSocket. Stop listening");
-                    userSession.removeListener(listenerId.get());
-                } else if (checkLatch(latch)) {
-                    ResultSnapshotNotificationDTO dto = new ResultSnapshotNotificationDTO();
-                    dto.notification = new SnapshotUpdateNotificationDTO(
-                            update.arriving().entrySet().stream().collect(toMap(Entry::getKey, e -> mapper.apply(e.getValue()))),
-                            update.modified().entrySet().stream().collect(toMap(Entry::getKey, e -> mapper.apply(e.getValue()))),
-                            update.departing());
-                    sendNotification(ws, listenerId.get(), dto, null);
-                }
-            } catch (Throwable e) {
-                logger.warn("Error notifying WebSocket of life cycle update", e);
-            }
+        Function<SnapshotUpdate, ResultSnapshotNotificationDTO> eventFactory = update -> {
+            ResultSnapshotNotificationDTO dto = new ResultSnapshotNotificationDTO();
+            dto.notification = new SnapshotUpdateNotificationDTO(
+                    update.arriving().entrySet().stream().collect(toMap(Entry::getKey, e -> mapper.apply(e.getValue()))),
+                    update.modified().entrySet().stream().collect(toMap(Entry::getKey, e -> mapper.apply(e.getValue()))),
+                    update.departing());
+            return dto;
         };
+
+        Consumer<SnapshotUpdate> handler = handleNotification(null, eventFactory, x -> null, latch,
+                listenerId, pending, "Error notifying WebSocket of snapshot update");
+
         return userSession.subscribe(filter, handler);
     }
 
     private String handleEventSubscription(final QuerySubscribeDTO query, final SensinactPath path,
-            CountDownLatch latch, final AtomicReference<String> listenerId)
+            CountDownLatch latch, final AtomicReference<String> listenerId,
+            BlockingQueue<Entry<AbstractResultNotificationDTO, String>> pending)
             throws StatusException {
         List<String> topics;
         final Predicate<ResourceNotification> eventPredicate;
@@ -533,42 +535,58 @@ public class WebSocketEndpoint {
             p = eventPredicate;
         }
 
-        final ClientDataListener cld = (topic, evt) -> {
+        Function<ResourceNotification, String> pathFactory = evt ->
+            new SensinactPath(evt.provider(), evt.service(), evt.resource()).toUri();
+        Function<ResourceDataNotification, ResultResourceNotificationDTO> dataEventFactory = evt -> {
+            ResultResourceNotificationDTO dto = new ResultResourceNotificationDTO();
+            dto.notification = new ResourceDataNotificationDTO(evt);
+            return dto;
+        };
+        final Consumer<ResourceDataNotification> cld = handleNotification(p, dataEventFactory, pathFactory,
+                latch, listenerId, pending, "Error notifying WebSocket of a data update");
+
+        Function<LifecycleNotification, ResultResourceNotificationDTO> lifecycleEventFactory = evt -> {
+            ResultResourceNotificationDTO dto = new ResultResourceNotificationDTO();
+            dto.notification = new ResourceLifecycleNotificationDTO(evt);
+            return dto;
+        };
+        final Consumer<LifecycleNotification> cll = handleNotification(p, lifecycleEventFactory,
+                pathFactory, latch, listenerId, pending, "Error notifying WebSocket of life cycle update");
+
+        return userSession.addListener(topics, (topic, evt) -> cld.accept(evt), null, (topic, evt) -> cll.accept(evt), null);
+    }
+
+    private <T> Consumer<T> handleNotification(
+            Predicate<? super T> filter, Function<? super T, ? extends AbstractResultNotificationDTO> notificationFactory,
+            Function<? super T, String> pathFactory, CountDownLatch latch, AtomicReference<String> listenerId,
+            BlockingQueue<Entry<AbstractResultNotificationDTO, String>> pending, String failureMessage) {
+        return evt -> {
             try {
                 Session ws = wsSession.get();
                 if (ws == null || !ws.isOpen()) {
                     logger.warn("Detected closed WebSocket. Stop listening");
                     userSession.removeListener(listenerId.get());
-                } else if ((p == null || p.test(evt)) && checkLatch(latch)) {
-                    ResultResourceNotificationDTO dto = new ResultResourceNotificationDTO();
-                    dto.notification = new ResourceDataNotificationDTO(evt);
-                    sendNotification(ws, listenerId.get(), dto,
-                            new SensinactPath(evt.provider(), evt.service(), evt.resource()).toUri());
+                } else if (filter == null || filter.test(evt)) {
+                    AbstractResultNotificationDTO dto = notificationFactory.apply(evt);
+                    String id = listenerId.get();
+                    // No id set until the id notification is sent. If this isn't
+                    // sent yet then don't block
+                    if(id == null) {
+                        pending.offer(new SimpleImmutableEntry<>(dto, pathFactory.apply(evt)));
+                    } else if (checkLatch(latch)) {
+                        Entry<AbstractResultNotificationDTO, String> stillQueued; ;
+                        while((stillQueued = pending.poll()) != null) {
+                            sendNotification(ws, id, stillQueued.getKey(), stillQueued.getValue());
+                        }
+                        sendNotification(ws, id, dto, pathFactory.apply(evt));
+                    } else {
+                        logger.warn("Ignoring message due to long wait. {}", failureMessage);
+                    }
                 }
             } catch (Throwable e) {
-                logger.warn("Error notifying WebSocket of life cycle update", e);
+                logger.warn(failureMessage, e);
             }
         };
-
-        final ClientLifecycleListener cll = (topic, evt) -> {
-            try {
-                Session ws = wsSession.get();
-                if (ws == null || !ws.isOpen()) {
-                    logger.warn("Detected closed WebSocket. Stop listening");
-                    userSession.removeListener(listenerId.get());
-                } else if ((p == null || p.test(evt)) && checkLatch(latch)) {
-                    ResultResourceNotificationDTO dto = new ResultResourceNotificationDTO();
-                    dto.notification = new ResourceLifecycleNotificationDTO(evt);
-                    sendNotification(ws, listenerId.get(), dto,
-                            new SensinactPath(evt.provider(), evt.service(), evt.resource()).toUri());
-                }
-            } catch (Throwable e) {
-                logger.error("Error notifying WebSocket of a data update", e);
-            }
-        };
-
-        String id = userSession.addListener(topics, cld, null, cll, null);
-        return id;
     }
 
     private boolean checkLatch(CountDownLatch latch) {

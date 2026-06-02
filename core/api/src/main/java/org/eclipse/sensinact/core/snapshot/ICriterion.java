@@ -133,6 +133,9 @@ public interface ICriterion {
         };
     }
 
+    /**
+     * @return The (escaped) topic filter(s) that should be used when applying this filter.
+     */
     default List<String> dataTopics() {
         return List.of("DATA/*");
     }

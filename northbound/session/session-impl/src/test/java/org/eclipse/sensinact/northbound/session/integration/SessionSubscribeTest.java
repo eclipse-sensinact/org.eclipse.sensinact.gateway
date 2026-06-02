@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.notification.TopicUtils;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
@@ -49,6 +50,8 @@ import org.eclipse.sensinact.northbound.session.impl.SessionManager;
 import org.eclipse.sensinact.northbound.session.impl.TestUserInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
@@ -362,51 +365,96 @@ public class SessionSubscribeTest {
         assertNull(queue.poll(1, TimeUnit.SECONDS));
     }
 
-    @Test
-    void subscribeSpecialCharactersTopic() throws Exception {
+    @ParameterizedTest
+    @CsvSource({"some~provider", "some#other$provider", "πάροχος", "sağlayıcı", "प्रदाता",
+        "المزود", "供應商", "постачальник"})
+    void subscribeSpecialCharactersTopic(String providerName) throws Exception {
 
         SensiNactSession session = sessionManager.getDefaultSession(FRED);
         Random random = new Random();
+        BlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
+        String subId = session.addListener(List.of(MODEL + "/" + providerName + "/*"),
+                (t, e) -> queue.offer(e), null, null, null);
+        assertNotNull(subId, "No subscription created for provider " + providerName);
 
-        for (String providerName : List.of("some~provider", "some#other$provider", "πάροχος", "sağlayıcı", "प्रदाता",
-                "المزود", "供應商", "постачальник", "éà@()/:-?øþæ€ł🔟")) {
-            BlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
-            String subId = session.addListener(List.of(MODEL + "/" + providerName + "/*"), (t, e) -> queue.offer(e),
-                    null, null, null);
-            assertNotNull(subId, "No subscription created for provider " + providerName);
+        try {
+            // Wait for the listener to be registered in the OSGi service registry
+            // (registration is asynchronous in doAddListener)
+            assertNull(queue.poll(500, TimeUnit.MILLISECONDS),
+                    "Unexpected early notification for provider " + providerName);
 
-            try {
-                // Wait for the listener to be registered in the OSGi service registry
-                // (registration is asynchronous in doAddListener)
-                assertNull(queue.poll(500, TimeUnit.MILLISECONDS),
-                        "Unexpected early notification for provider " + providerName);
+            int newValue = random.nextInt(32000);
+            pushDto(providerName, newValue);
 
-                int newValue = random.nextInt(32000);
-                pushDto(providerName, newValue);
+            ResourceDataNotification notification;
+            do {
+                notification = queue.poll(10, TimeUnit.SECONDS);
+                assertNotNull(notification, "No notification received for provider " + providerName);
+                assertEquals(providerName, notification.provider());
+            } while (!RESOURCE.equals(notification.resource()));
+            assertEquals(SERVICE, notification.service());
+            assertNull(notification.oldValue(), "Got an old value");
+            assertEquals(newValue, notification.newValue());
+        } finally {
+            session.removeListener(subId);
 
-                ResourceDataNotification notification;
-                do {
-                    notification = queue.poll(10, TimeUnit.SECONDS);
-                    assertNotNull(notification, "No notification received for provider " + providerName);
-                    assertEquals(providerName, notification.provider());
-                } while (!RESOURCE.equals(notification.resource()));
-                assertEquals(SERVICE, notification.service());
-                assertNull(notification.oldValue(), "Got an old value");
-                assertEquals(newValue, notification.newValue());
-            } finally {
-                session.removeListener(subId);
-
-                thread.execute(new AbstractTwinCommand<Void>() {
-                    @Override
-                    protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                        SensinactProvider sp = twin.getProvider(providerName);
-                        if (sp != null) {
-                            sp.delete();
-                        }
-                        return pf.resolved(null);
+            thread.execute(new AbstractTwinCommand<Void>() {
+                @Override
+                protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                    SensinactProvider sp = twin.getProvider(providerName);
+                    if (sp != null) {
+                        sp.delete();
                     }
-                }).getValue();
-            }
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"some~provider", "some#other$provider", "πάροχος", "sağlayıcı", "प्रदाता",
+        "المزود", "供應商", "постачальник", "éà@()/:-?øþæ€ł🔟"})
+    void subscribeSpecialCharactersPreEscapedTopic(String providerName) throws Exception {
+
+        SensiNactSession session = sessionManager.getDefaultSession(FRED);
+        Random random = new Random();
+        BlockingQueue<ResourceDataNotification> queue = new ArrayBlockingQueue<>(32);
+        String subId = session.addListener(List.of(MODEL + "/" +
+                TopicUtils.escapeTopicPart(providerName, false) + "/*"), false, (t, e) -> queue.offer(e),
+                null, null, null);
+        assertNotNull(subId, "No subscription created for provider " + providerName);
+
+        try {
+            // Wait for the listener to be registered in the OSGi service registry
+            // (registration is asynchronous in doAddListener)
+            assertNull(queue.poll(500, TimeUnit.MILLISECONDS),
+                    "Unexpected early notification for provider " + providerName);
+
+            int newValue = random.nextInt(32000);
+            pushDto(providerName, newValue);
+
+            ResourceDataNotification notification;
+            do {
+                notification = queue.poll(10, TimeUnit.SECONDS);
+                assertNotNull(notification, "No notification received for provider " + providerName);
+                assertEquals(providerName, notification.provider());
+            } while (!RESOURCE.equals(notification.resource()));
+            assertEquals(SERVICE, notification.service());
+            assertNull(notification.oldValue(), "Got an old value");
+            assertEquals(newValue, notification.newValue());
+        } finally {
+            session.removeListener(subId);
+
+            thread.execute(new AbstractTwinCommand<Void>() {
+                @Override
+                protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                    SensinactProvider sp = twin.getProvider(providerName);
+                    if (sp != null) {
+                        sp.delete();
+                    }
+                    return pf.resolved(null);
+                }
+            }).getValue();
         }
     }
 }

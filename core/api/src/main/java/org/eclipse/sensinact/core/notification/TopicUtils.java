@@ -13,8 +13,6 @@
 package org.eclipse.sensinact.core.notification;
 
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -80,17 +78,53 @@ public class TopicUtils {
      * @param allowWildcards whether to allow wildcard characters
      * @return the escaped topic part
      */
-    private static String escapeTopicPart(final String topicPart, final boolean allowWildcards) {
-        return topicPart.chars().mapToObj(c -> {
-            if (c != '$'
-                    && (c == '-' || Character.isJavaIdentifierPart(c) || (allowWildcards && (c == '*' || c == '+')))) {
-                // Valid character other than '$', return as is
-                return Character.toString(c);
-            } else {
-                // Escape the character as a Unicode escape sequence
-                return String.format("$%04x", c);
+    public static CharSequence escapeTopicPart(final String topicPart, final boolean allowWildcards) {
+        if(topicPart == null || topicPart.isEmpty()) {
+            return topicPart;
+        }
+
+        StringBuilder sb = new StringBuilder(topicPart.length());
+
+        for(int i = 0; i < topicPart.length(); i++) {
+            int cp = topicPart.codePointAt(i);
+            switch(cp) {
+                case '$':
+                    // $ must be escaped
+                    sb.append("$0024");
+                    break;
+                case '*':
+                    sb.append(allowWildcards? "*" : "$002a");
+                    break;
+                case '+':
+                    sb.append(allowWildcards? "+" : "$002b");
+                    break;
+                case '-':
+                    // can pass through
+                    sb.append('-');
+                    break;
+                default:
+                    if(Character.isJavaIdentifierPart(cp)) {
+                        // permissable character
+                        sb.appendCodePoint(cp);
+                        // Step over the char we have already consumed
+                        if(!Character.isBmpCodePoint(cp)) {
+                            i++;
+                        }
+                    } else {
+                        // must be escaped
+                        if(Character.isBmpCodePoint(cp)) {
+                            sb.append(String.format("$%04x", cp));
+                        } else {
+                            char[] chars = Character.toChars(cp);
+                            sb.append(String.format("$%04x$%04x", (int)chars[0], (int)chars[1]));
+                            // Step over the char we have already consumed
+                            i++;
+                        }
+                    }
+                    break;
             }
-        }).collect(Collectors.joining());
+        }
+        return sb;
     }
 
     /**
@@ -99,40 +133,50 @@ public class TopicUtils {
      * @param escapedTopicPart the topic part to unescape
      * @return the unescaped topic part
      */
-    private static String unescapeTopicPart(final String escapedTopicPart) {
-        final StringBuilder unescaped = new StringBuilder(escapedTopicPart.length());
-
-        final Pattern escapePattern = Pattern.compile("\\$([a-fA-F0-9]{4})");
-        final Matcher matcher = escapePattern.matcher(escapedTopicPart);
-
-        if(matcher.find()) {
-            int lastEnd = 0;
-            do {
-                if(matcher.start() > lastEnd) {
-                    // Append the text before the escape sequence
-                    unescaped.append(escapedTopicPart.subSequence(lastEnd, matcher.start()));
-                }
-
-                lastEnd = matcher.end();
-
-                // Parse the block
-                String hex = matcher.group(1);
-                try {
-                    int codePoint = Integer.parseInt(hex, 16);
-                    unescaped.append((char) codePoint);
-                } catch (NumberFormatException e) {
-                    // Not a valid escape sequence, append the original text
-                    unescaped.append(matcher.group());
-                }
-            } while (matcher.find());
-
-            // Append the remaining text after the last escape sequence
-            unescaped.append(escapedTopicPart.substring(lastEnd));
-        } else {
-            // No escape sequences found, return the original string
+    public static CharSequence unescapeTopicPart(final String escapedTopicPart) {
+        if(escapedTopicPart == null || escapedTopicPart.isEmpty()) {
             return escapedTopicPart;
         }
 
-        return unescaped.toString();
+        int idx = escapedTopicPart.indexOf('$');
+        if(idx < 0) {
+            return escapedTopicPart;
+        } else {
+            final StringBuilder unescaped = new StringBuilder(escapedTopicPart.subSequence(0, idx));
+            for(int i = idx; i < escapedTopicPart.length(); i++) {
+                int codePoint = escapedTopicPart.codePointAt(i);
+                if(!Character.isBmpCodePoint(codePoint)) {
+                    // We have moved two character indexes in the string
+                    i++;
+                } else if(codePoint == '$') {
+                    if(escapedTopicPart.length() < i+5) {
+                        throw new IllegalArgumentException("Invalid escape sequence " + escapedTopicPart.substring(i)
+                            + " in segment " + escapedTopicPart);
+                    }
+                    try {
+                        int first = Integer.parseInt(escapedTopicPart.substring(i+1, i+5), 16);
+                        if(Character.isSurrogate((char)first)) {
+                            if(escapedTopicPart.length() < i+10 || escapedTopicPart.charAt(i+5) != '$') {
+                                throw new IllegalArgumentException("Invalid escape sequence " + escapedTopicPart.substring(i, i + 10)
+                                + " in segment " + escapedTopicPart);
+                            }
+                            int second = Integer.parseInt(escapedTopicPart.substring(i+6, i+10), 16);
+                            codePoint = Character.toCodePoint((char) first, (char) second);
+                            // We have moved 9 characters forward in the string
+                            i += 9;
+                        } else {
+                            codePoint = first;
+                            // we have moved four character indexes in the string
+                            i += 4;
+                        }
+                    } catch (NumberFormatException nfe) {
+                        throw new IllegalArgumentException("Invalid escape sequence " + escapedTopicPart.substring(i, i + 4)
+                            + " in segment " + escapedTopicPart);
+                    }
+                }
+                unescaped.appendCodePoint(codePoint);
+            }
+            return unescaped.toString();
+        }
     }
 }

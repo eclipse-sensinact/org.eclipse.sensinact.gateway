@@ -28,7 +28,6 @@ import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
-import org.eclipse.sensinact.core.notification.TopicUtils;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
@@ -325,7 +324,7 @@ public class TimescaleHistoricalStore {
             }
 
             List<String> dataTopics = Optional.ofNullable(include.dataTopics())
-                    .map(l -> l.stream().filter(Objects::nonNull).map(TopicUtils::escapeTopicFilter).toList())
+                    .map(l -> l.stream().filter(Objects::nonNull).toList())
                     .orElse(null);
 
             reg = ctx.registerService(TypedEventHandler.class,

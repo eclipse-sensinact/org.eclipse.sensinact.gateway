@@ -27,7 +27,6 @@ import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
-import org.eclipse.sensinact.core.notification.TopicUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.typedevent.TypedEventHandler;
@@ -70,7 +69,7 @@ public abstract class AbstractSensinactSessionEventManager
         }
 
         List<String> filteredTopics = registeredTopics.stream().filter(Objects::nonNull)
-                .map(TopicUtils::escapeTopicFilter).toList();
+                .toList();
 
         registration.set(
                 context.registerService(TypedEventHandler.class, this,
