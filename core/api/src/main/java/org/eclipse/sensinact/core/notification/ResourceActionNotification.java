@@ -31,7 +31,9 @@ public record ResourceActionNotification(String modelPackageUri, String model, S
         Objects.requireNonNull(provider);
         Objects.requireNonNull(service);
         Objects.requireNonNull(resource);
-        return TopicUtils.escapeTopic(String.format("ACTION/%s/%s/%s/%s", model, provider, service, resource));
+        return TopicUtils.escapeTopic(String.format("ACTION/%s/%s/%s/%s",
+                TopicUtils.escapeTopicPart(model, false), TopicUtils.escapeTopicPart(provider, false),
+                TopicUtils.escapeTopicPart(service, false), TopicUtils.escapeTopicPart(resource, false)));
     }
 
 }

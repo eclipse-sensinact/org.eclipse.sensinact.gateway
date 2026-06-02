@@ -148,6 +148,29 @@ class JsonSerializationTests {
                     ValueSelectionMode.ANY_MATCH);
         }
 
+        @Test
+        void empty() throws StreamReadException, DatabindException, IOException {
+            // Totally empty behaves like a compact selector
+            ResourceSelector empty = mapper.readValue("{}", ResourceSelector.class);
+            // Must have a provider
+            assertEquals(1, empty.providers().size());
+
+            ProviderSelection ps = empty.providers().get(0);
+            assertNotNull(ps);
+
+            assertNull(ps.modelUri());
+            assertNull(ps.model());
+            assertNull(ps.provider());
+            assertEquals(List.of(), ps.location());
+            assertEquals(List.of(), ps.resources());
+
+            // Should select all resources
+            assertEquals(1, empty.resources().size());
+            assertNotNull(empty.resources().get(0));
+            assertNull(empty.resources().get(0).service());
+            assertNull(empty.resources().get(0).resource());
+            assertEquals(List.of(), empty.resources().get(0).value());
+        }
     }
 
     @Nested

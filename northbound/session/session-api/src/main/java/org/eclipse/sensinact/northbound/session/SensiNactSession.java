@@ -24,6 +24,7 @@ import org.eclipse.sensinact.core.notification.ClientActionListener;
 import org.eclipse.sensinact.core.notification.ClientDataListener;
 import org.eclipse.sensinact.core.notification.ClientLifecycleListener;
 import org.eclipse.sensinact.core.notification.ClientMetadataListener;
+import org.eclipse.sensinact.core.notification.TopicUtils;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -84,15 +85,33 @@ public interface SensiNactSession {
     Map<String, List<String>> activeListeners();
 
     /**
-     *
-     * @param topics topic strings, omitting the initial segment (e.g. LIFECYCLE)
+     * Add a session event listener. This is equivalent to
+     * {@link #addListener(List, boolean, ClientDataListener, ClientMetadataListener, ClientLifecycleListener, ClientActionListener)}
+     * with {@code escapeTopics} set to {@code true}
+     * @param topics topic strings, omitting the initial segment (e.g. LIFECYCLE).
      * @param cdl    a listener, or null if data events are ignored
      * @param cml    a listener, or null if metadata events are ignored
      * @param cll    a listener, or null if lifecycle events are ignored
      * @param cal    a listener, or null if action events are ignored
      * @return a new registration identifier
      */
-    String addListener(List<String> topics, ClientDataListener cdl, ClientMetadataListener cml,
+    default String addListener(List<String> topics, ClientDataListener cdl, ClientMetadataListener cml,
+            ClientLifecycleListener cll, ClientActionListener cal) {
+        return addListener(topics, true, cdl, cml, cll, cal);
+    }
+
+    /**
+     * Add a session event listener.
+     * @param topics topic strings, omitting the initial segment (e.g. LIFECYCLE).
+     * @param escapeTopics if true then the topics will be escaped to remove unfriendly
+     * characters as per {@link TopicUtils#escapeTopicFilter(String)}
+     * @param cdl    a listener, or null if data events are ignored
+     * @param cml    a listener, or null if metadata events are ignored
+     * @param cll    a listener, or null if lifecycle events are ignored
+     * @param cal    a listener, or null if action events are ignored
+     * @return a new registration identifier
+     */
+    String addListener(List<String> topics, boolean escapeTopics, ClientDataListener cdl, ClientMetadataListener cml,
             ClientLifecycleListener cll, ClientActionListener cal);
 
 
