@@ -21,6 +21,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
+import org.eclipse.sensinact.core.notification.TopicUtils;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -151,8 +152,8 @@ public class ResourceSelectorCriterion implements ICriterion {
         Set<String> found = new HashSet<String>();
         for(ProviderSelectionCriterion ps : providerSelections) {
             Set<String> locallyFound = new HashSet<String>();
-            String exactModel = ps.exactModel();
-            String exactProvider = ps.exactProvider();
+            CharSequence exactModel = TopicUtils.escapeTopicPart(ps.exactModel(), false);
+            CharSequence exactProvider = TopicUtils.escapeTopicPart(ps.exactProvider(), false);
             if(exactModel == null) {
                 if(allowSingleLevelWildcards) {
                     exactModel = "+";
@@ -173,8 +174,8 @@ public class ResourceSelectorCriterion implements ICriterion {
             }
 
             for(ResourceSelectionCriterion rsc : Stream.concat(ps.getResources().stream(), additionalResources.stream()).toList()) {
-                String exactService = rsc.exactService();
-                String exactResource = rsc.exactResource();
+                CharSequence exactService = TopicUtils.escapeTopicPart(rsc.exactService(), false);
+                CharSequence exactResource = TopicUtils.escapeTopicPart(rsc.exactResource(), false);
                 if(exactService == null) {
                     if(allowSingleLevelWildcards) {
                         exactService = "+";

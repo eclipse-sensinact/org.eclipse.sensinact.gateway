@@ -49,7 +49,9 @@ public interface IQueryHandler {
     ICriterion parseFilter(String filter, String filterLanguage) throws StatusException;
 
     /**
-     * Creates a {@link SnapshotProviderDTO} from the given {@link ProviderSnapshot}
+     * Creates a {@link SnapshotProviderDTO} from the given {@link ProviderSnapshot}.
+     * Does not query the gateway thread.
+     *
      * @param providerSnapshot
      * @param linkOptions
      * @param includeMetadata

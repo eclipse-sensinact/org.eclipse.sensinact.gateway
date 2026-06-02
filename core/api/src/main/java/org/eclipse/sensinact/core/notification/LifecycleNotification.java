@@ -40,7 +40,9 @@ public record LifecycleNotification(String modelPackageUri, String model, String
             Objects.requireNonNull(resource);
         }
 
-        return TopicUtils.escapeTopic("LIFECYCLE/".concat(String.format(status.template, model, provider, service, resource)));
+        return String.format(status.template,
+                TopicUtils.escapeTopicPart(model, false), TopicUtils.escapeTopicPart(provider, false),
+                TopicUtils.escapeTopicPart(service, false), TopicUtils.escapeTopicPart(resource, false));
     }
 
     public enum Status {
@@ -54,7 +56,7 @@ public record LifecycleNotification(String modelPackageUri, String model, String
          * service names for initial services</li>
          * </ul>
          */
-        PROVIDER_CREATED("%s/%s"),
+        PROVIDER_CREATED("LIFECYCLE/%s/%s"),
 
         /**
          * Provider deleted,
@@ -65,7 +67,7 @@ public record LifecycleNotification(String modelPackageUri, String model, String
          * <li>{@link LifecycleNotification#initialValue} will be null</li>
          * </ul>
          */
-        PROVIDER_DELETED("%s/%s"),
+        PROVIDER_DELETED("LIFECYCLE/%s/%s"),
 
         /**
          * Service created,
@@ -76,7 +78,7 @@ public record LifecycleNotification(String modelPackageUri, String model, String
          * service names for initial resources</li>
          * </ul>
          */
-        SERVICE_CREATED("%s/%s/%s"),
+        SERVICE_CREATED("LIFECYCLE/%s/%s/%s"),
 
         /**
          * Service deleted,
@@ -86,7 +88,7 @@ public record LifecycleNotification(String modelPackageUri, String model, String
          * <li>{@link LifecycleNotification#initialValue} will be null</li>
          * </ul>
          */
-        SERVICE_DELETED("%s/%s/%s"),
+        SERVICE_DELETED("LIFECYCLE/%s/%s/%s"),
 
         /**
          * Resource created,
@@ -96,7 +98,7 @@ public record LifecycleNotification(String modelPackageUri, String model, String
          * <li>{@link LifecycleNotification#initialValue} will be the initial value</li>
          * </ul>
          */
-        RESOURCE_CREATED("%s/%s/%s/%s"),
+        RESOURCE_CREATED("LIFECYCLE/%s/%s/%s/%s"),
 
         /**
          * Resource deleted,
@@ -105,7 +107,7 @@ public record LifecycleNotification(String modelPackageUri, String model, String
          * <li>{@link LifecycleNotification#initialValue} will be null</li>
          * </ul>
          */
-        RESOURCE_DELETED("%s/%s/%s/%s");
+        RESOURCE_DELETED("LIFECYCLE/%s/%s/%s/%s");
 
         private final String template;
 

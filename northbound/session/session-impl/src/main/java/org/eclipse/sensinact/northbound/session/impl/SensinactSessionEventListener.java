@@ -18,6 +18,7 @@ import static org.eclipse.sensinact.core.authorization.PermissionLevel.READ;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.eclipse.sensinact.core.authorization.Authorizer;
 import org.eclipse.sensinact.core.notification.ClientActionListener;
@@ -29,6 +30,7 @@ import org.eclipse.sensinact.core.notification.ResourceActionNotification;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceMetaDataNotification;
 import org.eclipse.sensinact.core.notification.ResourceNotification;
+import org.eclipse.sensinact.core.notification.TopicUtils;
 import org.osgi.service.typedevent.TypedEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +49,7 @@ public class SensinactSessionEventListener extends AbstractSensinactSessionEvent
 
 
     public SensinactSessionEventListener(String sessionId,
-            String subscriptionId, List<String> topics, Authorizer authorizer,
+            String subscriptionId, List<String> topics, boolean escapeTopics, Authorizer authorizer,
             ClientLifecycleListener lifecycleListener, ClientDataListener dataListener,
             ClientMetadataListener metadataListener, ClientActionListener actionListener) {
         super(sessionId, subscriptionId, topics, authorizer);
@@ -85,7 +87,8 @@ public class SensinactSessionEventListener extends AbstractSensinactSessionEvent
         if(prefixes.isEmpty()) {
             throw new IllegalArgumentException("At least one listener type must be specified");
         }
-        registeredTopics = prefixes.stream().flatMap(p -> topics.stream().map(p::concat)).toList();
+        registeredTopics = prefixes.stream().flatMap(p -> topics.stream().map(p::concat))
+                .map(escapeTopics ? TopicUtils::escapeTopicFilter : Function.identity()).toList();
     }
 
     public List<String> getRegisteredTopics() {

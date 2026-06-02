@@ -36,7 +36,6 @@ import org.eclipse.sensinact.core.metrics.IMetricTimer;
 import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
-import org.eclipse.sensinact.core.notification.TopicUtils;
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
@@ -101,7 +100,7 @@ public class RuleProcessor implements TypedEventHandler<ResourceDataNotification
         this.timerName = sanitizedMetricPrefix + ".execution";
 
         List<String> dataTopics = Optional.ofNullable(criterion.dataTopics())
-                .map(l -> l.stream().filter(Objects::nonNull).map(TopicUtils::escapeTopicFilter).toList())
+                .map(l -> l.stream().filter(Objects::nonNull).toList())
                 .orElse(null);
 
         reg = context.registerService(TypedEventHandler.class, this,

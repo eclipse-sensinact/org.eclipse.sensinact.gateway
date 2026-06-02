@@ -37,8 +37,11 @@ public class TopicUtilsTest {
 
         // Test topics with UTF-32 characters
         topic = "a/𐍈/c";
-        assertEquals("a/$d800$df48/c", TopicUtils.escapeTopic(topic));
+        assertEquals("a/𐍈/c", TopicUtils.escapeTopic(topic));
         assertEquals(topic, TopicUtils.unescapeTopic(TopicUtils.escapeTopic(topic)));
+        topic = "a/🙂/c";
+        assertEquals("a/$d83d$de42/c", TopicUtils.escapeTopic(topic));
+        assertEquals(topic, TopicUtils.unescapeTopicFilter(TopicUtils.escapeTopicFilter(topic)));
 
         // Test URL encoding
         topic = "http://example.com/resource";
@@ -70,7 +73,11 @@ public class TopicUtilsTest {
 
         // Test topics with UTF-32 characters
         topicFilter = "a/𐍈/c";
-        assertEquals("a/$d800$df48/c", TopicUtils.escapeTopicFilter(topicFilter));
+        assertEquals("a/𐍈/c", TopicUtils.escapeTopicFilter(topicFilter));
+        assertEquals(topicFilter, TopicUtils.unescapeTopicFilter(TopicUtils.escapeTopicFilter(topicFilter)));
+
+        topicFilter = "a/🙂/c";
+        assertEquals("a/$d83d$de42/c", TopicUtils.escapeTopicFilter(topicFilter));
         assertEquals(topicFilter, TopicUtils.unescapeTopicFilter(TopicUtils.escapeTopicFilter(topicFilter)));
 
         // Test URL encoding
@@ -81,22 +88,22 @@ public class TopicUtilsTest {
 
     @Test
     void testNestedEscapeTopic() {
-        String topic = "a/𐍈/+/c";
+        String topic = "a/𐍈/🙂/+/c";
         String escapedTopic = TopicUtils.escapeTopic(topic);
-        assertEquals("a/$d800$df48/$002b/c", escapedTopic);
+        assertEquals("a/𐍈/$d83d$de42/$002b/c", escapedTopic);
         String nestedEscapedTopic = TopicUtils.escapeTopic(escapedTopic);
-        assertEquals("a/$0024d800$0024df48/$0024002b/c", nestedEscapedTopic);
+        assertEquals("a/𐍈/$0024d83d$0024de42/$0024002b/c", nestedEscapedTopic);
         assertEquals(escapedTopic, TopicUtils.unescapeTopic(nestedEscapedTopic));
         assertEquals(topic, TopicUtils.unescapeTopic(escapedTopic));
     }
 
     @Test
     void testNestedEscapeTopicFilter() {
-        String topicFilter = "a/𐍈/+/c";
+        String topicFilter = "a/𐍈/🙂/+/c";
         String escapedTopicFilter = TopicUtils.escapeTopicFilter(topicFilter);
-        assertEquals("a/$d800$df48/+/c", escapedTopicFilter);
+        assertEquals("a/𐍈/$d83d$de42/+/c", escapedTopicFilter);
         String nestedEscapedTopicFilter = TopicUtils.escapeTopicFilter(escapedTopicFilter);
-        assertEquals("a/$0024d800$0024df48/+/c", nestedEscapedTopicFilter);
+        assertEquals("a/𐍈/$0024d83d$0024de42/+/c", nestedEscapedTopicFilter);
         assertEquals(escapedTopicFilter, TopicUtils.unescapeTopicFilter(nestedEscapedTopicFilter));
         assertEquals(topicFilter, TopicUtils.unescapeTopicFilter(escapedTopicFilter));
     }

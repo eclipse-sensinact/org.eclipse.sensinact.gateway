@@ -34,7 +34,9 @@ public record ResourceMetaDataNotification(String modelPackageUri, String model,
         Objects.requireNonNull(provider);
         Objects.requireNonNull(service);
         Objects.requireNonNull(resource);
-        return TopicUtils.escapeTopic(String.format("METADATA/%s/%s/%s/%s", model, provider, service, resource));
+        return String.format("METADATA/%s/%s/%s/%s",
+                TopicUtils.escapeTopicPart(model, false), TopicUtils.escapeTopicPart(provider, false),
+                TopicUtils.escapeTopicPart(service, false), TopicUtils.escapeTopicPart(resource, false));
     }
 
 }
