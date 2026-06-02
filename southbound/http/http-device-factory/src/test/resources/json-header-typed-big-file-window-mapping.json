@@ -1,0 +1,18 @@
+{
+  "parser": "json",
+  "parser.options": {
+    "base": "content/content/0/Windows"
+  },
+  "mapping": {
+    "@model": {
+      "literal": "it-model-window"
+    },
+    "@provider": "GlobalId",
+    "bim/globalId": "GlobalId",
+    "window/name": "Name",
+    "window/overallHeight": "OverallHeight",
+    "window/overallWidth": "OverallWidth",
+    "window/isExternal": "Pset_WindowCommon.IsExternal",
+    "window/thermalTransmittance": "Pset_WindowCommon.ThermalTransmittance"
+  }
+}

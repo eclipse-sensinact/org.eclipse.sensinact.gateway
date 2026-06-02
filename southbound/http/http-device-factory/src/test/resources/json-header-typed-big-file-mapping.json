@@ -1,0 +1,49 @@
+{
+  "parser": "json",
+  "parser.options": {
+    "base": "content/content"
+  },
+  "mapping": {
+    "@model": {
+      "literal": "it-model-building"
+    },
+    "@provider": "GlobalId",
+    "@latitude": {
+      "literal": "46.0636546"
+    },
+    "@longitude": {
+      "literal": "11.1244126"
+    },
+    "bim/globalId": "GlobalId",
+    "building/name": "Name",
+    "building/address": "Pset_Address.AddressLines",
+    "building/town": "Pset_Address.Town",
+    "building/postalcode": "Pset_Address.PostalCode",
+    "building/storeysNo": "Pset_BuildingCommon.NumberOfStoreys",
+    "building/yearOfConstruction": "Pset_BuildingCommon.YearOfConstruction",
+    "building/isLandmarked": "Pset_BuildingCommon.IsLandmarked",
+    "building/grossPlannedArea": "Pset_BuildingCommon.GrossPlannedArea",
+    "building/marketCategory": "Pset_BuildingUse.MarketCategory",
+    "building/netFloorArea": "Qto_BuildingBaseQuantities.NetFloorArea",
+    "building/grossVolume": "Qto_BuildingBaseQuantities.GrossVolume",
+    "building/netVolume": "Qto_BuildingBaseQuantities.NetVolume",
+    "performance/ratingEPC": {
+      "literal": "B"
+    },
+    "operation/usageHoursDaily": {
+      "literal": "8"
+    },
+    "operation/consumptionHeating": {
+      "literal": "4000"
+    },
+    "operation/consumptionWater": {
+      "literal": "200000"
+    },
+    "operation/consumptionElectricity": {
+      "literal": "12000"
+    },
+    "operation/productionRenewableEnergy": {
+      "literal": "200"
+    }
+  }
+}
