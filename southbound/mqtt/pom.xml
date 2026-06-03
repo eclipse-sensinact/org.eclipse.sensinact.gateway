@@ -35,6 +35,18 @@
       <artifactId>moquette-broker</artifactId>
       <version>0.17</version>
       <scope>test</scope>
+      <exclusions>
+        <!-- moquette-broker 0.17 pulls bugsnag with a banned version range [3.0,4.0) -->
+        <exclusion>
+          <groupId>com.bugsnag</groupId>
+          <artifactId>bugsnag</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.bugsnag</groupId>
+      <artifactId>bugsnag</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

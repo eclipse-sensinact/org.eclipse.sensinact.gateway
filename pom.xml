@@ -527,6 +527,12 @@
         <version>${slf4j.version}</version>
         <scope>test</scope>
       </dependency>
+      <!-- moquette-broker 0.17 pulls bugsnag with a banned version range [3.0,4.0) -->
+      <dependency>
+        <groupId>com.bugsnag</groupId>
+        <artifactId>bugsnag</artifactId>
+        <version>3.8.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
