@@ -358,7 +358,7 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
         providersStream = providersStream.map(p -> {
             snapshotServicesAndResources(svcFilter, rcFilter, snapshotTime, p, false);
             return p;
-        }).filter(p -> !p.getServices().isEmpty());
+        });
 
         return providersStream.collect(Collectors.toList());
     }

@@ -538,7 +538,8 @@ public class SensinactTwinTest {
             Predicate<ResourceSnapshot> p = r -> "foo".equals(r.getName());
 
             List<ProviderSnapshot> list = twinImpl.filteredSnapshot(null, null, null, p);
-            assertEquals(1, list.size());
+            assertEquals(2, list.size());
+            ProviderSnapshot ps = list.stream().filter(s -> s.getName().equals("sensor")).findFirst().get();
             assertEquals(2, list.get(0).getServices().size());
             ServiceSnapshot serviceSnapshot = list.get(0).getService(TEST_SERVICE);
             assertNotNull(serviceSnapshot);

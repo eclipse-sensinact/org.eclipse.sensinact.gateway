@@ -15,6 +15,7 @@ package org.eclipse.sensinact.filters.resource.selector.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
@@ -39,7 +40,6 @@ import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ProviderSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ResourceSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
-import org.eclipse.sensinact.filters.resource.selector.api.Selection.MatchType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.CheckType;
 import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection.OperationType;
@@ -222,17 +222,13 @@ public class ResourceSelectorTest {
     }
 
     private ResourceSelector makeBasicResourceSelector(String model, String provider, String service, String resource) {
-        List<ResourceSelection> resources = List.of(new ResourceSelection(service == null ? null : makeExactSelection(service),
-                resource == null ? null : makeExactSelection(resource), List.of()));
+        List<ResourceSelection> resources = List.of(new ResourceSelection(service == null ? null : new Selection(service),
+                resource == null ? null : new Selection(resource), List.of()));
         ProviderSelection ps = new ProviderSelection(null,
-                model == null ? null : makeExactSelection(model),
-                provider == null ? null : makeExactSelection(provider),
+                model == null ? null : new Selection(model),
+                provider == null ? null : new Selection(provider),
                 resources, List.of());
         return new ResourceSelector(List.of(ps), List.of());
-    }
-
-    private Selection makeExactSelection(String name) {
-        return new Selection(name, MatchType.EXACT, false);
     }
 
     private ValueSelection makeValueSelection(String value, CheckType check, OperationType operation) {
@@ -253,6 +249,30 @@ public class ResourceSelectorTest {
         ProviderSelection newer = new ProviderSelection(existingP.modelUri(), existingP.model(), existingP.provider(),
                 List.of(new ResourceSelection(exisitingR.service(), exisitingR.resource(), List.of(vs))), existingP.location());
         return new ResourceSelector(List.of(newer), rs.resources());
+    }
+
+    @Test
+    void withoutValueSelection() {
+        ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
+        ResourceSnapshot rcMatches = makeResource("test", "hello", "foo");
+        ResourceSnapshot rcDoesNotMatch = makeResource("test", "bye", "bar");
+
+        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        assertNull(filter.getProviderFilter());
+        assertTrue(filter.getServiceFilter().test(rcMatches.getService()));
+        assertTrue(filter.getResourceFilter().test(rcMatches));
+        assertTrue(filter.getResourceValueFilter().test(rcMatches.getService().getProvider(),
+                List.of(rcMatches)));
+        // Does not match if the resource is missing
+        assertFalse(filter.getResourceValueFilter().test(rcMatches.getService().getProvider(),
+                List.of()));
+
+        assertNull(filter.getProviderFilter());
+        assertTrue(filter.getServiceFilter().test(rcDoesNotMatch.getService()));
+        assertFalse(filter.getResourceFilter().test(rcDoesNotMatch));
+        // Does not match if the resource is different
+        assertFalse(filter.getResourceValueFilter().test(rcDoesNotMatch.getService().getProvider(),
+                List.of(rcDoesNotMatch)));
     }
 
     static Stream<Object> testValues() {

@@ -19,12 +19,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
+import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
+import org.eclipse.sensinact.core.command.GatewayThread;
+import org.eclipse.sensinact.core.model.SensinactModelManager;
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
+import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.filters.resource.selector.api.CompactResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ProviderSelection;
+import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ResourceSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
+import org.eclipse.sensinact.filters.resource.selector.api.ValueSelection;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.result.ResponseGetDTO;
@@ -46,6 +54,8 @@ import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.service.ServiceAware;
+import org.osgi.util.promise.Promise;
+import org.osgi.util.promise.PromiseFactory;
 
 import jakarta.ws.rs.core.Application;
 
@@ -85,12 +95,22 @@ public class ResourceSnapshotTest {
     final TestUtils utils = new TestUtils();
 
     @AfterEach
-    void stop() {
+    void stop(@InjectService GatewayThread gt) {
         if (queue != null) {
             SensiNactSession session = sessionManager.getDefaultSession(USER);
             session.activeListeners().keySet().forEach(session::removeListener);
             queue = null;
         }
+        gt.execute(new AbstractSensinactCommand<Void>() {
+
+            @Override
+            protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
+                    PromiseFactory promiseFactory) {
+                twin.getProviders().stream().filter(p -> p.getModelName().matches("M\\d"))
+                    .forEach(SensinactProvider::delete);
+                return null;
+            }
+        });
     }
 
     /**
@@ -120,6 +140,28 @@ public class ResourceSnapshotTest {
         assertEquals("R1", resourceDTO.name);
         assertEquals("java.lang.String", resourceDTO.type);
         assertEquals("V1", resourceDTO.value);
+    }
+
+    /**
+     * Get an empty provider value
+     */
+    @Test
+    void getEmptyProviderSnapshot() throws Exception {
+        // Register the resource
+        GenericDto dto = utils.makeDto("M1", "P1", "S1", "R1", "V1", String.class);
+        push.pushUpdate(dto).getValue();
+
+        List<ResourceSelector> request = new ArrayList<>();
+        ResourceSelector rs = new ResourceSelector(List.of(
+                new ProviderSelection(null, new Selection("M1"), null, null, null)), List.of());
+        request.add(rs);
+        ResponseSnapshotDTO response = utils.queryJson("snapshot", request, ResponseSnapshotDTO.class);
+
+        assertEquals(1, response.providers.size());
+        SnapshotProviderDTO providerDTO = response.providers.get("P1");
+        assertEquals("P1", providerDTO.name);
+        assertEquals("M1", providerDTO.modelName);
+        assertEquals(Map.of(), providerDTO.services);
     }
 
     /**
@@ -186,4 +228,5 @@ public class ResourceSnapshotTest {
         assertEquals(42, response.value);
         assertEquals("java.lang.Integer", response.type);
     }
+
 }
