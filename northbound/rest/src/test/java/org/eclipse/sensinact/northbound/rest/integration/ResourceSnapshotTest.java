@@ -229,4 +229,47 @@ public class ResourceSnapshotTest {
         assertEquals("java.lang.Integer", response.type);
     }
 
+    /**
+     * Get the resource value
+     */
+    @Test
+    void testValueSelections() throws Exception {
+        // Register the resource
+        GenericDto dto = utils.makeDto("M1", "P1", "S1", "R1", "V1", String.class);
+        push.pushUpdate(dto).getValue();
+        dto = utils.makeDto("M1", "P2", "S1", "R1", "V2", String.class);
+        push.pushUpdate(dto).getValue();
+        dto = utils.makeDto("M2", "P3", "S1", "R1", "V1", String.class);
+        push.pushUpdate(dto).getValue();
+
+        ResourceSelection service1Resource1WithValueV1 = new ResourceSelection(new Selection("S1"), new Selection("R1"), List.of(new ValueSelection("V1")));
+        List<ResourceSelector> request = new ArrayList<>();
+        ResourceSelector rs = new ResourceSelector(List.of(new ProviderSelection(
+                null, new Selection("M1"), null, List.of(service1Resource1WithValueV1), null)),
+                List.of());
+        request.add(rs);
+        rs = new ResourceSelector(List.of(
+                new ProviderSelection(null, new Selection("M2"), null, null, null)),
+                List.of());
+        request.add(rs);
+        ResponseSnapshotDTO response = utils.queryJson("snapshot", request, ResponseSnapshotDTO.class);
+
+        assertEquals(2, response.providers.size());
+        SnapshotProviderDTO providerDTO = response.providers.get("P1");
+        assertEquals("P1", providerDTO.name);
+        assertEquals("M1", providerDTO.modelName);
+        assertEquals(1, providerDTO.services.size());
+        SnapshotServiceDTO serviceDTO = providerDTO.services.get("S1");
+        assertEquals("S1", serviceDTO.name);
+        assertEquals(1, serviceDTO.resources.size());
+        SnapshotResourceDTO resourceDTO = serviceDTO.resources.get("R1");
+        assertEquals("R1", resourceDTO.name);
+        assertEquals("java.lang.String", resourceDTO.type);
+        assertEquals("V1", resourceDTO.value);
+
+        providerDTO = response.providers.get("P3");
+        assertEquals("P3", providerDTO.name);
+        assertEquals("M2", providerDTO.modelName);
+        assertEquals(Map.of(), providerDTO.services);
+    }
 }

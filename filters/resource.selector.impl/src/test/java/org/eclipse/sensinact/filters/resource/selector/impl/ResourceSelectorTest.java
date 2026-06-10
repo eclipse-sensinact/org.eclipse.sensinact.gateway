@@ -275,6 +275,36 @@ public class ResourceSelectorTest {
                 List.of(rcDoesNotMatch)));
     }
 
+    @Test
+    void withoutValueAllResources() {
+        ResourceSelector rs = makeBasicResourceSelector("foo", null, null, null);
+        ResourceSnapshot rc = makeResource("test", "hello", "foo");
+
+        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        assertFalse(filter.getProviderFilter().test(rc.getService().getProvider()));
+        assertFalse(filter.getServiceFilter().test(rc.getService()));
+        assertFalse(filter.getResourceFilter().test(rc));
+        // Does not match as the provider is wrong
+        assertFalse(filter.getResourceValueFilter().test(rc.getService().getProvider(),
+                List.of(rc)));
+    }
+
+    @Test
+    void withoutValueOrResourceSelection() {
+        ResourceSelector rs = new ResourceSelector(List.of(
+                new ProviderSelection(null, new Selection("foo"), null, null, null)),
+                List.of());
+        ResourceSnapshot rc = makeResource("test", "hello", "foo");
+
+        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        assertFalse(filter.getProviderFilter().test(rc.getService().getProvider()));
+        assertFalse(filter.getServiceFilter().test(rc.getService()));
+        assertFalse(filter.getResourceFilter().test(rc));
+        // Does not match as the provider is wrong
+        assertFalse(filter.getResourceValueFilter().test(rc.getService().getProvider(),
+                List.of(rc)));
+    }
+
     static Stream<Object> testValues() {
         return Stream.of("test", 42, 51L, 43.5);
     }
