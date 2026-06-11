@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -96,7 +97,7 @@ class JsonSerializationTests {
                     ResourceSelector.class);
 
             assertEquals(1, selector.providers().size());
-            assertEquals(1, selector.resources().size());
+            assertEquals(List.of(), selector.resources());
 
             ProviderSelection ps = selector.providers().get(0);
             assertNotNull(ps);
@@ -106,9 +107,9 @@ class JsonSerializationTests {
             assertNull(ps.provider());
 
             assertEquals(List.of(), ps.location());
-            assertEquals(List.of(), ps.resources());
+            assertEquals(1, ps.resources().size());
 
-            ResourceSelection rs = selector.resources().get(0);
+            ResourceSelection rs = ps.resources().get(0);
             assertNotNull(rs);
 
             assertNull(rs.service());
@@ -162,14 +163,15 @@ class JsonSerializationTests {
             assertNull(ps.model());
             assertNull(ps.provider());
             assertEquals(List.of(), ps.location());
-            assertEquals(List.of(), ps.resources());
 
             // Should select all resources
-            assertEquals(1, empty.resources().size());
-            assertNotNull(empty.resources().get(0));
-            assertNull(empty.resources().get(0).service());
-            assertNull(empty.resources().get(0).resource());
-            assertEquals(List.of(), empty.resources().get(0).value());
+            assertEquals(1, ps.resources().size());
+            assertNotNull(ps.resources().get(0));
+            assertNull(ps.resources().get(0).service());
+            assertNull(ps.resources().get(0).resource());
+            assertEquals(List.of(), ps.resources().get(0).value());
+
+            assertTrue(empty.resources().isEmpty());
         }
     }
 

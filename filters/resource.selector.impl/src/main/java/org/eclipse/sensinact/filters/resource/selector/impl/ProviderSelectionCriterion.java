@@ -55,7 +55,8 @@ public class ProviderSelectionCriterion {
         if(resources.isEmpty()) {
             this.serviceFilter = never();
             this.resourceFilter = never();
-            this.valueFilter = (x,y) -> Boolean.TRUE;
+            // It must target the correct provider, even though there are no values to check
+            this.valueFilter = (x,y) -> providerFilter.test(x);
         } else {
             this.serviceFilter = combineServiceCheck(providerFilter, resources.stream()
                             .map(ResourceSelectionCriterion::serviceFilter)

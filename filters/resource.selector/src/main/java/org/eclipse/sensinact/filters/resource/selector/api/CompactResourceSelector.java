@@ -63,7 +63,7 @@ public record CompactResourceSelector(Selection modelUri, Selection model, Selec
 
     public ResourceSelector toResourceSelector() {
         ResourceSelection rs = new ResourceSelection(service, resource, value);
-        ProviderSelection ps = new ProviderSelection(modelUri, model, provider, value.isEmpty() ? List.of() : List.of(rs), location);
-        return new ResourceSelector(List.of(ps), value().isEmpty() ? List.of(rs) : List.of());
+        ProviderSelection ps = new ProviderSelection(modelUri, model, provider, List.of(rs), location);
+        return new ResourceSelector(List.of(ps), List.of());
     }
 }
