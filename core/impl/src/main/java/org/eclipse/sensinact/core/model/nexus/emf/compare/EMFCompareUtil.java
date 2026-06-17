@@ -14,6 +14,7 @@ package org.eclipse.sensinact.core.model.nexus.emf.compare;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,7 +29,6 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.ETypedElement;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.sensinact.core.model.nexus.emf.EMFUtil;
@@ -256,10 +256,10 @@ public class EMFCompareUtil {
             if (resource instanceof EReference) {
                 if (resource.isMany()) {
                     isEqual = EcoreUtil.equals((List<EObject>) oldValue, (List<EObject>) newValue);
-                    if (!isEqual) {
-                        oldValue = EcoreUtil.copyAll((List<EObject>) oldValue);
-                        newValue = EcoreUtil.copyAll((List<EObject>) newValue);
-                    }
+                    // Holds an immutable snapshot of the value if it is a {@link Collection}
+                    // to prevent race conditions when the underlying EMF list is later modified.
+                    oldValue = EcoreUtil.copyAll((List<EObject>) oldValue);
+                    newValue = EcoreUtil.copyAll((List<EObject>) newValue);
                 } else {
                     isEqual = EcoreUtil.equals((EObject) oldValue, (EObject) newValue);
                     if (!isEqual) {
@@ -311,14 +311,14 @@ public class EMFCompareUtil {
             Map<String, Object> oldMetaData = null;
 
             if (previousTimestamp != null && !previousTimestamp.equals(Instant.EPOCH)) {
-                oldMetaData = extractMetadataMap(oldValue, originalMetadata, resource);
+                oldMetaData = EMFUtil.toMetadataAttributesToMap(originalMetadata, resource);
             }
 
             Metadata updatedMetadata = updateMetadata(resource, newService, originalService, newTimestamp);
 
             originalService.eSet(resource, newValue);
 
-            Map<String, Object> newMetaData = extractMetadataMap(newValue, updatedMetadata, resource);
+            Map<String, Object> newMetaData = EMFUtil.toMetadataAttributesToMap(updatedMetadata, resource);
 
             accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resource.getName(),
                     resource.getEType().getInstanceClass(), oldValue, newValue, newMetaData, newTimestamp);
@@ -331,13 +331,6 @@ public class EMFCompareUtil {
             }
         }
 
-    }
-
-    public static Map<String, Object> extractMetadataMap(Object value, Metadata updatedMetadata,
-            ETypedElement feature) {
-        Map<String, Object> newMetaData = EMFUtil.toMetadataAttributesToMap(updatedMetadata, feature);
-        newMetaData.put("value", value);
-        return newMetaData;
     }
 
     private static ResourceValueMetadata updateMetadata(EStructuralFeature resource, Service newService,
@@ -395,9 +388,14 @@ public class EMFCompareUtil {
             Metadata metadata = service.getMetadata().get(ea);
             accumulator.addResource(packageUri, model, providerName, serviceName, ea.getName());
             Map<String, Object> newMetaData = EMFUtil.toEObjectAttributesToMap(metadata, true, List.of(), null, null);
-            newMetaData.put("value", service.eGet(ea));
+            Object resourceValue = service.eGet(ea);
+            // Holds an immutable snapshot of the value if it is a {@link Collection}
+            // to prevent race conditions when the underlying EMF list is later modified.
+            if(resourceValue instanceof Collection<?> c) {
+                resourceValue = List.copyOf(c);
+            }
             accumulator.resourceValueUpdate(packageUri, model, providerName, serviceName, ea.getName(),
-                    ea.getEAttributeType().getInstanceClass(), null, service.eGet(ea), newMetaData,
+                    ea.getEAttributeType().getInstanceClass(), null, resourceValue, newMetaData,
                     metadata.getTimestamp());
             accumulator.metadataValueUpdate(packageUri, model, providerName, serviceName, ea.getName(), null,
                     newMetaData, metadata.getTimestamp());

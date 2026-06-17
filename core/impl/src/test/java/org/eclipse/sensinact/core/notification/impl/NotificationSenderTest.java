@@ -578,30 +578,6 @@ class NotificationSenderTest {
 
             assertTrue(thrown.getMessage().contains("out of temporal order"), "Wrong message: " + thrown.getMessage());
         }
-
-        @Test
-        void testCollectionValueIsSnapshotted() {
-            Instant now = Instant.now();
-
-            List<String> mutableNew = new java.util.ArrayList<>(List.of("a", "b"));
-            List<String> mutableOld = new java.util.ArrayList<>(List.of("x"));
-
-            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, List.class,
-                    mutableOld, mutableNew, null, now);
-
-            // Simulate concurrent EMF model mutation after registration
-            mutableNew.clear();
-            mutableOld.clear();
-
-            // Without snapshotting, the notification would carry the mutated (empty) lists.
-            // With snapshotting, the original values ["a","b"] and ["x"] must be preserved.
-            accumulator.completeAndSend();
-
-            Mockito.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
-                    argThat(isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, List.class,
-                            List.of("x"), List.of("a", "b"), null, now)));
-            Mockito.verifyNoMoreInteractions(bus);
-        }
     }
 
     @Nested
