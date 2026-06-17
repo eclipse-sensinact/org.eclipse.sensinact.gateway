@@ -59,18 +59,7 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
     protected ResourceDataNotification createResourceDataNotification(String modelPackageUri, String model, String provider, String service,
             String resource, Class<?> type, Object oldValue, Object newValue, Map<String, Object> metadata, Instant timestamp) {
         return new ResourceDataNotification(modelPackageUri, model, provider, service,
-                resource, snapshotValue(oldValue), snapshotValue(newValue), timestamp, type, metadata);
-    }
-
-    /**
-     * Returns an immutable snapshot of the value if it is a {@link Collection},
-     * to prevent race conditions when the underlying EMF list is later modified.
-     */
-    private static Object snapshotValue(Object value) {
-        if (value instanceof Collection<?> col) {
-            return List.copyOf(col);
-        }
-        return value;
+                resource, oldValue, newValue, timestamp, type, metadata);
     }
 
     protected ResourceActionNotification createResourceActionNotification(String modelPackageUri, String model, String provider, String service,

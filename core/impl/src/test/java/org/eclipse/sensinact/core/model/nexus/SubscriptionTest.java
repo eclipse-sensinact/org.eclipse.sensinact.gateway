@@ -168,13 +168,12 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER,
-                    Map.of("value", TEST_PROVIDER, "timestamp", now), now);
+                    Map.of("timestamp", now), now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
-                    Map.of("value", TEST_PROVIDER, "timestamp", now), now);
+                    Map.of("timestamp", now), now);
             HashMap<String, Object> map = new HashMap<>();
-            map.put("value", null);
             map.put("timestamp", now);
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
@@ -194,30 +193,27 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), String.class, null,
-                    model.getEPackage().getNsURI(), Map.of("value", TEST_MODEL_PKG, "timestamp", now), now);
+                    model.getEPackage().getNsURI(), Map.of("timestamp", now), now);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    String.class, null, EMFUtil.getModelName(model), Map.of("value", TEST_MODEL, "timestamp", now),
+                    String.class, null, EMFUtil.getModelName(model), Map.of("timestamp", now),
                     now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), null,
-                    Map.of("value", model.getEPackage().getNsURI(), "timestamp", now), now);
+                    Map.of("timestamp", now), now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    null, Map.of("value", EMFUtil.getModelName(model), "timestamp", now), now);
+                    null, Map.of("timestamp", now), now);
 
             Mockito.verify(accumulator).addService(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
             Mockito.verify(accumulator).addService(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
-            // TODO - this is missing
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
                     TEST_RESOURCE);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE, String.class, null, TEST_VALUE, Map.of("value", TEST_VALUE, "timestamp", now), now);
-            // TODO - the value is in here, which is surprising, as is the timestamp being a
-            // date
+                    TEST_RESOURCE, String.class, null, TEST_VALUE, Map.of("timestamp", now), now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE, null, Map.of("value", TEST_VALUE, "timestamp", now), now);
+                    TEST_RESOURCE, null, Map.of("timestamp", now), now);
 
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -254,13 +250,12 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER,
-                    Map.of("value", TEST_PROVIDER, "timestamp", before), before);
+                    Map.of("timestamp", before), before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
-                    Map.of("value", TEST_PROVIDER, "timestamp", before), before);
+                    Map.of("timestamp", before), before);
             HashMap<String, Object> map = new HashMap<>();
-            map.put("value", null);
             map.put("timestamp", before);
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
@@ -280,18 +275,17 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), String.class, null,
-                    model.getEPackage().getNsURI(), Map.of("value", TEST_MODEL_PKG, "timestamp", before), before);
+                    model.getEPackage().getNsURI(), Map.of("timestamp", before), before);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    String.class, null, EMFUtil.getModelName(model), Map.of("value", TEST_MODEL, "timestamp", before),
-                    before);
+                    String.class, null, EMFUtil.getModelName(model), Map.of("timestamp", before), before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), null,
-                    Map.of("value", model.getEPackage().getNsURI(), "timestamp", before), before);
+                    Map.of("timestamp", before), before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    null, Map.of("value", EMFUtil.getModelName(model), "timestamp", before), before);
+                    null, Map.of("timestamp", before), before);
 
             Mockito.verify(accumulator).addService(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
@@ -299,16 +293,16 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
                     TEST_RESOURCE_2);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE, String.class, null, TEST_VALUE, Map.of("value", TEST_VALUE, "timestamp", before),
+                    TEST_RESOURCE, String.class, null, TEST_VALUE, Map.of("timestamp", before),
                     before);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE_2, String.class, null, TEST_VALUE, Map.of("value", TEST_VALUE, "timestamp", now),
+                    TEST_RESOURCE_2, String.class, null, TEST_VALUE, Map.of("timestamp", now),
                     now);
 
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE, null, Map.of("value", TEST_VALUE, "timestamp", before), before);
+                    TEST_RESOURCE, null, Map.of("timestamp", before), before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE_2, null, Map.of("value", TEST_VALUE, "timestamp", now), now);
+                    TEST_RESOURCE_2, null, Map.of("timestamp", now), now);
 
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -346,13 +340,12 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER,
-                    Map.of("value", TEST_PROVIDER, "timestamp", before), before);
+                    Map.of("timestamp", before), before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
-                    Map.of("value", TEST_PROVIDER, "timestamp", before), before);
+                    Map.of("timestamp", before), before);
             HashMap<String, Object> map = new HashMap<>();
-            map.put("value", null);
             map.put("timestamp", before);
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
@@ -372,18 +365,18 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), String.class, null,
-                    model.getEPackage().getNsURI(), Map.of("value", TEST_MODEL_PKG, "timestamp", before), before);
+                    model.getEPackage().getNsURI(), Map.of("timestamp", before), before);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    String.class, null, EMFUtil.getModelName(model), Map.of("value", TEST_MODEL, "timestamp", before),
+                    String.class, null, EMFUtil.getModelName(model), Map.of("timestamp", before),
                     before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), null,
-                    Map.of("value", model.getEPackage().getNsURI(), "timestamp", before), before);
+                    Map.of("timestamp", before), before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    null, Map.of("value", EMFUtil.getModelName(model), "timestamp", before), before);
+                    null, Map.of("timestamp", before), before);
 
             Mockito.verify(accumulator).addService(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
             Mockito.verify(accumulator).addService(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE_2);
@@ -392,16 +385,16 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE_2,
                     TEST_RESOURCE_2);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE, String.class, null, TEST_VALUE, Map.of("value", TEST_VALUE, "timestamp", before),
+                    TEST_RESOURCE, String.class, null, TEST_VALUE, Map.of("timestamp", before),
                     before);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE_2,
-                    TEST_RESOURCE_2, String.class, null, TEST_VALUE_2, Map.of("value", TEST_VALUE_2, "timestamp", now),
+                    TEST_RESOURCE_2, String.class, null, TEST_VALUE_2, Map.of("timestamp", now),
                     now);
 
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
-                    TEST_RESOURCE, null, Map.of("value", TEST_VALUE, "timestamp", before), before);
+                    TEST_RESOURCE, null, Map.of("timestamp", before), before);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE_2,
-                    TEST_RESOURCE_2, null, Map.of("value", TEST_VALUE_2, "timestamp", now), now);
+                    TEST_RESOURCE_2, null, Map.of("timestamp", now), now);
 
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -409,7 +402,6 @@ public class SubscriptionTest {
         private static final String METADATA_KEY = "key";
         private static final String METADATA_VALUE = "value";
 
-        @SuppressWarnings("serial")
         @Test
         void basicTestWithMetadata() {
 
@@ -438,13 +430,12 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), String.class, null, TEST_PROVIDER,
-                    Map.of("value", TEST_PROVIDER, "timestamp", now), now);
+                    Map.of("timestamp", now), now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__FRIENDLY_NAME.getName(), null,
-                    Map.of("value", TEST_PROVIDER, "timestamp", now), now);
+                    Map.of("timestamp", now), now);
             HashMap<String, Object> map = new HashMap<>();
-            map.put("value", null);
             map.put("timestamp", now);
             Mockito.verify(accumulator).addResource(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
@@ -464,18 +455,18 @@ public class SubscriptionTest {
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), String.class, null,
-                    model.getEPackage().getNsURI(), Map.of("value", TEST_MODEL_PKG, "timestamp", now), now);
+                    model.getEPackage().getNsURI(), Map.of("timestamp", now), now);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    String.class, null, EMFUtil.getModelName(model), Map.of("value", TEST_MODEL, "timestamp", now),
+                    String.class, null, EMFUtil.getModelName(model), Map.of("timestamp", now),
                     now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
                     ProviderPackage.Literals.ADMIN__MODEL_PACKAGE_URI.getName(), null,
-                    Map.of("value", model.getEPackage().getNsURI(), "timestamp", now), now);
+                    Map.of("timestamp", now), now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER,
                     ProviderPackage.Literals.PROVIDER__ADMIN.getName(), ProviderPackage.Literals.ADMIN__MODEL.getName(),
-                    null, Map.of("value", EMFUtil.getModelName(model), "timestamp", now), now);
+                    null, Map.of("timestamp", now), now);
 
             Mockito.verify(accumulator).addService(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
             Mockito.verify(accumulator).addService(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE);
@@ -483,9 +474,7 @@ public class SubscriptionTest {
                     TEST_RESOURCE);
             Mockito.verify(accumulator).resourceValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
                     TEST_RESOURCE, String.class, null, TEST_VALUE,
-                    Map.of("value", TEST_VALUE, "timestamp", now, METADATA_KEY, METADATA_VALUE), now);
-            // TODO - the value is in here, which is surprising, as is the timestamp being a
-            // date
+                    Map.of("timestamp", now, METADATA_KEY, METADATA_VALUE), now);
             Mockito.verify(accumulator).metadataValueUpdate(TEST_MODEL_PKG, TEST_MODEL, TEST_PROVIDER, TEST_SERVICE,
                     TEST_RESOURCE, new HashMap<String, Object>() {
                         {
@@ -501,10 +490,9 @@ public class SubscriptionTest {
                     TEST_RESOURCE, new HashMap<String, Object>() {
                         {
                             put(METADATA_KEY, METADATA_VALUE);
-                            put("value", null);
                             put("timestamp", null);
                         }
-                    }, Map.of(METADATA_KEY, METADATA_VALUE, "value", TEST_VALUE, "timestamp", now), now);
+                    }, Map.of(METADATA_KEY, METADATA_VALUE, "timestamp", now), now);
 
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -715,11 +703,11 @@ public class SubscriptionTest {
                     "foo2");
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService1", "foo2", String.class, null, "somethingElse",
-                    Map.of("value", "somethingElse", "timestamp", newMetadata.getTimestamp()),
+                    Map.of("timestamp", newMetadata.getTimestamp()),
                     newMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService1", "foo2", null,
-                    Map.of("value", "somethingElse", "timestamp", newMetadata.getTimestamp()),
+                    Map.of("timestamp", newMetadata.getTimestamp()),
                     newMetadata.getTimestamp());
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -776,10 +764,10 @@ public class SubscriptionTest {
 
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService1", "foo", String.class, "foo", "foo2",
-                    Map.of("value", "foo2", "timestamp", curMetadata.getTimestamp()), curMetadata.getTimestamp());
+                    Map.of("timestamp", curMetadata.getTimestamp()), curMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
-                    "testService1", "foo", Map.of("value", "foo", "timestamp", oldMetadata.getTimestamp()),
-                    Map.of("value", "foo2", "timestamp", curMetadata.getTimestamp()), curMetadata.getTimestamp());
+                    "testService1", "foo", Map.of("timestamp", oldMetadata.getTimestamp()),
+                    Map.of("timestamp", curMetadata.getTimestamp()), curMetadata.getTimestamp());
             Mockito.verifyNoMoreInteractions(accumulator);
         }
 
@@ -852,11 +840,11 @@ public class SubscriptionTest {
                     "foo2");
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService1", "foo2", String.class, null, "somethingElse", Map.of("test.meta.1", "some Test",
-                            "value", "somethingElse", "timestamp", newMetadata.getTimestamp()),
+                            "timestamp", newMetadata.getTimestamp()),
                     newMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
-                    "testService1", "foo2", null, Map.of("test.meta.1", "some Test", "value", "somethingElse",
-                            "timestamp", newMetadata.getTimestamp()),
+                    "testService1", "foo2", null, Map.of("test.meta.1", "some Test", "timestamp",
+                            newMetadata.getTimestamp()),
                     newMetadata.getTimestamp());
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -932,12 +920,12 @@ public class SubscriptionTest {
 
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService1", "foo", String.class, "foo", "foo2", Map.of("test.meta.1", "some Test",
-                            "test.meta.2", 2, "value", "foo2", "timestamp", curMetadata.getTimestamp()),
+                            "test.meta.2", 2, "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(
                     ePackage.getNsURI(), modelName, provider.getId(), "testService1", "foo",
-                    Map.of("value", "foo", "timestamp", oldMetadataTimestampToCompare), Map.of("test.meta.1",
-                            "some Test", "test.meta.2", 2, "value", "foo2", "timestamp", curMetadata.getTimestamp()),
+                    Map.of("timestamp", oldMetadataTimestampToCompare), Map.of("test.meta.1",
+                            "some Test", "test.meta.2", 2, "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -996,11 +984,11 @@ public class SubscriptionTest {
                     "annotated");
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService2", "annotated", String.class, null, "avalue", Map.of("test", "testMetadata", "test2",
-                            "testMetadata2", "value", "avalue", "timestamp", curMetadata.getTimestamp()),
+                            "testMetadata2", "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
-                    "testService2", "annotated", null, Map.of("test", "testMetadata", "test2", "testMetadata2", "value",
-                            "avalue", "timestamp", curMetadata.getTimestamp()),
+                    "testService2", "annotated", null, Map.of("test", "testMetadata", "test2", "testMetadata2",
+                            "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -1078,11 +1066,11 @@ public class SubscriptionTest {
                     "annotated");
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService2", "annotated", String.class, null, "avalue", Map.of("test", mv.getValue(), "test2",
-                            "testMetadata2", "value", "avalue", "timestamp", curMetadata.getTimestamp()),
+                            "testMetadata2", "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
-                    "testService2", "annotated", null, Map.of("test", mv.getValue(), "test2", "testMetadata2", "value",
-                            "avalue", "timestamp", curMetadata.getTimestamp()),
+                    "testService2", "annotated", null, Map.of("test", mv.getValue(), "test2", "testMetadata2",
+                            "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -1160,13 +1148,13 @@ public class SubscriptionTest {
 
             Mockito.verify(accumulator).resourceValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService1", "foo", String.class, "foo", "foo",
-                    Map.of("test.meta.1", "some Test", "value", "foo", "timestamp", curMetadata.getTimestamp()),
+                    Map.of("test.meta.1", "some Test", "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verify(accumulator).metadataValueUpdate(ePackage.getNsURI(), modelName, provider.getId(),
                     "testService1", "foo",
-                    Map.of("test.meta.1", "some Test", "test.meta.2", 2, "value", "foo", "timestamp",
+                    Map.of("test.meta.1", "some Test", "test.meta.2", 2, "timestamp",
                             oldMetadataTimestampToCompare),
-                    Map.of("test.meta.1", "some Test", "value", "foo", "timestamp", curMetadata.getTimestamp()),
+                    Map.of("test.meta.1", "some Test", "timestamp", curMetadata.getTimestamp()),
                     curMetadata.getTimestamp());
             Mockito.verifyNoMoreInteractions(accumulator);
         }
@@ -1570,9 +1558,9 @@ public class SubscriptionTest {
         Instant time = getTimestampForService(service, attribute);
         Mockito.verify(accumulator).resourceValueUpdate(provider.eClass().getEPackage().getNsURI(), modelName,
                 provider.getId(), serviceName, attribute.getName(), attribute.getEType().getInstanceClass(), null,
-                value, Map.of("value", value, "timestamp", time), time);
+                value, Map.of("timestamp", time), time);
         Mockito.verify(accumulator).metadataValueUpdate(provider.eClass().getEPackage().getNsURI(), modelName,
-                provider.getId(), serviceName, attribute.getName(), null, Map.of("value", value, "timestamp", time),
+                provider.getId(), serviceName, attribute.getName(), null, Map.of("timestamp", time),
                 time);
     }
 
@@ -1585,7 +1573,7 @@ public class SubscriptionTest {
                 Mockito.any());
         Mockito.verify(accumulator).metadataValueUpdate(provider.eClass().getEPackage().getNsURI(), modelName,
                 provider.getId(), oldService.eContainingFeature().getName(), attribute.getName(),
-                Map.of("value", oldService.eGet(attribute), "timestamp", getTimestampForService(oldService, attribute)),
+                Map.of("timestamp", getTimestampForService(oldService, attribute)),
                 null, Mockito.any());
         Mockito.verify(accumulator).removeResource(provider.eClass().getEPackage().getNsURI(), modelName,
                 provider.getId(), oldService.eContainingFeature().getName(), attribute.getName());

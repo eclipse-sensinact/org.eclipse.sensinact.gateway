@@ -18,10 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,6 +39,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -71,6 +75,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -1304,6 +1309,54 @@ public class NexusTest {
             assertEquals(2, updatedList.size());
             assertTrue(updatedList.contains("x"));
             assertTrue(updatedList.contains("y"));
+        }
+
+
+        @Test
+        void testResourceValueIsSnapshotted() {
+            ModelNexus nexus = new ModelNexus(resourceSet, ProviderPackage.eINSTANCE, () -> accumulator);
+            Instant now = Instant.now();
+
+            EClass model = nexus.createModel(TEST_PKG, TEST_MODEL, now);
+            EReference service = nexus.createService(model, "testservice", "testservice", now);
+
+            // Create a collection resource
+            EAttribute resource = nexus.createResource(service.getEReferenceType(), "testList", String.class, now,
+                    null, Map.of(), false, 0, false, 0, -1);
+
+            Provider p = nexus.createProviderInstance(TEST_PKG, TEST_MODEL, TESTPROVIDER, now);
+
+            // Initial update with a list
+            List<String> initialData = List.of("a", "b", "c");
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, initialData, now);
+
+            ArgumentCaptor<List<String>> oldCaptor = ArgumentCaptor.captor();
+            ArgumentCaptor<List<String>> newCaptor = ArgumentCaptor.captor();
+            ArgumentCaptor<Map<String, Object>> newMetadataCaptor = ArgumentCaptor.captor();
+
+            Mockito.verify(accumulator).resourceValueUpdate(eq(TEST_PKG), eq(TEST_MODEL), eq(TESTPROVIDER),
+                    eq("testservice"), eq("testList"), any(), oldCaptor.capture(), newCaptor.capture(),
+                    newMetadataCaptor.capture(), eq(now));
+
+            assertEquals(List.of(), oldCaptor.getValue());
+            assertEquals(initialData, newCaptor.getValue());
+            assertNotSame(initialData, newCaptor.getValue());
+
+            assertEquals(Map.of("timestamp", now), newMetadataCaptor.getValue());
+
+            List<String> updatedValue = List.of("a", "b", "c");
+            nexus.handleDataUpdate(p, service.getName(), service, service.getEReferenceType(), resource, updatedValue, now.plusMillis(10));
+
+            Mockito.verify(accumulator).resourceValueUpdate(eq(TEST_PKG), eq(TEST_MODEL), eq(TESTPROVIDER),
+                    eq("testservice"), eq("testList"), any(), oldCaptor.capture(), newCaptor.capture(),
+                    newMetadataCaptor.capture(), eq(now.plusMillis(10)));
+
+            assertEquals(initialData, oldCaptor.getValue());
+            assertNotSame(initialData, oldCaptor.getValue());
+            assertEquals(updatedValue, newCaptor.getValue());
+            assertNotSame(updatedValue, newCaptor.getValue());
+
+            assertEquals(Map.of("timestamp", now.plusMillis(10)), newMetadataCaptor.getValue());
         }
     }
 }

@@ -441,10 +441,16 @@ public class ModelNexus {
 
         Map<String, Object> oldMetaData = null;
         Object oldValue = service.eGet(resourceFeature);
-        if (metadata != null) {
-            oldMetaData = EMFCompareUtil.extractMetadataMap(oldValue, metadata, resourceFeature);
+        // Holds an immutable snapshot of the value if it is a {@link Collection}
+        // to prevent race conditions when the underlying EMF list is later modified.
+        if(oldValue instanceof Collection<?> c) {
+            oldValue = List.copyOf(c);
         }
-        if (oldValue == null) {
+        if (metadata != null) {
+            oldMetaData = EMFUtil.toMetadataAttributesToMap(metadata, resourceFeature);
+        }
+        if(metadata == null || metadata.getTimestamp() == null) {
+            // New resource addition
             accumulator.addResource(packageUri, modelName, providerName, serviceName, resourceFeature.getName());
         }
 
@@ -460,6 +466,8 @@ public class ModelNexus {
             }
             metadata.setTimestamp(metaTimestamp);
 
+            // Holds an immutable snapshot of the value if it is a {@link Collection}
+            // to prevent race conditions when the underlying EMF list is later modified.
             final Object storedData;
 
             // Handle multi-valued features (collections)
@@ -475,12 +483,12 @@ public class ModelNexus {
                             list.add(EMFUtil.convertToTargetType(resourceType, item));
                         }
                     }
-                    storedData = list;
+                    storedData = List.copyOf(list);
                 } else if (data == null) {
                     @SuppressWarnings("unchecked")
                     EList<Object> list = (EList<Object>) service.eGet(resourceFeature);
                     list.clear();
-                    storedData = list;
+                    storedData = List.of();
                 } else {
                     // Single value for a multi-valued feature - add it to the list
                     @SuppressWarnings("unchecked")
@@ -491,7 +499,7 @@ public class ModelNexus {
                     } else {
                         list.add(EMFUtil.convertToTargetType(resourceType, data));
                     }
-                    storedData = list;
+                    storedData = List.copyOf(list);
                 }
             } else {
                 // Handle single-valued features
@@ -503,7 +511,7 @@ public class ModelNexus {
                 service.eSet(resourceFeature, storedData);
             }
 
-            Map<String, Object> newMetaData = EMFCompareUtil.extractMetadataMap(storedData, metadata, resourceFeature);
+            Map<String, Object> newMetaData = EMFUtil.toMetadataAttributesToMap(metadata, resourceFeature);
 
             accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
                     resourceType.getInstanceClass(), oldValue, storedData, newMetaData, metaTimestamp);

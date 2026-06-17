@@ -341,9 +341,8 @@ public class SensinactResourceImpl extends CommandScopedImpl implements Sensinac
             return (TimedValue<List<T>>) tv;
         }
         Object value = tv.getValue();
-        if(value instanceof List) {
-            return (TimedValue<List<T>>) tv;
-        } else if(value instanceof Collection<?> c) {
+        // We always copy the list to prevent leaking the internals
+        if(value instanceof Collection<?> c) {
             List<T> list = (List<T>) List.copyOf(c);
             return new DefaultTimedValue<>(list, tv.getTimestamp());
         } else {
