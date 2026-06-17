@@ -141,14 +141,14 @@ public class ImmediateNotificationAccumulator extends AbstractNotificationAccumu
      */
     @Override
     public void metadataValueUpdate(String modelPackageUri, String model, String provider, String service, String resource,
-            Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
+            Object data, Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
 
         Map<String, Object> nonNullOldValues = oldValues == null ? emptyMap() : oldValues;
         Map<String, Object> nonNullNewValues = newValues == null ? emptyMap() : newValues;
         Objects.requireNonNull(timestamp);
 
         ResourceMetaDataNotification rmn = createResourceMetaDataNotification(modelPackageUri, model, provider, service, resource,
-                nonNullOldValues, nonNullNewValues, timestamp);
+                data, nonNullOldValues, nonNullNewValues, timestamp);
 
         eventBus.deliver(rmn.getTopic(), rmn);
     }

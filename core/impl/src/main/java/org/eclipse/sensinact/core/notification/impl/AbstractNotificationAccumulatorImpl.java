@@ -13,7 +13,6 @@
 package org.eclipse.sensinact.core.notification.impl;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -50,10 +49,10 @@ public abstract class AbstractNotificationAccumulatorImpl implements Notificatio
     }
 
     protected ResourceMetaDataNotification createResourceMetaDataNotification(String modelPackageUri, String model, String provider,
-            String service, String resource, Map<String, Object> oldValues, Map<String, Object> newValues,
+            String service, String resource, Object data, Map<String, Object> oldValues, Map<String, Object> newValues,
             Instant timestamp) {
         return new ResourceMetaDataNotification(modelPackageUri, model, provider, service,
-                resource, oldValues, newValues, timestamp);
+                resource, data, oldValues, newValues, timestamp);
     }
 
     protected ResourceDataNotification createResourceDataNotification(String modelPackageUri, String model, String provider, String service,

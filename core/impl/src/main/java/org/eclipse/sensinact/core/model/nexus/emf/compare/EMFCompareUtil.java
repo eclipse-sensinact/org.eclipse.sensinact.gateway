@@ -314,17 +314,20 @@ public class EMFCompareUtil {
                 oldMetaData = EMFUtil.toMetadataAttributesToMap(originalMetadata, resource);
             }
 
-            Metadata updatedMetadata = updateMetadata(resource, newService, originalService, newTimestamp);
+            boolean updatedMetadata = updateMetadata(resource, newService, originalService, newTimestamp);
 
             originalService.eSet(resource, newValue);
 
-            Map<String, Object> newMetaData = EMFUtil.toMetadataAttributesToMap(updatedMetadata, resource);
+            Map<String, Object> newMetaData = EMFUtil.toMetadataAttributesToMap(
+                    originalService.getMetadata().get(resource), resource);
 
             accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resource.getName(),
                     resource.getEType().getInstanceClass(), oldValue, newValue, newMetaData, newTimestamp);
 
-            accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName, resource.getName(),
-                    oldMetaData, newMetaData, newTimestamp);
+            if (isNew || updatedMetadata) {
+                accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName, resource.getName(),
+                        newValue, oldMetaData, newMetaData, newTimestamp);
+            }
 
             if (newValue == null) {
                 accumulator.removeResource(packageUri, modelName, providerName, serviceName, resource.getName());
@@ -333,26 +336,27 @@ public class EMFCompareUtil {
 
     }
 
-    private static ResourceValueMetadata updateMetadata(EStructuralFeature resource, Service newService,
+    private static boolean updateMetadata(EStructuralFeature resource, Service newService,
             Service originalService, Instant newTimestamp) {
         ResourceValueMetadata resourceMetadata = checkMetadata(originalService, resource);
         resourceMetadata.setTimestamp(newTimestamp);
         Metadata update = newService.getMetadata().get(resource);
+        boolean updated = false;
         if (update != null && update.eIsSet(ProviderPackage.Literals.METADATA__EXTRA)) {
-            updateExtraMetadata(update.getExtra(), resourceMetadata.getExtra(), newTimestamp);
+            updated = updateExtraMetadata(update.getExtra(), resourceMetadata.getExtra(), newTimestamp);
         }
 
-        return resourceMetadata;
+        return updated;
     }
 
-    private static void updateExtraMetadata(EMap<String, MetadataValue> extraNew,
+    private static boolean updateExtraMetadata(EMap<String, MetadataValue> extraNew,
             EMap<String, MetadataValue> extraOriginal, Instant newTimestamp) {
+        boolean updated = false;
         if (extraNew.isEmpty() && extraOriginal.isEmpty()) {
-            return;
+            return updated;
         }
-        Map<String, MetadataValue> toRemoveMap = new HashMap<>();
-        extraOriginal.forEach(e -> toRemoveMap.put(e.getKey(), e.getValue()));
-        extraNew.forEach(e -> {
+        Map<String, MetadataValue> toRemoveMap = new HashMap<>(extraOriginal.map());
+        for(Entry<String, MetadataValue> e : extraNew) {
             MetadataValue mv = e.getValue();
             MetadataValue original = toRemoveMap.remove(e.getKey());
             Instant timestamp = mv.getTimestamp() == null ? newTimestamp : mv.getTimestamp();
@@ -362,12 +366,16 @@ public class EMFCompareUtil {
                     copy.setTimestamp(newTimestamp);
                 }
                 extraOriginal.put(e.getKey(), copy);
-            } else if (original.getTimestamp().plusMillis(1).isBefore(timestamp)) {
+                updated = true;
+            } else if (original.getTimestamp().isBefore(timestamp)) {
                 original.setValue(mv.getValue());
                 original.setTimestamp(timestamp);
+                updated = true;
             }
-        });
-        toRemoveMap.keySet().forEach(extraOriginal::removeKey);
+        }
+        updated |= !toRemoveMap.isEmpty();
+        extraOriginal.keySet().removeAll(toRemoveMap.keySet());
+        return updated;
     }
 
     private static Instant getNewTimestampFromMetadata(EStructuralFeature resource, Service service) {
@@ -397,8 +405,8 @@ public class EMFCompareUtil {
             accumulator.resourceValueUpdate(packageUri, model, providerName, serviceName, ea.getName(),
                     ea.getEAttributeType().getInstanceClass(), null, resourceValue, newMetaData,
                     metadata.getTimestamp());
-            accumulator.metadataValueUpdate(packageUri, model, providerName, serviceName, ea.getName(), null,
-                    newMetaData, metadata.getTimestamp());
+            accumulator.metadataValueUpdate(packageUri, model, providerName, serviceName, ea.getName(),
+                    resourceValue, null, newMetaData, metadata.getTimestamp());
         });
     }
 
