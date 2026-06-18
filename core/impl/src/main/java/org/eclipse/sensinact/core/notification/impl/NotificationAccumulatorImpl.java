@@ -216,7 +216,7 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
      */
     @Override
     public void metadataValueUpdate(String modelPackageUri, String model, String provider, String service, String resource,
-            Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
+            Object data, Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
         check();
 
         final Map<String, Object> nonNullOldValues = oldValues == null ? emptyMap() : oldValues;
@@ -258,7 +258,16 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                             });
 
                     return List.of(createResourceMetaDataNotification(modelPackageUri, model, provider, service, resource,
-                            oldValuesToUse, newValuesToUse, timestampToUse));
+                            data, oldValuesToUse, newValuesToUse, timestampToUse));
+                });
+        notifications.computeIfPresent(new NotificationKey(provider, service, resource, ResourceDataNotification.class),
+                (k,v) -> {
+                    if(v.isEmpty()) {
+                        return v;
+                    }
+                    ResourceDataNotification rdn = (ResourceDataNotification) v.get(0);
+                    return List.of(createResourceDataNotification(modelPackageUri, model, provider, service, resource,
+                            rdn.type(), rdn.oldValue(), rdn.newValue(), newValues, rdn.timestamp()));
                 });
     }
 
@@ -299,6 +308,16 @@ public class NotificationAccumulatorImpl extends AbstractNotificationAccumulator
                     }
                     return List.of(createResourceDataNotification(modelPackageUri, model, provider, service, resource, type,
                             oldValueToUse, newValue, metadata, timestamp));
+                });
+        notifications.computeIfPresent(new NotificationKey(provider, service, resource, ResourceMetaDataNotification.class),
+                (k,v) -> {
+                    if(v.isEmpty()) {
+                        return v;
+                    } else {
+                        ResourceMetaDataNotification rmdn = (ResourceMetaDataNotification) v.get(0);
+                        return List.of(createResourceMetaDataNotification(modelPackageUri, model, provider, service, resource,
+                                newValue, rmdn.oldValues(), metadata, timestamp));
+                    }
                 });
     }
 

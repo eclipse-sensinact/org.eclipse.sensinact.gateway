@@ -440,24 +440,20 @@ public class ModelNexus {
         ResourceValueMetadata metadata = service.getMetadata().get(resourceFeature);
 
         Map<String, Object> oldMetaData = null;
-        Object oldValue = service.eGet(resourceFeature);
-        // Holds an immutable snapshot of the value if it is a {@link Collection}
-        // to prevent race conditions when the underlying EMF list is later modified.
-        if(oldValue instanceof Collection<?> c) {
-            oldValue = List.copyOf(c);
-        }
+        Object oldValue = doGetResourceValue(service, resourceFeature);
         if (metadata != null) {
             oldMetaData = EMFUtil.toMetadataAttributesToMap(metadata, resourceFeature);
         }
+        boolean newResource = false;
         if(metadata == null || metadata.getTimestamp() == null) {
             // New resource addition
             accumulator.addResource(packageUri, modelName, providerName, serviceName, resourceFeature.getName());
+            newResource = true;
         }
 
         // Allow an update if the resource didn't exist or if the update timestamp is
         // equal to or after the one of the current value
-        if (metadata == null || metadata.getTimestamp() == null
-                || !metadata.getTimestamp().isAfter(metaTimestamp.plusMillis(1))) {
+        if (newResource || (metaTimestamp.compareTo(metadata.getTimestamp()) >= 0)) {
             EClassifier resourceType = resourceFeature.getEType();
 
             if (metadata == null) {
@@ -515,11 +511,23 @@ public class ModelNexus {
 
             accumulator.resourceValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
                     resourceType.getInstanceClass(), oldValue, storedData, newMetaData, metaTimestamp);
-            accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
-                    oldMetaData, newMetaData, timestamp);
+            if (newResource) {
+                accumulator.metadataValueUpdate(packageUri, modelName, providerName, serviceName, resourceFeature.getName(),
+                        storedData, oldMetaData, newMetaData, timestamp);
+            }
         } else {
             return;
         }
+    }
+
+    private Object doGetResourceValue(Service service, EStructuralFeature resourceFeature) {
+        Object oldValue = service.eGet(resourceFeature);
+        // Holds an immutable snapshot of the value if it is a {@link Collection}
+        // to prevent race conditions when the underlying EMF list is later modified.
+        if(oldValue instanceof Collection<?> c) {
+            oldValue = List.copyOf(c);
+        }
+        return oldValue;
     }
 
     /**
@@ -833,10 +841,11 @@ public class ModelNexus {
             EMFUtil.handleMetadataValue(fcm, timestamp, value);
         }
         Map<String, Object> newMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
+        Object dataValue = resource instanceof EStructuralFeature esf ? doGetResourceValue(svc, esf) : null;
 
         notificationAccumulator.get().metadataValueUpdate(provider.eClass().getEPackage().getNsURI(),
-                EMFUtil.getModelName(provider.eClass()), provider.getId(), serviceName, resource.getName(), oldMetadata,
-                newMetadata, timestamp);
+                EMFUtil.getModelName(provider.eClass()), provider.getId(), serviceName, resource.getName(),
+                dataValue, oldMetadata, newMetadata, timestamp);
     }
 
     public void unsetResourceMetadata(Provider provider, EStructuralFeature svcFeature, ETypedElement resource,
@@ -888,10 +897,10 @@ public class ModelNexus {
             return;
         }
         Map<String, Object> newMetadata = EMFUtil.toMetadataAttributesToMap(metadata, resource);
-
+        Object dataValue = resource instanceof EStructuralFeature esf ? doGetResourceValue(svc, esf) : null;
         notificationAccumulator.get().metadataValueUpdate(provider.eClass().getEPackage().getNsURI(),
-                EMFUtil.getModelName(provider.eClass()), provider.getId(), serviceName, resource.getName(), oldMetadata,
-                newMetadata, timestamp);
+                EMFUtil.getModelName(provider.eClass()), provider.getId(), serviceName, resource.getName(),
+                dataValue, oldMetadata, newMetadata, timestamp);
     }
 
     public Set<String> getModelNames() {

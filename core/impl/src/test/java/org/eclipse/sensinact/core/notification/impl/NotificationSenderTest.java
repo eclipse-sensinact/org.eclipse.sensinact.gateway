@@ -379,11 +379,13 @@ class NotificationSenderTest {
         void testAddNullMetadata() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null, null, now);
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
+                    null, null, now);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
-                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(), emptyMap(), now)));
+                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
+                            emptyMap(), emptyMap(), now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
 
@@ -391,12 +393,12 @@ class NotificationSenderTest {
         void testAddNewMetadata() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
-                    singletonMap(METADATA_KEY, METADATA_VALUE), now);
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
+                    null, singletonMap(METADATA_KEY, METADATA_VALUE), now);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
-                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(),
+                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE, emptyMap(),
                             singletonMap(METADATA_KEY, METADATA_VALUE), now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -405,12 +407,12 @@ class NotificationSenderTest {
         void testRemoveMetadata() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
                     singletonMap(METADATA_KEY, METADATA_VALUE), null, now);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
-                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE,
+                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
                             singletonMap(METADATA_KEY, METADATA_VALUE), emptyMap(), now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -419,15 +421,15 @@ class NotificationSenderTest {
         void testAddMetadataAcrossMultipleCalls() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
-                    singletonMap(METADATA_KEY, METADATA_VALUE), now);
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
+                    null, singletonMap(METADATA_KEY, METADATA_VALUE), now);
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE_2,
                     singletonMap(METADATA_KEY, METADATA_VALUE),
                     Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), now);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
-                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(),
+                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE_2, emptyMap(),
                             Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -436,15 +438,15 @@ class NotificationSenderTest {
         void testAddMetadataAcrossMultipleCallsWithTimeChange() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE, null,
                     singletonMap(METADATA_KEY, METADATA_VALUE), now.minusSeconds(10));
             accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
-                    singletonMap(METADATA_KEY, METADATA_VALUE),
+                    INTEGER_VALUE_2, singletonMap(METADATA_KEY, METADATA_VALUE),
                     Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), now);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
-                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(),
+                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE_2, emptyMap(),
                             Map.of(METADATA_KEY, METADATA_VALUE, METADATA_KEY_2, METADATA_VALUE_2), now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
@@ -453,11 +455,11 @@ class NotificationSenderTest {
         void testAddMetadataAcrossMultipleCallsReverseTime() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE, null,
                     singletonMap(METADATA_KEY, METADATA_VALUE), now);
 
             Exception thrown = assertThrows(IllegalArgumentException.class, () -> {
-                accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
+                accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
                         singletonMap(METADATA_KEY, METADATA_VALUE), Map.of(METADATA_KEY_2, METADATA_VALUE_2),
                         now.minusSeconds(10));
             });
@@ -469,15 +471,36 @@ class NotificationSenderTest {
         void testAddRemoveMetadataAcrossMultipleCalls() {
             Instant now = Instant.now();
 
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE, null,
                     singletonMap(METADATA_KEY, METADATA_VALUE), now.minusSeconds(10));
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE_2,
                     singletonMap(METADATA_KEY, METADATA_VALUE), singletonMap(METADATA_KEY_2, METADATA_VALUE_2), now);
             accumulator.completeAndSend();
 
             Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
-                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(),
+                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE_2, emptyMap(),
                             Map.of(METADATA_KEY_2, METADATA_VALUE_2), now)));
+            Mockito.verifyNoMoreInteractions(bus);
+        }
+
+        @Test
+        void testMetadataUpdateFixesUpResourceUpdate() {
+            Instant now = Instant.now();
+
+            // Create a resource and metadata, update the resource
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
+                    Map.of(METADATA_KEY, METADATA_VALUE), now);
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
+                    null, Map.of(METADATA_KEY, METADATA_VALUE_2), now);
+            accumulator.completeAndSend();
+
+            // The data event should be using the second metadata value
+            Mockito.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
+                    isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
+                            Map.of(METADATA_KEY, METADATA_VALUE_2), now)));
+            Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
+                    isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE, Map.of(),
+                            Map.of(METADATA_KEY, METADATA_VALUE_2), now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
     }
@@ -520,7 +543,7 @@ class NotificationSenderTest {
 
             accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
                     Map.of(METADATA_KEY, METADATA_VALUE), now);
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
                     Map.of(METADATA_KEY, METADATA_VALUE), Map.of(METADATA_KEY, METADATA_VALUE_2), now);
             accumulator.completeAndSend();
 
@@ -528,8 +551,8 @@ class NotificationSenderTest {
                     isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
                             Map.of(METADATA_KEY, METADATA_VALUE_2), now)));
             Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
-                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, Map.of(METADATA_KEY, METADATA_VALUE),
-                            Map.of(METADATA_KEY, METADATA_VALUE_2), now)));
+                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
+                            Map.of(METADATA_KEY, METADATA_VALUE), Map.of(METADATA_KEY, METADATA_VALUE_2), now)));
             Mockito.verifyNoMoreInteractions(bus);
         }
 
@@ -577,6 +600,29 @@ class NotificationSenderTest {
             });
 
             assertTrue(thrown.getMessage().contains("out of temporal order"), "Wrong message: " + thrown.getMessage());
+        }
+
+        @Test
+        void testResourceUpdateAfterMetadataUpdate() {
+            Instant now = Instant.now();
+
+            // Create a resource and metadata, update the resource
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE,
+                    Map.of(METADATA_KEY, METADATA_VALUE), now);
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE,
+                    null, Map.of(METADATA_KEY, METADATA_VALUE), now);
+            accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, INTEGER_VALUE,
+                    INTEGER_VALUE_2, Map.of(METADATA_KEY, METADATA_VALUE_2), now);
+            accumulator.completeAndSend();
+
+            // The metadata event should be using the second data value
+            Mockito.verify(bus).deliver(eq("DATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
+                    isValueNotificationWith(PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE_2,
+                            Map.of(METADATA_KEY, METADATA_VALUE_2), now)));
+            Mockito.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE), argThat(
+                    isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE_2, Map.of(),
+                            Map.of(METADATA_KEY, METADATA_VALUE_2), now)));
+            Mockito.verifyNoMoreInteractions(bus);
         }
     }
 
@@ -743,9 +789,9 @@ class NotificationSenderTest {
                     Map.of(METADATA_KEY_2, METADATA_VALUE_2), now);
             accumulator.resourceValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, Integer.class, null, INTEGER_VALUE_2,
                     Map.of(METADATA_KEY, METADATA_VALUE), now);
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE_2, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE_2, INTEGER_VALUE, null,
                     singletonMap(METADATA_KEY_2, METADATA_VALUE_2), now);
-            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, null,
+            accumulator.metadataValueUpdate(MODEL_PKG, MODEL, PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE_2, null,
                     singletonMap(METADATA_KEY, METADATA_VALUE), now);
             accumulator.addResource(MODEL_PKG, MODEL, PROVIDER_2, SERVICE_2, RESOURCE_2);
             accumulator.addResource(MODEL_PKG, MODEL, PROVIDER_2, SERVICE_2, RESOURCE);
@@ -799,10 +845,10 @@ class NotificationSenderTest {
 
             // Metadata next
             inOrder.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE),
-                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, emptyMap(),
+                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE, INTEGER_VALUE_2, emptyMap(),
                             singletonMap(METADATA_KEY, METADATA_VALUE), now)));
             inOrder.verify(bus).deliver(eq("METADATA/" + MODEL + "/" + PROVIDER + "/" + SERVICE + "/" + RESOURCE_2),
-                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE_2, emptyMap(),
+                    argThat(isMetadataNotificationWith(PROVIDER, SERVICE, RESOURCE_2, INTEGER_VALUE, emptyMap(),
                             singletonMap(METADATA_KEY_2, METADATA_VALUE_2), now)));
 
             // Resource values next
@@ -855,13 +901,14 @@ class NotificationSenderTest {
     }
 
     ArgumentMatcher<ResourceMetaDataNotification> isMetadataNotificationWith(String provider, String service,
-            String resource, Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
+            String resource, Object value, Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp) {
         return i -> {
             try {
                 assertEquals(MODEL, i.model());
                 assertEquals(provider, i.provider());
                 assertEquals(service, i.service());
                 assertEquals(resource, i.resource());
+                assertEquals(value, i.data());
                 assertEquals(oldValues, i.oldValues());
                 assertEquals(newValues, i.newValues());
                 assertEquals(timestamp, i.timestamp());
