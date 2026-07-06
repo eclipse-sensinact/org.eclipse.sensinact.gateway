@@ -11,6 +11,9 @@
 */
 
 /* Custom styles for use in the documentation */
+:root {
+    --linkColor: #277CB4;
+}
 
 /* Float on the right hand side */
 .float-right {
