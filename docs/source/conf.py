@@ -19,8 +19,13 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Eclipse sensiNact"
-copyright = "2023, Eclipse sensiNact contributors"
+import datetime
+
+project = "Eclipse sensiNact™"
+copyright = (
+    f"{datetime.date.today().year} by Eclipse Foundation. "
+    "Eclipse sensiNact™ is a trademark of Eclipse Foundation AISBL"
+)
 author = "Eclipse sensiNact contributors"
 release = "0.0.2"
 
