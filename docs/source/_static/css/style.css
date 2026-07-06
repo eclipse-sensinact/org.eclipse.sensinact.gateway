@@ -12,6 +12,7 @@
 
 /* Custom styles for use in the documentation */
 :root {
+    --mainNavColor: #24536F;
     --linkColor: #277CB4;
 }
 
@@ -29,4 +30,18 @@
 .block-center {
     display: block;
     margin: auto;
+}
+
+/* Underline links on hover */
+a:hover {
+    text-decoration: underline;
+}
+
+/* Do not underline links in the navigation buttons */
+.button_nav a:hover, .toggle_right_sidebar:hover, #toggle_sidebar a:hover {
+    text-decoration: none;
+}
+
+div.footer {
+    font-size: .9rem;
 }
