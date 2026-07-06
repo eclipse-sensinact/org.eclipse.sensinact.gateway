@@ -1,8 +1,8 @@
 # Welcome to Eclipse sensiNact™
 
-![Eclipse sensiNact logo](_static/sensiNact_logo.png){width=120px}
+![Eclipse sensiNact™ logo](_static/sensiNact_logo.png){width=120px}
 
-Eclipse sensiNact (lower-case on the first s and capital letter on the second N) is an Open Source framework that aims at creating a common environment in which heterogeneous devices can exchange information and interact among each other in the IoT world.
+Eclipse sensiNact™ (lower-case on the first s and capital letter on the second N) is an Open Source framework that aims at creating a common environment in which heterogeneous devices can exchange information and interact among each other in the IoT world.
 
 It is a horizontal platform dedicated to IoT and in particularly used in various smart city and smart home applications.
 Eclipse sensiNact aims at managing IoT protocols and devices heterogeneity and provides synchronous (on demand) and asynchronous (periodic or event based) access to data/actions of IoT devices, as well as access to historic data with generic and easy-to-use API.

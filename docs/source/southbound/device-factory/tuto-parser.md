@@ -96,7 +96,7 @@ We will add the feature submodule later.
   <version>0.0.2</version>
   <packaging>pom</packaging>
   <name>Custom Device Factory Parser - Parent</name>
-  <description>Parent project of the Eclipse sensiNact sample to write a parser for the Device Factory</description>
+  <description>Parent project of the Eclipse sensiNact™ sample to write a parser for the Device Factory</description>
 
   <!-- Definition of the submodules. We'll add the feature module afterwards -->
   <modules>

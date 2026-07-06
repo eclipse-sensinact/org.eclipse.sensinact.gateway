@@ -26,7 +26,7 @@ copyright = (
     f"{datetime.date.today().year} by Eclipse Foundation. "
     "Eclipse sensiNact™ is a trademark of Eclipse Foundation AISBL"
 )
-author = "Eclipse sensiNact contributors"
+author = "Eclipse sensiNact™ contributors"
 release = "0.0.2"
 
 # -- General configuration ---------------------------------------------------
