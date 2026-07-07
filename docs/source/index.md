@@ -1,8 +1,8 @@
-# Welcome to Eclipse sensiNact
+# Welcome to Eclipse sensiNact™
 
-![Eclipse sensiNact logo](_static/sensiNact_logo.png){width=120px}
+![Eclipse sensiNact™ logo](_static/sensiNact_logo.png){width=120px}
 
-Eclipse sensiNact (lower-case on the first s and capital letter on the second N) is an Open Source framework that aims at creating a common environment in which heterogeneous devices can exchange information and interact among each other in the IoT world.
+Eclipse sensiNact™ (lower-case on the first s and capital letter on the second N) is an Open Source framework that aims at creating a common environment in which heterogeneous devices can exchange information and interact among each other in the IoT world.
 
 It is a horizontal platform dedicated to IoT and in particularly used in various smart city and smart home applications.
 Eclipse sensiNact aims at managing IoT protocols and devices heterogeneity and provides synchronous (on demand) and asynchronous (periodic or event based) access to data/actions of IoT devices, as well as access to historic data with generic and easy-to-use API.
@@ -45,6 +45,10 @@ The following examples will help you to quickly get started with the sensiNact g
 
 
 ## Community
+
+This is a community documentation portal. The official Eclipse sensiNact project
+page, with governance and project information, is available at
+[projects.eclipse.org/projects/technology.sensinact](https://projects.eclipse.org/projects/technology.sensinact).
 
 The project is available on [GitHub](https://github.com/eclipse/org.eclipse.sensinact.gateway/).
 As it is an Eclipse-hosted project, contributors are required to sign the [Eclipse Contributor Agreement (ECA)](https://www.eclipse.org/legal/ECA.php) for their contributions to be accepted.

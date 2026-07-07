@@ -265,7 +265,7 @@ Add the required dependencies for EMF model development:
 
 ```xml
 <dependencies>
-  <!-- SensiNact Provider Model - Required for code generation -->
+  <!-- sensiNact Provider Model - Required for code generation -->
   <dependency>
     <groupId>org.eclipse.sensinact.gateway.core.models</groupId>
     <artifactId>provider</artifactId>
