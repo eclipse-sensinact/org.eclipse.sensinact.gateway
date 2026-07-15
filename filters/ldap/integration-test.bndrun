@@ -35,7 +35,7 @@
 	org.eclipse.emf.common;version='[2.44.0,2.44.1)',\
 	org.eclipse.emf.ecore;version='[2.41.0,2.41.1)',\
 	org.eclipse.emf.ecore.xmi;version='[2.39.0,2.39.1)',\
-	org.eclipse.fennec.emf.osgi.component.minimal;version='[1.0.0,1.0.1)',\
+	org.eclipse.fennec.emf.osgi.component.minimal;version='[1.0.2,1.0.3)',\
 	org.eclipse.sensinact.gateway.core.annotation;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.core.emf-api;version='[0.0.2,0.0.3)',\
