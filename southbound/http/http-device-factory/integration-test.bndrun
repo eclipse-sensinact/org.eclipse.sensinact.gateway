@@ -37,9 +37,10 @@
 	org.apache.commons.commons-csv;version='[1.9.0,1.9.1)',\
 	org.apache.felix.configadmin;version='[1.9.24,1.9.25)',\
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
-	org.eclipse.emf.common;version='[2.29.0,2.29.1)',\
-	org.eclipse.emf.ecore;version='[2.35.0,2.35.1)',\
-	org.eclipse.emf.ecore.xmi;version='[2.36.0,2.36.1)',\
+	org.eclipse.emf.common;version='[2.44.0,2.44.1)',\
+	org.eclipse.emf.ecore;version='[2.41.0,2.41.1)',\
+	org.eclipse.emf.ecore.xmi;version='[2.39.0,2.39.1)',\
+	org.eclipse.fennec.emf.osgi.component.minimal;version='[1.0.0,1.0.1)',\
 	org.eclipse.jetty.alpn.client;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.client;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.http;version='[11.0.13,11.0.14)',\
@@ -62,7 +63,6 @@
 	org.eclipse.sensinact.gateway.southbound.device-factory.parser-json;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.http.http-device-factory;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.http.http-device-factory-tests;version='[0.0.2,0.0.3)',\
-	org.gecko.emf.osgi.component.minimal;version='[6.3.0,6.3.1)',\
 	org.objectweb.asm;version='[9.9.1,9.9.2)',\
 	org.objectweb.asm.commons;version='[9.9.1,9.9.2)',\
 	org.objectweb.asm.tree;version='[9.9.1,9.9.2)',\

@@ -207,11 +207,11 @@ Attempting to use `@ServiceModel` with a static (non-dynamic) provider will resu
 
 ### Deploying EMF models in OSGi
 
-When deploying custom EMF models in an OSGi environment (which sensiNact runs in), you need to ensure your EMF model is properly registered. The recommended approach uses the Gecko EMF OSGi code generator, which automatically generates all the required registration code from your EMF model.
+When deploying custom EMF models in an OSGi environment (which sensiNact runs in), you need to ensure your EMF model is properly registered. The recommended approach uses the Eclipse Fennec EMF OSGi code generator, which automatically generates all the required registration code from your EMF model.
 
-#### Using the Gecko EMF Code Generator
+#### Using the Fennec EMF Code Generator
 
-The easiest way to deploy an EMF model is to use the BND Gecko EMF code generator. This automatically generates:
+The easiest way to deploy an EMF model is to use the BND Fennec EMF code generator. This automatically generates:
 - The model implementation classes (EPackage, EFactory, etc.)
 - OSGi service registration components
 - Proper lifecycle management code
@@ -230,14 +230,14 @@ Add the `bnd-generate-maven-plugin` to your project's `pom.xml`:
       <configuration>
         <externalPlugins>
           <dependency>
-            <groupId>org.geckoprojects.emf</groupId>
-            <artifactId>org.gecko.emf.osgi.codegen</artifactId>
+            <groupId>org.eclipse.fennec.emf</groupId>
+            <artifactId>org.eclipse.fennec.emf.osgi.codegen</artifactId>
           </dependency>
         </externalPlugins>
         <steps>
           <step>
             <trigger>src/main/resources/model/mymodel.genmodel</trigger>
-            <generateCommand>geckoEMF</generateCommand>
+            <generateCommand>fennecEMF</generateCommand>
             <output>src/main/java</output>
             <clear>false</clear>
             <properties>
@@ -272,10 +272,10 @@ Add the required dependencies for EMF model development:
     <version>${project.version}</version>
   </dependency>
 
-  <!-- Gecko EMF OSGi API -->
+  <!-- Fennec EMF OSGi API -->
   <dependency>
-    <groupId>org.geckoprojects.emf</groupId>
-    <artifactId>org.gecko.emf.osgi.api</artifactId>
+    <groupId>org.eclipse.fennec.emf</groupId>
+    <artifactId>org.eclipse.fennec.emf.osgi.api</artifactId>
   </dependency>
 </dependencies>
 ```
@@ -355,7 +355,7 @@ Manual registration is only needed if you cannot use the code generator. The gen
 
 If you must manually register your EMF model, you need to create two classes:
 
-1. **EPackage Configurator** - Implements `org.gecko.emf.osgi.configurator.EPackageConfigurator`
+1. **EPackage Configurator** - Implements `org.eclipse.fennec.emf.osgi.configurator.EPackageConfigurator`
    - `configureEPackage()`: Registers the EPackage in the EMF registry
    - `unconfigureEPackage()`: Unregisters on deactivation
    - `getServiceProperties()`: Provides service metadata (model name, NS URI, version)
@@ -371,8 +371,8 @@ Required bundle imports:
 ```
 Import-Package: org.eclipse.emf.ecore,
                 org.eclipse.emf.common.util,
-                org.gecko.emf.osgi.configurator,
-                org.gecko.emf.osgi.constants,
+                org.eclipse.fennec.emf.osgi.configurator,
+                org.eclipse.fennec.emf.osgi.constants,
                 org.osgi.framework,
                 org.osgi.service.component.annotations
 ```
