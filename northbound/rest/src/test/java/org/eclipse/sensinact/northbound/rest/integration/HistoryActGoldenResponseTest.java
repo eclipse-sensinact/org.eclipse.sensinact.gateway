@@ -205,8 +205,8 @@ class HistoryActGoldenResponseTest {
         JsonNode actual = actResponse("range", Map.of());
         assertGoldenJson("""
                 [{"timestamp":"2012-01-01T00:00:00Z","value":42},
-                 {"timestamp":"2012-01-02T00:00:00Z","value":43},
-                 {"timestamp":null,"value":null}]
+                {"timestamp":"2012-01-02T00:00:00Z","value":43},
+                {"timestamp":null,"value":null}]
                 """, actual);
     }
 
