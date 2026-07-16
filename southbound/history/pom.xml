@@ -29,6 +29,8 @@
     <module>history-api</module>
     <module>history-inmemory</module>
     <module>history-core</module>
+    <!-- throwaway module for the storage backend evaluation, never released -->
+    <module>history-storage-spikes</module>
   </modules>
 
   <dependencyManagement>
