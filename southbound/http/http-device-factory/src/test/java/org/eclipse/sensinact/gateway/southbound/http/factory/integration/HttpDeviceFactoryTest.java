@@ -22,6 +22,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -251,6 +253,62 @@ public class HttpDeviceFactoryTest {
             // Only 1 call should have been made
             assertEquals(1, handler.nbVisitedPaths());
             assertEquals(1, handler.nbVisits("/data"));
+        } finally {
+            config.delete();
+            queues.clear();
+        }
+    }
+
+    @Test
+    void testFileScheme() throws Exception {
+        // Excepted providers
+        final String provider1 = "file-provider1";
+        final String provider2 = "file-provider2";
+
+        // Register listener
+        setupProvidersHandling(provider1, provider2);
+
+        final String inputFileName = "csv-header-file";
+        final String mappingConfig = new String(readFile(inputFileName + "-mapping.json"));
+        handler.setData("/data", readFile(inputFileName + ".csv"));
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            Path resourcesPath = Path.of(System.getProperty("project.build.directory"), "test-classes");
+            URI uri = resourcesPath.resolve(inputFileName + ".csv").toUri();
+            config.update(new Hashtable<>(Map.of("tasks.oneshot",
+                    "[{\"url\": \"" + uri + "\", \"mapping\": " + mappingConfig
+                            + ", \"body\": [{\"A\": 1}]}]")));
+            // Wait for the providers to appear
+            assertNotNull(queues.get(0).poll(1, TimeUnit.SECONDS));
+            assertNotNull(queues.get(1).poll(1, TimeUnit.SECONDS));
+
+            // Ensure resource type
+            assertEquals(42, session.getResourceValue(provider1, "data", "value", Integer.class));
+            assertEquals(84, session.getResourceValue(provider2, "data", "value", Integer.class));
+
+            // Ensure timestamp
+            Instant timestamp1 = Instant.from(LocalDateTime.of(2021, 10, 20, 18, 14, 0).atOffset(ZoneOffset.UTC));
+            assertEquals(timestamp1, session.describeResource(provider1, "data", "value").timestamp);
+
+            Instant timestamp2 = Instant.from(LocalDateTime.of(2021, 10, 20, 18, 17, 0).atOffset(ZoneOffset.UTC));
+            assertEquals(timestamp2, session.describeResource(provider2, "data", "value").timestamp);
+
+            // Ensure location update (and its timestamp)
+            ResourceDescription location1 = session.describeResource(provider1, "admin", "location");
+            assertEquals(timestamp1, location1.timestamp);
+            assertNotNull(location1.value);
+            Point geoPoint = (Point) location1.value;
+            assertEquals(1.2, geoPoint.coordinates().latitude(), 0.001);
+            assertEquals(3.4, geoPoint.coordinates().longitude(), 0.001);
+            assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
+
+            ResourceDescription location2 = session.describeResource(provider2, "admin", "location");
+            assertNotNull(location2.value);
+            assertEquals(timestamp2, location2.timestamp);
+            geoPoint = (Point) location2.value;
+            assertEquals(5.6, geoPoint.coordinates().latitude(), 0.001);
+            assertEquals(7.8, geoPoint.coordinates().longitude(), 0.001);
+            assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
         } finally {
             config.delete();
             queues.clear();
