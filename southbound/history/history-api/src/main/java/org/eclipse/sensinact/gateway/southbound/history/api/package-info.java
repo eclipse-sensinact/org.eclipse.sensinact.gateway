@@ -10,5 +10,5 @@
  * Contributors: Kentyou - initial implementation
  **********************************************************************/
 @org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("0.2.0")
+@org.osgi.annotation.versioning.Version("0.2.1")
 package org.eclipse.sensinact.gateway.southbound.history.api;

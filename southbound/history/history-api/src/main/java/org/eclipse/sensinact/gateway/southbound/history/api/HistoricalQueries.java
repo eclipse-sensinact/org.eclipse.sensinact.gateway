@@ -19,6 +19,17 @@ import org.eclipse.sensinact.core.annotation.verb.ACT;
 import org.eclipse.sensinact.core.annotation.verb.ActParam;
 import org.eclipse.sensinact.core.twin.TimedValue;
 
+/**
+ * Legacy ACT-resource-based history query contract.
+ *
+ * @deprecated Use the
+ *             {@link org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider}
+ *             OSGi service instead: it offers unbounded paging without the
+ *             500-row cap and empty-marker convention, sort direction, value
+ *             filters, and aggregation. These ACT actions remain available as
+ *             a compatibility facade with unchanged semantics.
+ */
+@Deprecated
 public interface HistoricalQueries {
 
     /**
