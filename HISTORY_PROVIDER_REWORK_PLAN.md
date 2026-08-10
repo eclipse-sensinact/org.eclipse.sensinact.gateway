@@ -1,11 +1,12 @@
 # History Provider Rework — Plan
 
-> Status: **draft** — additional requirements to be collected and added in the
-> [Additional requirements](#additional-requirements-to-be-filled-in) section below.
+> Status: **in implementation** — M0 merged (#755); stream A evaluation complete with ADR
+> *proposed* (`docs/source/southbound/history/history-storage-adr.md` on branch
+> `evaluation/history-backends`: stay on Postgres, unified schema, Timescale optional); M1 started.
 >
-> Companion: [HISTORY_STA_GAP_ANALYSIS.md](HISTORY_STA_GAP_ANALYSIS.md) — what the current
-> history provider can do vs. OGC SensorThings v1.1 features; its §5 lists two open SPI-shape
-> decisions (per-record metadata/intervals, value-filter pushdown) that must be settled before M1.
+> Companions: [HISTORY_STA_GAP_ANALYSIS.md](HISTORY_STA_GAP_ANALYSIS.md) (STA feature gaps) and
+> [NOTIFICATION_PROXY_ALIGNMENT.md](NOTIFICATION_PROXY_ALIGNMENT.md) (third-party ingest-filter
+> alignment — source of the exported `HistoryIngestFilter` contract in M1).
 
 ## Context
 
@@ -197,7 +198,8 @@ Numeric read-shape: facade re-applies the legacy scale≤0→long, else→double
    - *(Optional)* filter-module inventory test documenting which `$filter` expressions are rejected (`UnsupportedRuleException` paths) — maps the fallback surface for M6/M7.
    - Explicitly out of scope: characterizing the `@Modified` reconfiguration path (known-buggy lifecycle that M2/M3 replace; the new behavior gets its own tests there).
    - Effort: ~2–4 days. Gate for starting M4; M1 may start in parallel.
-1. **M1 — Contracts**: new `provider` + `storage` packages (incl. `PruneRequest`/`prune` and the `ValueFilter` type carried by `HistoryQuery`), `@Deprecated` on `HistoricalQueries`, version bumps. No runtime change. *(Freeze = SPI v0 for stream A spikes.)*
+1. **M1 — Contracts**: new `provider` + `storage` packages (incl. `PruneRequest`/`prune` and the `ValueFilter` type carried by `HistoryQuery`), `@Deprecated` on `HistoricalQueries`, version bumps. No runtime change. *(SPI v0 was validated by the stream A spikes: 33-test contract suite green on in-memory/Postgres/Timescale/Mongo.)*
+   Decisions folded in: **synchronous API** (Promise-returning `default` methods addable later without breaking `@ProviderType`); **`HistoricalRecord` reserves `annotations` map and `endTimestamp`** (future STA `parameters`/`resultQuality`/interval `phenomenonTime` — v1 never writes them, backends persist when present); **`HistoryIngestFilter` is exported API** with declarative selectors for topic narrowing plus an optional stateful `shouldStore(HistoricalRecord, Optional<TimedValue<?>> lastStored)` callback (`history-core` supplies the last-stored value) — the built-in ConfigAdmin filter becomes one implementation; third parties (notification proxy) implement the same contract.
 2. **M2 — Engine**: history-core (manager, pipeline, **historization filter factory `sensinact.history.filter`**, **housekeeping factory `sensinact.history.housekeeping` + scheduler**, engine, facade) + history-inmemory + contract test-jar + facade unit tests.
 3. **M3 — Chosen backend on the SPI** *(after stream A decision gate)*: rewrite timescale-provider (or implement the evaluation winner) with a composable query builder (one `if` per dimension, no template matrix), including an efficient `prune` (native retention where the scope allows). Gate: **unmodified `TimescaleHistoryTest` green** (config + facade bit-compat proof). GeoJSON losslessness lands here per the ADR schema; legacy Point-only rows must stay readable (migration note/carve-out).
 4. **M4 — rest.gateway migration**: PaginationConstants, service binding, helper rewrite, +1ms removal, pushdown for the no-$filter case. Existing ITs green + new pushdown ITs (in-memory backend, docker-free).
@@ -232,11 +234,10 @@ Ordering: M0 first (independent PR to master; hard prerequisite for M4, recommen
 1. `@iot.count`-under-`$filter` correctness is the top pushdown risk — every pushdown condition needs a test.
 2. BigDecimal JSON representation through northbound (`1.0` vs `1`) — check serialization when facade narrowing is bypassed.
 3. Legacy geo rows (Point-only geography) readability after schema change — migration note required.
-4. Sync-vs-async contract must be settled before M1 freezes `@ProviderType`.
-   Likewise from the STA gap analysis (§5): decide whether `HistoricalRecord` reserves room for per-record metadata (`parameters`/`resultQuality`) and interval timestamps. (The other §5 decision is made: value-filter pushdown is milestone M7.)
+4. ~~Sync-vs-async / HistoricalRecord reservation~~ **decided** (see M1): synchronous API; `annotations` + `endTimestamp` reserved.
 5. Rolling-upgrade window: old timescale-provider + new history-core would double-register ACT resources — document "swap features atomically".
 6. Multi-resource/selector queries deliberately deferred (builder stays additive; future `MULTI_RESOURCE` capability).
-7. Before M3: skim PR #616 review threads for objections beyond template explosion.
+7. ~~Skim PR #616 review threads~~ **done** (2026-07-17): the maintainer objections were *correctness*, not complexity — pushdown paginating while `$filter`/value-`$orderby` ran post-hoc ("almost certainly broken"), count without filters, missing DB-side-filtering tests. All addressed by design: residual-filter-empty rule (M4/M6), value filters in DB (M7), count rule, pushdown ITs. The review *advocates* DB-side filtering done right — cite it in the M4–M7 PRs.
 8. Housekeeping deletes are irreversible and run unattended — misconfigured selectors/periods can wipe wanted data. Mitigations: invalid-policy rejection, delayed first run, INFO logging of every run; consider a `dry.run` config flag if reviewers want more safety.
 9. Deadband filtering makes history intentionally incomplete — consumers that assume "history == every update" (e.g. exact SensorThings Observation counts, the facade's count action) simply see fewer records; document this clearly. Per-resource deadband state is in-memory: bounded by resource count, but a very large twin plus many filter instances should be kept in mind (state is per (provider, resource), shared across filters).
 
