@@ -2,6 +2,7 @@
 
 -runproperties: \
 	org.osgi.service.http.port=-1,\
+	project.build.directory=${project.build.directory},\
 	logback.configurationFile=${project.build.testOutputDirectory}/logback-test.xml
 
 -runrequires: \
