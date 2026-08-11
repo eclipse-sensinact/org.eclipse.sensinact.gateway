@@ -27,6 +27,8 @@
   <modules>
     <module>timescale-provider</module>
     <module>history-api</module>
+    <module>history-inmemory</module>
+    <module>history-core</module>
   </modules>
 
   <dependencyManagement>
