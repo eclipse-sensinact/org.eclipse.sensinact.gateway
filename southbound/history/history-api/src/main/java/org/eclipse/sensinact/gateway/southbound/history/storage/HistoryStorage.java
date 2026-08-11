@@ -22,6 +22,7 @@ import org.eclipse.sensinact.gateway.southbound.history.provider.AggregateBucket
 import org.eclipse.sensinact.gateway.southbound.history.provider.AggregationQuery;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryCapability;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryPage;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
@@ -40,7 +41,7 @@ import org.osgi.annotation.versioning.ConsumerType;
 public interface HistoryStorage {
 
     /** Service property (String, required): the history provider name. */
-    String PROP_NAME = org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider.PROP_NAME;
+    String PROP_NAME = HistoryProvider.PROP_NAME;
 
     /** Service property (String[], optional): JSON ResourceSelector includes. */
     String PROP_INCLUDE = "sensinact.history.include.resources";

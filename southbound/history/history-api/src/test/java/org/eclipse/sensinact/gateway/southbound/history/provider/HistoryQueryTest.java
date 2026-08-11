@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 class HistoryQueryTest {
@@ -53,7 +55,7 @@ class HistoryQueryTest {
 
     @Test
     void valueFilterRequiresConditions() {
-        assertThrows(IllegalArgumentException.class, () -> new ValueFilter(java.util.List.of()));
+        assertThrows(IllegalArgumentException.class, () -> new ValueFilter(List.of()));
         assertThrows(NullPointerException.class, () -> ValueFilter.of(ValueFilter.Op.GT, null));
     }
 }
