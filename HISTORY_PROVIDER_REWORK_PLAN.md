@@ -159,7 +159,7 @@ Backend-independent cleanup of stored history, driven by ConfigAdmin, executed b
 
 - **Factory PID `sensinact.history.housekeeping`** (DS factory component in history-core) — multiple independent policies. Config properties per instance:
   - `target` — history-provider name(s) the policy applies to; default `*`.
-  - `include.resources` / `exclude.resources` — optional JSON `ResourceSelector` arrays scoping the policy to specific resources (same format/machinery as the historization filter).
+  - `include.resources` / `exclude.resources` — optional JSON `ResourceSelector` arrays scoping the policy to specific resources (same format/machinery as the historization filter). *Deferred beyond M2*: selector→path resolution needs a path enumeration source (`PruneRequest.paths` already carries resolved paths, so this lands without SPI change — planned with M3 alongside the backend's native scoping).
   - `retention.period` — ISO-8601 duration (e.g. `P90D`): records older than `now - period` are deleted.
   - `keep.count` — optional: keep only the newest N records per resource (a record is deleted if it violates *either* bound when both are set).
   - `schedule.period` — how often the policy runs, ISO-8601 duration, default `PT24H`; first run delayed one period after activation (no surprise mass-delete on startup).
