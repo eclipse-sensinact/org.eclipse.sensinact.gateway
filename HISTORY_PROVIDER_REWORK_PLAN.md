@@ -97,6 +97,8 @@ public interface HistoryProvider {
     Optional<TimedValue<?>> getValueAt(ResourcePath p, Instant at);  // at-or-before
     Optional<TimedValue<?>> getFirstValue(ResourcePath p);
     Optional<TimedValue<?>> getLatestValue(ResourcePath p);
+    default List<TimedValue<?>> getFirstValues(ResourcePath p, int limit, long skip); // oldest, chronological
+    default List<TimedValue<?>> getLastValues(ResourcePath p, int limit, long skip);  // newest first
     long getValueCount(ResourcePath p, TimeRange range);
     HistoryPage getValues(HistoryQuery q);                   // no cap, no magic markers
     default Stream<TimedValue<?>> streamValues(HistoryQuery q, long maxTotal);
@@ -132,6 +134,8 @@ Normalization happens once in history-core (adapted from `TimescaleDatabaseWorke
 
 history-core manager tracks `HistoryStorage` services (MULTIPLE/DYNAMIC); per service it registers the typed-event listener (ICriterion include/exclude from `PROP_INCLUDE`/`PROP_EXCLUDE` props, as today via `ResourceSelectorFilterFactory`), the `HistoryProvider` engine (limit clamping, capability gating), the ACT facade, and the synthetic twin provider (serialize create/delete per name). Config changes re-register the service with new properties → **structurally fixes the @Modified selector bug**.
 
+**Multi-backend routing** (review question): storing different resources on different backends is a configuration exercise — several `HistoryStorage` services coexist, each with its own name and include/exclude selectors (plus `target`-scoped historization filters), and each appears as its own `HistoryProvider`/ACT facade. Deliberately out of scope: **federated queries** (one logical provider transparently spanning backends) — consumers bind exactly one provider by name. A federating `HistoryProvider` that routes queries by selector could be added later without API change.
+
 ### Configurable historization filter (ConfigAdmin)
 
 A standalone, backend-independent filter stage in the history-core ingestion pipeline decides per resource whether an update is historized. Sits *in front of* every `HistoryStorage`, replacing the current situation where filtering is a private config detail of the TimescaleDB provider.
@@ -159,6 +163,7 @@ Backend-independent cleanup of stored history, driven by ConfigAdmin, executed b
   - `retention.period` — ISO-8601 duration (e.g. `P90D`): records older than `now - period` are deleted.
   - `keep.count` — optional: keep only the newest N records per resource (a record is deleted if it violates *either* bound when both are set).
   - `schedule.period` — how often the policy runs, ISO-8601 duration, default `PT24H`; first run delayed one period after activation (no surprise mass-delete on startup).
+  - `max.delete` — optional per-run safety cap (review feedback): the backend must not delete more than this many records per run (`PruneRequest.maxDelete`); a run that hits the cap is logged as a WARNING (policy likely misconfigured) — bounds the damage of a wrong selector/period regardless of anything else.
 - **Execution**: a single scheduler in history-core (`ScheduledExecutorService`) resolves each policy to the targeted `HistoryStorage` services and calls `prune(PruneRequest)`; runs are serialized per backend, logged with the deleted-record count, and never overlap ingestion-critical paths (prune is a backend-side operation).
 - **SPI addition**: `long prune(PruneRequest)` with `PruneRequest(scope include/exclude selectors or paths, Instant olderThan, OptionalLong keepLatestPerResource)` → returns deleted count. Backends may optimize natively: TimescaleDB `drop_chunks`/retention policies when the scope is table-wide (age-only, no selector) and plain `DELETE` otherwise; MongoDB TTL indexes only cover the age-only whole-collection case (TTL is collection-global on time-series collections — scoped policies need explicit deletes); in-memory trivially. Whether native retention exists and how well scoped deletes perform becomes an **evaluation criterion in stream A** (folded into ops-fit scoring, measured by a T4 prune suite in the contract test).
 - **Safety**: a policy with neither `retention.period` nor `keep.count` is invalid and ignored (logged); deletions are irreversible, so each run logs policy id, scope, cutoff, and count at INFO. A future `mode=downsample` (aggregate-then-delete, AGGREGATION-capability-gated) is noted as deferred — the `PruneRequest`/config shape stays additive for it.

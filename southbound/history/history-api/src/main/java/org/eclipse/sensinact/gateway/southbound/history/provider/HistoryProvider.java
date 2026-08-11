@@ -60,6 +60,26 @@ public interface HistoryProvider {
     /** Newest stored value. */
     Optional<TimedValue<?>> getLatestValue(ResourcePath path);
 
+    /**
+     * The oldest values in chronological order, skipping the {@code skip}
+     * oldest ones. Convenience for {@link #getValues(HistoryQuery)} with
+     * ascending order.
+     */
+    default List<TimedValue<?>> getFirstValues(ResourcePath path, int limit, long skip) {
+        return getValues(HistoryQuery.builder(path).order(SortOrder.ASCENDING).offset(skip).limit(limit).build())
+                .values();
+    }
+
+    /**
+     * The newest values, newest first, skipping the {@code skip} newest
+     * ones. Convenience for {@link #getValues(HistoryQuery)} with descending
+     * order; reverse the list for chronological display.
+     */
+    default List<TimedValue<?>> getLastValues(ResourcePath path, int limit, long skip) {
+        return getValues(HistoryQuery.builder(path).order(SortOrder.DESCENDING).offset(skip).limit(limit).build())
+                .values();
+    }
+
     long getValueCount(ResourcePath path, TimeRange range);
 
     /**

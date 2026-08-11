@@ -23,8 +23,13 @@ import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
  * backend. A record is deleted when it is older than {@code olderThan} (if
  * set) OR beyond the newest {@code keepLatestPerResource} records of its
  * resource (if set); at least one bound is required.
+ *
+ * {@code maxDelete} (optional) is a per-run safety cap: implementations must
+ * not delete more than that many records for this request, whatever the other
+ * bounds select. The engine treats a run that hits the cap as a warning sign
+ * of a misconfigured policy.
  */
-public record PruneRequest(List<ResourcePath> paths, Instant olderThan, Long keepLatestPerResource) {
+public record PruneRequest(List<ResourcePath> paths, Instant olderThan, Long keepLatestPerResource, Long maxDelete) {
 
     public PruneRequest {
         if (olderThan == null && keepLatestPerResource == null) {
@@ -33,6 +38,14 @@ public record PruneRequest(List<ResourcePath> paths, Instant olderThan, Long kee
         if (keepLatestPerResource != null && keepLatestPerResource < 0) {
             throw new IllegalArgumentException("keepLatestPerResource must not be negative");
         }
+        if (maxDelete != null && maxDelete <= 0) {
+            throw new IllegalArgumentException("maxDelete must be positive");
+        }
         paths = paths == null ? null : List.copyOf(paths);
+    }
+
+    /** Request without a safety cap. */
+    public PruneRequest(List<ResourcePath> paths, Instant olderThan, Long keepLatestPerResource) {
+        this(paths, olderThan, keepLatestPerResource, null);
     }
 }

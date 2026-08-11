@@ -15,6 +15,8 @@ package org.eclipse.sensinact.gateway.southbound.history.provider;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -70,14 +72,23 @@ class HistoryProviderStreamTest {
         @Override
         public HistoryPage getValues(HistoryQuery query) {
             pagesServed++;
-            int from = (int) Math.min(query.offset(), data.size());
-            int to = Math.min(from + getMaxPageSize(), data.size());
-            return HistoryPage.of(data.subList(from, to), query.offset(), to < data.size());
+            List<TimedValue<?>> ordered = query.order() == SortOrder.DESCENDING ? reversedData() : data;
+            int pageSize = query.limit() == HistoryQuery.PROVIDER_DEFAULT_LIMIT ? getMaxPageSize()
+                    : Math.min(query.limit(), getMaxPageSize());
+            int from = (int) Math.min(query.offset(), ordered.size());
+            int to = Math.min(from + pageSize, ordered.size());
+            return HistoryPage.of(ordered.subList(from, to), query.offset(), to < ordered.size());
         }
 
         @Override
         public int getMaxPageSize() {
             return 4;
+        }
+
+        private List<TimedValue<?>> reversedData() {
+            List<TimedValue<?>> reversed = new ArrayList<>(data);
+            Collections.reverse(reversed);
+            return reversed;
         }
 
         @Override
@@ -116,6 +127,24 @@ class HistoryProviderStreamTest {
                 .<Object>map(TimedValue::getValue).toList();
 
         assertEquals(LongStream.range(7, 10).boxed().toList(), values);
+    }
+
+    @Test
+    void firstValuesAreOldestInChronologicalOrder() {
+        ListBackedProvider provider = new ListBackedProvider();
+
+        List<Object> values = provider.getFirstValues(PATH, 3, 1).stream().<Object>map(TimedValue::getValue).toList();
+
+        assertEquals(List.of(1L, 2L, 3L), values);
+    }
+
+    @Test
+    void lastValuesAreNewestFirst() {
+        ListBackedProvider provider = new ListBackedProvider();
+
+        List<Object> values = provider.getLastValues(PATH, 3, 1).stream().<Object>map(TimedValue::getValue).toList();
+
+        assertEquals(List.of(8L, 7L, 6L), values);
     }
 
     @Test
