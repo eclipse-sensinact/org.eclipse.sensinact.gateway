@@ -14,6 +14,7 @@ package org.eclipse.sensinact.gateway.southbound.history.core.contract;
 
 import org.eclipse.sensinact.gateway.southbound.history.inmemory.InMemoryHistoryStorage;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryStorage;
+import org.eclipse.sensinact.gateway.southbound.history.testsupport.HistoryStorageContractTest;
 
 class InMemoryHistoryStorageContractTest extends HistoryStorageContractTest {
 

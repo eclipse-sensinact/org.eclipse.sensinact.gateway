@@ -10,7 +10,7 @@
 * Contributors:
 *   Data In Motion - initial API and implementation
 **********************************************************************/
-package org.eclipse.sensinact.gateway.southbound.history.core.contract;
+package org.eclipse.sensinact.gateway.southbound.history.testsupport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -127,7 +127,7 @@ public abstract class HistoryStorageContractTest {
     class T1RoundTripFidelity {
 
         @ParameterizedTest
-        @MethodSource("org.eclipse.sensinact.gateway.southbound.history.core.contract.HistoryStorageContractTest#roundTripValues")
+        @MethodSource("org.eclipse.sensinact.gateway.southbound.history.testsupport.HistoryStorageContractTest#roundTripValues")
         void numericValueAndTypeSurvive(Object value) {
             storeAt(T0, ValueKind.NUMBER, value);
 

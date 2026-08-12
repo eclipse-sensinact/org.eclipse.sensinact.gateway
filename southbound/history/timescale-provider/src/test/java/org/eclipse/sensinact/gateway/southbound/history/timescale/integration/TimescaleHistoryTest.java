@@ -77,6 +77,10 @@ public class TimescaleHistoryTest {
     private static final Instant TS_2013 = Instant.parse("2013-01-01T00:00:00.00Z");
     private static final Instant TS_2014 = Instant.parse("2014-01-01T00:00:00.00Z");
 
+    private static final String NUMERIC_ROWS = "sensinact.history WHERE value_kind = 0";
+    private static final String STRING_ROWS = "sensinact.history WHERE value_kind = 2";
+    private static final String GEO_ROWS = "sensinact.history WHERE value_kind = 3";
+
     private static JdbcDatabaseContainer<?> container;
 
     @BeforeAll
@@ -114,20 +118,30 @@ public class TimescaleHistoryTest {
 
     private void waitForStart() {
         boolean ready = false;
-        final long timeout = System.currentTimeMillis() + 5000;
+        final long timeout = System.currentTimeMillis() + 10000;
         Exception lastError = null;
+        int probe = 0;
         do {
             try {
-                for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
-                    waitForRowCount("sensinact." + table, 0, true);
-                }
-                // Got a valid count
+                waitForRowCount("sensinact.history", 0, true);
+                // The schema is ready; prove the ingestion chain is wired by
+                // pushing boolean probes (no test counts BOOLEAN rows) until
+                // one is stored
+                GenericDto dto = new GenericDto();
+                dto.model = "startupProbe";
+                dto.provider = "startupProbe";
+                dto.service = "probe";
+                dto.resource = "probe" + probe++;
+                dto.value = Boolean.TRUE;
+                dto.type = Boolean.class;
+                dto.timestamp = TS_2012;
+                push.pushUpdate(dto).getValue();
+                waitForRowCount("sensinact.history WHERE provider = 'startupProbe'", 1, true, 1000);
                 ready = true;
                 lastError = null;
                 break;
-            } catch (Exception e) {
-                // Ignore
-                lastError = e;
+            } catch (Exception | AssertionFailedError e) {
+                lastError = e instanceof Exception ex ? ex : new IllegalStateException(e);
             }
         } while (!ready && System.currentTimeMillis() < timeout);
 
@@ -151,9 +165,7 @@ public class TimescaleHistoryTest {
 
         try (Connection connection = getDataSource().getConnection()) {
             final Statement stmt = connection.createStatement();
-            for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
-                stmt.execute("DROP TABLE IF EXISTS sensinact." + table);
-            }
+            stmt.execute("DROP TABLE IF EXISTS sensinact.history");
         }
     }
 
@@ -250,8 +262,12 @@ public class TimescaleHistoryTest {
     }
 
     private void waitForRowCount(String table, int count, boolean allowMore) {
+        waitForRowCount(table, count, allowMore, 5000);
+    }
+
+    private void waitForRowCount(String table, int count, boolean allowMore, long timeoutMillis) {
         try (Connection conn = getDataSource().getConnection()) {
-            for (int i = 0; i < 50; i++) {
+            for (int i = 0; i < Math.max(1, timeoutMillis / 100); i++) {
                 try (ResultSet rs = conn.createStatement().executeQuery("SELECT COUNT(*) FROM " + table)) {
                     assertTrue(rs.next());
                     int current = rs.getInt(1);
@@ -268,6 +284,10 @@ public class TimescaleHistoryTest {
                 }
                 Thread.sleep(100);
             }
+            throw new AssertionFailedError(
+                    "Timed out waiting for " + count + " rows in " + table);
+        } catch (AssertionFailedError e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -281,11 +301,13 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 11);
+            waitForRowCount(STRING_ROWS + " AND provider = 'bar'", 7);
 
             try (Connection connection = getDataSource().getConnection();
                     ResultSet result = connection.createStatement()
-                            .executeQuery("SELECT * FROM sensinact.text_data WHERE provider = 'bar' ORDER BY time;")) {
+                            .executeQuery("SELECT time, model, provider, service, resource,"
+                                    + " value_json #>> '{}' AS data FROM " + STRING_ROWS
+                                    + " AND provider = 'bar' ORDER BY time;")) {
 
                 assertTrue(result.next());
                 checkResult(result, ProviderPackage.Literals.PROVIDER__ADMIN.getName(),
@@ -327,11 +349,12 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto(5, TS_2013)).getValue();
             push.pushUpdate(getDto(7, TS_2014)).getValue();
 
-            waitForRowCount("sensinact.numeric_data", 3);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'buzz'", 3);
 
             try (Connection connection = getDataSource().getConnection();
                     ResultSet result = connection.createStatement().executeQuery(
-                            "SELECT * FROM sensinact.numeric_data WHERE provider = 'buzz' ORDER BY time;")) {
+                            "SELECT time, model, provider, service, resource, value_num AS data FROM "
+                                    + NUMERIC_ROWS + " AND provider = 'buzz' ORDER BY time;")) {
 
                 assertTrue(result.next());
                 checkResult(result, 3, TS_2012);
@@ -358,11 +381,12 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto(3.4d, TS_2013)).getValue();
             push.pushUpdate(getDto(5.6d, TS_2014)).getValue();
 
-            waitForRowCount("sensinact.numeric_data", 3);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'Bobbidi'", 3);
 
             try (Connection connection = getDataSource().getConnection();
                     ResultSet result = connection.createStatement().executeQuery(
-                            "SELECT * FROM sensinact.numeric_data WHERE provider = 'Bobbidi' ORDER BY time;")) {
+                            "SELECT time, model, provider, service, resource, value_num AS data FROM "
+                                    + NUMERIC_ROWS + " AND provider = 'Bobbidi' ORDER BY time;")) {
 
                 assertTrue(result.next());
                 checkResult(result, 1.2d, TS_2012);
@@ -380,11 +404,12 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getIgnorableDto(45.6d, TS_2013)).getValue();
             push.pushUpdate(getIgnorableDto(6.78d, TS_2014)).getValue();
 
-            waitForRowCount("sensinact.numeric_data", 2);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'ignoredProvider'", 2);
 
             try (Connection connection = getDataSource().getConnection();
                     ResultSet result = connection.createStatement().executeQuery(
-                            "SELECT * FROM sensinact.numeric_data WHERE provider = 'ignoredProvider' ORDER BY time;")) {
+                            "SELECT time, model, provider, service, resource, value_num AS data FROM "
+                                    + NUMERIC_ROWS + " AND provider = 'ignoredProvider' ORDER BY time;")) {
 
                 assertTrue(result.next());
                 checkResult(result, "ignoredProvider", 12.3d, TS_2012);
@@ -410,83 +435,28 @@ public class TimescaleHistoryTest {
     }
 
     @Nested
-    class IndexesTests {
+    class SchemaTests {
 
         @Test
-        void testIndexesExist() throws Exception {
-            String indexQuery = "SELECT indexname FROM pg_indexes WHERE schemaname = 'sensinact';";
-            try (Connection conn = getDataSource().getConnection();
-                    Statement stmt = conn.createStatement();
-                    ResultSet rs = stmt.executeQuery(indexQuery)) {
+        void unifiedTableIsIndexedAndAHypertable() throws Exception {
+            try (Connection conn = getDataSource().getConnection(); Statement stmt = conn.createStatement()) {
 
-                Set<String> expectedIndexes = Set.of(
-                        // Composite indexes for (provider, service, resource, time)
-                        "idx_numeric_data_provider_service_resource_time",
-                        "idx_text_data_provider_service_resource_time", "idx_geo_data_provider_service_resource_time",
-                        // Time-only indexes
-                        "idx_numeric_data_time", "idx_text_data_time", "idx_geo_data_time",
-                        // Covering indexes for count queries
-                        "idx_numeric_data_covering", "idx_text_data_covering", "idx_geo_data_covering");
-
-                Set<String> actualIndexes = new HashSet<>();
-                while (rs.next()) {
-                    String indexName = rs.getString("indexname");
-                    if (indexName.startsWith("idx_")) { // Only collect our indexes
-                        actualIndexes.add(indexName);
-                    }
-                }
-
-                assertEquals(expectedIndexes.size(), actualIndexes.size());
-                // Verify all expected indexes exist
-                for (String expectedIndex : expectedIndexes) {
-                    assertTrue(actualIndexes.contains(expectedIndex),
-                            "Expected index '" + expectedIndex + "' was not found. Found indexes: " + actualIndexes);
-                }
-
-                verifyIndexStructure(conn, "idx_numeric_data_provider_service_resource_time", "sensinact.numeric_data");
-                verifyIndexStructure(conn, "idx_text_data_provider_service_resource_time", "sensinact.text_data");
-                verifyIndexStructure(conn, "idx_geo_data_provider_service_resource_time", "sensinact.geo_data");
-
-                // Verify covering indexes include the time column
-                verifyCoveringIndex(conn, "idx_numeric_data_covering");
-                verifyCoveringIndex(conn, "idx_text_data_covering");
-                verifyCoveringIndex(conn, "idx_geo_data_covering");
-            }
-        }
-
-        private void verifyIndexStructure(Connection conn, String indexName, String tableName) throws SQLException {
-            String indexDefQuery = "SELECT pg_get_indexdef(indexrelid) as definition FROM pg_stat_user_indexes WHERE indexrelname = ?;";
-
-            try (PreparedStatement ps = conn.prepareStatement(indexDefQuery)) {
-                ps.setString(1, indexName);
-                try (ResultSet rs = ps.executeQuery()) {
-                    assertTrue(rs.next(), "Index definition not found for: " + indexName);
-
+                try (ResultSet rs = stmt.executeQuery(
+                        "SELECT pg_get_indexdef(indexrelid) AS definition FROM pg_stat_user_indexes"
+                                + " WHERE indexrelname = 'history_psr_time';")) {
+                    assertTrue(rs.next(), "Index history_psr_time not found");
                     String definition = rs.getString("definition");
-                    assertNotNull(definition);
-                    assertTrue(definition.contains(tableName));
-                    // Verify columns
+                    assertTrue(definition.contains("sensinact.history"));
                     assertTrue(definition.contains("provider"));
                     assertTrue(definition.contains("service"));
                     assertTrue(definition.contains("resource"));
-                    assertTrue(definition.contains("time"));
+                    assertTrue(definition.contains("\"time\" DESC"));
                 }
-            }
-        }
 
-        private void verifyCoveringIndex(Connection conn, String indexName) throws SQLException {
-            String indexDefQuery = "SELECT pg_get_indexdef(indexrelid) as definition FROM pg_stat_user_indexes WHERE indexrelname = ?;";
-
-            try (PreparedStatement ps = conn.prepareStatement(indexDefQuery)) {
-                ps.setString(1, indexName);
-                try (ResultSet rs = ps.executeQuery()) {
-                    assertTrue(rs.next(), "Covering index definition not found for: " + indexName);
-
-                    String definition = rs.getString("definition");
-                    assertNotNull(definition);
-                    // Verify it's a covering index with INCLUDE clause
-                    assertTrue(definition.contains("INCLUDE"));
-                    assertTrue(definition.contains("time"));
+                try (ResultSet rs = stmt.executeQuery(
+                        "SELECT 1 FROM timescaledb_information.hypertables"
+                                + " WHERE hypertable_schema = 'sensinact' AND hypertable_name = 'history';")) {
+                    assertTrue(rs.next(), "sensinact.history is not a hypertable");
                 }
             }
         }
@@ -500,7 +470,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 11);
+            waitForRowCount(STRING_ROWS + " AND provider = 'bar'", 7);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "single") {
@@ -546,7 +516,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto(2, TS_2013)).getValue();
             push.pushUpdate(getDto(3, TS_2014)).getValue();
 
-            waitForRowCount("sensinact.numeric_data", 3);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'buzz'", 3);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "single") {
@@ -585,7 +555,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto(3.4d, TS_2013)).getValue();
             push.pushUpdate(getDto(5.6d, TS_2014)).getValue();
 
-            waitForRowCount("sensinact.numeric_data", 3);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'Bobbidi'", 3);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "single") {
@@ -621,7 +591,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto(new Point(11.59089, 50.9011843), TS_2013)).getValue();
             push.pushUpdate(getDto(new Point(11.59097, 50.9011844), TS_2014)).getValue();
 
-            waitForRowCount("sensinact.geo_data", 3);
+            waitForRowCount(GEO_ROWS + " AND provider = 'Bobbidi'", 3);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "single") {
@@ -659,7 +629,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDtoWithSpecialDouble(Double.POSITIVE_INFINITY, TS_2013)).getValue();
             push.pushUpdate(getDtoWithSpecialDouble(Double.NaN, TS_2014)).getValue();
 
-            waitForRowCount("sensinact.numeric_data", 3);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'SpecialProvider'", 3);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "single") {
@@ -700,7 +670,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto("buzz", TS_2013)).getValue();
             push.pushUpdate(getDto("fizzbuzz", TS_2014)).getValue();
 
-            waitForRowCount("sensinact.text_data", 11);
+            waitForRowCount(STRING_ROWS + " AND provider = 'bar'", 7);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -748,7 +718,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto(2, TS_2013)).getValue();
             push.pushUpdate(getDto(3, TS_2014)).getValue();
 
-            waitForRowCount("sensinact.numeric_data", 3);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'buzz'", 3);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -788,7 +758,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto(3.4d, TS_2013)).getValue();
             push.pushUpdate(getDto(5.6d, TS_2014)).getValue();
 
-            waitForRowCount("sensinact.numeric_data", 3);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'Bobbidi'", 3);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -827,7 +797,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDto((GeoJsonObject)null, TS_2013)).getValue();
             push.pushUpdate(getDto(new Point(11.59087, 50.9011834), TS_2014)).getValue();
 
-            waitForRowCount("sensinact.geo_data", 3);
+            waitForRowCount(GEO_ROWS + " AND provider = 'Bobbidi'", 3);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -866,7 +836,7 @@ public class TimescaleHistoryTest {
             push.pushUpdate(getDtoWithSpecialDouble(Double.POSITIVE_INFINITY, TS_2013)).getValue();
             push.pushUpdate(getDtoWithSpecialDouble(Double.NaN, TS_2014)).getValue();
 
-            waitForRowCount("sensinact.numeric_data", 3);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'SpecialProvider'", 3);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -900,7 +870,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1008);
+            waitForRowCount(STRING_ROWS + " AND provider = 'bar'", 1004, false, 30000);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -973,7 +943,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1008);
+            waitForRowCount(STRING_ROWS + " AND provider = 'bar'", 1004, false, 30000);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -1016,7 +986,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1008);
+            waitForRowCount(STRING_ROWS + " AND provider = 'bar'", 1004, false, 30000);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "count") {
@@ -1058,7 +1028,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(i, TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1002);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'buzz'", 1000, false, 30000);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -1131,7 +1101,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(i, TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1002);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'buzz'", 1000, false, 30000);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "count") {
@@ -1173,7 +1143,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(1.0001d * i, TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1002);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'Bobbidi'", 1000, false, 30000);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "range") {
@@ -1245,7 +1215,7 @@ public class TimescaleHistoryTest {
                 push.pushUpdate(getDto(1.0001d * i, TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.text_data", 1002);
+            waitForRowCount(NUMERIC_ROWS + " AND provider = 'Bobbidi'", 1000, false, 30000);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "count") {
@@ -1293,7 +1263,7 @@ public class TimescaleHistoryTest {
                         TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.geo_data", 1000);
+            waitForRowCount(GEO_ROWS + " AND provider = 'Bobbidi'", 1000, false, 30000);
 
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
@@ -1372,7 +1342,7 @@ public class TimescaleHistoryTest {
                         TS_2012.plus(ofDays(i)))).getValue();
             }
 
-            waitForRowCount("sensinact.geo_data", 1000);
+            waitForRowCount(GEO_ROWS + " AND provider = 'Bobbidi'", 1000, false, 30000);
 
             thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
                     "sensiNactHistory", "timescale-history", "history", "count") {

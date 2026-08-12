@@ -29,6 +29,7 @@
     <module>history-api</module>
     <module>history-inmemory</module>
     <module>history-core</module>
+    <module>history-testsupport</module>
   </modules>
 
   <dependencyManagement>

@@ -18,7 +18,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.Callable;
 
-import org.eclipse.sensinact.gateway.southbound.history.core.contract.HistoryStorageContractTest;
+import org.eclipse.sensinact.gateway.southbound.history.testsupport.HistoryStorageContractTest;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryStorage;
 import org.eclipse.sensinact.gateway.southbound.history.timescale.TimescaleHistoryStorage.TxRunner;
 import org.testcontainers.postgresql.PostgreSQLContainer;

@@ -113,7 +113,12 @@
       <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
       <artifactId>history-core</artifactId>
       <version>${project.version}</version>
-      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
+      <artifactId>history-testsupport</artifactId>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
