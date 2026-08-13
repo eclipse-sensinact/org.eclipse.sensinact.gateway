@@ -9,6 +9,7 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Data In Motion - rework onto the HistoryProvider service
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact;
 
@@ -18,18 +19,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
@@ -38,6 +38,10 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.api.FilterParserException;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
+import org.eclipse.sensinact.gateway.southbound.history.provider.SortOrder;
 import org.eclipse.sensinact.northbound.filters.sensorthings.impl.SensorthingsFilterComponent;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -47,6 +51,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -59,11 +64,16 @@ import jakarta.ws.rs.core.UriInfo;
 @ExtendWith(MockitoExtension.class)
 class HistoryResourceHelperSensinactTest {
 
+    private static final ResourcePath PATH = new ResourcePath("testProvider", "testService", "testResource");
+
     @Mock
     private SensiNactSession userSession;
 
     @Mock
     private Application application;
+
+    @Mock
+    private HistoryProvider history;
 
     @Mock
     private ObjectMapper mapper;
@@ -86,18 +96,17 @@ class HistoryResourceHelperSensinactTest {
     @Mock
     private UriBuilder uriBuilder;
 
-    // Helper method to verify parameter maps contain expected basic parameters
-    private Map<String, Object> hasBasicParams() {
-        return argThat(params -> params != null && "testProvider".equals(params.get("provider"))
-                && "testService".equals(params.get("service")) && "testResource".equals(params.get("resource")));
-    }
-
     private void setupResourceSnapshotMocks() {
         when(resourceSnapshot.getService()).thenReturn(serviceSnapshot);
         when(serviceSnapshot.getProvider()).thenReturn(providerSnapshot);
         when(providerSnapshot.getName()).thenReturn("testProvider");
         when(serviceSnapshot.getName()).thenReturn("testService");
         when(resourceSnapshot.getName()).thenReturn("testResource");
+    }
+
+    private void setupApplication(int maxResults) {
+        when(application.getProperties()).thenReturn(
+                Map.of("sensinact.history.service", history, "sensinact.history.result.limit", maxResults));
     }
 
     @Nested
@@ -110,12 +119,12 @@ class HistoryResourceHelperSensinactTest {
             when(uriBuilder.uri(anyString())).thenReturn(uriBuilder);
             when(uriBuilder.resolveTemplate(eq("id"), startsWith("testProvider~testService~testResource~")))
                     .thenReturn(uriBuilder);
-            when(uriBuilder.build(any(Object[].class))).thenReturn(java.net.URI.create("http://test.com/test"));
-            when(uriBuilder.build()).thenReturn(java.net.URI.create("http://test.com/test"));
+            when(uriBuilder.build(any(Object[].class))).thenReturn(URI.create("http://test.com/test"));
+            when(uriBuilder.build()).thenReturn(URI.create("http://test.com/test"));
         }
 
         @Test
-        @DisplayName("Should return empty result when no history provider is configured")
+        @DisplayName("Should return empty result when no history provider is available")
         void noHistoryProvider() {
             when(application.getProperties()).thenReturn(Map.of());
 
@@ -127,100 +136,80 @@ class HistoryResourceHelperSensinactTest {
         }
 
         @Test
-        @DisplayName("Should process historical data when history provider is configured")
+        @DisplayName("Should process historical data through the HistoryProvider service")
         void withHistoryProvider() {
             Instant now = Instant.now();
             setupResourceSnapshotMocks();
             setupUriBuilder();
-            String historyProvider = "test-history-provider";
-            Integer maxResults = 1000;
-            Long count = 5L;
+            setupApplication(1000);
 
-            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
-                    "sensinact.history.result.limit", maxResults);
-            when(application.getProperties()).thenReturn(appProperties);
-
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
-                    .thenReturn(count);
-
-            List<TimedValue<?>> timedValues = Arrays.asList(new DefaultTimedValue<>("value1", now),
-                    new DefaultTimedValue<>("value2", now));
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
-                    .thenReturn(timedValues);
+            when(history.getValueCount(eq(PATH), any())).thenReturn(5L);
+            when(history.streamValues(any(), anyLong())).thenReturn(
+                    Stream.of(new DefaultTimedValue<>("value2", now), new DefaultTimedValue<>("value1", now)));
 
             ResultList<Observation> result = HistoryResourceHelperSensinact.loadHistoricalObservations(userSession,
                     application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
-            assertEquals(count.intValue(), result.count().intValue());
-            verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams());
-            verify(userSession, times(3)).actOnResource(eq(historyProvider), eq("history"), eq("range"),
-                    hasBasicParams());
+            assertEquals(5, result.count().intValue());
+            assertEquals(2, result.value().size());
+            // the newest-first stream is reversed to chronological order
+            assertEquals("value1", result.value().get(0).result());
+            assertEquals("value2", result.value().get(1).result());
         }
 
         @Test
-        @DisplayName("Should apply local result limit when provided")
+        @DisplayName("Should request the newest values up to the local result limit")
         void withLocalResultLimit() {
             setupResourceSnapshotMocks();
-            String historyProvider = "test-history-provider";
-            Integer maxResults = 1000;
-            int localResultLimit = 100;
-
-            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
-                    "sensinact.history.result.limit", maxResults);
-            when(application.getProperties()).thenReturn(appProperties);
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
-                    .thenReturn(50L);
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
-                    .thenReturn(Arrays.asList());
+            setupApplication(1000);
+            when(history.getValueCount(eq(PATH), any())).thenReturn(50L);
+            when(history.streamValues(any(), anyLong())).thenReturn(Stream.of());
 
             HistoryResourceHelperSensinact.loadHistoricalObservations(userSession, application, mapper, uriInfo,
-                    expansions, resourceSnapshot, null, localResultLimit);
+                    expansions, resourceSnapshot, null, 100);
 
-            verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams());
+            ArgumentCaptor<HistoryQuery> query = ArgumentCaptor.forClass(HistoryQuery.class);
+            ArgumentCaptor<Long> maxTotal = ArgumentCaptor.forClass(Long.class);
+            verify(history).streamValues(query.capture(), maxTotal.capture());
+            assertEquals(PATH, query.getValue().path());
+            assertEquals(SortOrder.DESCENDING, query.getValue().order());
+            assertEquals(100L, maxTotal.getValue());
         }
 
         @Test
-        @DisplayName("Should apply SensorThings filter to the history")
+        @DisplayName("Should apply SensorThings filter to the history and adjust the count")
         void withFilter() throws FilterParserException {
             Instant now = Instant.now();
             setupResourceSnapshotMocks();
             setupUriBuilder();
-            String historyProvider = "test-history-provider";
-            Integer maxResults = 1000;
-            Long count = 6L;
+            setupApplication(1000);
 
-            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
-                    "sensinact.history.result.limit", maxResults);
-            when(application.getProperties()).thenReturn(appProperties);
+            when(history.getValueCount(eq(PATH), any())).thenReturn(6L);
 
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
-                    .thenReturn(count);
             SensorthingsFilterComponent filterComponent = new SensorthingsFilterComponent();
             filterComponent.setSession(userSession);
             ICriterion filter = filterComponent.parseFilter(
                     String.format("result eq 'value1' or phenomenonTime lt %s", now.minus(1, DAYS)), OBSERVATIONS);
 
-            List<TimedValue<?>> timedValues = Arrays.asList(new DefaultTimedValue<>("value1", now),
-                    new DefaultTimedValue<>("value2", now));
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
-                    .thenReturn(timedValues, timedValues, List.of(new DefaultTimedValue<>("value1", now.minus(3, DAYS)),
-                            new DefaultTimedValue<>("value3", now.minus(3, DAYS))), List.of());
+            // newest first, as the provider returns them
+            when(history.streamValues(any(), anyLong())).thenReturn(Stream.<TimedValue<?>>of(
+                    new DefaultTimedValue<>("value1", now), new DefaultTimedValue<>("value2", now),
+                    new DefaultTimedValue<>("value1", now), new DefaultTimedValue<>("value2", now),
+                    new DefaultTimedValue<>("value1", now.minus(3, DAYS)),
+                    new DefaultTimedValue<>("value3", now.minus(3, DAYS))));
 
             ResultList<Observation> result = HistoryResourceHelperSensinact.loadHistoricalObservations(userSession,
                     application, mapper, uriInfo, expansions, resourceSnapshot, filter, 0);
 
             assertNotNull(result);
             assertEquals(4, result.value().size());
-            // Result batches come in reverse order
-            assertEquals("value1", result.value().get(0).result());
-            assertEquals("value3", result.value().get(1).result());
+            // chronological order, the two value2 entries filtered out
+            assertEquals("value3", result.value().get(0).result());
+            assertEquals("value1", result.value().get(1).result());
             assertEquals("value1", result.value().get(2).result());
             assertEquals("value1", result.value().get(3).result());
             assertEquals(4, result.count().intValue());
-            verify(userSession).actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams());
-            verify(userSession, times(3)).actOnResource(eq(historyProvider), eq("history"), eq("range"),
-                    hasBasicParams());
         }
     }
 
@@ -229,19 +218,12 @@ class HistoryResourceHelperSensinactTest {
     class EdgeCases {
 
         @Test
-        @DisplayName("Should handle count exceeding Integer.MAX_VALUE")
+        @DisplayName("Should clamp a count exceeding Integer.MAX_VALUE")
         void countExceedsIntegerMax() {
             setupResourceSnapshotMocks();
-            String historyProvider = "test-history-provider";
-            Long largeCount = (long) Integer.MAX_VALUE + 1;
-
-            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
-                    "sensinact.history.result.limit", 1000);
-            when(application.getProperties()).thenReturn(appProperties);
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
-                    .thenReturn(largeCount);
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
-                    .thenReturn(Arrays.asList());
+            setupApplication(1000);
+            when(history.getValueCount(eq(PATH), any())).thenReturn((long) Integer.MAX_VALUE + 1);
+            when(history.streamValues(any(), anyLong())).thenReturn(Stream.of());
 
             ResultList<Observation> result = HistoryResourceHelperSensinact.loadHistoricalObservations(userSession,
                     application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
@@ -251,24 +233,19 @@ class HistoryResourceHelperSensinactTest {
         }
 
         @Test
-        @DisplayName("Should handle null count from history provider")
-        void nullCount() {
+        @DisplayName("Should report a zero count for empty history")
+        void emptyHistoryHasZeroCount() {
             setupResourceSnapshotMocks();
-            String historyProvider = "test-history-provider";
-
-            Map<String, Object> appProperties = Map.of("sensinact.history.provider", historyProvider,
-                    "sensinact.history.result.limit", 1000);
-            when(application.getProperties()).thenReturn(appProperties);
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("count"), hasBasicParams()))
-                    .thenReturn(null);
-            when(userSession.actOnResource(eq(historyProvider), eq("history"), eq("range"), hasBasicParams()))
-                    .thenReturn(Arrays.asList());
+            setupApplication(1000);
+            when(history.getValueCount(eq(PATH), any())).thenReturn(0L);
+            when(history.streamValues(any(), anyLong())).thenReturn(Stream.of());
 
             ResultList<Observation> result = HistoryResourceHelperSensinact.loadHistoricalObservations(userSession,
                     application, mapper, uriInfo, expansions, resourceSnapshot, null, 0);
 
             assertNotNull(result);
-            assertEquals(null, result.count());
+            assertEquals(0, result.count().intValue());
+            assertTrue(result.value().isEmpty());
         }
     }
 }

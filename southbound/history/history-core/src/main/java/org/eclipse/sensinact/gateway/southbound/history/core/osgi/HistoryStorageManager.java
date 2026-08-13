@@ -39,6 +39,7 @@ import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryIngestFilter;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryStorage;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -80,7 +81,8 @@ public class HistoryStorageManager {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private final Map<HistoryStorage, ManagedBackend> backends = new LinkedHashMap<>();
+    private final Map<ServiceReference<HistoryStorage>, ManagedBackend> backends = new LinkedHashMap<>();
+    private final List<ServiceReference<HistoryStorage>> pendingStorages = new ArrayList<>();
     private final List<HistoryIngestFilter> filters = new ArrayList<>();
 
     private BundleContext context;
@@ -88,38 +90,67 @@ public class HistoryStorageManager {
     @Activate
     synchronized void activate(BundleContext context) {
         this.context = context;
+        pendingStorages.forEach(this::bindStorage);
+        pendingStorages.clear();
         backends.values().forEach(ManagedBackend::start);
     }
 
     @Deactivate
     synchronized void deactivate() {
         backends.values().forEach(ManagedBackend::stop);
+        backends.keySet().forEach(context::ungetService);
+        backends.clear();
         context = null;
     }
 
+    /**
+     * Bound by service reference, not object: on a configuration restart the
+     * same backend instance may be re-registered, and the new registration
+     * binds before the old one unbinds.
+     */
     @Reference(service = HistoryStorage.class, cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    synchronized void addStorage(HistoryStorage storage, Map<String, Object> properties) {
-        Object name = properties.get(HistoryStorage.PROP_NAME);
-        if (!(name instanceof String providerName) || providerName.isBlank()) {
-            logger.error("Ignoring a HistoryStorage service without the {} property", HistoryStorage.PROP_NAME);
+    synchronized void addStorage(ServiceReference<HistoryStorage> reference) {
+        if (context == null) {
+            pendingStorages.add(reference);
             return;
         }
-        if (backends.values().stream().anyMatch(backend -> backend.name.equals(providerName))) {
-            logger.error("Ignoring a HistoryStorage service with duplicate provider name {}", providerName);
-            return;
-        }
-        ManagedBackend backend = new ManagedBackend(providerName, storage, parseSelectors(properties,
-                HistoryStorage.PROP_INCLUDE), parseSelectors(properties, HistoryStorage.PROP_EXCLUDE));
-        backends.put(storage, backend);
-        if (context != null) {
+        bindStorage(reference);
+        ManagedBackend backend = backends.get(reference);
+        if (backend != null) {
             backend.start();
         }
     }
 
-    synchronized void removeStorage(HistoryStorage storage) {
-        ManagedBackend backend = backends.remove(storage);
+    private void bindStorage(ServiceReference<HistoryStorage> reference) {
+        Object name = reference.getProperty(HistoryStorage.PROP_NAME);
+        if (!(name instanceof String providerName) || providerName.isBlank()) {
+            logger.error("Ignoring a HistoryStorage service without the {} property", HistoryStorage.PROP_NAME);
+            return;
+        }
+        // the newest registration of a provider name wins
+        backends.entrySet().stream().filter(entry -> entry.getValue().name.equals(providerName)).findFirst()
+                .ifPresent(previous -> {
+                    logger.warn("Replacing the history backend {} with a newer registration", providerName);
+                    backends.remove(previous.getKey());
+                    previous.getValue().stop();
+                    context.ungetService(previous.getKey());
+                });
+        HistoryStorage storage = context.getService(reference);
+        if (storage == null) {
+            return;
+        }
+        ManagedBackend backend = new ManagedBackend(providerName, storage,
+                parseSelectors(reference, HistoryStorage.PROP_INCLUDE),
+                parseSelectors(reference, HistoryStorage.PROP_EXCLUDE));
+        backends.put(reference, backend);
+    }
+
+    synchronized void removeStorage(ServiceReference<HistoryStorage> reference) {
+        pendingStorages.remove(reference);
+        ManagedBackend backend = backends.remove(reference);
         if (backend != null) {
             backend.stop();
+            context.ungetService(reference);
         }
     }
 
@@ -134,8 +165,8 @@ public class HistoryStorageManager {
         backends.values().forEach(ManagedBackend::updateFilters);
     }
 
-    private ICriterion parseSelectors(Map<String, Object> properties, String key) {
-        Object value = properties.get(key);
+    private ICriterion parseSelectors(ServiceReference<HistoryStorage> reference, String key) {
+        Object value = reference.getProperty(key);
         String[] selectors;
         if (value instanceof String[] array) {
             selectors = array;

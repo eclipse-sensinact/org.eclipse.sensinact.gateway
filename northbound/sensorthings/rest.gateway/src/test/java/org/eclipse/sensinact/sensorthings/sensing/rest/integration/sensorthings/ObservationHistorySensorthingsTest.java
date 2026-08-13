@@ -38,6 +38,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.test.testcontainers.postgres.RequirePostgresContainer;
 import org.eclipse.sensinact.northbound.session.ProviderDescription;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -139,9 +140,20 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         Exception lastError = null;
         do {
             try {
-                for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
-                    waitForRowCount("sensinact." + table, "", 0, true);
-                }
+                waitForRowCount("sensinact.history", "", 0, true);
+                // prove the ingestion chain is wired before tests push data:
+                // events sent before the history listener is up would be lost
+                GenericDto probe = new GenericDto();
+                probe.modelPackageUri = "sensinact";
+                probe.provider = "startupProbe";
+                probe.service = "probe";
+                probe.resource = "probe" + System.nanoTime();
+                probe.type = Boolean.class;
+                probe.value = Boolean.TRUE;
+                probe.timestamp = Instant.now();
+                push.pushUpdate(probe).getValue();
+                waitForRowCount("sensinact.history", "WHERE provider = 'startupProbe'", 1, true);
+
                 // Got a valid count
                 ready = true;
                 lastError = null;
@@ -149,6 +161,8 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
             } catch (Exception e) {
                 // Ignore
                 lastError = e;
+            } catch (AssertionFailedError e) {
+                lastError = new IllegalStateException(e);
             }
         } while (!ready && System.currentTimeMillis() < timeout);
 
@@ -215,9 +229,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
 
         try (Connection connection = getDataSource().getConnection()) {
             final Statement stmt = connection.createStatement();
-            for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
-                stmt.execute("DROP TABLE IF EXISTS sensinact." + table);
-            }
+            stmt.execute("DROP TABLE IF EXISTS sensinact.history");
         }
     }
 
@@ -310,7 +322,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         // 1008: 1000 updates + history provider name & description & model &
         // modelPackageUri + foo
         // provider name & description & modelUri
-        waitForRowCount("sensinact.text_data", "WHERE resource = 'lastObservation'", 5000);
+        waitForRowCount("sensinact.history", "WHERE value_kind = 2 AND resource = 'lastObservation'", 5000);
 
         ResultList<Observation> observations = utils.queryJson("/Datastreams(baz)/Observations?$count=true",
                 RESULT_OBSERVATIONS);
@@ -361,8 +373,8 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
 
         }
         createThing(thingId, List.of(), List.of(datastreamId), TS_2012);
-        waitForRowCount("sensinact.text_data",
-                String.format("WHERE provider = '%s' AND resource = 'lastObservation'", datastreamId), 11);
+        waitForRowCount("sensinact.history",
+                String.format("WHERE value_kind = 2 AND provider = '%s' AND resource = 'lastObservation'", datastreamId), 11);
 
         String id = String.format("%s~%s~%s", datastreamId, "test",
                 Long.toString(TS_2012.plus(ofDays(3)).toEpochMilli(), 16));
@@ -385,8 +397,8 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
 
         }
         createThing(thingId, List.of(), List.of(datastreamId));
-        waitForRowCount("sensinact.text_data",
-                String.format("WHERE provider = '%s' AND resource = 'lastObservation'", datastreamId), 11);
+        waitForRowCount("sensinact.history",
+                String.format("WHERE value_kind = 2 AND provider = '%s' AND resource = 'lastObservation'", datastreamId), 11);
 
         ResultList<Datastream> streams = utils.queryJson("/Datastreams", new TypeReference<ResultList<Datastream>>() {
         });
@@ -427,8 +439,8 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         createLocation(testProviderLocation);
         createThing(testProviderThing, List.of(), List.of(testProvider));
 
-        waitForRowCount("sensinact.text_data",
-                String.format("WHERE provider = '%s' AND resource = 'lastObservation'", testProvider), 2);
+        waitForRowCount("sensinact.history",
+                String.format("WHERE value_kind = 2 AND provider = '%s' AND resource = 'lastObservation'", testProvider), 2);
 
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils.queryJson(
@@ -465,7 +477,7 @@ public class ObservationHistorySensorthingsTest extends AbstractIntegrationTest 
         for (int i = 0; i < 1000; i++) {
             createObservation("foobar", thingId, Integer.valueOf(i), TS_2012.plus(ofDays(i)));
         }
-        waitForRowCount("sensinact.text_data", "WHERE provider = 'foobar' AND resource = 'lastObservation'", 1001);
+        waitForRowCount("sensinact.history", "WHERE value_kind = 2 AND provider = 'foobar' AND resource = 'lastObservation'", 1001);
         // Test phenomenonTime lt filter - should return only the earlier observation
         ResultList<Observation> observations = utils
                 .queryJson(String.format("/Datastreams(foobar)/Observations?$filter=%s",

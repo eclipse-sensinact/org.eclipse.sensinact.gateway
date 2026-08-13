@@ -1,8 +1,9 @@
 # History Provider Rework — Plan
 
 > Status: **in implementation** — M0 merged (#755); stream A evaluation complete with ADR
-> *proposed* (`docs/source/southbound/history/history-storage-adr.md` on branch
-> `evaluation/history-backends`: stay on Postgres, unified schema, Timescale optional); M1 started.
+> *accepted* (`docs/source/southbound/history/history-storage-adr.md`: stay on Postgres, unified
+> schema, Timescale optional); M1–M3 done; M4 stage A (service binding, helper rewrite, +1ms
+> removal, IT adaptation) done — stage B (pushdown) next.
 >
 > Companions: [HISTORY_STA_GAP_ANALYSIS.md](HISTORY_STA_GAP_ANALYSIS.md) (STA feature gaps) and
 > [NOTIFICATION_PROXY_ALIGNMENT.md](NOTIFICATION_PROXY_ALIGNMENT.md) (third-party ingest-filter

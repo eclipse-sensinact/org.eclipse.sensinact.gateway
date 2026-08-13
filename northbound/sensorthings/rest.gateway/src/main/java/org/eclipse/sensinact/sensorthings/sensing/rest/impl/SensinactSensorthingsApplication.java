@@ -15,9 +15,12 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
@@ -30,6 +33,9 @@ import org.eclipse.sensinact.sensorthings.sensing.rest.usecase.impl.DtoMemoryCac
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.ReferencePolicyOption;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsApplicationBase;
 import org.osgi.service.jakartars.whiteboard.propertytypes.JakartarsName;
 
@@ -66,8 +72,25 @@ public class SensinactSensorthingsApplication extends Application {
     @Reference
     ISensorthingsFilterParser filterParser;
 
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
+    volatile List<HistoryProvider> historyProviders;
+
     @Activate
     Config config;
+
+    /**
+     * The history provider to use: the one named by the {@code history.provider}
+     * configuration, or the only one available when the configuration does not
+     * name one.
+     */
+    private Optional<HistoryProvider> selectedHistoryProvider() {
+        List<HistoryProvider> providers = historyProviders;
+        String configured = config == null ? NOT_SET : config.history_provider();
+        if (!NOT_SET.equals(configured)) {
+            return providers.stream().filter(provider -> configured.equals(provider.getName())).findFirst();
+        }
+        return providers.size() == 1 ? Optional.of(providers.get(0)) : Optional.empty();
+    }
 
     @Override
     public Set<Class<?>> getClasses() {
@@ -97,8 +120,6 @@ public class SensinactSensorthingsApplication extends Application {
 
         int resultMax = defaultHistoryMaxResult;
 
-        String provider = config.history_provider();
-
         Map<String, Object> props = new HashMap<>();
         props.put("session.manager", sessionManager);
         props.put("filter.parser", filterParser);
@@ -106,9 +127,11 @@ public class SensinactSensorthingsApplication extends Application {
         props.put("sensinact.history.result.limit", resultMax);
         props.put("cache.historical.location", cacheHl);
         props.put("cache.expanded.observation", cacheObs);
-        if (!NOT_SET.equals(provider)) {
-            props.put("sensinact.history.provider", provider);
-        }
+        selectedHistoryProvider().ifPresent(provider -> {
+            props.put("sensinact.history.service", provider);
+            // legacy key, kept for consumers still selecting by name
+            props.put("sensinact.history.provider", provider.getName());
+        });
         return props;
     }
 

@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryStorage;
-import org.eclipse.sensinact.gateway.southbound.history.timescale.TimescaleHistoryStorage.TxRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -117,11 +116,14 @@ public class TimescaleHistoricalStore {
         }
 
         if (Objects.equals(oldConfig.url(), config.url()) && Objects.equals(oldConfig.user(), config.user())
-                && Objects.equals(oldConfig._password(), config._password())
-                && oldConfig.max_page_size() == config.max_page_size()) {
+                && Objects.equals(oldConfig._password(), config._password())) {
             logger.debug("Re-registering the history storage with updated properties");
-            // re-registration makes the engine re-read name and selectors
-            registerStorage(currentStorage());
+            // a fresh instance so the engine can tell the registrations apart;
+            // initialization is idempotent and the connection is kept
+            TimescaleHistoryStorage storage = new TimescaleHistoryStorage(this::inTransaction, connection::get,
+                    config.max_page_size());
+            storage.initialize();
+            registerStorage(storage);
         } else {
             logger.debug("Restarting the Timescale DB connection due to a config change");
             doStart();
@@ -155,11 +157,6 @@ public class TimescaleHistoricalStore {
         } catch (ScopedWorkException e) {
             throw e.asRuntimeException();
         }
-    }
-
-    private synchronized TimescaleHistoryStorage currentStorage() {
-        return registration == null ? null
-                : (TimescaleHistoryStorage) context.getService(registration.getReference());
     }
 
     private void registerStorage(TimescaleHistoryStorage storage) {

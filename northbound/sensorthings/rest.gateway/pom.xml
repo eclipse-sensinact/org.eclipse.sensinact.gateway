@@ -24,6 +24,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
+      <artifactId>history-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>filter</artifactId>
       <version>${project.version}</version>
@@ -188,6 +193,12 @@
     </dependency>
 
     <!-- History Provider -->
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
+      <artifactId>history-core</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
       <artifactId>timescale-provider</artifactId>
