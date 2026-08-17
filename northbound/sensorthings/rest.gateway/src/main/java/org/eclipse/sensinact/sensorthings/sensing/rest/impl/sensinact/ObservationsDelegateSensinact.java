@@ -113,7 +113,7 @@ public class ObservationsDelegateSensinact extends AbstractDelegate {
 
     public ResultList<Observation> getObservationDatastreamObservations(String id) {
         return RootResourceDelegateSensinact.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
+                requestContext, getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
     }
 
     public ObservedProperty getObservationDatastreamObservedProperty(String id) {
@@ -175,8 +175,9 @@ public class ObservationsDelegateSensinact extends AbstractDelegate {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         ICriterion filter = parseFilter(OBSERVATIONS);
         ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
-                application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
-        if (list.value().isEmpty())
+                application, getMapper(), uriInfo, requestContext,
+                    getExpansions(), filter, providerSnapshot, 0);
+        if (!HistoryResourceHelperSensinact.hasHistory(list))
             list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
                     getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
         return list;

@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.sensorthings.sensing.rest.filters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -132,5 +134,19 @@ class OrderByFilterTest extends QueryOptionFilterTestSupport {
         filter.filter(requestContext, responseContext);
 
         assertEquals(single, responseEntity());
+    }
+
+    @Test
+    void appliedPaginationLeavesResponseUntouched() throws IOException {
+        queryParameters.putSingle("$orderby", "rank desc");
+        filter.filter(requestContext);
+        setRequestProperty(PaginationConstants.PAGINATION_APPLIED, Boolean.TRUE);
+
+        ResultList<RankedEntity> pushedDownPage = new ResultList<>(
+                List.of(entity("a", 1, "x"), entity("b", 2, "x")));
+        setResponseEntity(pushedDownPage);
+        filter.filter(requestContext, responseContext);
+
+        assertSame(pushedDownPage, responseEntity());
     }
 }

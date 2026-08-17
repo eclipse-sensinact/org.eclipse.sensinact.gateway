@@ -206,6 +206,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
+      <artifactId>history-inmemory</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.filters</groupId>
       <artifactId>resource.selector.impl</artifactId>
       <version>${project.version}</version>

@@ -16,11 +16,13 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryPage;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
@@ -32,27 +34,40 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 
 import tools.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriInfo;
 
 /**
  * Helper class for accessing historical observation data through the
- * {@link HistoryProvider} service published by the application. Results are
- * the newest values up to the configured result limit, in chronological
- * order; the returned count covers the full dataset minus entries removed by
- * row-level filtering.
+ * {@link HistoryProvider} service published by the application.
+ *
+ * When the request carries no $filter, an effective $top and at most a single
+ * time-field $orderby, the pagination is pushed down into the history query
+ * and {@link PaginationConstants#PAGINATION_APPLIED} tells the response-side
+ * query option filters to leave the page alone. Otherwise the results are the
+ * newest values up to the configured result limit, in chronological order,
+ * paginated in memory by the filters; the returned count covers the full
+ * dataset minus entries removed by row-level filtering.
  */
 class HistoryResourceHelperSensinact {
+
+    /** $orderby fields of an Observation carrying the history timestamp */
+    private static final Set<String> OBSERVATION_TIME_FIELDS = Set.of("phenomenonTime", "resultTime");
+
+    /** $orderby fields of a HistoricalLocation carrying the history timestamp */
+    private static final Set<String> HISTORICAL_LOCATION_TIME_FIELDS = Set.of("time");
 
     private HistoryResourceHelperSensinact() {
     }
 
     static ResultList<Observation> loadHistoricalObservations(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
-            ICriterion filter, int localResultLimit) {
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext,
+            ExpansionSettings expansions, ResourceSnapshot resourceSnapshot, ICriterion filter, int localResultLimit) {
         HistoryProvider history = historyProvider(application);
         if (history == null) {
             return new ResultList<>(List.of());
@@ -60,6 +75,14 @@ class HistoryResourceHelperSensinact {
 
         ResourcePath path = new ResourcePath(resourceSnapshot.getService().getProvider().getName(),
                 resourceSnapshot.getService().getName(), resourceSnapshot.getName());
+
+        HistoryPage page = pushDownPage(history, path, requestContext, filter, OBSERVATION_TIME_FIELDS,
+                getMaxResult(application, localResultLimit));
+        if (page != null) {
+            List<Observation> observations = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
+                    expansions, filter, resourceSnapshot, page.values());
+            return pushedDownResultList(history, path, requestContext, page, observations);
+        }
 
         long count = history.getValueCount(path, TimeRange.ALL);
         List<TimedValue<?>> timed = newestChronological(history, path, getMaxResult(application, localResultLimit));
@@ -70,14 +93,22 @@ class HistoryResourceHelperSensinact {
     }
 
     static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession,
-            Application application, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions,
-            ICriterion filter, ProviderSnapshot provider, int localResultLimit) {
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext,
+            ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider, int localResultLimit) {
         HistoryProvider history = historyProvider(application);
         if (history == null) {
             return new ResultList<>(List.of());
         }
 
         ResourcePath path = new ResourcePath(provider.getName(), "admin", "location");
+
+        HistoryPage page = pushDownPage(history, path, requestContext, filter, HISTORICAL_LOCATION_TIME_FIELDS,
+                getMaxResult(application, localResultLimit));
+        if (page != null) {
+            List<HistoricalLocation> locations = DtoMapper.toHistoricalLocationList(userSession, application, mapper,
+                    uriInfo, expansions, filter, provider, page.values());
+            return pushedDownResultList(history, path, requestContext, page, locations);
+        }
 
         long count = history.getValueCount(path, TimeRange.ALL);
         List<TimedValue<?>> timed = newestChronological(history, path, getMaxResult(application, localResultLimit));
@@ -89,6 +120,79 @@ class HistoryResourceHelperSensinact {
 
     static HistoryProvider historyProvider(Application application) {
         return (HistoryProvider) application.getProperties().get("sensinact.history.service");
+    }
+
+    /**
+     * Whether the list represents existing history data: a pushed-down page
+     * can be empty (e.g. $skip beyond the dataset) while history exists, and
+     * must not trigger the fall-back to the live value.
+     */
+    static boolean hasHistory(ResultList<?> list) {
+        return !list.value().isEmpty() || (list.count() != null && list.count() > 0);
+    }
+
+    /**
+     * Runs the query with $orderby, $skip and $top applied database-side when
+     * the request allows it: no $filter, an effective $top and an absent or
+     * single time-field $orderby. Returns {@code null} when the request is
+     * not pushable and pagination stays with the response filters.
+     */
+    private static HistoryPage pushDownPage(HistoryProvider history, ResourcePath path,
+            ContainerRequestContext requestContext, ICriterion filter, Set<String> timeFields, int maxResults) {
+        if (requestContext == null || filter != null) {
+            return null;
+        }
+        Integer top = (Integer) requestContext.getProperty(PaginationConstants.TOP_PROP);
+        if (top == null) {
+            return null;
+        }
+        SortOrder order = pushableOrder(requestContext, timeFields);
+        if (order == null) {
+            return null;
+        }
+        Integer skip = (Integer) requestContext.getProperty(PaginationConstants.SKIP_PROP);
+        return history.getValues(HistoryQuery.builder(path).order(order).offset(skip == null ? 0 : skip)
+                .limit(Math.min(top, maxResults)).build());
+    }
+
+    /**
+     * The sort order matching the request's $orderby, or {@code null} when
+     * the ordering cannot be pushed down. An absent $orderby is pushable: the
+     * default ordering (by id) is chronological for history entities, whose
+     * ids end in the fixed-length hex timestamp.
+     */
+    private static SortOrder pushableOrder(ContainerRequestContext requestContext, Set<String> timeFields) {
+        List<String> parameters = requestContext.getUriInfo().getQueryParameters().getOrDefault("$orderby",
+                List.of());
+        if (parameters.isEmpty()) {
+            return SortOrder.ASCENDING;
+        }
+        if (parameters.size() > 1 || parameters.get(0).contains(",")) {
+            return null;
+        }
+
+        String clause = parameters.get(0).trim();
+        SortOrder order = SortOrder.ASCENDING;
+        if (clause.endsWith(" desc")) {
+            order = SortOrder.DESCENDING;
+            clause = clause.substring(0, clause.length() - 5).trim();
+        } else if (clause.endsWith(" asc")) {
+            clause = clause.substring(0, clause.length() - 4).trim();
+        }
+        return timeFields.contains(clause) ? order : null;
+    }
+
+    private static <T extends Self> ResultList<T> pushedDownResultList(HistoryProvider history, ResourcePath path,
+            ContainerRequestContext requestContext, HistoryPage page, List<T> values) {
+        String nextLink = null;
+        if (page.hasMore()) {
+            long nextSkip = page.offset() + page.values().size();
+            nextLink = requestContext.getUriInfo().getRequestUriBuilder().replaceQueryParam("$skip", nextSkip).build()
+                    .toString();
+        }
+        long count = page.totalCount().orElseGet(() -> history.getValueCount(path, TimeRange.ALL));
+        requestContext.setProperty(PaginationConstants.PAGINATION_APPLIED, Boolean.TRUE);
+        return new ResultList<>((int) Math.min(Integer.MAX_VALUE, count), nextLink, values);
     }
 
     /** The newest {@code maxResults} values, reversed to chronological order. */

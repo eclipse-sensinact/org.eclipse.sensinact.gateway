@@ -8,6 +8,7 @@
 	bnd.identity;id='org.eclipse.parsson.jakarta.json',\
 	bnd.identity;id='org.eclipse.sensinact.gateway.southbound.history.timescale-provider',\
 	bnd.identity;id='org.eclipse.sensinact.gateway.southbound.history.history-core',\
+	bnd.identity;id='org.eclipse.sensinact.gateway.southbound.history.history-inmemory',\
 	bnd.identity;id='ch.qos.logback.classic',\
 	bnd.identity;id='jul.to.slf4j'
 
@@ -90,6 +91,7 @@
 	org.eclipse.sensinact.gateway.northbound.session.session-impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.history-api;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.history-core;version='[0.0.2,0.0.3)',\
+	org.eclipse.sensinact.gateway.southbound.history.history-inmemory;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.timescale-provider;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.test.testcontainers.bundle;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.test.testcontainers.postgres;version='[0.0.2,0.0.3)',\

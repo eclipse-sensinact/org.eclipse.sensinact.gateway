@@ -110,8 +110,9 @@ public class HistoricalLocationsDelegateSensinact extends AbstractDelegate {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
-            if (list.value().isEmpty())
+                    application, getMapper(), uriInfo, requestContext,
+                    getExpansions(), filter, providerSnapshot, 0);
+            if (!HistoryResourceHelperSensinact.hasHistory(list))
                 list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
                         getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;
@@ -154,8 +155,9 @@ public class HistoricalLocationsDelegateSensinact extends AbstractDelegate {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
-                    application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
-            if (list.value().isEmpty())
+                    application, getMapper(), uriInfo, requestContext,
+                    getExpansions(), filter, providerSnapshot, 0);
+            if (!HistoryResourceHelperSensinact.hasHistory(list))
                 list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
                         getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
             return list;

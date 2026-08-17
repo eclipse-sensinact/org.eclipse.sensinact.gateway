@@ -349,10 +349,13 @@ public class ObservationHistorySensinactTest extends AbstractIntegrationTest {
         assertEquals(500, observations.value().size());
         assertNotNull(observations.nextLink());
 
+        // the pushed-down pagination pages over the full dataset from its
+        // start; before the pushdown the first page was cut from a window of
+        // the newest `history.result.limit` values and started at day 1000
         for (int i = 0; i < 500; i++) {
-            Instant ts = TS_2012.plus(ofDays(i + 1000));
+            Instant ts = TS_2012.plus(ofDays(i));
             assertEquals(ts, observations.value().get(i).resultTime());
-            assertEquals(i + 1000, observations.value().get(i).result());
+            assertEquals(i, observations.value().get(i).result());
         }
     }
 
