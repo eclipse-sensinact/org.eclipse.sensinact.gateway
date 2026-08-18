@@ -241,6 +241,14 @@ public class EMFUpdateServiceTest {
             TestTemperatur temp = TestdataFactory.eINSTANCE.createTestTemperatur();
             temp.setV1("12 °C");
 
+            // Anchor this update in the past: without an explicit timestamp it gets a
+            // full-precision Instant.now(), while the DTO update below is truncated to
+            // milliseconds and would be silently dropped as outdated if both happen
+            // within the same millisecond
+            ResourceValueMetadata md = ProviderFactory.eINSTANCE.createResourceValueMetadata();
+            md.setTimestamp(Instant.now().minusSeconds(60));
+            temp.getMetadata().put(TestdataPackage.eINSTANCE.getTestTemperatur_V1(), md);
+
             EMap<String, org.eclipse.sensinact.model.core.provider.Service> services = sensor.getServices();
             services.put(SERVICE, temp);
             Promise<?> update = push.pushUpdate(sensor);
