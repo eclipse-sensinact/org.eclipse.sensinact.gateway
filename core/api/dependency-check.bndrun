@@ -2,9 +2,9 @@
 -runfw: org.apache.felix.framework
 -runee: JavaSE-25
 
-# These packages are also provided by the gecko.emf.osgi.component project
+# These packages are also provided by the fennec.emf.osgi.component project
 # so we blacklist the API for resolve consistency
--runblacklist: bnd.identity;id='org.gecko.emf.osgi.api',\
+-runblacklist: bnd.identity;id='org.eclipse.fennec.emf.osgi.api',\
 	bnd.identity;id='org.osgi.service.cm'
 
 # This will help us keep -runbundles sorted

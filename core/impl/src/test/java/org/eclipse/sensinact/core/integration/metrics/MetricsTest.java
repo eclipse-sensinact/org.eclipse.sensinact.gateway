@@ -154,6 +154,15 @@ public class MetricsTest {
     @WithConfiguration(pid = "sensinact.metrics", location = "?", properties = {
             @Property(key = "enabled", value = "false"), @Property(key = "metrics.rate", value = "1") })
     void testDisabled(@InjectService(filter = "(enabled=false)") IMetricsManager metrics) throws Exception {
+        // A report fired while a previous test still had metrics enabled can be
+        // delivered after the switch to enabled=false: drain stragglers before
+        // asserting silence
+        while (queue.poll(1, TimeUnit.SECONDS) != null) {
+            // discard
+        }
+        gaugeCalled.set(false);
+        gaugesCalled.clear();
+
         // At this point, listener and gauges should be registered
         metrics.getCounter("toto").inc();
 
