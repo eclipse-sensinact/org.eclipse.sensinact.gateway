@@ -2,8 +2,10 @@
 
 > Status: **in implementation** — M0 merged (#755); stream A evaluation complete with ADR
 > *accepted* (`docs/source/southbound/history/history-storage-adr.md`: stay on Postgres, unified
-> schema, Timescale optional); M1–M3 done; M4 stage A (service binding, helper rewrite, +1ms
-> removal, IT adaptation) done — stage B (pushdown) next.
+> schema, Timescale optional); M1–M5 done (M4: service binding, helper rewrite, +1ms removal,
+> $top/$skip/$orderby pushdown incl. docker-free in-memory ITs; M5: sensorthings-family and
+> filter-module helpers migrated off the ACT facade, feature definitions fixed) — M6
+> ($filter time pushdown) next.
 >
 > Companions: [HISTORY_STA_GAP_ANALYSIS.md](HISTORY_STA_GAP_ANALYSIS.md) (STA feature gaps) and
 > [NOTIFICATION_PROXY_ALIGNMENT.md](NOTIFICATION_PROXY_ALIGNMENT.md) (third-party ingest-filter

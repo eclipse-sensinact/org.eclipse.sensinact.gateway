@@ -14,6 +14,7 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl;
 
 import java.time.Instant;
 
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings.DtoMapper;
@@ -25,6 +26,7 @@ import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class DtoMapperProvider implements ContextResolver<DtoMapper> {
+
     @Context
     Application application;
 
@@ -33,8 +35,11 @@ public class DtoMapperProvider implements ContextResolver<DtoMapper> {
     @SuppressWarnings("unchecked")
     @Override
     public DtoMapper getContext(Class<?> type) {
-        if (dtoMapper == null) {
-            String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
+        HistoryProvider historyProvider = (HistoryProvider) application.getProperties()
+                .get("sensinact.history.service");
+        // the history provider is a dynamic service: rebuild the mapper when
+        // it appears, disappears or is replaced
+        if (dtoMapper == null || dtoMapper.historyProvider() != historyProvider) {
             int maxResult = (int) application.getProperties().get("sensinact.history.result.limit");
             IDtoMemoryCache<ExpandedObservation> cacheObs = (IDtoMemoryCache<ExpandedObservation>) application
                     .getProperties().get("cache.expanded.observation");

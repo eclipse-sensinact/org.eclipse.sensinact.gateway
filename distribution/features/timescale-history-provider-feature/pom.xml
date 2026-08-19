@@ -18,6 +18,11 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
+      <artifactId>history-core</artifactId>
+      <version>${revision}${changelist}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
       <artifactId>timescale-provider</artifactId>
       <version>${revision}${changelist}</version>
     </dependency>

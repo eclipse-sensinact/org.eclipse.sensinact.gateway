@@ -28,6 +28,7 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -60,17 +61,22 @@ import jakarta.ws.rs.core.UriInfo;
 public class DtoMapper {
     public static final String VERSION = "v1.1";
 
-    private String historyProvider;
-    private int maxResult;
+    private final HistoryProvider historyProvider;
+    private final int maxResult;
     private final IDtoMemoryCache<ExpandedObservation> cacheObs;
     private final IDtoMemoryCache<Instant> cacheHl;
 
-    public DtoMapper(String historyProvider, int maxResult, IDtoMemoryCache<ExpandedObservation> cacheObs,
+    public DtoMapper(HistoryProvider historyProvider, int maxResult, IDtoMemoryCache<ExpandedObservation> cacheObs,
             IDtoMemoryCache<Instant> cacheHl) {
         this.historyProvider = historyProvider;
         this.maxResult = maxResult;
         this.cacheObs = cacheObs;
         this.cacheHl = cacheHl;
+    }
+
+    /** The history provider this mapper was created for, possibly null */
+    public HistoryProvider historyProvider() {
+        return historyProvider;
     }
 
     public static ServiceSnapshot getServiceSnapshot(ProviderSnapshot provider, String name) {

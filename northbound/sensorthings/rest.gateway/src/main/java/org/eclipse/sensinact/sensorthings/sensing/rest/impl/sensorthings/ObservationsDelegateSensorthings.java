@@ -22,7 +22,6 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import jakarta.ws.rs.core.Application;
@@ -35,6 +34,10 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
+import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -90,20 +93,17 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
 
             } else {
                 if (timestamp.isBefore(milliTimestamp)) {
-                    String history = (String) application.getProperties().get("sensinact.history.provider");
+                    HistoryProvider history = getHistoryProvider();
                     if (history != null) {
-                        String provider = resourceSnapshot.getService().getProvider().getName();
-                        String service = resourceSnapshot.getService().getName();
-                        String resource = resourceSnapshot.getName();
-                        // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
-                        // (timestamp)
-                        Instant timestampPlusOneMilli = timestamp.plusMillis(1);
-                        TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
-                                Map.of("provider", provider, "service", service, "resource", resource, "time",
-                                        timestampPlusOneMilli));
-                        if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
+                        ResourcePath path = new ResourcePath(resourceSnapshot.getService().getProvider().getName(),
+                                resourceSnapshot.getService().getName(), resourceSnapshot.getName());
+                        // the id carries a millisecond-truncated timestamp while
+                        // the store keeps full precision
+                        List<TimedValue<?>> match = history.getValues(HistoryQuery.builder(path)
+                                .range(TimeRange.millisecondOf(timestamp)).limit(1).build()).values();
+                        if (!match.isEmpty()) {
                             result = getSensorThingDtoMapper().toObservation(getSession(), getMapper(), uriInfo,
-                                    getExpansions(), criterion, resourceSnapshot, t);
+                                    getExpansions(), criterion, resourceSnapshot, match.get(0));
                         }
                     }
                 } else if (timestamp.equals(milliTimestamp)) {
@@ -200,19 +200,17 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
                             getExpansions(), criterion,
                             validateAndGetProvider(obs.featureOfInterest().id().toString()));
                 } else {
-                    String history = (String) application.getProperties().get("sensinact.history.provider");
+                    HistoryProvider history = getHistoryProvider();
                     if (history != null) {
-                        String provider = resourceSnapshot.getService().getProvider().getName();
-                        String service = resourceSnapshot.getService().getName();
-                        String resource = resourceSnapshot.getName();
-                        // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
-                        // (timestamp)
-                        Instant timestampPlusOneMilli = timestamp.plusMillis(1);
-                        TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
-                                Map.of("provider", provider, "service", service, "resource", resource, "time",
-                                        timestampPlusOneMilli));
-                        if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
-                            ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(getMapper(), t.getValue());
+                        ResourcePath path = new ResourcePath(resourceSnapshot.getService().getProvider().getName(),
+                                resourceSnapshot.getService().getName(), resourceSnapshot.getName());
+                        // the id carries a millisecond-truncated timestamp while
+                        // the store keeps full precision
+                        List<TimedValue<?>> match = history.getValues(HistoryQuery.builder(path)
+                                .range(TimeRange.millisecondOf(timestamp)).limit(1).build()).values();
+                        if (!match.isEmpty()) {
+                            ExpandedObservation obs = DtoMapperSimple.parseExpandObservation(getMapper(),
+                                    match.get(0).getValue());
                             result = getSensorThingDtoMapper().toFeatureOfInterest(getSession(), getMapper(), uriInfo,
                                     getExpansions(), criterion,
                                     validateAndGetProvider(obs.featureOfInterest().id().toString()));

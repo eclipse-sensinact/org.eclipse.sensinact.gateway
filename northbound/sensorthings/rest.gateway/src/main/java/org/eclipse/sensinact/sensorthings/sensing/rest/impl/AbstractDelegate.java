@@ -33,6 +33,7 @@ import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.filters.api.FilterParserException;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
@@ -159,8 +160,8 @@ public abstract class AbstractDelegate {
         return getMaxResult(-1);
     }
 
-    protected String getHistoryProvider() {
-        return (String) this.application.getProperties().get("sensinact.history.provider");
+    protected HistoryProvider getHistoryProvider() {
+        return (HistoryProvider) this.application.getProperties().get("sensinact.history.service");
     }
 
     protected IDtoMemoryCache<ExpandedObservation> getCacheObservationIfHistoryMemory() {

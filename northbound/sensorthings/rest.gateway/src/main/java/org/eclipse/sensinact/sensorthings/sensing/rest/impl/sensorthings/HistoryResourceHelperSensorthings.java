@@ -14,16 +14,20 @@ package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensorthings;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
+
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
+import org.eclipse.sensinact.gateway.southbound.history.provider.SortOrder;
+import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -38,18 +42,19 @@ import tools.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.core.UriInfo;
 
 /**
- * Helper class for accessing historical observation data from the history
- * provider
+ * Helper class for accessing historical observation data through the
+ * {@link HistoryProvider} service published by the application. Results are
+ * the newest values up to the configured result limit, in chronological
+ * order; entries from the optional in-memory cache follow the history data.
  */
 public class HistoryResourceHelperSensorthings {
 
     private HistoryResourceHelperSensorthings() {
     }
 
-    @SuppressWarnings("unchecked")
     public static ResultList<Observation> loadHistoricalObservations(SensiNactSession userSession, DtoMapper dtoMapper,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
-            ICriterion filter, String historyProvider, int localResultLimit,
+            ICriterion filter, HistoryProvider history, int localResultLimit,
             IDtoMemoryCache<ExpandedObservation> cacheObs) {
         List<Observation> values = new ArrayList<>();
 
@@ -66,57 +71,40 @@ public class HistoryResourceHelperSensorthings {
                         return dtoMapper.toObservation(userSession, mapper, uriInfo, expansions, filter,
                                 resourceSnapshot, stamp, expObs);
                     }).filter(opt -> opt.isPresent()).map(o -> o.get()).forEach(o -> values.add(o));
-            ;
         }
 
-        if (historyProvider == null) {
+        if (history == null) {
             return new ResultList<>(values);
         }
 
-        Integer maxResults = localResultLimit;
-        Map<String, Object> params = initParameter(resourceSnapshot);
-        // Get count for the full dataset (for pagination metadata)
-        Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
-        int skip = 0;
+        ResourcePath path = new ResourcePath(resourceSnapshot.getService().getProvider().getName(),
+                resourceSnapshot.getService().getName(), resourceSnapshot.getName());
 
-        List<TimedValue<?>> timed;
+        long count = history.getValueCount(path, TimeRange.ALL);
+        List<TimedValue<?>> timed = newestChronological(history, path, Math.max(0, localResultLimit - values.size()));
 
-        do {
-            params.put("skip", skip);
+        // Filtering happens at a lower level, so we may not use all the
+        // discovered history
+        List<Observation> observationList = dtoMapper.toObservationList(userSession, mapper, uriInfo, expansions,
+                filter, resourceSnapshot, timed);
+        count -= (timed.size() - observationList.size());
 
-            timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-            // Filtering happens at a lower level, so we may not use all the discovered
-            // history
-            List<Observation> observationList = dtoMapper.toObservationList(userSession, mapper, uriInfo, expansions,
-                    filter, resourceSnapshot, timed);
-
-            if (count != null && count < Integer.MAX_VALUE && observationList.size() < timed.size()) {
-                count -= (timed.size() - observationList.size());
-            }
-            values.addAll(0, observationList);
-            if (timed.isEmpty()) {
-                break;
-            }
-            skip += timed.size();
-            // Keep going until the list is as full as count, or it hits maxResults
-        } while ((count == null || values.size() < count) && values.size() < maxResults);
-        return new ResultList<>(count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue(),
-                null, values);
+        values.addAll(0, observationList);
+        return new ResultList<>((int) Math.min(Integer.MAX_VALUE, count), null, values);
     }
 
     public static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession,
             DtoMapper dtoMapper, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot providerThing, String historyProvider, int localResultLimit,
+            ProviderSnapshot providerThing, HistoryProvider history, int localResultLimit,
             IDtoMemoryCache<Instant> cacheHl) {
 
         return loadHistoricalLocations(userSession, dtoMapper, mapper, uriInfo, expansions, filter,
-                List.of(providerThing), null, historyProvider, localResultLimit, cacheHl);
+                List.of(providerThing), null, history, localResultLimit, cacheHl);
     }
 
-    @SuppressWarnings("unchecked")
     static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession, DtoMapper dtoMapper,
             ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            List<ProviderSnapshot> providerThings, String locationId, String historyProvider, int localResultLimit,
+            List<ProviderSnapshot> providerThings, String locationId, HistoryProvider history, int localResultLimit,
             IDtoMemoryCache<Instant> cacheHl) {
         List<HistoricalLocation> values = new ArrayList<>();
 
@@ -136,61 +124,30 @@ public class HistoryResourceHelperSensorthings {
 
         }
 
-        if (historyProvider == null) {
+        if (history == null) {
             return new ResultList<>(values);
         }
-        AtomicLong totalCount = new AtomicLong(0);
 
-        Integer maxResults = localResultLimit;
+        long totalCount = 0;
         for (ProviderSnapshot providerThing : providerThings) {
-            Map<String, Object> params = initParameter(providerThing);
-            // Get count for the full dataset (for pagination metadata)
-            Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
-            if (count != null)
-                totalCount.addAndGet(count);
-            int skip = 0;
+            ResourcePath path = new ResourcePath(providerThing.getName(), "admin", "location");
 
-            List<TimedValue<?>> timed;
-            do {
-                params.put("skip", skip);
+            totalCount += history.getValueCount(path, TimeRange.ALL);
+            List<TimedValue<?>> timed = newestChronological(history, path,
+                    Math.max(0, localResultLimit - values.size()));
 
-                timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-                List<HistoricalLocation> historicalLocationList = dtoMapper.toHistoricalLocationList(userSession,
-                        mapper, uriInfo, expansions, filter, providerThing, locationId, timed);
-                if (count != null && count < Integer.MAX_VALUE && historicalLocationList.size() < timed.size()) {
-                    count -= (timed.size() - historicalLocationList.size());
-                }
-                values.addAll(0, historicalLocationList);
-                if (timed.isEmpty()) {
-                    break;
-                }
-                skip += timed.size();
-
-            } while ((count == null || values.size() < count) && values.size() < maxResults);
+            values.addAll(0, dtoMapper.toHistoricalLocationList(userSession, mapper, uriInfo, expansions, filter,
+                    providerThing, locationId, timed));
         }
-        return new ResultList<>(
-                totalCount == null ? null
-                        : totalCount.get() > Integer.MAX_VALUE ? Integer.MAX_VALUE : totalCount.intValue(),
-                null, values);
+        return new ResultList<>((int) Math.min(Integer.MAX_VALUE, totalCount), null, values);
     }
 
-    private static Map<String, Object> initParameter(ResourceSnapshot resourceSnapshot) {
-        String provider = resourceSnapshot.getService().getProvider().getName();
-        String service = resourceSnapshot.getService().getName();
-        String resource = resourceSnapshot.getName();
-        Map<String, Object> params = new HashMap<>();
-        params.put("provider", provider);
-        params.put("service", service);
-        params.put("resource", resource);
-        return params;
-    }
-
-    private static Map<String, Object> initParameter(ProviderSnapshot providerSnapshot) {
-        String provider = providerSnapshot.getName();
-        Map<String, Object> params = new HashMap<>();
-        params.put("provider", provider);
-        params.put("service", "admin");
-        params.put("resource", "location");
-        return params;
+    /** The newest {@code maxResults} values, reversed to chronological order. */
+    private static List<TimedValue<?>> newestChronological(HistoryProvider history, ResourcePath path,
+            int maxResults) {
+        List<TimedValue<?>> timed = new ArrayList<>(history
+                .streamValues(HistoryQuery.builder(path).order(SortOrder.DESCENDING).build(), maxResults).toList());
+        Collections.reverse(timed);
+        return timed;
     }
 }

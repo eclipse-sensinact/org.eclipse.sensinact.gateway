@@ -15,6 +15,7 @@ package org.eclipse.sensinact.gateway.southbound.history.core.ingest;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,7 +91,7 @@ public class IngestionPipeline {
         if (dataTopics == null) {
             topics.add("DATA/*");
         } else {
-            dataTopics.stream().filter(topic -> topic != null).forEach(topics::add);
+            dataTopics.stream().filter(Objects::nonNull).forEach(topics::add);
         }
     }
 

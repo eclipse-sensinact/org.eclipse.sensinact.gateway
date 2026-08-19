@@ -8,6 +8,7 @@
     { "id": "org.antlr:antlr4-runtime:${antlr.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:dto:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.sensorthings:extended:${gateway.version}" },
+    { "id": "org.eclipse.sensinact.gateway.southbound.history:history-api:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:filter:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:rest.api:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.northbound.sensorthings:rest.gateway:${gateway.version}" },
