@@ -17,7 +17,6 @@ import static java.util.stream.Collectors.toMap;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -856,9 +855,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (dateTimePath != null) {
             final String strDateTime = getFieldString(record, dateTimePath, options);
             if (strDateTime != null && !strDateTime.isBlank()) {
-                final TemporalAccessor parsedDateTime = parseDateTime(strDateTime, configuration.mappingOptions,
-                        locale);
-                return extractDateTime(parsedDateTime, timezone);
+                return Instant.from(parseDateTime(strDateTime, timezone, configuration.mappingOptions, locale));
             }
         }
 
@@ -1010,7 +1007,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      * @param locale      Configured locale
      * @return The parsed date time
      */
-    private TemporalAccessor parseDateTime(final String strDateTime, final DeviceMappingOptionsDTO options,
+    private TemporalAccessor parseDateTime(final String strDateTime, final ZoneId timezone, final DeviceMappingOptionsDTO options,
             final Locale locale) {
         DateTimeFormatter format = DateTimeFormatter.ISO_DATE_TIME;
 
@@ -1036,22 +1033,11 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         if (locale != null) {
             format = format.withLocale(locale);
         }
-
+        if (timezone != null) {
+            // default offset
+            format = format.withZone(timezone);
+        }
         return format.parse(strDateTime);
-    }
-
-    /**
-     * Extract date and time from a parsed temporal accessor
-     *
-     * @param parsedTime Parsed date time
-     * @param timezone   Fallback timezone
-     * @return The parsed date as an instant
-     */
-    private Instant extractDateTime(final TemporalAccessor parsedTime, final ZoneId timezone) {
-        final LocalDate date = extractDate(parsedTime);
-        final OffsetTime offsetTime = extractTime(parsedTime, date, timezone);
-        final OffsetDateTime dateTime = OffsetDateTime.of(date, offsetTime.toLocalTime(), offsetTime.getOffset());
-        return dateTime.toInstant();
     }
 
     /**
