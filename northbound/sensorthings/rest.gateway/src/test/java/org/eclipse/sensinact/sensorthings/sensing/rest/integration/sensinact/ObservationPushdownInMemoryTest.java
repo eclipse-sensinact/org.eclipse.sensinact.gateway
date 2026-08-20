@@ -198,6 +198,34 @@ public class ObservationPushdownInMemoryTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void timeOnlyFilterIsPushedDownWithRangeScopedCount() throws Exception {
+        String query = "?$filter=phenomenonTime%20ge%202024-01-01T00:06:00Z%20and%20phenomenonTime%20lt%202024-01-01T00:12:00Z"
+                + "&$top=4&$count=true";
+        ResultList<Observation> page = utils.queryJson(DATASTREAM_PATH + query, OBSERVATIONS);
+
+        assertEquals(6, page.count());
+        assertEquals(List.of(6, 7, 8, 9), page.value().stream().map(ObservationPushdownInMemoryTest::result).toList());
+        assertNotNull(page.nextLink());
+        assertTrue(page.nextLink().contains("skip=4"), "Unexpected nextLink: " + page.nextLink());
+
+        ResultList<Observation> next = utils.queryJson(DATASTREAM_PATH + query + "&$skip=4", OBSERVATIONS);
+        assertEquals(6, next.count());
+        assertEquals(List.of(10, 11), next.value().stream().map(ObservationPushdownInMemoryTest::result).toList());
+        assertNull(next.nextLink());
+    }
+
+    @Test
+    void mixedFilterFallsBackWithCorrectResults() throws Exception {
+        ResultList<Observation> page = utils.queryJson(DATASTREAM_PATH
+                + "?$filter=result%20ge%2010%20and%20phenomenonTime%20lt%202024-01-01T00:15:00Z&$top=3&$count=true",
+                OBSERVATIONS);
+
+        assertEquals(5, page.count());
+        assertEquals(List.of(10, 11, 12), page.value().stream().map(ObservationPushdownInMemoryTest::result).toList());
+        assertNotNull(page.nextLink());
+    }
+
+    @Test
     void filterKeepsInMemoryPaginationAndCorrectsTheCount() throws Exception {
         ResultList<Observation> page = utils.queryJson(
                 DATASTREAM_PATH + "?$filter=result%20ge%2010&$top=5&$count=true", OBSERVATIONS);

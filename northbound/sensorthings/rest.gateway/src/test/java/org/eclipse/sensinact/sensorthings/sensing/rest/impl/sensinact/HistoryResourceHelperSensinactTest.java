@@ -50,11 +50,13 @@ import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.provider.SortOrder;
+import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
 import org.eclipse.sensinact.northbound.filters.sensorthings.impl.SensorthingsFilterComponent;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -342,11 +344,13 @@ class HistoryResourceHelperSensinactTest {
         }
 
         @Test
-        @DisplayName("Should not push down when a $filter is present")
+        @DisplayName("Should not push down when a $filter is present that is more than a time constraint")
         void filterFallsBackToInMemoryPagination() throws FilterParserException {
             setupResourceSnapshotMocks();
+            setupRequestContext();
             setupApplication(1000);
             requestProperties.put(PaginationConstants.TOP_PROP, 2);
+            requestProperties.put(IFilterConstants.PROP_FILTER_STRING, "result eq 'value1'");
 
             SensorthingsFilterComponent filterComponent = new SensorthingsFilterComponent();
             filterComponent.setSession(userSession);
@@ -360,6 +364,39 @@ class HistoryResourceHelperSensinactTest {
 
             verify(history, never()).getValues(any());
             assertNull(requestProperties.get(PaginationConstants.PAGINATION_APPLIED));
+        }
+
+        @Test
+        @DisplayName("Should push a time-only $filter down as the query's time range")
+        void timeOnlyFilterIsPushedDownAsRange() throws FilterParserException {
+            Instant from = Instant.parse("2014-07-01T00:00:00Z");
+            Instant to = Instant.parse("2014-07-10T00:00:00Z");
+            String rawFilter = "phenomenonTime ge 2014-07-01T00:00:00Z and phenomenonTime lt 2014-07-10T00:00:00Z";
+            setupResourceSnapshotMocks();
+            setupRequestContext();
+            setupApplication(1000);
+            requestProperties.put(PaginationConstants.TOP_PROP, 5);
+            requestProperties.put(IFilterConstants.PROP_FILTER_STRING, rawFilter);
+
+            SensorthingsFilterComponent filterComponent = new SensorthingsFilterComponent();
+            filterComponent.setSession(userSession);
+            ICriterion filter = filterComponent.parseFilter(rawFilter, OBSERVATIONS);
+
+            when(history.getValueCount(eq(PATH), any())).thenReturn(6L);
+            when(history.getValues(any())).thenReturn(HistoryPage.of(List.of(), 0, false));
+
+            ResultList<Observation> result = HistoryResourceHelperSensinact.loadHistoricalObservations(userSession,
+                    application, mapper, uriInfo, requestContext, expansions, resourceSnapshot, filter, 0);
+
+            ArgumentCaptor<HistoryQuery> query = ArgumentCaptor.forClass(HistoryQuery.class);
+            verify(history).getValues(query.capture());
+            assertEquals(new TimeRange(from, true, to, false), query.getValue().range());
+            // the filtered count is scoped to the pushed-down range
+            ArgumentCaptor<TimeRange> countRange = ArgumentCaptor.forClass(TimeRange.class);
+            verify(history).getValueCount(eq(PATH), countRange.capture());
+            assertEquals(new TimeRange(from, true, to, false), countRange.getValue());
+            assertEquals(6, result.count().intValue());
+            assertEquals(Boolean.TRUE, requestProperties.get(PaginationConstants.PAGINATION_APPLIED));
         }
 
         @Test
