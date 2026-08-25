@@ -65,7 +65,7 @@ class HistoryProviderStreamTest {
         }
 
         @Override
-        public long getValueCount(ResourcePath path, TimeRange range) {
+        public long getValueCount(ResourcePath path, TimeRange range, ValueFilter valueFilter) {
             return data.size();
         }
 

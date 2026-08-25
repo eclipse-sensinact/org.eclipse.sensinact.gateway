@@ -91,6 +91,30 @@ class HistoryProviderEngineTest {
     }
 
     @Test
+    void valueFilteredCountWithoutCapabilityIsRejected() {
+        when(storage.capabilities()).thenReturn(Set.of());
+
+        assertThrows(UnsupportedHistoryOperationException.class,
+                () -> engine.getValueCount(PATH, TimeRange.ALL, ValueFilter.of(Op.GT, 5L)));
+    }
+
+    @Test
+    void valueFilteredCountReachesTheBackend() {
+        when(storage.capabilities()).thenReturn(Set.of(HistoryCapability.VALUE_FILTERING));
+        ValueFilter filter = ValueFilter.of(Op.GE, 3L);
+        when(storage.count(PATH, TimeRange.ALL, filter)).thenReturn(7L);
+
+        assertEquals(7L, engine.getValueCount(PATH, TimeRange.ALL, filter));
+    }
+
+    @Test
+    void unfilteredCountNeedsNoCapability() {
+        when(storage.count(PATH, TimeRange.ALL, null)).thenReturn(4L);
+
+        assertEquals(4L, engine.getValueCount(PATH, TimeRange.ALL));
+    }
+
+    @Test
     void aggregationWithoutCapabilityIsRejected() {
         when(storage.capabilities()).thenReturn(Set.of(HistoryCapability.VALUE_FILTERING));
 

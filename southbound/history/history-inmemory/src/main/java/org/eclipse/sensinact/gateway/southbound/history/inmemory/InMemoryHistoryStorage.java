@@ -96,8 +96,8 @@ public class InMemoryHistoryStorage implements HistoryStorage {
     }
 
     @Override
-    public long count(ResourcePath path, TimeRange range) {
-        return matching(path, range, null).count();
+    public long count(ResourcePath path, TimeRange range, ValueFilter valueFilter) {
+        return matching(path, range, valueFilter).count();
     }
 
     @Override

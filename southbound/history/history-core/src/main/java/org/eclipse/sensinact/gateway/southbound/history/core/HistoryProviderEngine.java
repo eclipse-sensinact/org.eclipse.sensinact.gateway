@@ -30,6 +30,7 @@ import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQueryExc
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
 import org.eclipse.sensinact.gateway.southbound.history.provider.UnsupportedHistoryOperationException;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ValueFilter;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryStorage;
 
 /**
@@ -83,10 +84,13 @@ public class HistoryProviderEngine implements HistoryProvider {
     }
 
     @Override
-    public long getValueCount(ResourcePath path, TimeRange range) {
+    public long getValueCount(ResourcePath path, TimeRange range, ValueFilter valueFilter) {
         Objects.requireNonNull(path, "path must not be null");
         Objects.requireNonNull(range, "range must not be null");
-        return guarded(() -> storage.count(path, range));
+        if (valueFilter != null && !getCapabilities().contains(HistoryCapability.VALUE_FILTERING)) {
+            throw new UnsupportedHistoryOperationException(HistoryCapability.VALUE_FILTERING);
+        }
+        return guarded(() -> storage.count(path, range, valueFilter));
     }
 
     @Override

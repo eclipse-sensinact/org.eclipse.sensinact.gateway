@@ -39,10 +39,11 @@ import org.osgi.test.common.annotation.config.WithConfiguration;
 import tools.jackson.core.type.TypeReference;
 
 /**
- * $top/$skip/$orderby pushdown against the in-memory history backend — no
- * docker required. The pushed-down page must match what the in-memory
- * pagination filters would have produced, and $filter requests must keep
- * using the in-memory path.
+ * $top/$skip/$orderby and $filter constraint pushdown against the in-memory
+ * history backend — no docker required. The pushed-down page must match what
+ * the in-memory pagination filters would have produced, and $filter requests
+ * beyond time ranges and numeric value conditions must keep using the
+ * in-memory path.
  */
 public class ObservationPushdownInMemoryTest extends AbstractIntegrationTest {
 
@@ -215,7 +216,7 @@ public class ObservationPushdownInMemoryTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void mixedFilterFallsBackWithCorrectResults() throws Exception {
+    void combinedValueAndTimeFilterIsPushedDown() throws Exception {
         ResultList<Observation> page = utils.queryJson(DATASTREAM_PATH
                 + "?$filter=result%20ge%2010%20and%20phenomenonTime%20lt%202024-01-01T00:15:00Z&$top=3&$count=true",
                 OBSERVATIONS);
@@ -226,13 +227,31 @@ public class ObservationPushdownInMemoryTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void filterKeepsInMemoryPaginationAndCorrectsTheCount() throws Exception {
+    void numericValueFilterIsPushedDownWithFilteredCount() throws Exception {
         ResultList<Observation> page = utils.queryJson(
                 DATASTREAM_PATH + "?$filter=result%20ge%2010&$top=5&$count=true", OBSERVATIONS);
 
         assertEquals(10, page.count());
         assertEquals(List.of(10, 11, 12, 13, 14),
                 page.value().stream().map(ObservationPushdownInMemoryTest::result).toList());
+        assertNotNull(page.nextLink());
+        assertTrue(page.nextLink().contains("skip=5"), "Unexpected nextLink: " + page.nextLink());
+
+        ResultList<Observation> next = utils
+                .queryJson(DATASTREAM_PATH + "?$filter=result%20ge%2010&$top=5&$count=true&$skip=5", OBSERVATIONS);
+        assertEquals(10, next.count());
+        assertEquals(List.of(15, 16, 17, 18, 19),
+                next.value().stream().map(ObservationPushdownInMemoryTest::result).toList());
+        assertNull(next.nextLink());
+    }
+
+    @Test
+    void disjunctiveFilterFallsBackWithCorrectResults() throws Exception {
+        ResultList<Observation> page = utils.queryJson(
+                DATASTREAM_PATH + "?$filter=result%20lt%203%20or%20result%20gt%2016&$top=4&$count=true", OBSERVATIONS);
+
+        assertEquals(6, page.count());
+        assertEquals(List.of(0, 1, 2, 17), page.value().stream().map(ObservationPushdownInMemoryTest::result).toList());
         assertNotNull(page.nextLink());
     }
 

@@ -14,13 +14,19 @@ package org.eclipse.sensinact.northbound.filters.sensorthings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ValueFilter;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ValueFilter.Op;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -141,5 +147,79 @@ class TimeRangeExtractorTest {
             "" })
     void nonReducibleFiltersYieldNothing(String filter) {
         assertNotExtractable(filter);
+    }
+
+    @Nested
+    class ValueConstraints {
+
+        private static final Set<String> VALUE_FIELDS = Set.of("result");
+
+        private TimeRangeExtractor.Constraints extractConstraints(String filter) {
+            Optional<TimeRangeExtractor.Constraints> constraints = TimeRangeExtractor.extractConstraints(filter,
+                    OBSERVATION_TIME_FIELDS, VALUE_FIELDS);
+            assertTrue(constraints.isPresent(), "Expected constraints for: " + filter);
+            return constraints.get();
+        }
+
+        private void assertNotExtractable(String filter) {
+            assertTrue(TimeRangeExtractor.extractConstraints(filter, OBSERVATION_TIME_FIELDS, VALUE_FIELDS).isEmpty(),
+                    "Expected no constraints for: " + filter);
+        }
+
+        @Test
+        void numericComparisonBecomesAValueCondition() {
+            TimeRangeExtractor.Constraints constraints = extractConstraints("result ge 10");
+
+            assertEquals(TimeRange.ALL, constraints.range());
+            assertEquals(new ValueFilter(List.of(new ValueFilter.Condition(Op.GE, new BigDecimal("10")))),
+                    constraints.valueFilter());
+        }
+
+        @Test
+        void decimalLiteralKeepsItsPrecision() {
+            TimeRangeExtractor.Constraints constraints = extractConstraints("result lt 21.5");
+
+            assertEquals(new ValueFilter(List.of(new ValueFilter.Condition(Op.LT, new BigDecimal("21.5")))),
+                    constraints.valueFilter());
+        }
+
+        @Test
+        void valueAndTimeConstraintsCombine() {
+            TimeRangeExtractor.Constraints constraints = extractConstraints(
+                    "result ge 10 and phenomenonTime lt 2014-07-10T00:00:00Z");
+
+            assertEquals(new TimeRange(null, true, T2, false), constraints.range());
+            assertEquals(new ValueFilter(List.of(new ValueFilter.Condition(Op.GE, new BigDecimal("10")))),
+                    constraints.valueFilter());
+        }
+
+        @Test
+        void multipleValueConditionsAreKeptInOrder() {
+            TimeRangeExtractor.Constraints constraints = extractConstraints("result ge 10 and result lt 20");
+
+            assertEquals(new ValueFilter(List.of(new ValueFilter.Condition(Op.GE, new BigDecimal("10")),
+                    new ValueFilter.Condition(Op.LT, new BigDecimal("20")))), constraints.valueFilter());
+        }
+
+        @Test
+        void timeOnlyFilterHasNoValueFilter() {
+            TimeRangeExtractor.Constraints constraints = extractConstraints(
+                    "phenomenonTime ge 2014-07-01T00:00:00Z");
+
+            assertEquals(new TimeRange(T1, true, null, true), constraints.range());
+            assertNull(constraints.valueFilter());
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {
+                "result eq 'value1'",
+                "result eq true",
+                "result ne 10",
+                "result ge 10 or result lt 5",
+                "unitOfMeasurement ge 10",
+                "result ge 2014-07-01T00:00:00Z and result lt asdf" })
+        void nonNumericOrNonReducibleValueFiltersYieldNothing(String filter) {
+            assertNotExtractable(filter);
+        }
     }
 }

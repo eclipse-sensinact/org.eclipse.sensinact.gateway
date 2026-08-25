@@ -80,7 +80,15 @@ public interface HistoryProvider {
                 .values();
     }
 
-    long getValueCount(ResourcePath path, TimeRange range);
+    default long getValueCount(ResourcePath path, TimeRange range) {
+        return getValueCount(path, range, null);
+    }
+
+    /**
+     * Number of values in the range matching the filter. A non-null
+     * {@code valueFilter} requires {@link HistoryCapability#VALUE_FILTERING}.
+     */
+    long getValueCount(ResourcePath path, TimeRange range, ValueFilter valueFilter);
 
     /**
      * Paged range query. The page size is {@code query.limit()} clamped to

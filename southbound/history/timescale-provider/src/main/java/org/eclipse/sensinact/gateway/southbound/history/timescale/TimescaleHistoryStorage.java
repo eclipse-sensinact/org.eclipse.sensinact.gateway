@@ -39,6 +39,7 @@ import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.provider.SortOrder;
 import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ValueFilter;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoricalRecord;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryStorage;
 import org.eclipse.sensinact.gateway.southbound.history.storage.PruneRequest;
@@ -207,9 +208,9 @@ public class TimescaleHistoryStorage implements HistoryStorage {
     }
 
     @Override
-    public long count(ResourcePath path, TimeRange range) {
+    public long count(ResourcePath path, TimeRange range, ValueFilter valueFilter) {
         TimescaleSql.Builder query = new TimescaleSql.Builder("SELECT COUNT(*) FROM " + TimescaleSql.TABLE)
-                .path(path).range(range);
+                .path(path).range(range).valueFilter(valueFilter);
         return tx.inTransaction(() -> {
             try (PreparedStatement ps = query.prepare(connection.get()); ResultSet rs = ps.executeQuery()) {
                 rs.next();

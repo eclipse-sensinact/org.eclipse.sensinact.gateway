@@ -26,6 +26,7 @@ import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ValueFilter;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
@@ -63,7 +64,16 @@ public interface HistoryStorage {
 
     Optional<TimedValue<?>> latestValue(ResourcePath path);
 
-    long count(ResourcePath path, TimeRange range);
+    default long count(ResourcePath path, TimeRange range) {
+        return count(path, range, null);
+    }
+
+    /**
+     * Number of values in the range matching the filter. A non-null
+     * {@code valueFilter} is only passed when {@link #capabilities()}
+     * contains VALUE_FILTERING.
+     */
+    long count(ResourcePath path, TimeRange range, ValueFilter valueFilter);
 
     HistoryPage values(HistoryQuery query);
 

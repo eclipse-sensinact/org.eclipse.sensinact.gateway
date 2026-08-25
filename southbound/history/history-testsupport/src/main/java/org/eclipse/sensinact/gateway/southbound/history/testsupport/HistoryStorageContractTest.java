@@ -285,6 +285,26 @@ public abstract class HistoryStorageContractTest {
 
             assertEquals(1, page.values().size());
         }
+
+        @Test
+        void valueFilterScopesTheCount() {
+            assumeTrue(storage.capabilities().contains(HistoryCapability.VALUE_FILTERING));
+            storeLongs(PATH, 10);
+
+            assertEquals(3, storage.count(PATH, TimeRange.ALL, ValueFilter.of(Op.GT, 6L)));
+            assertEquals(4, storage.count(PATH, TimeRange.ALL, ValueFilter.of(Op.GE, 6L)));
+            assertEquals(10, storage.count(PATH, TimeRange.ALL, null));
+        }
+
+        @Test
+        void valueFilteredCountRespectsTheTimeRange() {
+            assumeTrue(storage.capabilities().contains(HistoryCapability.VALUE_FILTERING));
+            storeLongs(PATH, 10);
+
+            long inRange = storage.count(PATH, TimeRange.closed(T0, T0.plusSeconds(5 * 60)),
+                    ValueFilter.of(Op.GE, 3L));
+            assertEquals(3, inRange);
+        }
     }
 
     @Nested

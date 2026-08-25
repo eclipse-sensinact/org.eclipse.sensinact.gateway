@@ -22,13 +22,16 @@ import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryCapability;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryPage;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.provider.SortOrder;
 import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ValueFilter;
 import org.eclipse.sensinact.northbound.filters.sensorthings.TimeRangeExtractor;
+import org.eclipse.sensinact.northbound.filters.sensorthings.TimeRangeExtractor.Constraints;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -49,8 +52,9 @@ import jakarta.ws.rs.core.UriInfo;
  * {@link HistoryProvider} service published by the application.
  *
  * When the request carries an effective $top, at most a single time-field
- * $orderby and no $filter — or one that reduces entirely to a time constraint
- * — the pagination and time range are pushed down into the history query and
+ * $orderby and no $filter — or one that reduces entirely to a time range plus,
+ * capability permitting, numeric value conditions — the pagination and the
+ * constraints are pushed down into the history query and
  * {@link PaginationConstants#PAGINATION_APPLIED} tells the response-side
  * query option filters to leave the page alone. Otherwise the results are the
  * newest values up to the configured result limit, in chronological order,
@@ -61,6 +65,9 @@ class HistoryResourceHelperSensinact {
 
     /** $orderby fields of an Observation carrying the history timestamp */
     private static final Set<String> OBSERVATION_TIME_FIELDS = Set.of("phenomenonTime", "resultTime");
+
+    /** $filter fields of an Observation carrying the stored value */
+    private static final Set<String> OBSERVATION_VALUE_FIELDS = Set.of("result");
 
     /** $orderby fields of a HistoricalLocation carrying the history timestamp */
     private static final Set<String> HISTORICAL_LOCATION_TIME_FIELDS = Set.of("time");
@@ -79,8 +86,8 @@ class HistoryResourceHelperSensinact {
         ResourcePath path = new ResourcePath(resourceSnapshot.getService().getProvider().getName(),
                 resourceSnapshot.getService().getName(), resourceSnapshot.getName());
 
-        HistoryQuery pushed = pushDownQuery(path, requestContext, filter, OBSERVATION_TIME_FIELDS,
-                getMaxResult(application, localResultLimit));
+        HistoryQuery pushed = pushDownQuery(history, path, requestContext, filter, OBSERVATION_TIME_FIELDS,
+                OBSERVATION_VALUE_FIELDS, getMaxResult(application, localResultLimit));
         if (pushed != null) {
             HistoryPage page = history.getValues(pushed);
             List<Observation> observations = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
@@ -106,8 +113,8 @@ class HistoryResourceHelperSensinact {
 
         ResourcePath path = new ResourcePath(provider.getName(), "admin", "location");
 
-        HistoryQuery pushed = pushDownQuery(path, requestContext, filter, HISTORICAL_LOCATION_TIME_FIELDS,
-                getMaxResult(application, localResultLimit));
+        HistoryQuery pushed = pushDownQuery(history, path, requestContext, filter, HISTORICAL_LOCATION_TIME_FIELDS,
+                Set.of(), getMaxResult(application, localResultLimit));
         if (pushed != null) {
             HistoryPage page = history.getValues(pushed);
             List<HistoricalLocation> locations = DtoMapper.toHistoricalLocationList(userSession, application, mapper,
@@ -137,25 +144,35 @@ class HistoryResourceHelperSensinact {
     }
 
     /**
-     * Runs the query with $orderby, $skip, $top and the $filter's time range
+     * Runs the query with $orderby, $skip, $top and the $filter's constraints
      * applied database-side when the request allows it: an effective $top, an
      * absent or single time-field $orderby, and no $filter or one that
-     * reduces entirely to a time constraint (making re-applying it to the
-     * returned rows a no-op). Returns {@code null} when the request is not
-     * pushable and pagination stays with the response filters.
+     * reduces entirely to a time range plus — capability permitting — numeric
+     * value conditions (making re-applying it to the returned rows a no-op).
+     * Returns {@code null} when the request is not pushable and pagination
+     * stays with the response filters.
      */
-    private static HistoryQuery pushDownQuery(ResourcePath path, ContainerRequestContext requestContext,
-            ICriterion filter, Set<String> timeFields, int maxResults) {
+    private static HistoryQuery pushDownQuery(HistoryProvider history, ResourcePath path,
+            ContainerRequestContext requestContext, ICriterion filter, Set<String> timeFields,
+            Set<String> valueFields, int maxResults) {
         if (requestContext == null) {
             return null;
         }
         TimeRange range = TimeRange.ALL;
+        ValueFilter valueFilter = null;
         if (filter != null) {
             String rawFilter = (String) requestContext.getProperty(IFilterConstants.PROP_FILTER_STRING);
-            range = TimeRangeExtractor.extract(rawFilter, timeFields).orElse(null);
-            if (range == null) {
+            Constraints constraints = TimeRangeExtractor.extractConstraints(rawFilter, timeFields, valueFields)
+                    .orElse(null);
+            if (constraints == null) {
                 return null;
             }
+            if (constraints.valueFilter() != null
+                    && !history.getCapabilities().contains(HistoryCapability.VALUE_FILTERING)) {
+                return null;
+            }
+            range = constraints.range();
+            valueFilter = constraints.valueFilter();
         }
         Integer top = (Integer) requestContext.getProperty(PaginationConstants.TOP_PROP);
         if (top == null) {
@@ -166,8 +183,8 @@ class HistoryResourceHelperSensinact {
             return null;
         }
         Integer skip = (Integer) requestContext.getProperty(PaginationConstants.SKIP_PROP);
-        return HistoryQuery.builder(path).range(range).order(order).offset(skip == null ? 0 : skip)
-                .limit(Math.min(top, maxResults)).build();
+        return HistoryQuery.builder(path).range(range).valueFilter(valueFilter).order(order)
+                .offset(skip == null ? 0 : skip).limit(Math.min(top, maxResults)).build();
     }
 
     /**
@@ -205,7 +222,8 @@ class HistoryResourceHelperSensinact {
             nextLink = requestContext.getUriInfo().getRequestUriBuilder().replaceQueryParam("$skip", nextSkip).build()
                     .toString();
         }
-        long count = page.totalCount().orElseGet(() -> history.getValueCount(query.path(), query.range()));
+        long count = page.totalCount()
+                .orElseGet(() -> history.getValueCount(query.path(), query.range(), query.valueFilter()));
         requestContext.setProperty(PaginationConstants.PAGINATION_APPLIED, Boolean.TRUE);
         return new ResultList<>((int) Math.min(Integer.MAX_VALUE, count), nextLink, values);
     }

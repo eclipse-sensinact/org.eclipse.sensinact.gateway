@@ -31,11 +31,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
@@ -45,12 +47,14 @@ import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.filters.api.FilterParserException;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryCapability;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryPage;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.provider.SortOrder;
 import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ValueFilter;
 import org.eclipse.sensinact.northbound.filters.sensorthings.impl.SensorthingsFilterComponent;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
@@ -273,7 +277,7 @@ class HistoryResourceHelperSensinactTest {
             requestProperties.put(PaginationConstants.TOP_PROP, 2);
             requestProperties.put(PaginationConstants.SKIP_PROP, 10);
 
-            when(history.getValueCount(eq(PATH), any())).thenReturn(50L);
+            when(history.getValueCount(eq(PATH), any(), any())).thenReturn(50L);
             when(history.getValues(any())).thenReturn(HistoryPage.of(
                     List.of(new DefaultTimedValue<>("value1", now), new DefaultTimedValue<>("value2", now)), 10,
                     true));
@@ -310,7 +314,7 @@ class HistoryResourceHelperSensinactTest {
             requestProperties.put(PaginationConstants.TOP_PROP, 2);
             queryParameters.putSingle("$orderby", "phenomenonTime desc");
 
-            when(history.getValueCount(eq(PATH), any())).thenReturn(2L);
+            when(history.getValueCount(eq(PATH), any(), any())).thenReturn(2L);
             when(history.getValues(any())).thenReturn(HistoryPage.of(List.of(
                     new DefaultTimedValue<>("newest", now), new DefaultTimedValue<>("older", now.minusSeconds(60))),
                     0, false));
@@ -367,6 +371,65 @@ class HistoryResourceHelperSensinactTest {
         }
 
         @Test
+        @DisplayName("Should push a numeric result $filter down as the query's value filter")
+        void numericValueFilterIsPushedDown() throws FilterParserException {
+            String rawFilter = "result ge 10";
+            setupResourceSnapshotMocks();
+            setupRequestContext();
+            setupApplication(1000);
+            requestProperties.put(PaginationConstants.TOP_PROP, 5);
+            requestProperties.put(IFilterConstants.PROP_FILTER_STRING, rawFilter);
+
+            SensorthingsFilterComponent filterComponent = new SensorthingsFilterComponent();
+            filterComponent.setSession(userSession);
+            ICriterion filter = filterComponent.parseFilter(rawFilter, OBSERVATIONS);
+
+            when(history.getCapabilities()).thenReturn(Set.of(HistoryCapability.VALUE_FILTERING));
+            when(history.getValueCount(eq(PATH), any(), any())).thenReturn(10L);
+            when(history.getValues(any())).thenReturn(HistoryPage.of(List.of(), 0, false));
+
+            ResultList<Observation> result = HistoryResourceHelperSensinact.loadHistoricalObservations(userSession,
+                    application, mapper, uriInfo, requestContext, expansions, resourceSnapshot, filter, 0);
+
+            ArgumentCaptor<HistoryQuery> query = ArgumentCaptor.forClass(HistoryQuery.class);
+            verify(history).getValues(query.capture());
+            ValueFilter expected = new ValueFilter(
+                    List.of(new ValueFilter.Condition(ValueFilter.Op.GE, new BigDecimal("10"))));
+            assertEquals(expected, query.getValue().valueFilter());
+            // the filtered count is computed with the same value filter
+            ArgumentCaptor<ValueFilter> countFilter = ArgumentCaptor.forClass(ValueFilter.class);
+            verify(history).getValueCount(eq(PATH), any(), countFilter.capture());
+            assertEquals(expected, countFilter.getValue());
+            assertEquals(10, result.count().intValue());
+            assertEquals(Boolean.TRUE, requestProperties.get(PaginationConstants.PAGINATION_APPLIED));
+        }
+
+        @Test
+        @DisplayName("Should not push a value filter to a provider without the capability")
+        void valueFilterWithoutCapabilityFallsBack() throws FilterParserException {
+            String rawFilter = "result ge 10";
+            setupResourceSnapshotMocks();
+            setupRequestContext();
+            setupApplication(1000);
+            requestProperties.put(PaginationConstants.TOP_PROP, 5);
+            requestProperties.put(IFilterConstants.PROP_FILTER_STRING, rawFilter);
+
+            SensorthingsFilterComponent filterComponent = new SensorthingsFilterComponent();
+            filterComponent.setSession(userSession);
+            ICriterion filter = filterComponent.parseFilter(rawFilter, OBSERVATIONS);
+
+            when(history.getCapabilities()).thenReturn(Set.of());
+            when(history.getValueCount(eq(PATH), any())).thenReturn(0L);
+            when(history.streamValues(any(), anyLong())).thenReturn(Stream.of());
+
+            HistoryResourceHelperSensinact.loadHistoricalObservations(userSession, application, mapper, uriInfo,
+                    requestContext, expansions, resourceSnapshot, filter, 0);
+
+            verify(history, never()).getValues(any());
+            assertNull(requestProperties.get(PaginationConstants.PAGINATION_APPLIED));
+        }
+
+        @Test
         @DisplayName("Should push a time-only $filter down as the query's time range")
         void timeOnlyFilterIsPushedDownAsRange() throws FilterParserException {
             Instant from = Instant.parse("2014-07-01T00:00:00Z");
@@ -382,7 +445,7 @@ class HistoryResourceHelperSensinactTest {
             filterComponent.setSession(userSession);
             ICriterion filter = filterComponent.parseFilter(rawFilter, OBSERVATIONS);
 
-            when(history.getValueCount(eq(PATH), any())).thenReturn(6L);
+            when(history.getValueCount(eq(PATH), any(), any())).thenReturn(6L);
             when(history.getValues(any())).thenReturn(HistoryPage.of(List.of(), 0, false));
 
             ResultList<Observation> result = HistoryResourceHelperSensinact.loadHistoricalObservations(userSession,
@@ -393,7 +456,7 @@ class HistoryResourceHelperSensinactTest {
             assertEquals(new TimeRange(from, true, to, false), query.getValue().range());
             // the filtered count is scoped to the pushed-down range
             ArgumentCaptor<TimeRange> countRange = ArgumentCaptor.forClass(TimeRange.class);
-            verify(history).getValueCount(eq(PATH), countRange.capture());
+            verify(history).getValueCount(eq(PATH), countRange.capture(), any());
             assertEquals(new TimeRange(from, true, to, false), countRange.getValue());
             assertEquals(6, result.count().intValue());
             assertEquals(Boolean.TRUE, requestProperties.get(PaginationConstants.PAGINATION_APPLIED));
@@ -423,7 +486,7 @@ class HistoryResourceHelperSensinactTest {
             setupApplication(100);
             requestProperties.put(PaginationConstants.TOP_PROP, 500);
 
-            when(history.getValueCount(eq(PATH), any())).thenReturn(0L);
+            when(history.getValueCount(eq(PATH), any(), any())).thenReturn(0L);
             when(history.getValues(any())).thenReturn(HistoryPage.of(List.of(), 0, false));
 
             load();
@@ -442,7 +505,7 @@ class HistoryResourceHelperSensinactTest {
             requestProperties.put(PaginationConstants.TOP_PROP, 5);
             requestProperties.put(PaginationConstants.SKIP_PROP, 100);
 
-            when(history.getValueCount(eq(PATH), any())).thenReturn(20L);
+            when(history.getValueCount(eq(PATH), any(), any())).thenReturn(20L);
             when(history.getValues(any())).thenReturn(HistoryPage.of(List.of(), 100, false));
 
             ResultList<Observation> result = load();
