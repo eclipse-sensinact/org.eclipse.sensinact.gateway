@@ -54,9 +54,10 @@
 	org.apache.felix.http.jetty;version='[5.0.4,5.0.5)',\
 	org.apache.felix.http.servlet-api;version='[2.1.0,2.1.1)',\
 	org.apache.felix.scr;version='[2.2.2,2.2.3)',\
-	org.eclipse.emf.common;version='[2.29.0,2.29.1)',\
-	org.eclipse.emf.ecore;version='[2.35.0,2.35.1)',\
-	org.eclipse.emf.ecore.xmi;version='[2.36.0,2.36.1)',\
+	org.eclipse.emf.common;version='[2.44.0,2.44.1)',\
+	org.eclipse.emf.ecore;version='[2.41.0,2.41.1)',\
+	org.eclipse.emf.ecore.xmi;version='[2.39.0,2.39.1)',\
+	org.eclipse.fennec.emf.osgi.component.minimal;version='[1.0.2,1.0.3)',\
 	org.eclipse.jetty.io;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.security;version='[11.0.13,11.0.14)',\
 	org.eclipse.jetty.util;version='[11.0.13,11.0.14)',\
@@ -83,7 +84,6 @@
 	org.eclipse.sensinact.gateway.northbound.session.session-impl;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.sensorthings.extended;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.history-api;version='[0.0.2,0.0.3)',\
-	org.gecko.emf.osgi.component.minimal;version='[6.3.0,6.3.1)',\
 	org.glassfish.hk2.api;version='[3.0.5,3.0.6)',\
 	org.glassfish.hk2.external.aopalliance-repackaged;version='[3.0.6,3.0.7)',\
 	org.glassfish.hk2.locator;version='[3.0.6,3.0.7)',\
