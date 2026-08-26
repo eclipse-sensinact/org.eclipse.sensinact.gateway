@@ -260,6 +260,13 @@ Ordering: M0 first (independent PR to master; hard prerequisite for M4, recommen
 - M4/M6: run the SensorThings ITs and manually exercise `GET .../Observations?$top=5&$skip=10&$orderby=phenomenonTime desc` against a seeded gateway, verifying the SQL (log/explain) shows LIMIT/OFFSET pushdown and `@iot.count`/nextLink stay correct with and without `$filter`.
 - Facade parity: REST ACT calls to `history/single|range|count` return byte-identical JSON before/after (golden responses captured in M0).
 - Docs build: `docs/` sphinx build green; examples in history.md/timescale.md executed against the sample docker config.
+- **Load tests** (opt-in, skipped in normal builds; results print as `BENCH|` lines, assertions are
+  generous sanity ceilings only):
+  - Storage level (1M rows hot resource + 100k across 1k resources, both Postgres variants):
+    `mvn test -pl southbound/history/timescale-provider -Dtest=TimescaleStorageBenchmarkTest -Dhistory.benchmark=true`
+  - REST end-to-end (1M observations behind one datastream; a correct page at `$skip=500000`
+    is itself the pushdown proof — the in-memory fallback only sees the newest 3000 values):
+    `HISTORY_BENCHMARK=true mvn verify -pl northbound/sensorthings/rest.gateway -Dmaven.test.skip.exec=true -Dtest=org.eclipse.sensinact.sensorthings.sensing.rest.integration.sensinact.ObservationHistoryLoadTest`
 
 ## Deferred / follow-ups
 
