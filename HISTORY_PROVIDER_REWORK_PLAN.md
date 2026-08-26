@@ -1,13 +1,15 @@
 # History Provider Rework — Plan
 
-> Status: **in implementation** — M0 merged (#755); stream A evaluation complete with ADR
+> Status: **implementation complete** — M0 merged (#755); stream A evaluation complete with ADR
 > *accepted* (`docs/source/southbound/history/history-storage-adr.md`: stay on Postgres, unified
-> schema, Timescale optional); M1–M7 done (M4: service binding, helper rewrite, +1ms removal,
+> schema, Timescale optional); M1–M8 done (M4: service binding, helper rewrite, +1ms removal,
 > $top/$skip/$orderby pushdown incl. docker-free in-memory ITs; M5: sensorthings-family and
 > filter-module helpers migrated off the ACT facade, feature definitions fixed; M6:
 > TimeRangeExtractor + whole-filter time-constraint pushdown with range-scoped counts;
-> M7: numeric value-condition pushdown, capability-gated, with value-filtered counts) —
-> M8 (docs rewrite) next.
+> M7: numeric value-condition pushdown, capability-gated, with value-filtered counts;
+> M8: history.md rewritten around the HistoryProvider contract with ACT as legacy,
+> SensorthingsRestAccess.md pushdown section, timescale.md/_index.md consistency).
+> Remaining follow-ups are listed under "Deferred / follow-ups" below.
 >
 > Companions: [HISTORY_STA_GAP_ANALYSIS.md](HISTORY_STA_GAP_ANALYSIS.md) (STA feature gaps) and
 > [NOTIFICATION_PROXY_ALIGNMENT.md](NOTIFICATION_PROXY_ALIGNMENT.md) (third-party ingest-filter
@@ -258,3 +260,22 @@ Ordering: M0 first (independent PR to master; hard prerequisite for M4, recommen
 - M4/M6: run the SensorThings ITs and manually exercise `GET .../Observations?$top=5&$skip=10&$orderby=phenomenonTime desc` against a seeded gateway, verifying the SQL (log/explain) shows LIMIT/OFFSET pushdown and `@iot.count`/nextLink stay correct with and without `$filter`.
 - Facade parity: REST ACT calls to `history/single|range|count` return byte-identical JSON before/after (golden responses captured in M0).
 - Docs build: `docs/` sphinx build green; examples in history.md/timescale.md executed against the sample docker config.
+
+## Deferred / follow-ups
+
+Work intentionally left out of the M1–M8 implementation:
+
+1. **Housekeeping selector scoping** (`include.resources` on policies, plan §housekeeping): needs a
+   path enumeration source; `PruneRequest.paths` already carries resolved paths, so it lands
+   without an SPI change.
+2. **In-memory backend distribution feature**: `history-inmemory` is used by tests only; a feature
+   definition would make it available for demo deployments.
+3. **Upstream issues to file**: flaky `EMFUpdateServiceTest#dynamicUpdateDTO` (ms-truncation race),
+   flaky `MetricsTest#testProvider` (listener timing), CI artifact-name step skipped on failure.
+4. **Multi-resource/selector queries** (risk #6): the `HistoryQuery` builder stays additive; a
+   future `MULTI_RESOURCE` capability can add them without breaking the contract.
+5. **Keyset pagination** (`after(Instant)` on the builder, ADR note): deep `OFFSET` costs grow
+   linearly; worth adding when consumers page very deep.
+6. **String/boolean value-filter pushdown**: deliberately excluded in M7 — comparison semantics
+   differ between backends (`value_num`-only SQL vs. in-memory equality); would need a
+   per-kind column strategy and a capability flag of its own.

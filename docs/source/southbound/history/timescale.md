@@ -60,11 +60,11 @@ once the migration is verified. Migrated numeric values keep their historical re
 (whole numbers as `Long`, everything else as `double`); values stored after the migration
 additionally preserve their exact Java type.
 
-## Provided actions
+## Provided services and actions
 
-The provider implements the [Eclipse sensiNact History Provider actions](./history.md#provider-actions)
-through the history engine, and is also available to OSGi consumers as a `HistoryProvider` service.
-No additional actions are defined.
+Through the history engine the backend is available to OSGi consumers as a
+[`HistoryProvider` service](./history.md#the-historyprovider-service) and implements the
+[legacy ACT actions](./history.md#legacy-act-actions). No additional actions are defined.
 
 ## Sample configuration
 
