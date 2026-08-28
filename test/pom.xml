@@ -23,7 +23,7 @@
   <name>SensiNact Test</name>
 
   <properties>
-    <testcontainers.version>2.0.3</testcontainers.version>
+    <testcontainers.version>2.0.5</testcontainers.version>
     <!-- These need to be kept in sync with the testcontainers -->
     <docker.java.version>3.7.0</docker.java.version>
     <duct.tape.version>1.0.8</duct.tape.version>
