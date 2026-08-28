@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.northbound.rest.impl;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,6 +40,7 @@ public class RestAccessApplication extends Application {
 
     @interface Config {
         boolean allow_anonymous() default false;
+        boolean add_default_authenticator() default true;
     }
 
     @Reference
@@ -55,7 +57,7 @@ public class RestAccessApplication extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return Set.of(
+        Set<Class<?>> res = new HashSet<>(Set.of(
             StatusCodeFilter.class,
             SensinactSessionProvider.class,
             SensinactSessionManagerProvider.class,
@@ -64,8 +66,11 @@ public class RestAccessApplication extends Application {
             JacksonJsonProvider.class,
             JacksonXmlBindJsonProvider.class,
             RestNorthbound.class,
-            AuthenticationFilter.class,
-            RestRuntime.class);
+            RestRuntime.class));
+        if (config.add_default_authenticator()) {
+            res.add(AuthenticationFilter.class);
+        }
+        return res;
     }
 
     public SensiNactSessionManager getSessionManager() {
