@@ -128,10 +128,11 @@
     <osgi.typedevent.version>1.0.0</osgi.typedevent.version>
     <osgi.feature.version>1.0.0</osgi.feature.version>
     <osgi.converter.version>1.0.9</osgi.converter.version>
-    <gecko.emf.version>6.3.0</gecko.emf.version>
-    <emf.common.version>2.29.0</emf.common.version>
-    <emf.ecore.version>2.35.0</emf.ecore.version>
-    <emf.ecore.xmi.version>2.36.0</emf.ecore.xmi.version>
+    <osgi.condition.version>1.0.0</osgi.condition.version>
+    <fennec.emf.version>1.0.2</fennec.emf.version>
+    <emf.common.version>2.44.0</emf.common.version>
+    <emf.ecore.version>2.41.0</emf.ecore.version>
+    <emf.ecore.xmi.version>2.39.0</emf.ecore.xmi.version>
     <slf4j.version>2.0.17</slf4j.version>
     <logback.version>1.5.31</logback.version>
     <jackson.version>3.1.1</jackson.version>
@@ -316,15 +317,21 @@
         <version>${osgi.converter.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.geckoprojects.emf</groupId>
-        <artifactId>org.gecko.emf.osgi.api</artifactId>
-        <version>${gecko.emf.version}</version>
+        <groupId>org.osgi</groupId>
+        <artifactId>org.osgi.service.condition</artifactId>
+        <version>${osgi.condition.version}</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
-        <groupId>org.geckoprojects.emf</groupId>
-        <artifactId>org.gecko.emf.osgi.component.minimal</artifactId>
-        <version>${gecko.emf.version}</version>
+        <groupId>org.eclipse.fennec.emf</groupId>
+        <artifactId>org.eclipse.fennec.emf.osgi.api</artifactId>
+        <version>${fennec.emf.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.fennec.emf</groupId>
+        <artifactId>org.eclipse.fennec.emf.osgi.component.minimal</artifactId>
+        <version>${fennec.emf.version}</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.emf</groupId>
@@ -517,9 +524,9 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>org.geckoprojects.emf</groupId>
-        <artifactId>org.gecko.emf.osgi.codegen</artifactId>
-        <version>${gecko.emf.version}</version>
+        <groupId>org.eclipse.fennec.emf</groupId>
+        <artifactId>org.eclipse.fennec.emf.osgi.codegen</artifactId>
+        <version>${fennec.emf.version}</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>

@@ -1,4 +1,4 @@
-# SensiNact metrics
+# sensiNact metrics
 
 The Eclipse sensiNact core provides a metrics service to gather statistics about its use.
 The API to access this service is defined in the core API bundle and its implementation is in the core `impl` bundle.
@@ -133,8 +133,8 @@ Here is an example POM file:
   <groupId>org.eclipse.sensinact.tutorials</groupId>
   <artifactId>metrics-oshi</artifactId>
   <version>0.0.2-SNAPSHOT</version>
-  <name>System Metrics for Eclipse sensiNact</name>
-  <description>Addition of system metrics for sensinact</description>
+  <name>System Metrics for Eclipse sensiNact™</name>
+  <description>Addition of system metrics for Eclipse sensiNact™</description>
   <properties>
     <sensinact.version>0.0.2</sensinact.version>
     <bnd.version>6.4.0</bnd.version>

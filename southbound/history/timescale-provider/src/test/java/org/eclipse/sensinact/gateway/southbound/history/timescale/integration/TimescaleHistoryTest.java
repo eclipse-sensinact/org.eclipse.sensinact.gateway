@@ -968,6 +968,49 @@ public class TimescaleHistoryTest {
         }
 
         @Test
+        void manyStringDataSkipCountsFromEndWhenNoStartTime() throws Exception {
+            for (int i = 0; i < 1000; i++) {
+                push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
+            }
+
+            waitForRowCount("sensinact.text_data", 1008);
+
+            thread.execute(new ResourceCommand<Void>("https://eclipse.org/sensinact/" + "sensiNactHistory",
+                    "sensiNactHistory", "timescale-history", "history", "range") {
+
+                @SuppressWarnings("unchecked")
+                @Override
+                protected Promise<Void> call(SensinactResource resource, PromiseFactory pf) {
+                    // No start time: skip counts from the end, exactly 500 values, no
+                    // empty 501st marker although more data exists
+                    List<TimedValue<?>> result = safeGet(resource
+                            .act(Map.of("provider", "bar", "service", "foobar", "resource", "foofoobarbar", "toTime",
+                                    TS_2014.atOffset(ZoneOffset.UTC), "skip", 100))
+                            .map(List.class::cast));
+                    assertEquals(500, result.size());
+                    long valueAt2014 = TS_2012.until(TS_2014, ChronoUnit.DAYS);
+                    for (int i = 0; i < 500; i++) {
+                        assertEquals(String.valueOf(valueAt2014 - 599 + i), result.get(i).getValue());
+                        assertEquals(TS_2014.minus(ofDays(599 - i)), result.get(i).getTimestamp());
+                    }
+
+                    // No start or end: skipping 600 of 1000 from the end leaves the
+                    // 400 oldest values, again without an empty marker
+                    result = safeGet(resource.act(
+                            Map.of("provider", "bar", "service", "foobar", "resource", "foofoobarbar", "skip", 600))
+                            .map(List.class::cast));
+                    assertEquals(400, result.size());
+                    for (int i = 0; i < 400; i++) {
+                        assertEquals(String.valueOf(i), result.get(i).getValue());
+                        assertEquals(TS_2012.plus(ofDays(i)), result.get(i).getTimestamp());
+                    }
+
+                    return pf.resolved(null);
+                }
+            }).getValue();
+        }
+
+        @Test
         void manyStringCount() throws Exception {
             for (int i = 0; i < 1000; i++) {
                 push.pushUpdate(getDto(String.valueOf(i), TS_2012.plus(ofDays(i)))).getValue();
