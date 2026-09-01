@@ -90,9 +90,11 @@ class HistoryResourceHelperSensinact {
                 OBSERVATION_VALUE_FIELDS, getMaxResult(application, localResultLimit));
         if (pushed != null) {
             HistoryPage page = history.getValues(pushed);
+            long count = page.totalCount()
+                    .orElseGet(() -> history.getValueCount(pushed.path(), pushed.range(), pushed.valueFilter()));
             List<Observation> observations = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
                     expansions, filter, resourceSnapshot, page.values());
-            return pushedDownResultList(history, pushed, requestContext, page, observations);
+            return pushedDownResultList(requestContext, page, count, observations);
         }
 
         long count = history.getValueCount(path, TimeRange.ALL);
@@ -117,9 +119,11 @@ class HistoryResourceHelperSensinact {
                 Set.of(), getMaxResult(application, localResultLimit));
         if (pushed != null) {
             HistoryPage page = history.getValues(pushed);
+            long count = page.totalCount()
+                    .orElseGet(() -> history.getValueCount(pushed.path(), pushed.range(), pushed.valueFilter()));
             List<HistoricalLocation> locations = DtoMapper.toHistoricalLocationList(userSession, application, mapper,
                     uriInfo, expansions, filter, provider, page.values());
-            return pushedDownResultList(history, pushed, requestContext, page, locations);
+            return pushedDownResultList(requestContext, page, count, locations);
         }
 
         long count = history.getValueCount(path, TimeRange.ALL);
@@ -214,16 +218,14 @@ class HistoryResourceHelperSensinact {
         return timeFields.contains(clause) ? order : null;
     }
 
-    private static <T extends Self> ResultList<T> pushedDownResultList(HistoryProvider history, HistoryQuery query,
-            ContainerRequestContext requestContext, HistoryPage page, List<T> values) {
+    private static <T extends Self> ResultList<T> pushedDownResultList(ContainerRequestContext requestContext,
+            HistoryPage page, long count, List<T> values) {
         String nextLink = null;
         if (page.hasMore()) {
             long nextSkip = page.offset() + page.values().size();
             nextLink = requestContext.getUriInfo().getRequestUriBuilder().replaceQueryParam("$skip", nextSkip).build()
                     .toString();
         }
-        long count = page.totalCount()
-                .orElseGet(() -> history.getValueCount(query.path(), query.range(), query.valueFilter()));
         requestContext.setProperty(PaginationConstants.PAGINATION_APPLIED, Boolean.TRUE);
         return new ResultList<>((int) Math.min(Integer.MAX_VALUE, count), nextLink, values);
     }
