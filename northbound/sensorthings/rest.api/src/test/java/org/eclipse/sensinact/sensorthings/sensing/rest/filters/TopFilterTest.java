@@ -27,6 +27,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -188,5 +189,18 @@ class TopFilterTest extends QueryOptionFilterTestSupport {
         filter.filter(requestContext, responseContext);
 
         assertSame(single, responseEntity());
+    }
+
+    @Test
+    void appliedPaginationLeavesResponseUntouched() throws IOException {
+        queryParameters.putSingle("$top", "4");
+        filter.filter(requestContext);
+        setRequestProperty(PaginationConstants.PAGINATION_APPLIED, Boolean.TRUE);
+
+        ResultList<TestEntity> pushedDownPage = new ResultList<>(42, "https://example.org/next", entities(10));
+        setResponseEntity(pushedDownPage);
+        filter.filter(requestContext, responseContext);
+
+        assertSame(pushedDownPage, responseEntity());
     }
 }

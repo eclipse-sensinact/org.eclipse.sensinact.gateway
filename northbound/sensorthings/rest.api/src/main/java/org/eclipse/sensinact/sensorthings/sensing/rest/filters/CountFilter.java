@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -34,7 +35,7 @@ import jakarta.ws.rs.core.Response.Status;
 @Priority(ENTITY_CODER + 4)
 public class CountFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    private static final String COUNT_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.count";
+    private static final String COUNT_PROP = PaginationConstants.COUNT_PROP;
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)

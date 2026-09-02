@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -56,6 +57,9 @@ public class OrderByFilter implements ContainerRequestFilter, ContainerResponseF
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
+        if (requestContext.getProperty(PaginationConstants.PAGINATION_APPLIED) != null) {
+            return;
+        }
         @SuppressWarnings("unchecked")
         Comparator<Object> comparator = (Comparator<Object>) requestContext.getProperty(ORDERBY_PROP);
         if (comparator == null) {

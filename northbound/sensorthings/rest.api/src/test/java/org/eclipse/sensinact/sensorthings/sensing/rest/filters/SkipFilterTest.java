@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -122,5 +123,18 @@ class SkipFilterTest extends QueryOptionFilterTestSupport {
         filter.filter(requestContext, responseContext);
 
         assertSame(single, responseEntity());
+    }
+
+    @Test
+    void appliedPaginationLeavesResponseUntouched() throws IOException {
+        queryParameters.putSingle("$skip", "3");
+        filter.filter(requestContext);
+        setRequestProperty(PaginationConstants.PAGINATION_APPLIED, Boolean.TRUE);
+
+        ResultList<TestEntity> pushedDownPage = new ResultList<>(entities(10));
+        setResponseEntity(pushedDownPage);
+        filter.filter(requestContext, responseContext);
+
+        assertSame(pushedDownPage, responseEntity());
     }
 }

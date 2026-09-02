@@ -35,10 +35,26 @@ The REST interface will run without any configuration, however the `jakarta-rest
 
 ## History configuration
 
-To retrieve historical data from the SensorThings REST interface, the available [History provider](https://eclipse-sensinact.readthedocs.io/en/latest/southbound/history/timescale.html) must be configured with the PID `sensinact.sensorthings.northbound.rest`:
+To retrieve historical data from the SensorThings REST interface, a
+[History provider](../southbound/history/history.md) must be deployed. The SensorThings
+implementation binds the `HistoryProvider` service directly: when exactly one provider is
+available it is used automatically; with several providers, the one to use is named in the
+configuration with the PID `sensinact.sensorthings.northbound.rest`:
 ```
     "sensinact.sensorthings.northbound.rest" : {
         "history.provider": "history"
     }
 ```
+
+### Query pushdown
+
+Requests for `Observations` and `HistoricalLocations` execute their query options inside
+the history database whenever possible: `$top`, `$skip` and a time-field `$orderby`
+(`phenomenonTime`/`resultTime`, or `time` for historical locations) become the query's
+pagination and ordering, and a `$filter` that reduces to time-range bounds and — if the
+provider supports value filtering — numeric `result` comparisons becomes the query's
+constraints. For such requests `@iot.count` and the `@iot.nextLink` chain are computed
+database-side and cover the **full filtered dataset**. Other filters (`or`, `not`,
+functions, string comparisons, non-time `$orderby` fields) are evaluated in memory over
+the newest `history.results.max` values.
 

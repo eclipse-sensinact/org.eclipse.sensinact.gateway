@@ -2,6 +2,7 @@
   "id":"org.eclipse.sensinact.gateway.distribution.features:timescale-history-provider-feature:osgifeature:${project.version}",
   "bundles":[
     { "id": "org.eclipse.sensinact.gateway.southbound.history:history-api:${gateway.version}" },
+    { "id": "org.eclipse.sensinact.gateway.southbound.history:history-core:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.southbound.history:timescale-provider:${gateway.version}" },
     { "id": "org.eclipse.sensinact.gateway.filters:esri.geometry:${gateway.version}" },
     { "id": "com.fasterxml.jackson.core:jackson-core:${compatibility.jackson.version}" },

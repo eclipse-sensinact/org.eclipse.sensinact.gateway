@@ -25,6 +25,7 @@ import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.northbound.filters.sensorthings.EFilterContext;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -186,22 +187,22 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
 
     public static ResultList<Observation> getObservationList(SensiNactSession userSession, DtoMapper dtoMapper,
             ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext,
-            ResourceSnapshot resourceSnapshot, ICriterion filter, String historyProvider, int localResultLimit,
+            ResourceSnapshot resourceSnapshot, ICriterion filter, HistoryProvider historyProvider, int localResultLimit,
             IDtoMemoryCache<ExpandedObservation> cacheObs) {
 
         ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
-        return getObservationList(userSession, dtoMapper, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot,
-                filter, historyProvider, localResultLimit, cacheObs);
+        return getObservationList(userSession, dtoMapper, mapper, uriInfo, requestContext, es == null ? EMPTY : es,
+                resourceSnapshot, filter, historyProvider, localResultLimit, cacheObs);
     }
 
     public static ResultList<Observation> getObservationList(SensiNactSession userSession, DtoMapper dtoMapper,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
-            ICriterion filter, String historyProvider, int localResultLimit,
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ExpansionSettings expansions,
+            ResourceSnapshot resourceSnapshot, ICriterion filter, HistoryProvider historyProvider, int localResultLimit,
             IDtoMemoryCache<ExpandedObservation> cacheObs) {
 
         ResultList<Observation> list = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                dtoMapper, mapper, uriInfo, expansions, resourceSnapshot, filter, historyProvider, localResultLimit,
-                cacheObs);
+                dtoMapper, mapper, uriInfo, requestContext, expansions, resourceSnapshot, filter, historyProvider,
+                localResultLimit, cacheObs);
 
         if (list.value().isEmpty()) {
             list = new ResultList<Observation>(

@@ -20,6 +20,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.northbound.filters.sensorthings.antlr.impl.paths.PathHandler.PathContext;
 import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
@@ -27,7 +28,7 @@ import tools.jackson.core.JacksonException;
 
 public class AbstractPathHandlerSensorthings {
 
-    private static final String SENSINACT_HISTORY_PROVIDER = "sensinact.history.provider";
+    private static final String SENSINACT_HISTORY_SERVICE = "sensinact.history.service";
     private static final String SENSINACT_HISTORY_MAX_RESULT = "sensinact.history.max.result";
     protected PathContext pathContext;
 
@@ -46,11 +47,10 @@ public class AbstractPathHandlerSensorthings {
         // get list of observation resource
         ServiceSnapshot service = DtoMapperSimple.getDatastreamService(provider);
         ResourceSnapshot resource = service.getResource("lastObservation");
-        String historyProvider = getHistoryProvider(pathContext);
+        HistoryProvider historyProvider = getHistoryProvider(pathContext);
         int maxResult = getMaxResult(pathContext);
         List<ExpandedObservation> listHistory = HistoryResourceHelperSensorthings.loadHistoricalObservations(
-                pathContext.session(), pathContext.mapper(), resource, historyProvider, maxResult,
-                pathContext.cacheObs());
+                pathContext.mapper(), resource, historyProvider, maxResult, pathContext.cacheObs());
         return listHistory;
     }
 
@@ -104,11 +104,10 @@ public class AbstractPathHandlerSensorthings {
         return 0;
     }
 
-    protected static String getHistoryProvider(PathContext pathContext) {
+    protected static HistoryProvider getHistoryProvider(PathContext pathContext) {
         if (pathContext.configProperties() != null
-                && pathContext.configProperties().containsKey(SENSINACT_HISTORY_PROVIDER)) {
-            String historyProvider = (String) pathContext.configProperties().get(SENSINACT_HISTORY_PROVIDER);
-            return historyProvider;
+                && pathContext.configProperties().containsKey(SENSINACT_HISTORY_SERVICE)) {
+            return (HistoryProvider) pathContext.configProperties().get(SENSINACT_HISTORY_SERVICE);
         }
         return null;
     }

@@ -12,5 +12,5 @@
 **********************************************************************/
 
 @org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("0.0.1")
+@org.osgi.annotation.versioning.Version("0.1.0")
 package org.eclipse.sensinact.northbound.filters.sensorthings;

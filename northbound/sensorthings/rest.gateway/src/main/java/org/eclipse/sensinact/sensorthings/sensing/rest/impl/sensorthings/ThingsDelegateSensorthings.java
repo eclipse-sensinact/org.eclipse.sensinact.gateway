@@ -177,7 +177,7 @@ public class ThingsDelegateSensorthings extends AbstractDelegate {
         try {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), filter,
+                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext, getExpansions(), filter,
                     providerThing, getHistoryProvider(), getMaxResult(), getCacheHistoricalLocationIfHistoryMemory());
             if (list.value().isEmpty()) {
                 list = getSensorThingDtoMapper().toHistoricalLocations(getSession(), getMapper(), uriInfo,

@@ -45,6 +45,11 @@
       <version>${sensorthings.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.sensinact.gateway.southbound.history</groupId>
+      <artifactId>history-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.northbound.sensorthings</groupId>
       <artifactId>filter</artifactId>
       <version>${sensorthings.version}</version>

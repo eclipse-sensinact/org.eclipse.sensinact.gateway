@@ -23,13 +23,16 @@ import static org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact.Dto
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
+import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
 import org.eclipse.sensinact.sensorthings.sensing.dto.FeatureOfInterest;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
@@ -65,20 +68,17 @@ public class ObservationsDelegateSensinact extends AbstractDelegate {
         if (resourceSnapshot.isSet()) {
             Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
             if (timestamp.isBefore(milliTimestamp)) {
-                String history = (String) application.getProperties().get("sensinact.history.provider");
+                HistoryProvider history = HistoryResourceHelperSensinact.historyProvider(application);
                 if (history != null) {
-                    String provider = resourceSnapshot.getService().getProvider().getName();
-                    String service = resourceSnapshot.getService().getName();
-                    String resource = resourceSnapshot.getName();
-                    // +1 milli as 00:00:00.123456 (db) is always greater than 00:00:00.123000
-                    // (timestamp)
-                    Instant timestampPlusOneMilli = timestamp.plusMillis(1);
-                    TimedValue<?> t = (TimedValue<?>) getSession().actOnResource(history, "history", "single",
-                            Map.of("provider", provider, "service", service, "resource", resource, "time",
-                                    timestampPlusOneMilli));
-                    if (timestamp.equals(t.getTimestamp().truncatedTo(ChronoUnit.MILLIS))) {
+                    ResourcePath path = new ResourcePath(resourceSnapshot.getService().getProvider().getName(),
+                            resourceSnapshot.getService().getName(), resourceSnapshot.getName());
+                    // the id carries a millisecond-truncated timestamp while the
+                    // store keeps full precision
+                    List<TimedValue<?>> match = history.getValues(HistoryQuery.builder(path)
+                            .range(TimeRange.millisecondOf(timestamp)).limit(1).build()).values();
+                    if (!match.isEmpty()) {
                         result = DtoMapper.toObservation(getSession(), application, getMapper(), uriInfo,
-                                getExpansions(), criterion, resourceSnapshot, Optional.of(t));
+                                getExpansions(), criterion, resourceSnapshot, Optional.of(match.get(0)));
                     }
                 }
             } else if (timestamp.equals(milliTimestamp)) {
@@ -113,7 +113,7 @@ public class ObservationsDelegateSensinact extends AbstractDelegate {
 
     public ResultList<Observation> getObservationDatastreamObservations(String id) {
         return RootResourceDelegateSensinact.getObservationList(getSession(), application, getMapper(), uriInfo,
-                getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
+                requestContext, getExpansions(), validateAndGetResourceSnapshot(id), parseFilter(OBSERVATIONS), 0);
     }
 
     public ObservedProperty getObservationDatastreamObservedProperty(String id) {
@@ -175,8 +175,9 @@ public class ObservationsDelegateSensinact extends AbstractDelegate {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         ICriterion filter = parseFilter(OBSERVATIONS);
         ResultList<HistoricalLocation> list = HistoryResourceHelperSensinact.loadHistoricalLocations(getSession(),
-                application, getMapper(), uriInfo, getExpansions(), filter, providerSnapshot, 0);
-        if (list.value().isEmpty())
+                application, getMapper(), uriInfo, requestContext,
+                    getExpansions(), filter, providerSnapshot, 0);
+        if (!HistoryResourceHelperSensinact.hasHistory(list))
             list = new ResultList<>(DtoMapper.toHistoricalLocation(getSession(), application, getMapper(), uriInfo,
                     getExpansions(), filter, providerSnapshot).map(List::of).orElse(List.of()));
         return list;

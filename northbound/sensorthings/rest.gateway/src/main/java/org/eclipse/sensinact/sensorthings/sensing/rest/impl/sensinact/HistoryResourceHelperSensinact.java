@@ -9,117 +9,261 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Data In Motion - rework onto the HistoryProvider service
 **********************************************************************/
 package org.eclipse.sensinact.sensorthings.sensing.rest.impl.sensinact;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.twin.TimedValue;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryCapability;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryPage;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
+import org.eclipse.sensinact.gateway.southbound.history.provider.SortOrder;
+import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
+import org.eclipse.sensinact.gateway.southbound.history.provider.ValueFilter;
+import org.eclipse.sensinact.northbound.filters.sensorthings.TimeRangeExtractor;
+import org.eclipse.sensinact.northbound.filters.sensorthings.TimeRangeExtractor.Constraints;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.sensorthings.sensing.dto.HistoricalLocation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Observation;
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
+import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.IFilterConstants;
+import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 
 import tools.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.UriInfo;
 
 /**
- * Helper class for accessing historical observation data from the history
- * provider
+ * Helper class for accessing historical observation data through the
+ * {@link HistoryProvider} service published by the application.
+ *
+ * When the request carries an effective $top, at most a single time-field
+ * $orderby and no $filter — or one that reduces entirely to a time range plus,
+ * capability permitting, numeric value conditions — the pagination and the
+ * constraints are pushed down into the history query and
+ * {@link PaginationConstants#PAGINATION_APPLIED} tells the response-side
+ * query option filters to leave the page alone. Otherwise the results are the
+ * newest values up to the configured result limit, in chronological order,
+ * paginated in memory by the filters; the returned count covers the full
+ * dataset minus entries removed by row-level filtering.
  */
 class HistoryResourceHelperSensinact {
+
+    /** $orderby fields of an Observation carrying the history timestamp */
+    private static final Set<String> OBSERVATION_TIME_FIELDS = Set.of("phenomenonTime", "resultTime");
+
+    /** $filter fields of an Observation carrying the stored value */
+    private static final Set<String> OBSERVATION_VALUE_FIELDS = Set.of("result");
+
+    /** $orderby fields of a HistoricalLocation carrying the history timestamp */
+    private static final Set<String> HISTORICAL_LOCATION_TIME_FIELDS = Set.of("time");
 
     private HistoryResourceHelperSensinact() {
     }
 
-    @SuppressWarnings("unchecked")
     static ResultList<Observation> loadHistoricalObservations(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
-            ICriterion filter, int localResultLimit) {
-        String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
-
-        if (historyProvider == null) {
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext,
+            ExpansionSettings expansions, ResourceSnapshot resourceSnapshot, ICriterion filter, int localResultLimit) {
+        HistoryProvider history = historyProvider(application);
+        if (history == null) {
             return new ResultList<>(List.of());
         }
 
-        Integer maxResults = getMaxResult(application, localResultLimit);
-        Map<String, Object> params = initParameter(resourceSnapshot);
-        // Get count for the full dataset (for pagination metadata)
-        Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
-        List<Observation> values = new ArrayList<>();
-        int skip = 0;
+        ResourcePath path = new ResourcePath(resourceSnapshot.getService().getProvider().getName(),
+                resourceSnapshot.getService().getName(), resourceSnapshot.getName());
 
-        List<TimedValue<?>> timed;
-        do {
-            params.put("skip", skip);
-
-            timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-
-            // Filtering happens at a lower level, so we may not use all the discovered
-            // history
-            List<Observation> observationList = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
-                    expansions, filter, resourceSnapshot, timed);
-            if (count != null && count < Integer.MAX_VALUE && observationList.size() < timed.size()) {
-                count -= (timed.size() - observationList.size());
+        HistoryQuery pushed = pushDownQuery(history, path, requestContext, filter, OBSERVATION_TIME_FIELDS,
+                OBSERVATION_VALUE_FIELDS, getMaxResult(application, localResultLimit));
+        if (pushed != null) {
+            HistoryPage page = history.getValues(pushed);
+            List<Observation> observations = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
+                    expansions, filter, resourceSnapshot, page.values());
+            Long count = null;
+            if (countRequested(requestContext) || observations.isEmpty()) {
+                count = page.totalCount().orElseGet(
+                        () -> history.getValueCount(pushed.path(), pushed.range(), pushed.valueFilter()));
             }
-            values.addAll(0, observationList);
-            if (timed.isEmpty()) {
-                break;
-            }
-            skip += timed.size();
-            // Keep going until the list is as full as count, or it hits maxResults
-        } while ((count == null || values.size() < count) && values.size() < maxResults);
-        return new ResultList<>(count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue(),
-                null, values);
+            return pushedDownResultList(requestContext, page, count, observations);
+        }
+
+        List<TimedValue<?>> timed = newestChronological(history, path, getMaxResult(application, localResultLimit));
+        List<Observation> observations = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
+                expansions, filter, resourceSnapshot, timed);
+
+        Long count = null;
+        if (countRequested(requestContext) || observations.isEmpty()) {
+            count = history.getValueCount(path, TimeRange.ALL) - (timed.size() - observations.size());
+        }
+        return resultList(count, observations);
     }
 
-    @SuppressWarnings("unchecked")
-    static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot provider, int localResultLimit) {
-        String historyProvider = (String) application.getProperties().get("sensinact.history.provider");
-        if (historyProvider == null) {
+    static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession,
+            Application application, ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext,
+            ExpansionSettings expansions, ICriterion filter, ProviderSnapshot provider, int localResultLimit) {
+        HistoryProvider history = historyProvider(application);
+        if (history == null) {
             return new ResultList<>(List.of());
         }
 
-        Integer maxResults = getMaxResult(application, localResultLimit);
-        Map<String, Object> params = initParameter(provider);
-        // Get count for the full dataset (for pagination metadata)
-        Long count = (Long) userSession.actOnResource(historyProvider, "history", "count", params);
-        List<HistoricalLocation> values = new ArrayList<>();
-        int skip = 0;
+        ResourcePath path = new ResourcePath(provider.getName(), "admin", "location");
 
-        List<TimedValue<?>> timed;
-        do {
-            params.put("skip", skip);
-
-            timed = (List<TimedValue<?>>) userSession.actOnResource(historyProvider, "history", "range", params);
-            List<HistoricalLocation> historicalLocationList = DtoMapper.toHistoricalLocationList(userSession,
-                    application, mapper, uriInfo, expansions, filter, provider, timed);
-            if (count != null && count < Integer.MAX_VALUE && historicalLocationList.size() < timed.size()) {
-                count -= (timed.size() - historicalLocationList.size());
+        HistoryQuery pushed = pushDownQuery(history, path, requestContext, filter, HISTORICAL_LOCATION_TIME_FIELDS,
+                Set.of(), getMaxResult(application, localResultLimit));
+        if (pushed != null) {
+            HistoryPage page = history.getValues(pushed);
+            List<HistoricalLocation> locations = DtoMapper.toHistoricalLocationList(userSession, application, mapper,
+                    uriInfo, expansions, filter, provider, page.values());
+            Long count = null;
+            if (countRequested(requestContext) || locations.isEmpty()) {
+                count = page.totalCount().orElseGet(
+                        () -> history.getValueCount(pushed.path(), pushed.range(), pushed.valueFilter()));
             }
-            values.addAll(0, historicalLocationList);
-            if (timed.isEmpty()) {
-                break;
-            }
-            skip += timed.size();
+            return pushedDownResultList(requestContext, page, count, locations);
+        }
 
-        } while ((count == null || values.size() < count) && values.size() < maxResults);
-        return new ResultList<>(count == null ? null : count > Integer.MAX_VALUE ? Integer.MAX_VALUE : count.intValue(),
-                null, values);
+        List<TimedValue<?>> timed = newestChronological(history, path, getMaxResult(application, localResultLimit));
+        List<HistoricalLocation> locations = DtoMapper.toHistoricalLocationList(userSession, application, mapper,
+                uriInfo, expansions, filter, provider, timed);
+
+        Long count = null;
+        if (countRequested(requestContext) || locations.isEmpty()) {
+            count = history.getValueCount(path, TimeRange.ALL) - (timed.size() - locations.size());
+        }
+        return resultList(count, locations);
     }
 
-    private static Integer getMaxResult(Application application, int localResultLimit) {
+    static HistoryProvider historyProvider(Application application) {
+        return (HistoryProvider) application.getProperties().get("sensinact.history.service");
+    }
+
+    /**
+     * Whether the count must be computed: the client asked for it with
+     * $count=true, or there is no request context — an $expand sub-list,
+     * which always carries its count. Counting is skipped otherwise: it is
+     * by far the most expensive part of a paginated request and the count
+     * filter would discard it anyway.
+     */
+    private static boolean countRequested(ContainerRequestContext requestContext) {
+        return requestContext == null
+                || Boolean.TRUE.equals(requestContext.getProperty(PaginationConstants.COUNT_PROP));
+    }
+
+    /**
+     * Whether the list represents existing history data: a pushed-down page
+     * can be empty (e.g. $skip beyond the dataset) while history exists, and
+     * must not trigger the fall-back to the live value.
+     */
+    static boolean hasHistory(ResultList<?> list) {
+        return !list.value().isEmpty() || (list.count() != null && list.count() > 0);
+    }
+
+    /**
+     * Runs the query with $orderby, $skip, $top and the $filter's constraints
+     * applied database-side when the request allows it: an effective $top, an
+     * absent or single time-field $orderby, and no $filter or one that
+     * reduces entirely to a time range plus — capability permitting — numeric
+     * value conditions (making re-applying it to the returned rows a no-op).
+     * Returns {@code null} when the request is not pushable and pagination
+     * stays with the response filters.
+     */
+    private static HistoryQuery pushDownQuery(HistoryProvider history, ResourcePath path,
+            ContainerRequestContext requestContext, ICriterion filter, Set<String> timeFields,
+            Set<String> valueFields, int maxResults) {
+        if (requestContext == null) {
+            return null;
+        }
+        TimeRange range = TimeRange.ALL;
+        ValueFilter valueFilter = null;
+        if (filter != null) {
+            String rawFilter = (String) requestContext.getProperty(IFilterConstants.PROP_FILTER_STRING);
+            Constraints constraints = TimeRangeExtractor.extractConstraints(rawFilter, timeFields, valueFields)
+                    .orElse(null);
+            if (constraints == null) {
+                return null;
+            }
+            if (constraints.valueFilter() != null
+                    && !history.getCapabilities().contains(HistoryCapability.VALUE_FILTERING)) {
+                return null;
+            }
+            range = constraints.range();
+            valueFilter = constraints.valueFilter();
+        }
+        Integer top = (Integer) requestContext.getProperty(PaginationConstants.TOP_PROP);
+        if (top == null) {
+            return null;
+        }
+        SortOrder order = pushableOrder(requestContext, timeFields);
+        if (order == null) {
+            return null;
+        }
+        Integer skip = (Integer) requestContext.getProperty(PaginationConstants.SKIP_PROP);
+        return HistoryQuery.builder(path).range(range).valueFilter(valueFilter).order(order)
+                .offset(skip == null ? 0 : skip).limit(Math.min(top, maxResults)).build();
+    }
+
+    /**
+     * The sort order matching the request's $orderby, or {@code null} when
+     * the ordering cannot be pushed down. An absent $orderby is pushable: the
+     * default ordering (by id) is chronological for history entities, whose
+     * ids end in the fixed-length hex timestamp.
+     */
+    private static SortOrder pushableOrder(ContainerRequestContext requestContext, Set<String> timeFields) {
+        List<String> parameters = requestContext.getUriInfo().getQueryParameters().getOrDefault("$orderby",
+                List.of());
+        if (parameters.isEmpty()) {
+            return SortOrder.ASCENDING;
+        }
+        if (parameters.size() > 1 || parameters.get(0).contains(",")) {
+            return null;
+        }
+
+        String clause = parameters.get(0).trim();
+        SortOrder order = SortOrder.ASCENDING;
+        if (clause.endsWith(" desc")) {
+            order = SortOrder.DESCENDING;
+            clause = clause.substring(0, clause.length() - 5).trim();
+        } else if (clause.endsWith(" asc")) {
+            clause = clause.substring(0, clause.length() - 4).trim();
+        }
+        return timeFields.contains(clause) ? order : null;
+    }
+
+    private static <T extends Self> ResultList<T> pushedDownResultList(ContainerRequestContext requestContext,
+            HistoryPage page, Long count, List<T> values) {
+        String nextLink = null;
+        if (page.hasMore()) {
+            long nextSkip = page.offset() + page.values().size();
+            nextLink = requestContext.getUriInfo().getRequestUriBuilder().replaceQueryParam("$skip", nextSkip).build()
+                    .toString();
+        }
+        requestContext.setProperty(PaginationConstants.PAGINATION_APPLIED, Boolean.TRUE);
+        return new ResultList<>(clamped(count), nextLink, values);
+    }
+
+    /** The newest {@code maxResults} values, reversed to chronological order. */
+    private static List<TimedValue<?>> newestChronological(HistoryProvider history, ResourcePath path,
+            int maxResults) {
+        List<TimedValue<?>> timed = new ArrayList<>(history
+                .streamValues(HistoryQuery.builder(path).order(SortOrder.DESCENDING).build(), maxResults).toList());
+        Collections.reverse(timed);
+        return timed;
+    }
+
+    private static int getMaxResult(Application application, int localResultLimit) {
         Integer maxResults = (Integer) application.getProperties().get("sensinact.history.result.limit");
         if (localResultLimit > 0) {
             maxResults = Math.min(localResultLimit, maxResults);
@@ -127,23 +271,11 @@ class HistoryResourceHelperSensinact {
         return maxResults;
     }
 
-    private static Map<String, Object> initParameter(ResourceSnapshot resourceSnapshot) {
-        String provider = resourceSnapshot.getService().getProvider().getName();
-        String service = resourceSnapshot.getService().getName();
-        String resource = resourceSnapshot.getName();
-        Map<String, Object> params = new HashMap<>();
-        params.put("provider", provider);
-        params.put("service", service);
-        params.put("resource", resource);
-        return params;
+    private static <T extends Self> ResultList<T> resultList(Long count, List<T> values) {
+        return new ResultList<>(clamped(count), null, values);
     }
 
-    private static Map<String, Object> initParameter(ProviderSnapshot providerSnapshot) {
-        String provider = providerSnapshot.getName();
-        Map<String, Object> params = new HashMap<>();
-        params.put("provider", provider);
-        params.put("service", "admin");
-        params.put("resource", "location");
-        return params;
+    private static Integer clamped(Long count) {
+        return count == null ? null : (int) Math.min(Integer.MAX_VALUE, count);
     }
 }
