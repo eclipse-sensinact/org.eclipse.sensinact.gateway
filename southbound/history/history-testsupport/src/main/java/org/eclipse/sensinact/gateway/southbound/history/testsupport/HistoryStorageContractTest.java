@@ -358,6 +358,7 @@ public abstract class HistoryStorageContractTest {
 
         @Test
         void pruneByAge() {
+            assumeTrue(storage.capabilities().contains(HistoryCapability.PRUNING));
             storeLongs(PATH, 10);
 
             long deleted = storage.prune(new PruneRequest(null, T0.plusSeconds(5 * 60), null));
@@ -369,6 +370,7 @@ public abstract class HistoryStorageContractTest {
 
         @Test
         void pruneByKeepCount() {
+            assumeTrue(storage.capabilities().contains(HistoryCapability.PRUNING));
             storeLongs(PATH, 10);
 
             long deleted = storage.prune(new PruneRequest(null, null, 3L));
@@ -380,6 +382,7 @@ public abstract class HistoryStorageContractTest {
 
         @Test
         void pruneScopedToPathsLeavesOthersAlone() {
+            assumeTrue(storage.capabilities().contains(HistoryCapability.PRUNING));
             ResourcePath other = new ResourcePath("otherProvider", "otherService", "otherResource");
             storeLongs(PATH, 4);
             storeLongs(other, 4);
@@ -393,6 +396,7 @@ public abstract class HistoryStorageContractTest {
 
         @Test
         void pruneCombinedBoundsDeleteUnionOfBoth() {
+            assumeTrue(storage.capabilities().contains(HistoryCapability.PRUNING));
             storeLongs(PATH, 10);
 
             long deleted = storage.prune(new PruneRequest(null, T0.plusSeconds(2 * 60), 5L));
@@ -404,6 +408,7 @@ public abstract class HistoryStorageContractTest {
 
         @Test
         void maxDeleteCapsASingleRun() {
+            assumeTrue(storage.capabilities().contains(HistoryCapability.PRUNING));
             storeLongs(PATH, 10);
 
             long deleted = storage.prune(new PruneRequest(null, T0.plusSeconds(8 * 60), null, 3L));

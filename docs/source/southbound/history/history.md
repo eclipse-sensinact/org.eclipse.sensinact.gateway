@@ -50,8 +50,9 @@ Consumers look up the `HistoryProvider` service; with several backends the servi
 
 Operations beyond plain range queries are capability-gated: `getCapabilities()` reports
 `AGGREGATION`, `VALUE_FILTERING` (the backend executes `ValueFilter` conditions, including
-filtered counts) and `TOTAL_COUNT`. Both shipped backends support aggregation and value
-filtering. Page sizes are clamped to the backend's `getMaxPageSize()`.
+filtered counts), `TOTAL_COUNT` and `PRUNING` (the backend can delete stored values, making
+[housekeeping](#housekeeping) applicable). Both shipped backends support aggregation, value
+filtering and pruning. Page sizes are clamped to the backend's `getMaxPageSize()`.
 
 The [SensorThings northbound](../../northbound/SensorthingsRestAccess.md) uses this contract to
 push `$top`/`$skip`/`$orderby` and reducible `$filter` constraints down into the database.
@@ -103,7 +104,9 @@ policy with the entries:
   happens one full period after activation
 
 At least one of `retention.period` and `keep.count` is required. Backend-native retention
-mechanisms are used where available.
+mechanisms are used where available. Policies only apply to backends declaring the `PRUNING`
+capability — a backend that cannot delete, such as an adapter for an external history
+service, is skipped with a warning.
 
 ## Legacy ACT actions
 

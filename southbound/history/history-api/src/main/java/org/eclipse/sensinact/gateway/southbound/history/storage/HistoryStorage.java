@@ -26,6 +26,7 @@ import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
+import org.eclipse.sensinact.gateway.southbound.history.provider.UnsupportedHistoryOperationException;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ValueFilter;
 import org.osgi.annotation.versioning.ConsumerType;
 
@@ -80,6 +81,13 @@ public interface HistoryStorage {
     /** Only called when {@link #capabilities()} contains AGGREGATION. */
     List<AggregateBucket> aggregate(AggregationQuery query);
 
-    /** @return the number of deleted records */
-    long prune(PruneRequest request);
+    /**
+     * Only called when {@link #capabilities()} contains PRUNING; backends
+     * that cannot delete stored values keep this default.
+     *
+     * @return the number of deleted records
+     */
+    default long prune(PruneRequest request) {
+        throw new UnsupportedHistoryOperationException(HistoryCapability.PRUNING);
+    }
 }

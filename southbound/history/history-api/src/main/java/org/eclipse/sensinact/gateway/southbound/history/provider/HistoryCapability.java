@@ -23,5 +23,11 @@ public enum HistoryCapability {
     /** {@link HistoryQuery#valueFilter()} is executed by the backend. */
     VALUE_FILTERING,
     /** {@link HistoryPage#totalCount()} may be populated on range queries. */
-    TOTAL_COUNT
+    TOTAL_COUNT,
+    /**
+     * The backend can delete stored values: housekeeping policies apply.
+     * Backends that cannot delete — e.g. an adapter for an external history
+     * web service — simply do not declare it and are skipped by housekeeping.
+     */
+    PRUNING
 }

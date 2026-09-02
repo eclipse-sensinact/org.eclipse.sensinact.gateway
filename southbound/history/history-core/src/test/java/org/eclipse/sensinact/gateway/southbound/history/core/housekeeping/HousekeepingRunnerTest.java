@@ -19,10 +19,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.eclipse.sensinact.gateway.southbound.history.inmemory.InMemoryHistoryStorage;
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryCapability;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
+import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryStorage;
 import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoricalRecord;
 import org.eclipse.sensinact.gateway.southbound.history.storage.PruneRequest;
@@ -49,6 +52,24 @@ class HousekeepingRunnerTest {
 
     private long count() {
         return storage.count(PATH, TimeRange.ALL);
+    }
+
+    @Test
+    void backendsWithoutPruningAreSkipped() {
+        HistoryStorage readOnly = new InMemoryHistoryStorage(10_000) {
+            @Override
+            public Set<HistoryCapability> capabilities() {
+                return Set.of(HistoryCapability.AGGREGATION, HistoryCapability.VALUE_FILTERING);
+            }
+        };
+        HousekeepingPolicy policy = new HousekeepingPolicy("age", List.of(), Duration.ofDays(5), null, null,
+                Duration.ofHours(24));
+
+        long deleted = HousekeepingRunner.run(policy, Map.of("readOnly", readOnly, "test", storage), NOW);
+
+        // only the pruning-capable backend was cleaned
+        assertEquals(5, deleted);
+        assertEquals(5, count());
     }
 
     @Test

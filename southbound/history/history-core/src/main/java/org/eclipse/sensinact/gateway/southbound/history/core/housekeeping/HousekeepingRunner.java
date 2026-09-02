@@ -15,6 +15,7 @@ package org.eclipse.sensinact.gateway.southbound.history.core.housekeeping;
 import java.time.Instant;
 import java.util.Map;
 
+import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryCapability;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryStorage;
 import org.eclipse.sensinact.gateway.southbound.history.storage.PruneRequest;
 import org.slf4j.Logger;
@@ -37,6 +38,11 @@ public final class HousekeepingRunner {
         long total = 0;
         for (Map.Entry<String, HistoryStorage> entry : storagesByName.entrySet()) {
             if (!policy.appliesTo(entry.getKey())) {
+                continue;
+            }
+            if (!entry.getValue().capabilities().contains(HistoryCapability.PRUNING)) {
+                logger.warn("Housekeeping policy {} skips provider {}: its backend does not support pruning",
+                        policy.name(), entry.getKey());
                 continue;
             }
             Instant cutoff = policy.retention() == null ? null : now.minus(policy.retention());

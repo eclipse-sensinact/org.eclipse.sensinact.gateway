@@ -65,7 +65,8 @@ public class InMemoryHistoryStorage implements HistoryStorage {
 
     @Override
     public Set<HistoryCapability> capabilities() {
-        return Set.of(HistoryCapability.AGGREGATION, HistoryCapability.VALUE_FILTERING);
+        return Set.of(HistoryCapability.AGGREGATION, HistoryCapability.VALUE_FILTERING,
+                HistoryCapability.PRUNING);
     }
 
     @Override
