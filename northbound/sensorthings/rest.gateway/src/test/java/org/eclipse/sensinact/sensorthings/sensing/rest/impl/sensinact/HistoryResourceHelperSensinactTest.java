@@ -276,6 +276,7 @@ class HistoryResourceHelperSensinactTest {
             setupApplication(1000);
             requestProperties.put(PaginationConstants.TOP_PROP, 2);
             requestProperties.put(PaginationConstants.SKIP_PROP, 10);
+            requestProperties.put(PaginationConstants.COUNT_PROP, Boolean.TRUE);
 
             when(history.getValueCount(eq(PATH), any(), any())).thenReturn(50L);
             when(history.getValues(any())).thenReturn(HistoryPage.of(
@@ -304,6 +305,27 @@ class HistoryResourceHelperSensinactTest {
         }
 
         @Test
+        @DisplayName("Should skip the count query when $count is not requested")
+        void countNotRequestedSkipsTheCountQuery() {
+            Instant now = Instant.now();
+            setupResourceSnapshotMocks();
+            setupRequestContext();
+            setupUriBuilder();
+            setupApplication(1000);
+            requestProperties.put(PaginationConstants.TOP_PROP, 2);
+
+            when(history.getValues(any())).thenReturn(HistoryPage.of(
+                    List.of(new DefaultTimedValue<>("value1", now), new DefaultTimedValue<>("value2", now)), 0,
+                    false));
+
+            ResultList<Observation> result = load();
+
+            assertNull(result.count());
+            assertEquals(2, result.value().size());
+            verify(history, never()).getValueCount(any(), any(), any());
+        }
+
+        @Test
         @DisplayName("Should push a descending time $orderby down and keep the returned order")
         void descendingTimeOrderIsPushedDown() {
             Instant now = Instant.now();
@@ -314,7 +336,6 @@ class HistoryResourceHelperSensinactTest {
             requestProperties.put(PaginationConstants.TOP_PROP, 2);
             queryParameters.putSingle("$orderby", "phenomenonTime desc");
 
-            when(history.getValueCount(eq(PATH), any(), any())).thenReturn(2L);
             when(history.getValues(any())).thenReturn(HistoryPage.of(List.of(
                     new DefaultTimedValue<>("newest", now), new DefaultTimedValue<>("older", now.minusSeconds(60))),
                     0, false));
@@ -378,6 +399,7 @@ class HistoryResourceHelperSensinactTest {
             setupRequestContext();
             setupApplication(1000);
             requestProperties.put(PaginationConstants.TOP_PROP, 5);
+            requestProperties.put(PaginationConstants.COUNT_PROP, Boolean.TRUE);
             requestProperties.put(IFilterConstants.PROP_FILTER_STRING, rawFilter);
 
             SensorthingsFilterComponent filterComponent = new SensorthingsFilterComponent();

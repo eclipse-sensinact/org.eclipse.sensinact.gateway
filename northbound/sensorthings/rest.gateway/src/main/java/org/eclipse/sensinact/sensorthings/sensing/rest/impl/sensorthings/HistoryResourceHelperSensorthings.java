@@ -36,9 +36,11 @@ import org.eclipse.sensinact.sensorthings.sensing.dto.expand.ExpandedObservation
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.DtoMapperSimple;
 import org.eclipse.sensinact.sensorthings.sensing.dto.util.IDtoMemoryCache;
 import org.eclipse.sensinact.sensorthings.sensing.rest.ExpansionSettings;
+import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 
 import tools.jackson.databind.ObjectMapper;
 
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.UriInfo;
 
 /**
@@ -53,8 +55,8 @@ public class HistoryResourceHelperSensorthings {
     }
 
     public static ResultList<Observation> loadHistoricalObservations(SensiNactSession userSession, DtoMapper dtoMapper,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
-            ICriterion filter, HistoryProvider history, int localResultLimit,
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ExpansionSettings expansions,
+            ResourceSnapshot resourceSnapshot, ICriterion filter, HistoryProvider history, int localResultLimit,
             IDtoMemoryCache<ExpandedObservation> cacheObs) {
         List<Observation> values = new ArrayList<>();
 
@@ -80,32 +82,34 @@ public class HistoryResourceHelperSensorthings {
         ResourcePath path = new ResourcePath(resourceSnapshot.getService().getProvider().getName(),
                 resourceSnapshot.getService().getName(), resourceSnapshot.getName());
 
-        long count = history.getValueCount(path, TimeRange.ALL);
         List<TimedValue<?>> timed = newestChronological(history, path, Math.max(0, localResultLimit - values.size()));
 
         // Filtering happens at a lower level, so we may not use all the
         // discovered history
         List<Observation> observationList = dtoMapper.toObservationList(userSession, mapper, uriInfo, expansions,
                 filter, resourceSnapshot, timed);
-        count -= (timed.size() - observationList.size());
-
         values.addAll(0, observationList);
-        return new ResultList<>((int) Math.min(Integer.MAX_VALUE, count), null, values);
+
+        Long count = null;
+        if (countRequested(requestContext)) {
+            count = history.getValueCount(path, TimeRange.ALL) - (timed.size() - observationList.size());
+        }
+        return new ResultList<>(clamped(count), null, values);
     }
 
     public static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession,
-            DtoMapper dtoMapper, ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            ProviderSnapshot providerThing, HistoryProvider history, int localResultLimit,
-            IDtoMemoryCache<Instant> cacheHl) {
+            DtoMapper dtoMapper, ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext,
+            ExpansionSettings expansions, ICriterion filter, ProviderSnapshot providerThing, HistoryProvider history,
+            int localResultLimit, IDtoMemoryCache<Instant> cacheHl) {
 
-        return loadHistoricalLocations(userSession, dtoMapper, mapper, uriInfo, expansions, filter,
+        return loadHistoricalLocations(userSession, dtoMapper, mapper, uriInfo, requestContext, expansions, filter,
                 List.of(providerThing), null, history, localResultLimit, cacheHl);
     }
 
     static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession, DtoMapper dtoMapper,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ICriterion filter,
-            List<ProviderSnapshot> providerThings, String locationId, HistoryProvider history, int localResultLimit,
-            IDtoMemoryCache<Instant> cacheHl) {
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ExpansionSettings expansions,
+            ICriterion filter, List<ProviderSnapshot> providerThings, String locationId, HistoryProvider history,
+            int localResultLimit, IDtoMemoryCache<Instant> cacheHl) {
         List<HistoricalLocation> values = new ArrayList<>();
 
         if (cacheHl != null) {
@@ -128,18 +132,37 @@ public class HistoryResourceHelperSensorthings {
             return new ResultList<>(values);
         }
 
+        boolean withCount = countRequested(requestContext);
         long totalCount = 0;
         for (ProviderSnapshot providerThing : providerThings) {
             ResourcePath path = new ResourcePath(providerThing.getName(), "admin", "location");
 
-            totalCount += history.getValueCount(path, TimeRange.ALL);
+            if (withCount) {
+                totalCount += history.getValueCount(path, TimeRange.ALL);
+            }
             List<TimedValue<?>> timed = newestChronological(history, path,
                     Math.max(0, localResultLimit - values.size()));
 
             values.addAll(0, dtoMapper.toHistoricalLocationList(userSession, mapper, uriInfo, expansions, filter,
                     providerThing, locationId, timed));
         }
-        return new ResultList<>((int) Math.min(Integer.MAX_VALUE, totalCount), null, values);
+        return new ResultList<>(withCount ? clamped(totalCount) : null, null, values);
+    }
+
+    /**
+     * Whether the count must be computed: the client asked for it with
+     * $count=true, or there is no request context — an $expand sub-list,
+     * which always carries its count. Counting is skipped otherwise: it is
+     * by far the most expensive part of a paginated request and the count
+     * filter would discard it anyway.
+     */
+    private static boolean countRequested(ContainerRequestContext requestContext) {
+        return requestContext == null
+                || Boolean.TRUE.equals(requestContext.getProperty(PaginationConstants.COUNT_PROP));
+    }
+
+    private static Integer clamped(Long count) {
+        return count == null ? null : (int) Math.min(Integer.MAX_VALUE, count);
     }
 
     /** The newest {@code maxResults} values, reversed to chronological order. */

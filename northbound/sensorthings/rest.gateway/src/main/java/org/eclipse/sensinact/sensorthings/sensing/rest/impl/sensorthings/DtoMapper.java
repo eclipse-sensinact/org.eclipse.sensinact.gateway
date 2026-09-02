@@ -177,7 +177,7 @@ public class DtoMapper {
 
         if (expansions.shouldExpand("HistoricalLocations", thing)) {
             ResultList<HistoricalLocation> historyHls = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    userSession, this, mapper, uriInfo, expansions.getExpansionSettings("HistoricalLocations"), filter,
+                    userSession, this, mapper, uriInfo, null, expansions.getExpansionSettings("HistoricalLocations"), filter,
                     provider, historyProvider, maxResult, cacheHl);
             Stream<HistoricalLocation> cacheHls = Stream.empty();
             if (cacheHl != null) {
@@ -232,7 +232,7 @@ public class DtoMapper {
 
         if (expansions.shouldExpand("Observations", datastream)) {
             expansions.addExpansion("Observations", datastream,
-                    RootResourceDelegateSensorthings.getObservationList(userSession, this, mapper, uriInfo,
+                    RootResourceDelegateSensorthings.getObservationList(userSession, this, mapper, uriInfo, null,
                             expansions.getExpansionSettings("Observations"),
                             DtoMapperSimple.getDatastreamService(provider).getResource("lastObservation"), filter,
                             historyProvider, maxResult, cacheObs));
@@ -641,7 +641,7 @@ public class DtoMapper {
                     DtoMapperSimple.getFeatureOfInterestService(provider), "datastreamIds", List.class);
             List<Observation> listObs = datastreamId.stream()
                     .map(id -> userSession.providerSnapshot(id, EnumSet.noneOf(SnapshotOption.class)))
-                    .map(p -> RootResourceDelegateSensorthings.getObservationList(userSession, this, mapper, uriInfo,
+                    .map(p -> RootResourceDelegateSensorthings.getObservationList(userSession, this, mapper, uriInfo, null,
                             expansions.getExpansionSettings("Observations"),
                             DtoMapperSimple.getDatastreamService(p).getResource("lastObservation"), filter,
                             historyProvider, maxResult, cacheObs))

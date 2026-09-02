@@ -79,7 +79,7 @@ public class LocationsDelegateSensorthings extends AbstractDelegate {
                 return new ResultList<HistoricalLocation>(List.of());
             }
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), filter,
+                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext, getExpansions(), filter,
                     providerThings, id, getHistoryProvider(), getMaxResult(),
                     getCacheHistoricalLocationIfHistoryMemory());
             if (list.value().isEmpty()) {
@@ -228,7 +228,7 @@ public class LocationsDelegateSensorthings extends AbstractDelegate {
 
     public ResultList<Observation> getLocationThingDatastreamObservations(String id) {
         return RootResourceDelegateSensorthings.getObservationList(getSession(), getSensorThingDtoMapper(), getMapper(),
-                uriInfo, getExpansions(), getObservationResourceSnapshot(id), parseFilter(OBSERVATIONS),
+                uriInfo, requestContext, getExpansions(), getObservationResourceSnapshot(id), parseFilter(OBSERVATIONS),
                 getHistoryProvider(), getMaxResult(), getCacheObservationIfHistoryMemory());
 
     }

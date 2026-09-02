@@ -191,18 +191,18 @@ public class RootResourceDelegateSensorthings extends AbstractDelegate {
             IDtoMemoryCache<ExpandedObservation> cacheObs) {
 
         ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
-        return getObservationList(userSession, dtoMapper, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot,
-                filter, historyProvider, localResultLimit, cacheObs);
+        return getObservationList(userSession, dtoMapper, mapper, uriInfo, requestContext, es == null ? EMPTY : es,
+                resourceSnapshot, filter, historyProvider, localResultLimit, cacheObs);
     }
 
     public static ResultList<Observation> getObservationList(SensiNactSession userSession, DtoMapper dtoMapper,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
-            ICriterion filter, HistoryProvider historyProvider, int localResultLimit,
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ExpansionSettings expansions,
+            ResourceSnapshot resourceSnapshot, ICriterion filter, HistoryProvider historyProvider, int localResultLimit,
             IDtoMemoryCache<ExpandedObservation> cacheObs) {
 
         ResultList<Observation> list = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                dtoMapper, mapper, uriInfo, expansions, resourceSnapshot, filter, historyProvider, localResultLimit,
-                cacheObs);
+                dtoMapper, mapper, uriInfo, requestContext, expansions, resourceSnapshot, filter, historyProvider,
+                localResultLimit, cacheObs);
 
         if (list.value().isEmpty()) {
             list = new ResultList<Observation>(

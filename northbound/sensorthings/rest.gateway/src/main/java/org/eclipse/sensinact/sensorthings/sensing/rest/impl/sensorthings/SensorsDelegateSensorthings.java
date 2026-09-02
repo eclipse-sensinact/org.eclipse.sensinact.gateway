@@ -102,7 +102,7 @@ public class SensorsDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
         return RootResourceDelegateSensorthings.getObservationList(getSession(), getSensorThingDtoMapper(), getMapper(),
-                uriInfo, getExpansions(), provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"),
+                uriInfo, requestContext, getExpansions(), provider.getResource(DtoMapperSimple.SERVICE_DATASTREAM, "lastObservation"),
                 parseFilter(EFilterContext.OBSERVATIONS), getHistoryProvider(), getMaxResult(),
                 getCacheObservationIfHistoryMemory());
     }

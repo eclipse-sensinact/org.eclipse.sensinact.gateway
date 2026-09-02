@@ -144,7 +144,7 @@ public class ObservationsDelegateSensorthings extends AbstractDelegate {
     public ResultList<Observation> getObservationDatastreamObservations(String id) {
 
         return RootResourceDelegateSensorthings.getObservationList(getSession(), getSensorThingDtoMapper(), getMapper(),
-                uriInfo, getExpansions(), getObservationResourceSnapshot(id), parseFilter(OBSERVATIONS),
+                uriInfo, requestContext, getExpansions(), getObservationResourceSnapshot(id), parseFilter(OBSERVATIONS),
                 getHistoryProvider(), getMaxResult(), getCacheObservationIfHistoryMemory());
     }
 

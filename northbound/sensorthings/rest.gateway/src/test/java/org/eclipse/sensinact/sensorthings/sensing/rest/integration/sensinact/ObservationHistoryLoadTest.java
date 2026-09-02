@@ -314,6 +314,11 @@ public class ObservationHistoryLoadTest extends AbstractIntegrationTest {
 
         // a correct page at skip=500000 is only reachable database-side: the
         // in-memory fallback paginates a window of the newest 3000 values
+        ResultList<Observation> deepNoCount = timedQuery("page at $skip=500000 without $count",
+                "?$top=50&$skip=500000");
+        assertEquals(ascending(500_000, 50), results(deepNoCount));
+        assertNull(deepNoCount.count());
+
         ResultList<Observation> deep = timedQuery("page at $skip=500000",
                 "?$top=50&$skip=500000&$count=true");
         assertEquals(TOTAL_ROWS, deep.count());

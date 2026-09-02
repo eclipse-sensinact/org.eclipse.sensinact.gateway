@@ -90,19 +90,25 @@ class HistoryResourceHelperSensinact {
                 OBSERVATION_VALUE_FIELDS, getMaxResult(application, localResultLimit));
         if (pushed != null) {
             HistoryPage page = history.getValues(pushed);
-            long count = page.totalCount()
-                    .orElseGet(() -> history.getValueCount(pushed.path(), pushed.range(), pushed.valueFilter()));
             List<Observation> observations = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
                     expansions, filter, resourceSnapshot, page.values());
+            Long count = null;
+            if (countRequested(requestContext) || observations.isEmpty()) {
+                count = page.totalCount().orElseGet(
+                        () -> history.getValueCount(pushed.path(), pushed.range(), pushed.valueFilter()));
+            }
             return pushedDownResultList(requestContext, page, count, observations);
         }
 
-        long count = history.getValueCount(path, TimeRange.ALL);
         List<TimedValue<?>> timed = newestChronological(history, path, getMaxResult(application, localResultLimit));
-
         List<Observation> observations = DtoMapper.toObservationList(userSession, application, mapper, uriInfo,
                 expansions, filter, resourceSnapshot, timed);
-        return resultList(count - (timed.size() - observations.size()), observations);
+
+        Long count = null;
+        if (countRequested(requestContext) || observations.isEmpty()) {
+            count = history.getValueCount(path, TimeRange.ALL) - (timed.size() - observations.size());
+        }
+        return resultList(count, observations);
     }
 
     static ResultList<HistoricalLocation> loadHistoricalLocations(SensiNactSession userSession,
@@ -119,23 +125,41 @@ class HistoryResourceHelperSensinact {
                 Set.of(), getMaxResult(application, localResultLimit));
         if (pushed != null) {
             HistoryPage page = history.getValues(pushed);
-            long count = page.totalCount()
-                    .orElseGet(() -> history.getValueCount(pushed.path(), pushed.range(), pushed.valueFilter()));
             List<HistoricalLocation> locations = DtoMapper.toHistoricalLocationList(userSession, application, mapper,
                     uriInfo, expansions, filter, provider, page.values());
+            Long count = null;
+            if (countRequested(requestContext) || locations.isEmpty()) {
+                count = page.totalCount().orElseGet(
+                        () -> history.getValueCount(pushed.path(), pushed.range(), pushed.valueFilter()));
+            }
             return pushedDownResultList(requestContext, page, count, locations);
         }
 
-        long count = history.getValueCount(path, TimeRange.ALL);
         List<TimedValue<?>> timed = newestChronological(history, path, getMaxResult(application, localResultLimit));
-
         List<HistoricalLocation> locations = DtoMapper.toHistoricalLocationList(userSession, application, mapper,
                 uriInfo, expansions, filter, provider, timed);
-        return resultList(count - (timed.size() - locations.size()), locations);
+
+        Long count = null;
+        if (countRequested(requestContext) || locations.isEmpty()) {
+            count = history.getValueCount(path, TimeRange.ALL) - (timed.size() - locations.size());
+        }
+        return resultList(count, locations);
     }
 
     static HistoryProvider historyProvider(Application application) {
         return (HistoryProvider) application.getProperties().get("sensinact.history.service");
+    }
+
+    /**
+     * Whether the count must be computed: the client asked for it with
+     * $count=true, or there is no request context — an $expand sub-list,
+     * which always carries its count. Counting is skipped otherwise: it is
+     * by far the most expensive part of a paginated request and the count
+     * filter would discard it anyway.
+     */
+    private static boolean countRequested(ContainerRequestContext requestContext) {
+        return requestContext == null
+                || Boolean.TRUE.equals(requestContext.getProperty(PaginationConstants.COUNT_PROP));
     }
 
     /**
@@ -219,7 +243,7 @@ class HistoryResourceHelperSensinact {
     }
 
     private static <T extends Self> ResultList<T> pushedDownResultList(ContainerRequestContext requestContext,
-            HistoryPage page, long count, List<T> values) {
+            HistoryPage page, Long count, List<T> values) {
         String nextLink = null;
         if (page.hasMore()) {
             long nextSkip = page.offset() + page.values().size();
@@ -227,7 +251,7 @@ class HistoryResourceHelperSensinact {
                     .toString();
         }
         requestContext.setProperty(PaginationConstants.PAGINATION_APPLIED, Boolean.TRUE);
-        return new ResultList<>((int) Math.min(Integer.MAX_VALUE, count), nextLink, values);
+        return new ResultList<>(clamped(count), nextLink, values);
     }
 
     /** The newest {@code maxResults} values, reversed to chronological order. */
@@ -247,7 +271,11 @@ class HistoryResourceHelperSensinact {
         return maxResults;
     }
 
-    private static <T extends Self> ResultList<T> resultList(long count, List<T> values) {
-        return new ResultList<>((int) Math.min(Integer.MAX_VALUE, count), null, values);
+    private static <T extends Self> ResultList<T> resultList(Long count, List<T> values) {
+        return new ResultList<>(clamped(count), null, values);
+    }
+
+    private static Integer clamped(Long count) {
+        return count == null ? null : (int) Math.min(Integer.MAX_VALUE, count);
     }
 }

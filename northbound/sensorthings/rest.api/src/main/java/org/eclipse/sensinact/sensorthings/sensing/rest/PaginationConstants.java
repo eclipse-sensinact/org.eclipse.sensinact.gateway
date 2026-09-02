@@ -32,6 +32,13 @@ public interface PaginationConstants {
     String SKIP_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.skip";
 
     /**
+     * Request context property holding whether the client requested the
+     * entity count ($count=true) as a {@link Boolean}. Resource methods may
+     * skip computing expensive counts when it is absent or false.
+     */
+    String COUNT_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.count";
+
+    /**
      * Request context property a resource method sets to {@link Boolean#TRUE}
      * after applying $orderby, $skip and $top itself. The response-side query
      * option filters then leave the result list untouched: the method already

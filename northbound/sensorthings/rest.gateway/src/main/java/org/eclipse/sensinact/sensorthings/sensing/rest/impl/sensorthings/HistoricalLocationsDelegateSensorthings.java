@@ -144,7 +144,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
                 throw new BadRequestException();
             }
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), filter,
+                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext, getExpansions(), filter,
                     List.of(thingProvider), id2, getHistoryProvider(), getMaxResult(),
                     getCacheHistoricalLocationIfHistoryMemory());
             if (list.value().isEmpty())
@@ -194,7 +194,7 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), filter,
+                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext, getExpansions(), filter,
                     providerSnapshot, getHistoryProvider(), getMaxResult(),
                     getCacheHistoricalLocationIfHistoryMemory());
             if (list.value().isEmpty())

@@ -111,7 +111,7 @@ public abstract class AbstractDelegate {
             ICriterion filter = parseFilter(HISTORICAL_LOCATIONS);
             ProviderSnapshot providerThing = validateAndGetProvider(idThing);
             ResultList<HistoricalLocation> list = HistoryResourceHelperSensorthings.loadHistoricalLocations(
-                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, getExpansions(), filter,
+                    getSession(), getSensorThingDtoMapper(), getMapper(), uriInfo, requestContext, getExpansions(), filter,
                     providerThing, getHistoryProvider(), getMaxResult(), getCacheHistoricalLocationIfHistoryMemory());
             if (list.value().isEmpty()) {
                 list = getSensorThingDtoMapper().toHistoricalLocations(getSession(), getMapper(), uriInfo,

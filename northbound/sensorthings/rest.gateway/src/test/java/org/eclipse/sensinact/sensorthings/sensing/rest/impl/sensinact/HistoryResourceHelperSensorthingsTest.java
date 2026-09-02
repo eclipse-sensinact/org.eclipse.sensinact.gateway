@@ -18,12 +18,15 @@ import static org.eclipse.sensinact.northbound.filters.sensorthings.EFilterConte
 import static org.eclipse.sensinact.sensorthings.models.extended.ExtendedPackage.eNS_URI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +64,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 import tools.jackson.core.JacksonException;
@@ -157,7 +161,7 @@ class HistoryResourceHelperSensorthingsTest {
         void noHistoryProvider() {
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, null, 0, null);
+                    getDtoMapper(), getMapper(), uriInfo, null, expansions, resourceSnapshot, null, null, 0, null);
 
             assertNotNull(result);
             assertTrue(result.value().isEmpty());
@@ -176,7 +180,7 @@ class HistoryResourceHelperSensorthingsTest {
                     .thenReturn(Stream.of(observationValue("value2", now), observationValue("value1", now)));
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, history, 1000, null);
+                    getDtoMapper(), getMapper(), uriInfo, null, expansions, resourceSnapshot, null, history, 1000, null);
 
             assertNotNull(result);
             assertEquals(5, result.count().intValue());
@@ -195,7 +199,7 @@ class HistoryResourceHelperSensorthingsTest {
             when(history.streamValues(any(), anyLong())).thenReturn(Stream.of());
 
             HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession, getDtoMapper(), getMapper(),
-                    uriInfo, expansions, resourceSnapshot, null, history, 100, null);
+                    uriInfo, null, expansions, resourceSnapshot, null, history, 100, null);
 
             ArgumentCaptor<HistoryQuery> query = ArgumentCaptor.forClass(HistoryQuery.class);
             ArgumentCaptor<Long> maxTotal = ArgumentCaptor.forClass(Long.class);
@@ -227,7 +231,7 @@ class HistoryResourceHelperSensorthingsTest {
                     observationValue("value1", now.minus(3, DAYS)), observationValue("value3", now.minus(3, DAYS))));
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, filter, history, 1000, null);
+                    getDtoMapper(), getMapper(), uriInfo, null, expansions, resourceSnapshot, filter, history, 1000, null);
 
             assertNotNull(result);
             assertEquals(4, result.value().size());
@@ -245,6 +249,22 @@ class HistoryResourceHelperSensorthingsTest {
     class EdgeCases {
 
         @Test
+        @DisplayName("Should skip the count query when $count is not requested")
+        void countNotRequestedSkipsTheCountQuery() {
+            setupResourceSnapshotMocks();
+
+            ContainerRequestContext requestContext = mock(ContainerRequestContext.class);
+            when(history.streamValues(any(), anyLong())).thenReturn(Stream.of());
+
+            ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
+                    getDtoMapper(), getMapper(), uriInfo, requestContext, expansions, resourceSnapshot, null, history,
+                    1000, null);
+
+            assertNull(result.count());
+            verify(history, never()).getValueCount(any(), any());
+        }
+
+        @Test
         @DisplayName("Should clamp a count exceeding Integer.MAX_VALUE")
         void countExceedsIntegerMax() {
             setupResourceSnapshotMocks();
@@ -253,7 +273,7 @@ class HistoryResourceHelperSensorthingsTest {
             when(history.streamValues(any(), anyLong())).thenReturn(Stream.of());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, history, 1000, null);
+                    getDtoMapper(), getMapper(), uriInfo, null, expansions, resourceSnapshot, null, history, 1000, null);
 
             assertNotNull(result);
             assertEquals(Integer.MAX_VALUE, result.count().intValue());
@@ -268,7 +288,7 @@ class HistoryResourceHelperSensorthingsTest {
             when(history.streamValues(any(), anyLong())).thenReturn(Stream.of());
 
             ResultList<Observation> result = HistoryResourceHelperSensorthings.loadHistoricalObservations(userSession,
-                    getDtoMapper(), getMapper(), uriInfo, expansions, resourceSnapshot, null, history, 0, null);
+                    getDtoMapper(), getMapper(), uriInfo, null, expansions, resourceSnapshot, null, history, 0, null);
 
             assertNotNull(result);
             assertEquals(0, result.count().intValue());

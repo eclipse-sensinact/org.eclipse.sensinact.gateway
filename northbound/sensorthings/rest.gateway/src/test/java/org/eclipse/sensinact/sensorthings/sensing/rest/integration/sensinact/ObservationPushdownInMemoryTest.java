@@ -190,6 +190,24 @@ public class ObservationPushdownInMemoryTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void countIsOmittedWhenNotRequested() throws Exception {
+        ResultList<Observation> page = utils.queryJson(DATASTREAM_PATH + "?$top=5", OBSERVATIONS);
+
+        assertNull(page.count());
+        assertEquals(List.of(0, 1, 2, 3, 4), page.value().stream().map(ObservationPushdownInMemoryTest::result).toList());
+        assertNotNull(page.nextLink());
+    }
+
+    @Test
+    void skipBeyondTheDatasetWithoutCountStillNotTheLiveValue() throws Exception {
+        ResultList<Observation> page = utils.queryJson(DATASTREAM_PATH + "?$top=5&$skip=25", OBSERVATIONS);
+
+        assertNull(page.count());
+        assertTrue(page.value().isEmpty());
+        assertNull(page.nextLink());
+    }
+
+    @Test
     void skipBeyondTheDatasetYieldsAnEmptyPageNotTheLiveValue() throws Exception {
         ResultList<Observation> page = utils.queryJson(DATASTREAM_PATH + "?$top=5&$skip=25&$count=true", OBSERVATIONS);
 
