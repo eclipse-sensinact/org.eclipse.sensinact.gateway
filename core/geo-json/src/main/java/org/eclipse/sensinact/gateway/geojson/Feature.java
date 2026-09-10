@@ -16,12 +16,15 @@ package org.eclipse.sensinact.gateway.geojson;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-public record Feature(String id, @JsonInclude Geometry geometry, @JsonInclude Map<String, Object> properties, List<Double> bbox,
-        @JsonAnySetter @JsonAnyGetter Map<String,Object> foreignMembers) implements GeoJsonObject {
+public record Feature(@Nullable String id, @Nullable @JsonInclude Geometry geometry, 
+        @Nullable @JsonInclude Map<String, Object> properties, @Nullable List<Double> bbox,
+        @JsonAnySetter @JsonAnyGetter @Nullable Map<String,Object> foreignMembers) implements GeoJsonObject {
 
     public Feature {
         if(bbox != null) {

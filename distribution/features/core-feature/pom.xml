@@ -106,6 +106,10 @@
       <artifactId>metrics-core</artifactId>
       <version>${metrics.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

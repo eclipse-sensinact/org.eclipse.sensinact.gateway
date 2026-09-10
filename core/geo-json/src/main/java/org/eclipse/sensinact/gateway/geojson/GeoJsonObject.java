@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.geojson.internal.JacksonHelper;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -61,12 +62,14 @@ public sealed interface GeoJsonObject permits Geometry, Feature, FeatureCollecti
      * Additional extension properties for this object
      * @return A {@link Map} of extension properties. May be empty, but will never be <code>null</code>
      */
+    @Nullable
     public Map<String, Object> foreignMembers();
 
     /**
      * The GeoJSON bounding box.
      * @return A List of bounding box coordinates. May be null according to the specification.
      */
+    @Nullable
     public List<Double> bbox();
 
     /**

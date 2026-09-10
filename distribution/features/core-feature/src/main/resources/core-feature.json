@@ -10,6 +10,7 @@
     { "id": "com.fasterxml.jackson.core:jackson-annotations:${jackson.annotations.version}" },
     { "id": "tools.jackson.core:jackson-core:${jackson.version}" },
     { "id": "tools.jackson.core:jackson-databind:${jackson.version}" },
+    { "id": "org.jspecify:jspecify:1.0.0" },
     { "id": "org.osgi:org.osgi.service.typedevent:1.0.0" },
     { "id": "org.osgi:org.osgi.util.pushstream:1.1.0" },
     { "id": "org.eclipse.emf:org.eclipse.emf.common:2.44.0" },

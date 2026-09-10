@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.filters.resource.selector.api;
 
 import org.eclipse.sensinact.gateway.geojson.Geometry;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Defines a selection for the location of provider
@@ -34,10 +35,12 @@ public record LocationSelection(
          * likely to return true, while DISJOINT and
          * WITHIN will be less likely to be true.
          */
+        @Nullable
         Double radius,
         /**
          * If true then the result of the test will be negated
          */
+        @Nullable
         boolean negate,
         /**
          * The type of matching to use

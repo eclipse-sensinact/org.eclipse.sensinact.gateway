@@ -1,0 +1,6 @@
+<FindBugsFilter>
+  <Match>
+    <Class name="org.eclipse.sensinact.filters.resource.selector.api.ValueSelection" />
+    <Bug code="EI" />
+  </Match>
+</FindBugsFilter>

@@ -53,6 +53,7 @@
 	org.eclipse.sensinact.gateway.southbound.history.history-core-tests;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.history-inmemory;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.history.history-testsupport;version='[0.0.2,0.0.3)',\
+	org.jspecify.jspecify;version='[1.0.0,1.0.1)',\
 	org.mockito.mockito-core;version='[5.21.0,5.21.1)',\
 	org.objectweb.asm;version='[9.9.1,9.9.2)',\
 	org.objectweb.asm.commons;version='[9.9.1,9.9.2)',\
