@@ -26,9 +26,8 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1">the GeoJSON
  * specification</a>
  */
-public record LineString(List<Coordinates> coordinates, 
-        @Nullable List<Double> bbox, @JsonAnySetter @JsonAnyGetter 
-        @Nullable Map<String,Object> foreignMembers) implements Geometry {
+public record LineString(List<Coordinates> coordinates, @Nullable List<Double> bbox,
+        @JsonAnySetter @JsonAnyGetter @Nullable Map<String,Object> foreignMembers) implements Geometry {
 
     public LineString {
         if(coordinates != null) {

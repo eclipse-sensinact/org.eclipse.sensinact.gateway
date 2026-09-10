@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-public record Feature(@Nullable String id, @Nullable @JsonInclude Geometry geometry, 
+public record Feature(@Nullable String id, @Nullable @JsonInclude Geometry geometry,
         @Nullable @JsonInclude Map<String, Object> properties, @Nullable List<Double> bbox,
         @JsonAnySetter @JsonAnyGetter @Nullable Map<String,Object> foreignMembers) implements GeoJsonObject {
 
