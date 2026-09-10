@@ -41,8 +41,8 @@ If this is your first time contributing to an Eclipse Foundation project, you'll
 
 The Eclipse sensiNact build requires below as dependencies.
 
-- Java 11+
-- Maven 3.8.0+
+- Java 17+
+- Maven 3.9.0+
 
 The Eclipse sensiNact build uses code generation in some components. Please Run the full build once before attempting to load the code into your IDE.
 
