@@ -58,4 +58,11 @@ public record GeometryCollection (List<Geometry> geometries, @Nullable List<Doub
     public boolean isEmpty() {
         return geometries.isEmpty();
     }
+
+    @Override
+    public int getDimension() {
+        return geometries.stream()
+                .mapToInt(GeoJsonObject::getDimension)
+                .max().orElse(0);
+    }
 }

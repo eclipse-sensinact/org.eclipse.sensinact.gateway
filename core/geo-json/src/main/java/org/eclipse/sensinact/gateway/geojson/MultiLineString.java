@@ -56,4 +56,9 @@ public record MultiLineString(List<List<Coordinates>> coordinates, @Nullable Lis
     public boolean isEmpty() {
         return coordinates.isEmpty();
     }
+
+    @Override
+    public int getDimension() {
+        return 1;
+    }
 }

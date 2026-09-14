@@ -56,4 +56,9 @@ public record Point(Coordinates coordinates, @Nullable List<Double> bbox,
     public boolean isEmpty() {
         return coordinates.isEmpty();
     }
+
+    @Override
+    public int getDimension() {
+        return 0;
+    }
 }

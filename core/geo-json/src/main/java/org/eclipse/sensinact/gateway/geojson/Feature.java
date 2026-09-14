@@ -49,4 +49,9 @@ public record Feature(@Nullable String id, @Nullable @JsonInclude Geometry geome
     public boolean isEmpty() {
         return geometry == null || geometry.isEmpty();
     }
+
+    @Override
+    public int getDimension() {
+        return geometry == null ? 0 : geometry.getDimension();
+    }
 }

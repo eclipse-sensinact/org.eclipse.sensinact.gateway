@@ -80,6 +80,14 @@ public sealed interface GeoJsonObject permits Geometry, Feature, FeatureCollecti
     @JsonIgnore
     public boolean isEmpty();
 
+    /**
+     * Tests the dimensionality of this GeoJson object between zero and two. For composite geometries
+     * the largestdimension is returned.
+     * @return <code>true</code> if the object is empty
+     */
+    @JsonIgnore
+    public int getDimension();
+
     public default String toJsonString() {
         try {
             return JacksonHelper.MAPPER.writeValueAsString(this);
