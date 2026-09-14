@@ -56,4 +56,9 @@ public record Polygon(List<List<Coordinates>> coordinates, @Nullable List<Double
     public boolean isEmpty() {
         return coordinates.isEmpty();
     }
+
+    @Override
+    public int getDimension() {
+        return 2;
+    }
 }

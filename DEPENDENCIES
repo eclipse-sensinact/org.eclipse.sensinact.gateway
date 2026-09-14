@@ -18,6 +18,7 @@ maven/mavencentral/com.github.seancfoley/ipaddress/5.5.1, Apache-2.0, approved, 
 maven/mavencentral/com.google.code.gson/gson/2.11.0, Apache-2.0, approved, #14820
 maven/mavencentral/com.google.errorprone/error_prone_annotations/2.27.0, Apache-2.0, approved, #14584
 maven/mavencentral/com.googlecode.aviator/aviator/5.4.3, Apache-2.0 AND LGPL-2.1-or-later AND BSD-3-Clause AND EPL-1.0, approved, #22385
+maven/mavencentral/com.googlecode.json-simple/json-simple/1.1.1, Apache-2.0, approved, CQ9858
 maven/mavencentral/com.h2database/h2-mvstore/2.1.212, EPL-1.0 AND MPL-2.0, approved, #8716
 maven/mavencentral/com.librato.metrics/librato-java/2.1.0, Apache-2.0, approved, #100
 maven/mavencentral/com.librato.metrics/metrics-librato/5.1.0, Apache-2.0, approved, #95
@@ -141,6 +142,8 @@ maven/mavencentral/org.jspecify/jspecify/1.0.0, Apache-2.0, approved, #21897
 maven/mavencentral/org.junit.jupiter/junit-jupiter-api/5.14.3, EPL-2.0, approved, #23721
 maven/mavencentral/org.junit.jupiter/junit-jupiter-params/5.14.3, EPL-2.0, approved, #23727
 maven/mavencentral/org.junit.platform/junit-platform-commons/1.14.3, EPL-2.0, approved, #23723
+maven/mavencentral/org.locationtech.jts.io/jts-io-common/1.20.0, EPL-2.0, approved, locationtech.jts
+maven/mavencentral/org.locationtech.jts/jts-core/1.20.0, EPL-2.0, approved, locationtech.jts
 maven/mavencentral/org.opentest4j/opentest4j/1.3.0, Apache-2.0, approved, #9713
 maven/mavencentral/org.ops4j.base/ops4j-base-io/1.5.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.ops4j.base/ops4j-base-lang/1.5.0, Apache-2.0, approved, clearlydefined

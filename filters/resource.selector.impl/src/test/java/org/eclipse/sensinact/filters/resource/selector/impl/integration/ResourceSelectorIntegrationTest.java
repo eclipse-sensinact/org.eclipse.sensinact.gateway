@@ -14,6 +14,7 @@ package org.eclipse.sensinact.filters.resource.selector.impl.integration;
 
 import static org.eclipse.sensinact.filters.resource.selector.api.LocationSelection.MatchType.WITHIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.InvocationTargetException;
@@ -51,6 +52,8 @@ import org.eclipse.sensinact.gateway.geojson.Point;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
@@ -341,6 +344,23 @@ public class ResourceSelectorIntegrationTest {
         results = applyFilter(rs);
         assertEquals(1, results.size());
         assertFindProviders(results, "naming2");
+    }
+
+    @Test
+    @WithConfiguration(pid = "sensinact.resource.selector", properties = {
+            @Property(key = "foo", value = "bar"),
+            @Property(key = "LocationMatchFactory.target", value = "(missing=true)")
+        }
+    )
+    void testLocationNoIntegration(
+            @InjectService(filter = "(foo=bar)") ResourceSelectorFilterFactory filterFactory) throws Exception {
+        ResourceSelector rs = new ResourceSelector(List.of(
+                new ProviderSelection(null, null, null,
+                        List.of(new ResourceSelection(new Selection("sensor", null, false), new Selection("temperature", null, false), null)),
+                        List.of(new LocationSelection(new Point(11d, 33d), 500_000d, false, WITHIN)))),
+                List.of());
+
+        assertThrows(IllegalArgumentException.class, () -> filterFactory.parseResourceSelector(rs).getLocationFilter());
     }
 
     @Test

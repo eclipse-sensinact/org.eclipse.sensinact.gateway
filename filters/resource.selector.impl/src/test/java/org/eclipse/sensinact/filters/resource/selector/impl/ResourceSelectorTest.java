@@ -205,7 +205,7 @@ public class ResourceSelectorTest {
     }
 
     private boolean testResource(final ResourceSelector selector, final ResourceSnapshot... rc) {
-        final ICriterion criterion = new ResourceSelectorCriterion(selector, false);
+        final ICriterion criterion = new ResourceSelectorCriterion(selector, false, () -> null);
         assertNotNull(criterion, "No criterion returned for: " + selector);
 
         final ResourceValueFilter valueFilter = criterion.getResourceValueFilter();
@@ -257,7 +257,7 @@ public class ResourceSelectorTest {
         ResourceSnapshot rcMatches = makeResource("test", "hello", "foo");
         ResourceSnapshot rcDoesNotMatch = makeResource("test", "bye", "bar");
 
-        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ICriterion filter = new ResourceSelectorCriterion(rs, false, () -> null);
         assertNull(filter.getProviderFilter());
         assertTrue(filter.getServiceFilter().test(rcMatches.getService()));
         assertTrue(filter.getResourceFilter().test(rcMatches));
@@ -280,7 +280,7 @@ public class ResourceSelectorTest {
         ResourceSelector rs = makeBasicResourceSelector("foo", null, null, null);
         ResourceSnapshot rc = makeResource("test", "hello", "foo");
 
-        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ICriterion filter = new ResourceSelectorCriterion(rs, false, () -> null);
         assertFalse(filter.getProviderFilter().test(rc.getService().getProvider()));
         assertFalse(filter.getServiceFilter().test(rc.getService()));
         assertFalse(filter.getResourceFilter().test(rc));
@@ -296,7 +296,7 @@ public class ResourceSelectorTest {
                 List.of());
         ResourceSnapshot rc = makeResource("test", "hello", "foo");
 
-        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ICriterion filter = new ResourceSelectorCriterion(rs, false, () -> null);
         assertFalse(filter.getProviderFilter().test(rc.getService().getProvider()));
         assertFalse(filter.getServiceFilter().test(rc.getService()));
         assertFalse(filter.getResourceFilter().test(rc));
@@ -315,10 +315,10 @@ public class ResourceSelectorTest {
         ResourceSnapshot rc = makeResource("test", "hello", value);
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
         rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET));
-        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ICriterion filter = new ResourceSelectorCriterion(rs, false, () -> null);
         ResourceSelector rsNeg = makeBasicResourceSelector(null, null, "test", "hello");
         rsNeg = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_SET, true));
-        ICriterion filterNeg = new ResourceSelectorCriterion(rsNeg, false);
+        ICriterion filterNeg = new ResourceSelectorCriterion(rsNeg, false, () -> null);
 
         // ... value level
         ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
@@ -346,11 +346,11 @@ public class ResourceSelectorTest {
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for value
         rs = updateValueTest(rs, makeValueSelection(String.valueOf(value), null, OperationType.EQUALS));
-        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ICriterion filter = new ResourceSelectorCriterion(rs, false, () -> null);
         ResourceSelector rsWrong = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for wrong value
         rsWrong = updateValueTest(rs, makeValueSelection("wrong", null, OperationType.EQUALS));
-        ICriterion filterWrong = new ResourceSelectorCriterion(rsWrong, false);
+        ICriterion filterWrong = new ResourceSelectorCriterion(rsWrong, false, () -> null);
 
         // ... value level
         ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
@@ -384,11 +384,11 @@ public class ResourceSelectorTest {
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for value
         rs = updateValueTest(rs, makeValueSelection(String.valueOf(value), null, OperationType.EQUALS, true));
-        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ICriterion filter = new ResourceSelectorCriterion(rs, false, () -> null);
         ResourceSelector rsWrong = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for wrong value
         rsWrong = updateValueTest(rs, makeValueSelection("wrong", null, OperationType.EQUALS, true));
-        ICriterion filterWrong = new ResourceSelectorCriterion(rsWrong, false);
+        ICriterion filterWrong = new ResourceSelectorCriterion(rsWrong, false, () -> null);
 
         // ... value level
         ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
@@ -421,7 +421,7 @@ public class ResourceSelectorTest {
         ResourceSelector rs = makeBasicResourceSelector(null, null, "test", "hello");
         // Test for null value (should always be false)
         rs = updateValueTest(rs, makeValueSelection(null, null, OperationType.IS_NOT_NULL));
-        ICriterion filter = new ResourceSelectorCriterion(rs, false);
+        ICriterion filter = new ResourceSelectorCriterion(rs, false, () -> null);
 
         // ... value level
         ResourceValueFilter rcPredicate = filter.getResourceValueFilter();
@@ -1033,7 +1033,7 @@ public class ResourceSelectorTest {
     class TopicFilterTests {
 
         ICriterion makeCriterion(ResourceSelector rs, boolean allowSingleLevelWildcard) {
-            return new ResourceSelectorCriterion(rs, allowSingleLevelWildcard);
+            return new ResourceSelectorCriterion(rs, allowSingleLevelWildcard, () -> null);
         }
 
         @Test

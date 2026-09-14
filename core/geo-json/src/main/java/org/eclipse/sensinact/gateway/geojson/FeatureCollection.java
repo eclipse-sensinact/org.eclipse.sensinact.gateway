@@ -54,4 +54,11 @@ public record FeatureCollection(List<Feature> features, @Nullable List<Double> b
     public boolean isEmpty() {
         return features.isEmpty();
     }
+
+    @Override
+    public int getDimension() {
+        return features.stream()
+                .mapToInt(GeoJsonObject::getDimension)
+                .max().orElse(0);
+    }
 }

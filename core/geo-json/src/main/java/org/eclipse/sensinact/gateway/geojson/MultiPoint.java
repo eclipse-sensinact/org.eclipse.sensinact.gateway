@@ -56,4 +56,9 @@ public record MultiPoint(List<Coordinates> coordinates, @Nullable List<Double> b
     public boolean isEmpty() {
         return coordinates.isEmpty();
     }
+
+    @Override
+    public int getDimension() {
+        return 0;
+    }
 }

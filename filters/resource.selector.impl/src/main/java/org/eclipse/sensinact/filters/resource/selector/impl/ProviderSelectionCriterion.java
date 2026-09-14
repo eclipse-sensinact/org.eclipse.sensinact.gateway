@@ -14,6 +14,7 @@ package org.eclipse.sensinact.filters.resource.selector.impl;
 
 import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.ALWAYS;
 import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.always;
+import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.biAlways;
 import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.fromSelection;
 import static org.eclipse.sensinact.filters.resource.selector.impl.ResourceSelectorCriterion.never;
 
@@ -25,6 +26,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.filters.location.api.LocationMatchFactory;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ProviderSelection;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 
@@ -40,7 +42,6 @@ public class ProviderSelectionCriterion {
     private final Predicate<ResourceSnapshot> resourceFilter;
 
     private final ResourceValueFilter valueFilter;
-    private final BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter;
 
     public ProviderSelectionCriterion(ProviderSelection ps) {
         this.ps = ps;
@@ -70,10 +71,6 @@ public class ProviderSelectionCriterion {
 
             this.valueFilter = this::checkResourceValues;
         }
-        locationFilter = combineLocationCheck(this.providerFilter, locations.stream()
-                    .map(LocationSelectionCriterion::locationFilter)
-                    .reduce(Predicate::and)
-                    .orElse(always()));
     }
 
     public Predicate<ProviderSnapshot> providerFilter() {
@@ -92,8 +89,15 @@ public class ProviderSelectionCriterion {
         return valueFilter;
     }
 
-    public BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter() {
-        return locationFilter;
+    public boolean hasLocationRestriction() {
+        return !locations.isEmpty();
+    }
+
+    public BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter(LocationMatchFactory factory) {
+        return combineLocationCheck(this.providerFilter, locations.stream()
+                .map(lsc -> lsc.locationFilter(factory))
+                .reduce(Predicate::and)
+                .orElse(always()));
     }
 
     public String exactModel() {
@@ -157,7 +161,7 @@ public class ProviderSelectionCriterion {
 
     private static BiPredicate<ProviderSnapshot, GeoJsonObject> combineLocationCheck(Predicate<ProviderSnapshot> p, Predicate<GeoJsonObject> l) {
         if(p == ALWAYS) {
-            return (x,g) -> l.test(g);
+            return l == ALWAYS ? biAlways() : (x,g) -> l.test(g);
         } else {
             return l == ALWAYS ? (ps, x) -> p.test(ps) : (ps, g) -> p.test(ps) && l.test(g);
         }

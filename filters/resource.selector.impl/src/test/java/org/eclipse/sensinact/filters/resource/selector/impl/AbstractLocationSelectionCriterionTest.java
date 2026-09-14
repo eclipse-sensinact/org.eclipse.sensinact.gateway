@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.sensinact.filters.location.api.LocationMatchFactory;
 import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection.MatchType;
 import org.eclipse.sensinact.gateway.geojson.Coordinates;
@@ -45,8 +46,11 @@ import tools.jackson.databind.json.JsonMapper;
  * This class tests a subset of the location selection function.
  * It can be extended if we wish to test filter values that are not
  * polygons or multi-polygons.
+ *
+ * It is abstract so that it can be extended to test various implementations
+ * are working correctly
  */
-public class LocationSelectionCriterionTest {
+public abstract class AbstractLocationSelectionCriterionTest {
 
     // All polygons
     private static final String BUSHY_PARK = "Bushy Park";
@@ -139,6 +143,8 @@ public class LocationSelectionCriterionTest {
 
     private FeatureCollection locations;
 
+    protected abstract LocationMatchFactory getLocationMatchFactory();
+
     @BeforeEach
     public void loadJSON() throws Exception {
         try (InputStream is = getClass().getResourceAsStream("/geojson/london-parks-landmarks.json")) {
@@ -195,7 +201,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(poly, null, false, match);
 
-            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter().test(point));
+            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(point));
         }
 
         /**
@@ -217,7 +223,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(poly, null, false, match);
 
-            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter().test(line));
+            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(line));
         }
 
         /**
@@ -240,7 +246,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(poly, null, false, match);
 
-            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter().test(location));
+            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(location));
         }
 
         @Test
@@ -250,7 +256,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(serpentine, null, false, MatchType.CONTAINS);
 
-            assertTrue(new LocationSelectionCriterion(ls).locationFilter().test(hyde));
+            assertTrue(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(hyde));
         }
 
         /**
@@ -285,7 +291,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(poly, null, false, match);
 
-            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter().test(mp));
+            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(mp));
         }
 
         /**
@@ -345,7 +351,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(poly, null, false, match);
 
-            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter().test(ml));
+            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(ml));
         }
 
         /**
@@ -405,7 +411,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(poly, null, false, match);
 
-            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter().test(mp));
+            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(mp));
         }
 
         /**
@@ -442,7 +448,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(poly, null, false, match);
 
-            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter().test(gc));
+            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(gc));
         }
     }
 
@@ -471,7 +477,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(mp, null, false, match);
 
-            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter().test(point));
+            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(point));
         }
 
         /**
@@ -494,7 +500,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(mp, null, false, match);
 
-            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter().test(line));
+            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(line));
         }
 
         /**
@@ -527,7 +533,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(mp, null, false, match);
 
-            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter().test(location));
+            assertEquals(inside, new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(location));
         }
 
         @Test
@@ -537,7 +543,7 @@ public class LocationSelectionCriterionTest {
 
             LocationSelection ls = new LocationSelection(serpentine, null, false, MatchType.CONTAINS);
 
-            assertTrue(new LocationSelectionCriterion(ls).locationFilter().test(mp));
+            assertTrue(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(mp));
         }
     }
 
@@ -552,13 +558,13 @@ public class LocationSelectionCriterionTest {
             Polygon serpentine = (Polygon) getFeature(SERPENTINE).geometry();
 
             LocationSelection ls = new LocationSelection(serpentine, null, false, MatchType.CONTAINS);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POINT));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_POINT));
             ls = new LocationSelection(serpentine, null, false, MatchType.WITHIN);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POINT));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_POINT));
             ls = new LocationSelection(serpentine, null, false, MatchType.INTERSECTS);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POINT));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_POINT));
             ls = new LocationSelection(serpentine, null, false, MatchType.DISJOINT);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POINT));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_POINT));
         }
 
         @Test
@@ -566,13 +572,13 @@ public class LocationSelectionCriterionTest {
             Polygon serpentine = (Polygon) getFeature(SERPENTINE).geometry();
 
             LocationSelection ls = new LocationSelection(serpentine, null, false, MatchType.CONTAINS);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_LINE));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_LINE));
             ls = new LocationSelection(serpentine, null, false, MatchType.WITHIN);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_LINE));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_LINE));
             ls = new LocationSelection(serpentine, null, false, MatchType.INTERSECTS);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_LINE));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_LINE));
             ls = new LocationSelection(serpentine, null, false, MatchType.DISJOINT);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_LINE));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_LINE));
         }
 
         @Test
@@ -580,13 +586,13 @@ public class LocationSelectionCriterionTest {
             Polygon serpentine = (Polygon) getFeature(SERPENTINE).geometry();
 
             LocationSelection ls = new LocationSelection(serpentine, null, false, MatchType.CONTAINS);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POLY));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_POLY));
             ls = new LocationSelection(serpentine, null, false, MatchType.WITHIN);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POLY));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_POLY));
             ls = new LocationSelection(serpentine, null, false, MatchType.INTERSECTS);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POLY));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_POLY));
             ls = new LocationSelection(serpentine, null, false, MatchType.DISJOINT);
-            assertFalse(new LocationSelectionCriterion(ls).locationFilter().test(EMPTY_POLY));
+            assertFalse(new LocationSelectionCriterion(ls).locationFilter(getLocationMatchFactory()).test(EMPTY_POLY));
         }
     }
 }

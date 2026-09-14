@@ -16,23 +16,24 @@
     <artifactId>filters</artifactId>
     <version>${revision}${changelist}</version>
   </parent>
-  <artifactId>esri.geometry</artifactId>
-  <name>SensiNact Filters :: ESRI Geometry</name>
-  <description>Repackaging the ESRI Geometry API as an OSGi bundle</description>
+  <artifactId>jts.geometry</artifactId>
+  <name>SensiNact Filters :: JTS Geometry</name>
+  <description>Location filtering based on Eclipse JTS</description>
 
   <properties>
-    <esri.version>2.2.4</esri.version>
+    <jts.version>1.20.0</jts.version>
   </properties>
 
   <dependencies>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.service.component.annotations</artifactId>
+      <groupId>org.locationtech.jts</groupId>
+      <artifactId>jts-core</artifactId>
+      <version>${jts.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.esri.geometry</groupId>
-      <artifactId>esri-geometry-api</artifactId>
-      <version>2.2.4</version>
+      <groupId>org.locationtech.jts.io</groupId>
+      <artifactId>jts-io-common</artifactId>
+      <version>${jts.version}</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
@@ -42,6 +43,10 @@
       <groupId>org.eclipse.sensinact.gateway.filters</groupId>
       <artifactId>filters.core</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

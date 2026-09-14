@@ -58,4 +58,9 @@ public record MultiPolygon(List<List<List<Coordinates>>> coordinates, @Nullable 
     public boolean isEmpty() {
         return coordinates.isEmpty();
     }
+
+    @Override
+    public int getDimension() {
+        return 2;
+    }
 }
