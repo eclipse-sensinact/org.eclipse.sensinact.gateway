@@ -16,9 +16,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eclipse.sensinact.gateway</groupId>
   <artifactId>sensinact-parent</artifactId>
+  <!-- The version is ${revision}${changelist}. Both live in exactly one
+      place: .mvn/maven.config (-Drevision=x.y.z, -Dchangelist=-SNAPSHOT or
+      empty for a release). Maven picks that file up from the repo root for
+      every build, and the release workflow matches the git tag against
+      revision. No properties here - a second copy would just drift. -->
   <version>${revision}${changelist}</version>
   <packaging>pom</packaging>
   <name>SensiNact</name>
+  <description>Eclipse sensiNact gateway: a lightweight digital twin for devices and data sources</description>
   <url>https://projects.eclipse.org/projects/technology.sensinact</url>
 
   <inceptionYear>2017</inceptionYear>
@@ -84,10 +90,10 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:eclipse/org.eclipse.sensinact.gateway.git</connection>
+    <connection>scm:git:git@github.com:eclipse-sensinact/org.eclipse.sensinact.gateway.git</connection>
     <developerConnection>
-      scm:git:git@github.com:eclipse/org.eclipse.sensinact.gateway.git</developerConnection>
-    <url>https://github.com/eclipse/org.eclipse.sensinact.gateway</url>
+      scm:git:git@github.com:eclipse-sensinact/org.eclipse.sensinact.gateway.git</developerConnection>
+    <url>https://github.com/eclipse-sensinact/org.eclipse.sensinact.gateway</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -114,8 +120,6 @@
     <maven.compiler.target>17</maven.compiler.target>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <revision>0.0.2</revision>
-    <changelist>-SNAPSHOT</changelist>
 
     <!-- compile dependency versions -->
     <osgi.core.version>7.0.0</osgi.core.version>
@@ -186,68 +190,6 @@
     <save.test.bndrun.changes>true</save.test.bndrun.changes>
     <verify.test.bndruns>false</verify.test.bndruns>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>ossrh</id>
-      <name>Sonatype Nexus Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>eclipse-sensinact</id>
-      <name>Eclipse Nexus - sensiNact group</name>
-      <url>https://repo.eclipse.org/content/groups/sensinact/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>apache-snapshots</id>
-      <name>Apache Snapshots</name>
-      <url>https://repository.apache.org/snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>bnd-snapshots</id>
-      <name>bnd snapshot repository</name>
-      <url>https://bndtools.jfrog.io/bndtools/update-snapshot</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-    <pluginRepository>
-      <id>eclipse-dash</id>
-      <name>Eclipse Nexus</name>
-      <url>
-        https://repo.eclipse.org/content/repositories/dash-licenses-snapshots/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </pluginRepository>
-  </pluginRepositories>
 
   <dependencyManagement>
     <dependencies>
@@ -607,8 +549,9 @@
                   </goals>
                   <configuration>
                     <rules>
+                      <!-- .mvn/maven.config with comments and one argument per line needs 3.9 -->
                       <requireMavenVersion>
-                        <version>3.8.1</version>
+                        <version>3.9.0</version>
                       </requireMavenVersion>
                     </rules>
                   </configuration>
@@ -796,6 +739,76 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>3.0.0</version>
+        </plugin>
+        <!-- Publishing to Maven Central (Sonatype Central portal). Managed here,
+            activated only by the deploy profile below. -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.3.1</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.11.2</version>
+          <configuration>
+            <!-- Central requires a javadoc jar; it must not break the release -->
+            <doclint>none</doclint>
+            <failOnError>false</failOnError>
+            <quiet>true</quiet>
+          </configuration>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>3.2.8</version>
+          <configuration>
+            <!-- Prevent gpg from using pinentry programs -->
+            <gpgArguments>
+              <arg>--pinentry-mode</arg>
+              <arg>loopback</arg>
+            </gpgArguments>
+          </configuration>
+          <executions>
+            <execution>
+              <id>sign-artifacts</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>0.10.0</version>
+          <extensions>true</extensions>
+          <configuration>
+            <!-- server id in settings.xml, provided by setup-java in CI -->
+            <publishingServerId>central</publishingServerId>
+            <!-- releases are published automatically; the only gate is the
+                release workflow, which checks the tag against .mvn/maven.config -->
+            <autoPublish>true</autoPublish>
+            <waitUntil>published</waitUntil>
+            <centralSnapshotsUrl>https://central.sonatype.com/repository/maven-snapshots/</centralSnapshotsUrl>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>com.github.spotbugs</groupId>
@@ -995,17 +1008,39 @@
         </plugins>
       </build>
     </profile>
+    <!-- Used by CI to publish to Maven Central: SNAPSHOTs from master and the
+        weekly build, releases from a tag. Needs the credentials of the
+        Central portal (server id "central") and, for releases, a GPG key. -->
     <profile>
-      <id>dim-nexus</id>
-      <distributionManagement>
-        <repository>
-          <id>dim_nexus</id>
-          <uniqueVersion>false</uniqueVersion>
-          <name>Dim Nexus</name>
-          <url>https://devel.data-in-motion.biz/nexus/repository/sensinact/</url>
-          <layout>default</layout>
-        </repository>
-      </distributionManagement>
+      <id>deploy</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+          </plugin>
+          <!-- central-publishing-maven-plugin takes over the deploy phase -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+              <skip>true</skip>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>

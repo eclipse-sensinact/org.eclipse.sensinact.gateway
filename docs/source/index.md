@@ -50,10 +50,10 @@ This is a community documentation portal. The official Eclipse sensiNact project
 page, with governance and project information, is available at
 [projects.eclipse.org/projects/technology.sensinact](https://projects.eclipse.org/projects/technology.sensinact).
 
-The project is available on [GitHub](https://github.com/eclipse/org.eclipse.sensinact.gateway/).
+The project is available on [GitHub](https://github.com/eclipse-sensinact/org.eclipse.sensinact.gateway/).
 As it is an Eclipse-hosted project, contributors are required to sign the [Eclipse Contributor Agreement (ECA)](https://www.eclipse.org/legal/ECA.php) for their contributions to be accepted.
 
-You can open issues on [GitHub](https://github.com/eclipse/org.eclipse.sensinact.gateway/issues) to report bugs.
+You can open issues on [GitHub](https://github.com/eclipse-sensinact/org.eclipse.sensinact.gateway/issues) to report bugs.
 Remember to follow the [code of conduct](https://github.com/eclipse/.github/blob/master/CODE_OF_CONDUCT.md).
 
 You can also ask your questions on the [sensinact-dev mailing list](https://accounts.eclipse.org/mailing-list/sensinact-dev).
