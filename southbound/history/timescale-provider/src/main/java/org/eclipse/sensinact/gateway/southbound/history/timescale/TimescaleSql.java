@@ -65,7 +65,10 @@ final class TimescaleSql {
             "INSERT INTO " + TABLE
                     + " (time, modelpackageuri, model, provider, service, resource, value_kind, value_json)"
                     + " SELECT time, modelpackageuri, model, provider, service, resource, "
-                    + ValueKind.GEOJSON.ordinal() + ", ST_AsGeoJSON(data)::jsonb FROM sensinact.geo_data");
+                    + ValueKind.GEOJSON.ordinal()
+                    + ", (CASE WHEN geojson ~ '(NaN|Infinity)' THEN NULL ELSE geojson END)::jsonb FROM ("
+                    + " SELECT time, modelpackageuri, model, provider, service, resource,"
+                    + " ST_AsGeoJSON(data) AS geojson FROM sensinact.geo_data) legacy");
 
     static final List<String> LEGACY_TABLES = List.of("numeric_data", "text_data", "geo_data");
 
