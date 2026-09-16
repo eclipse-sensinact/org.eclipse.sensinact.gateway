@@ -35,8 +35,7 @@ public class DtoMapperProvider implements ContextResolver<DtoMapper> {
     @SuppressWarnings("unchecked")
     @Override
     public DtoMapper getContext(Class<?> type) {
-        HistoryProvider historyProvider = (HistoryProvider) application.getProperties()
-                .get("sensinact.history.service");
+        HistoryProvider historyProvider = HistoryProviderLookup.from(application);
         // the history provider is a dynamic service: rebuild the mapper when
         // it appears, disappears or is replaced
         if (dtoMapper == null || dtoMapper.historyProvider() != historyProvider) {

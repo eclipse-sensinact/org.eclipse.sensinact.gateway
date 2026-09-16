@@ -161,7 +161,7 @@ public abstract class AbstractDelegate {
     }
 
     protected HistoryProvider getHistoryProvider() {
-        return (HistoryProvider) this.application.getProperties().get("sensinact.history.service");
+        return HistoryProviderLookup.from(this.application);
     }
 
     protected IDtoMemoryCache<ExpandedObservation> getCacheObservationIfHistoryMemory() {
