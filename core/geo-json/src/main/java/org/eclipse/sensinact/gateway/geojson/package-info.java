@@ -13,6 +13,7 @@
 **********************************************************************/
 @Export
 @Version("0.0.1")
+@org.jspecify.annotations.NullMarked
 package org.eclipse.sensinact.gateway.geojson;
 
 import org.osgi.annotation.bundle.Export;

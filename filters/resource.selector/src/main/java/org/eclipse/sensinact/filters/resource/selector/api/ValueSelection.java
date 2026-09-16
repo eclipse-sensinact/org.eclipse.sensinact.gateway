@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.filters.resource.selector.jackson.ValueSelectionDeserializer;
+import org.jspecify.annotations.Nullable;
 
 import tools.jackson.databind.annotation.JsonDeserialize;
 
@@ -35,6 +36,7 @@ public record ValueSelection(
         /**
          * The type of test to use
          */
+        @Nullable
         OperationType operation,
         /**
          * If true then the result of the test will be negated, except that:
@@ -48,14 +50,17 @@ public record ValueSelection(
          * return false in this case</li>
          * </ul>
          */
+        @Nullable
         boolean negate,
         /**
          * The type of the check, defaults to {@link CheckType#VALUE}
          */
+        @Nullable
         CheckType checkType,
         /**
          * Value(s) selection mode
          */
+        @Nullable
         ValueSelectionMode valueSelectionMode) {
     public ValueSelection {
         if (operation == null) {

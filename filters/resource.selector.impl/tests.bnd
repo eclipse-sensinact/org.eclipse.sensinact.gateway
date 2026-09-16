@@ -1,0 +1,5 @@
+#Ignore the impl dependencies from the unit tests
+Import-Package: \
+    !org.eclipse.sensinact.gateway.filters.esri.geometry, \
+    !org.eclipse.sensinact.gateway.filters.jts.geometry, \
+    *

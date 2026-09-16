@@ -64,6 +64,7 @@
 	org.eclipse.sensinact.gateway.southbound.device-factory.parser-json;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.http.http-device-factory;version='[0.0.2,0.0.3)',\
 	org.eclipse.sensinact.gateway.southbound.http.http-device-factory-tests;version='[0.0.2,0.0.3)',\
+	org.jspecify.jspecify;version='[1.0.0,1.0.1)',\
 	org.objectweb.asm;version='[9.9.1,9.9.2)',\
 	org.objectweb.asm.commons;version='[9.9.1,9.9.2)',\
 	org.objectweb.asm.tree;version='[9.9.1,9.9.2)',\
