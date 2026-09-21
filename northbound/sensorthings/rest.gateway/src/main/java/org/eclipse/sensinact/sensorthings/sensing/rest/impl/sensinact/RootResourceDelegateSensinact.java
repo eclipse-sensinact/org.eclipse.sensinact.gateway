@@ -181,18 +181,18 @@ public class RootResourceDelegateSensinact extends AbstractDelegate {
             ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext,
             ResourceSnapshot resourceSnapshot, ICriterion filter) {
         ExpansionSettings es = (ExpansionSettings) requestContext.getProperty(IFilterConstants.EXPAND_SETTINGS_STRING);
-        return getObservationList(userSession, application, mapper, uriInfo, es == null ? EMPTY : es, resourceSnapshot,
-                filter, 0);
+        return getObservationList(userSession, application, mapper, uriInfo, requestContext, es == null ? EMPTY : es,
+                resourceSnapshot, filter, 0);
     }
 
     static ResultList<Observation> getObservationList(SensiNactSession userSession, Application application,
-            ObjectMapper mapper, UriInfo uriInfo, ExpansionSettings expansions, ResourceSnapshot resourceSnapshot,
-            ICriterion filter, int localResultLimit) {
+            ObjectMapper mapper, UriInfo uriInfo, ContainerRequestContext requestContext, ExpansionSettings expansions,
+            ResourceSnapshot resourceSnapshot, ICriterion filter, int localResultLimit) {
 
         ResultList<Observation> list = HistoryResourceHelperSensinact.loadHistoricalObservations(userSession,
-                application, mapper, uriInfo, expansions, resourceSnapshot, filter, localResultLimit);
+                application, mapper, uriInfo, requestContext, expansions, resourceSnapshot, filter, localResultLimit);
 
-        if (list.value().isEmpty() && resourceSnapshot.isSet()) {
+        if (!HistoryResourceHelperSensinact.hasHistory(list) && resourceSnapshot.isSet()) {
             list = new ResultList<Observation>(DtoMapper
                     .toObservation(userSession, application, mapper, uriInfo, expansions, filter, resourceSnapshot)
                     .map(List::of).orElse(List.of()));

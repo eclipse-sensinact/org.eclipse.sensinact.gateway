@@ -474,4 +474,70 @@ public class RecordHandlingTest {
             assertEquals(now.truncatedTo(ChronoUnit.SECONDS), dto.timestamp);
         }
     }
+
+    @Test
+    void testHardcodedTimezone() throws Exception {
+        final Map<String, Object> record = new HashMap<>();
+        record.put("provider", "provider");
+        record.put("nozone", "2026-08-11T10:46:10");
+        parser.setRecords(record);
+
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+        config.mapping.put("@provider", "provider");
+        config.mapping.put("data/val", null);
+        config.mapping.put("@datetime", "nozone");
+
+        // Default timezone
+        config.mappingOptions.formatDateTime = null;
+        config.mappingOptions.dateTimezone = null;
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        GenericDto dtoZulu = getResourceValue("provider", "data", "val");
+        assertEquals(Instant.parse("2026-08-11T10:46:10Z"), dtoZulu.timestamp);
+
+        // Region timezone
+        bulks.clear();
+        config.mappingOptions.formatDateTime = "yyyy-MM-dd'T'HH:mm:ss";
+        config.mappingOptions.dateTimezone = "Europe/Paris";
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        GenericDto dtoParis = getResourceValue("provider", "data", "val");
+        assertEquals(Instant.parse("2026-08-11T08:46:10Z"), dtoParis.timestamp);
+
+        // Offset timezone
+        bulks.clear();
+        config.mappingOptions.formatDateTime = "yyyy-MM-dd'T'HH:mm:ss";
+        config.mappingOptions.dateTimezone = "+0200";
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        GenericDto dtoOffset = getResourceValue("provider", "data", "val");
+        assertEquals(Instant.parse("2026-08-11T08:46:10Z"), dtoOffset.timestamp);
+    }
+
+    @Test
+    void testTimezone() throws Exception {
+        final Map<String, Object> record = new HashMap<>();
+        record.put("provider", "provider");
+        record.put("offset", "2026-08-11T10:46:10+0200");
+        record.put("fullzone", "2026-08-11T11:57:22+0200[Europe/Paris]");
+        parser.setRecords(record);
+
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+        config.mapping.put("@provider", "provider");
+        config.mapping.put("data/val", null);
+
+        // Time offset
+        config.mapping.put("@datetime", "offset");
+        config.mappingOptions.formatDateTime = "yyyy-MM-dd'T'HH:mm:ssZ";
+        config.mappingOptions.dateTimezone = null;
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        GenericDto dtoOffset = getResourceValue("provider", "data", "val");
+        assertEquals(Instant.parse("2026-08-11T08:46:10Z"), dtoOffset.timestamp);
+
+        // Full zone
+        bulks.clear();
+        config.mapping.put("@datetime", "fullzone");
+        config.mappingOptions.formatDateTime = "yyyy-MM-dd'T'HH:mm:ssZ'['zzzz']'";
+        config.mappingOptions.dateTimezone = null;
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        GenericDto dtoFullzone = getResourceValue("provider", "data", "val");
+        assertEquals(Instant.parse("2026-08-11T09:57:22Z"), dtoFullzone.timestamp);
+    }
 }

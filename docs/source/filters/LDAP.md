@@ -15,7 +15,7 @@ A filter can easily be created from an LDAP string using the `IFilterHandler` se
 
 2. LDAP filters can rapidly increase in complexity and become hard to read. These filters are also usually less efficient when subscribing for data notifications.
 
-3. SensiNact LDAP filters do not restrict the services or resources returned in snapshots. If you wish to restrict to a subset of services or resources then you will need to use a different sort of filter.
+3. sensiNact LDAP filters do not restrict the services or resources returned in snapshots. If you wish to restrict to a subset of services or resources then you will need to use a different sort of filter.
 
 
 ## Filtering Provider Data

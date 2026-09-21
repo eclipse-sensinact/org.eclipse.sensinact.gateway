@@ -556,8 +556,10 @@ public class DtoMapper {
                 "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Observation", unit, observedArea, null, null,
                 metadata, observationsLink, observedPropertyLink, sensorLink, thingLink);
         if (expansions.shouldExpand("Observations", datastream)) {
+            // no request context: the request's $top/$skip target the outer
+            // collection and must not be pushed into the expanded sub-list
             expansions.addExpansion("Observations", datastream,
-                    RootResourceDelegateSensinact.getObservationList(userSession, application, mapper, uriInfo,
+                    RootResourceDelegateSensinact.getObservationList(userSession, application, mapper, uriInfo, null,
                             expansions.getExpansionSettings("Observations"), resource, filter, 25));
         }
 

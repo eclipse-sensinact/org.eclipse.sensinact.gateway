@@ -48,8 +48,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.geckoprojects.emf</groupId>
-      <artifactId>org.gecko.emf.osgi.component.minimal</artifactId>
+      <groupId>org.eclipse.fennec.emf</groupId>
+      <artifactId>org.eclipse.fennec.emf.osgi.component.minimal</artifactId>
     </dependency>
 
     <!-- Test dependencies-->
@@ -82,6 +82,10 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-testing-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-resolver-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

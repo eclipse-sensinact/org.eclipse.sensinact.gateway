@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 import org.eclipse.sensinact.sensorthings.sensing.rest.annotation.PaginationLimit;
 
 import jakarta.annotation.Priority;
@@ -37,7 +38,7 @@ import jakarta.ws.rs.core.Response.Status;
 @Priority(ENTITY_CODER + 1)
 public class TopFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    private static final String TOP_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.top";
+    private static final String TOP_PROP = PaginationConstants.TOP_PROP;
 
     @Context
     ResourceInfo resourceInfo;
@@ -45,6 +46,9 @@ public class TopFilter implements ContainerRequestFilter, ContainerResponseFilte
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
+        if (requestContext.getProperty(PaginationConstants.PAGINATION_APPLIED) != null) {
+            return;
+        }
         Integer top = (Integer) requestContext.getProperty(TOP_PROP);
         if (top == null) {
             return;
@@ -56,7 +60,7 @@ public class TopFilter implements ContainerRequestFilter, ContainerResponseFilte
             int size = resultList.value().size();
             List<? extends Self> value = resultList.value().subList(0, Math.min(top, size));
 
-            Integer skip = (Integer) requestContext.getProperty(SkipFilter.SKIP_PROP);
+            Integer skip = (Integer) requestContext.getProperty(PaginationConstants.SKIP_PROP);
             Integer nextSkip = (skip == null) ? top : top + skip;
             String nextLink = null;
             if (top < size) {

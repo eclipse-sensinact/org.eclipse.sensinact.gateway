@@ -17,9 +17,9 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 
-import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.fennec.emf.osgi.annotation.provide.EPackage;
 
-import org.gecko.emf.osgi.annotation.provide.EPackage;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -41,7 +41,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @generated
  */
 @ProviderType
-@EPackage(uri = SensorthingsPackage.eNS_URI, genModel = "/model/sensorthings.genmodel", genModelSourceLocations = {"src/main/resources/model/sensorthings.genmodel","models/src/main/resources/model/sensorthings.genmodel"}, ecore="/model/sensorthings.ecore", ecoreSourceLocations="/src/main/resources/model/sensorthings.ecore")
+@EPackage(uri = SensorthingsPackage.eNS_URI, genModel = "/model/sensorthings.genmodel", genModelSourceLocations = {"src/main/resources/model/sensorthings.genmodel","models/src/main/resources/model/sensorthings.genmodel"}, ecore = "/model/sensorthings.ecore", ecoreSourceLocations = "/src/main/resources/model/sensorthings.ecore")
 public interface SensorthingsPackage extends org.eclipse.emf.ecore.EPackage {
 	/**
 	 * The package name.

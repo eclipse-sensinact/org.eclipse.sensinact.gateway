@@ -8,5 +8,4 @@ venv/
 
 # uv
 .python-version
-pyproject.toml
 uv.lock

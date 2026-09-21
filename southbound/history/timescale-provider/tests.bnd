@@ -1,0 +1,8 @@
+# The storage contract tests run at surefire level with Testcontainers; they
+# are packaged into this fragment but never instantiated in the OSGi test
+# runtime (Test-Cases only selects *.integration.*), so their imports must
+# not constrain the resolution.
+Import-Package: \
+    org.testcontainers.*;resolution:=optional, \
+    org.junit.jupiter.api.condition;resolution:=optional, \
+    *

@@ -96,7 +96,7 @@ We will add the feature submodule later.
   <version>0.0.2</version>
   <packaging>pom</packaging>
   <name>Custom Device Factory Parser - Parent</name>
-  <description>Parent project of the Eclipse sensiNact sample to write a parser for the Device Factory</description>
+  <description>Parent project of the Eclipse sensiNact™ sample to write a parser for the Device Factory</description>
 
   <!-- Definition of the submodules. We'll add the feature module afterwards -->
   <modules>
@@ -714,7 +714,7 @@ This will ensure it is visible by other Maven projects and ease the creation of 
 #### Setup a sensiNact instance
 
 1. Download or generate the Eclipse distribution file
-   * To generate it, [clone](https://github.com/eclipse/org.eclipse.sensinact.gateway) and build the project and get the `distribution/assembly/target/gateway.zip` file
+   * To generate it, [clone](https://github.com/eclipse-sensinact/org.eclipse.sensinact.gateway) and build the project and get the `distribution/assembly/target/gateway.zip` file
 2. Decompress it somewhere, we'll call the folder containing `start.sh`: `${SENSINACT_HOME}`.
 3. Copy your JSON feature file (`custom-parser-feature.json`) in `${SENSINACT_HOME}/features`
 4. Copy the content of `feature/target/repository` in `${SENSINACT_HOME}/repository`

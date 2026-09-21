@@ -25,7 +25,7 @@ import java.util.Objects;
  * METADATA/&lt;model&gt;/&lt;provider&gt;/&lt;service&gt;/&lt;resource&gt;
  */
 public record ResourceMetaDataNotification(String modelPackageUri, String model, String provider,
-        String service, String resource, Map<String, Object> oldValues,
+        String service, String resource, Object data, Map<String, Object> oldValues,
         Map<String, Object> newValues, Instant timestamp) implements ResourceNotification {
 
     @Override

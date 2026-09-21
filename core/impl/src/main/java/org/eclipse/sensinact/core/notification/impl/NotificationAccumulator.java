@@ -133,7 +133,7 @@ public interface NotificationAccumulator {
      *                                  {@link #completeAndSend()}
      */
     void metadataValueUpdate(String modelPackageUri, String model, String provider, String service, String resource,
-            Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp);
+            Object data, Map<String, Object> oldValues, Map<String, Object> newValues, Instant timestamp);
 
     /**
      * Called to update a resource value. If multiple updates occur they will be

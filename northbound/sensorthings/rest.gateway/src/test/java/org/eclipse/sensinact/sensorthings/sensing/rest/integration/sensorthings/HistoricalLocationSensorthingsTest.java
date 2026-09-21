@@ -31,6 +31,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.test.testcontainers.postgres.RequirePostgresContainer;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Datastream;
@@ -123,9 +124,20 @@ public class HistoricalLocationSensorthingsTest extends AbstractIntegrationTest 
         Exception lastError = null;
         do {
             try {
-                for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
-                    waitForRowCount("sensinact." + table, 0, true);
-                }
+                waitForRowCount("sensinact.history", 0, true);
+                // prove the ingestion chain is wired before tests push data:
+                // events sent before the history listener is up would be lost
+                GenericDto probe = new GenericDto();
+                probe.modelPackageUri = "sensinact";
+                probe.provider = "startupProbe";
+                probe.service = "probe";
+                probe.resource = "probe" + System.nanoTime();
+                probe.type = Boolean.class;
+                probe.value = Boolean.TRUE;
+                probe.timestamp = Instant.now();
+                push.pushUpdate(probe).getValue();
+                waitForRowCount("sensinact.history WHERE provider = 'startupProbe'", 1, true);
+
                 // Got a valid count
                 ready = true;
                 lastError = null;
@@ -133,6 +145,8 @@ public class HistoricalLocationSensorthingsTest extends AbstractIntegrationTest 
             } catch (Exception e) {
                 // Ignore
                 lastError = e;
+            } catch (AssertionFailedError e) {
+                lastError = new IllegalStateException(e);
             }
         } while (!ready && System.currentTimeMillis() < timeout);
 
@@ -170,9 +184,7 @@ public class HistoricalLocationSensorthingsTest extends AbstractIntegrationTest 
 
         try (Connection connection = getDataSource().getConnection()) {
             final Statement stmt = connection.createStatement();
-            for (final String table : List.of("numeric_data", "text_data", "geo_data")) {
-                stmt.execute("DROP TABLE IF EXISTS sensinact." + table);
-            }
+            stmt.execute("DROP TABLE IF EXISTS sensinact.history");
         }
     }
 
@@ -198,11 +210,18 @@ public class HistoricalLocationSensorthingsTest extends AbstractIntegrationTest 
 
     private void waitForRowCount(String table, int count, boolean allowMore) {
         int current = -1;
+        int currentUnchangedCount = 0;
         try (Connection conn = getDataSource().getConnection()) {
             for (int i = 0; i < 60; i++) {
                 try (ResultSet rs = conn.createStatement().executeQuery("SELECT COUNT(*) FROM " + table)) {
                     assertTrue(rs.next());
-                    current = rs.getInt(1);
+                    int updated = rs.getInt(1);
+                    currentUnchangedCount = updated == current ? currentUnchangedCount + 1 : 0;
+                    if (currentUnchangedCount > 9) {
+                        throw new AssertionFailedError("The count for table " + table + " has stabilised at " + current
+                                + " which is less than the expected " + count);
+                    }
+                    current = updated;
                     if (current == count) {
                         return;
                     } else if (current > count) {
@@ -248,7 +267,7 @@ public class HistoricalLocationSensorthingsTest extends AbstractIntegrationTest 
 
         }
         // 10 updates
-        waitForRowCount("sensinact.geo_data", 10);
+        waitForRowCount("sensinact.history WHERE value_kind = 3", 10);
 
         ResultList<HistoricalLocation> o = utils.queryJson("/Things(fizz)/HistoricalLocations?$count=true",
                 new TypeReference<ResultList<HistoricalLocation>>() {
@@ -267,7 +286,7 @@ public class HistoricalLocationSensorthingsTest extends AbstractIntegrationTest 
                     TS_2012.plus(ofDays(i)));
         }
         // 10 updates
-        waitForRowCount("sensinact.geo_data", 12);
+        waitForRowCount("sensinact.history WHERE value_kind = 3", 12);
 
         ResultList<HistoricalLocation> o = utils.queryJson("/Locations(fizz)/HistoricalLocations?$count=true",
                 new TypeReference<ResultList<HistoricalLocation>>() {
@@ -282,7 +301,7 @@ public class HistoricalLocationSensorthingsTest extends AbstractIntegrationTest 
             createDatastream("fizzbuzz", "fizz", "test" + i, "sensor" + i, "op" + i, TS_2012.plus(ofDays(i)));
         }
         // 10 updates
-        waitForRowCount("sensinact.geo_data", 20);
+        waitForRowCount("sensinact.history WHERE value_kind = 3", 20);
 
         String id = "fizzbuzz";
 

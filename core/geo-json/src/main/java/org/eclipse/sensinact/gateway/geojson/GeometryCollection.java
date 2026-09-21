@@ -16,6 +16,8 @@ package org.eclipse.sensinact.gateway.geojson;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 
@@ -24,7 +26,8 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
  * <a href="https://tools.ietf.org/html/rfc7946#section-3.1">the GeoJSON
  * specification</a>
  */
-public record GeometryCollection (List<Geometry> geometries, List<Double> bbox, @JsonAnySetter @JsonAnyGetter Map<String,Object> foreignMembers) implements Geometry {
+public record GeometryCollection (List<Geometry> geometries, @Nullable List<Double> bbox,
+        @JsonAnySetter @JsonAnyGetter @Nullable Map<String,Object> foreignMembers) implements Geometry {
 
     public GeometryCollection {
         if(geometries != null) {
@@ -54,5 +57,12 @@ public record GeometryCollection (List<Geometry> geometries, List<Double> bbox, 
     @Override
     public boolean isEmpty() {
         return geometries.isEmpty();
+    }
+
+    @Override
+    public int getDimension() {
+        return geometries.stream()
+                .mapToInt(GeoJsonObject::getDimension)
+                .max().orElse(0);
     }
 }

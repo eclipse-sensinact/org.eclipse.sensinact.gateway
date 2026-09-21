@@ -16,6 +16,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import org.eclipse.sensinact.filters.resource.selector.jackson.SelectionDeserializer;
+import org.jspecify.annotations.Nullable;
 
 import tools.jackson.databind.annotation.JsonDeserialize;
 
@@ -31,10 +32,12 @@ public record Selection(
         /**
          * The type of matching to use
          */
+        @Nullable
         MatchType type,
         /**
          * If true then the result of the test will be negated
          */
+        @Nullable
         boolean negate) {
 
     /**
