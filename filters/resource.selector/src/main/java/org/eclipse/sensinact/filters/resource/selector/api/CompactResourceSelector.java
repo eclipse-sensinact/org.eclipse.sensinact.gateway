@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ProviderSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector.ResourceSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection.MatchType;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Feature;
@@ -44,9 +45,10 @@ import com.fasterxml.jackson.annotation.JsonFormat.Feature;
  *   <li>Gathering all providers where the value of a particular resource has a certain value</li>
  * </ul>
  */
-public record CompactResourceSelector(Selection modelUri, Selection model, Selection provider, Selection service, Selection resource,
-        @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<ValueSelection> value,
-        @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<LocationSelection> location) {
+public record CompactResourceSelector(@Nullable Selection modelUri, @Nullable Selection model, @Nullable Selection provider,
+        @Nullable Selection service, @Nullable Selection resource,
+        @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) @Nullable List<ValueSelection> value,
+        @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) @Nullable List<LocationSelection> location) {
 
     public CompactResourceSelector {
         if(value == null) {

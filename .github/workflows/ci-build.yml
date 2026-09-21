@@ -1,10 +1,21 @@
-name: Java CI with Maven
+# Build workflow. Every push and pull request is built and tested the same
+# way. Every push to master deploys a fresh SNAPSHOT to the Sonatype Central
+# snapshot repository once every check of this workflow has passed; the
+# weekly schedule keeps it fresh in quiet times.
+# Releases go through release.yml (tag push) instead.
+name: build
 
 on:
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:
+  schedule:
+    - cron: '23 3 * * 1'
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -29,7 +40,7 @@ jobs:
       run: mvn -P ci-build -B clean install -DskipTests --file pom.xml
 
     - name: Cache Maven dependencies and build artifacts
-      uses: actions/cache@v5
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: |
           ~/.m2/repository
@@ -72,7 +83,7 @@ jobs:
         cache: maven
 
     - name: Restore Maven build artifacts
-      uses: actions/cache/restore@v5
+      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: |
           ~/.m2/repository
@@ -108,6 +119,10 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: always()
+    permissions:
+      contents: read
+      # the test report is published as a check run
+      checks: write
 
     steps:
     - name: Download all test results
@@ -116,6 +131,8 @@ jobs:
         pattern: test-results-*
         path: test-results
 
+    # renders the JUnit XML of every module as a check run with
+    # annotations and a job summary
     - name: Publish Test Report
       uses: mikepenz/action-junit-report@3a81627bfac62268172037048872e8ebd4207e6d # v6.4.1
       if: always()
@@ -123,12 +140,98 @@ jobs:
         report_paths: 'test-results/**/TEST-*.xml'
         check_name: Test Results
         fail_on_failure: true
+        require_tests: true
+        # show every test, grouped by suite, with times and full stack traces
+        detailed_summary: true
+        include_passed: true
+        group_suite: true
+        include_time_in_summary: true
+        truncate_stack_traces: false
+
+  # The Sphinx documentation (docs/), same sources Read the Docs publishes.
+  # The HTML is kept as a workflow artifact.
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.11'
+        cache: pip
+        cache-dependency-path: docs/requirements.txt
+
+    - name: Install Sphinx and the SVG converter
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y librsvg2-bin
+        pip install -r docs/requirements.txt
+
+    - name: Build HTML documentation
+      run: sphinx-build -M html docs/source docs/build -W --keep-going
+
+    - name: Upload documentation
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: docs-html
+        path: docs/build/html
+        if-no-files-found: error
+
+  # Runs after every other job of this workflow succeeded, on master only.
+  # Releases go through release.yml (tag push) instead.
+  deploy:
+    name: Deploy SNAPSHOT
+    needs: [ build, test, test-results, docs ]
+    if: >-
+      github.repository == 'eclipse-sensinact/org.eclipse.sensinact.gateway' &&
+      github.ref == 'refs/heads/master' &&
+      (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+        # server id used by the central-publishing-maven-plugin in pom.xml
+        server-id: central
+        server-username: CENTRAL_USERNAME
+        server-password: CENTRAL_PASSWORD
+
+    - name: Guard - only SNAPSHOT versions are auto-deployed
+      run: |
+        cfg=.mvn/maven.config
+        [ "$(grep -c '^-Drevision=' "$cfg")" = 1 ] \
+          || { echo "::error file=$cfg::expected exactly one -Drevision= line"; exit 1; }
+        [ "$(grep -c '^-Dchangelist=' "$cfg")" = 1 ] \
+          || { echo "::error file=$cfg::expected exactly one -Dchangelist= line"; exit 1; }
+        rev=$(sed -n 's/^-Drevision=//p' "$cfg")
+        cl=$(sed -n 's/^-Dchangelist=//p' "$cfg")
+        echo "$rev" | grep -Eqx '[0-9]+\.[0-9]+\.[0-9]+' \
+          || { echo "::error file=$cfg::revision '$rev' is not a plain x.y.z version"; exit 1; }
+        [ "$cl" = "-SNAPSHOT" ] \
+          || { echo "::error file=$cfg::changelist '$cl' is not -SNAPSHOT - refusing to deploy from master, cut a release with a tag instead"; exit 1; }
+
+    # tests already ran in the matrix above
+    - name: Deploy SNAPSHOT
+      run: mvn -B -ntp -P ci-build -P deploy -Dgpg.skip=true -DskipTests deploy
+      env:
+        CENTRAL_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
+        CENTRAL_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
 
   # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
   dependency-graph:
     name: Update dependency graph
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
+    permissions:
+      contents: write
 
     steps:
     - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3

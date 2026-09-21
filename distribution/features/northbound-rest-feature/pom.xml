@@ -23,8 +23,12 @@
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.filters</groupId>
-      <artifactId>esri.geometry</artifactId>
+      <artifactId>jts.geometry</artifactId>
       <version>${rest.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.locationtech.jts</groupId>
+      <artifactId>jts-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.filters</groupId>

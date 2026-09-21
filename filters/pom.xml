@@ -27,6 +27,7 @@
     <module>resource.selector</module>
     <module>resource.selector.impl</module>
     <module>esri.geometry</module>
+    <module>jts.geometry</module>
   </modules>
   <properties>
     <sensinact.core.version>${project.version}</sensinact.core.version>

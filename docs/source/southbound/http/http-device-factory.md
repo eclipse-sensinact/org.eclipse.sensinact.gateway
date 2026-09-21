@@ -25,7 +25,7 @@ They can be used to load the static description of providers, *e.g.* the locatio
 
 Here are the available configuration options:
 * `mapping`: the device factory mapping configuration (**mandatory**)
-* `url`: target URL (**mandatory**)
+* `url`: target URL (**mandatory**), this supports `http[s]://` and `file://` urls.
 * `timeout`: HTTP request timeout, in seconds (30s by default)
 * `bufferSize`: maximum size of the response payload, in kilo-bytes (512B minimum)
 * `method`: HTTP method/verb to use (GET by default)

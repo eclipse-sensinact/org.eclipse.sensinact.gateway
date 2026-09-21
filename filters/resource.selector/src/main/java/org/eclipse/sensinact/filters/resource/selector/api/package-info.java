@@ -17,4 +17,5 @@
  */
 @org.osgi.annotation.bundle.Export
 @org.osgi.annotation.versioning.Version("0.0.1")
+@org.jspecify.annotations.NullMarked
 package org.eclipse.sensinact.filters.resource.selector.api;

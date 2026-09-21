@@ -12,23 +12,16 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.resource.selector.impl;
 
-import static com.esri.core.geometry.Geometry.GeometryAccelerationDegree.enumMedium;
-import static com.esri.core.geometry.Operator.Type.Relate;
-import static org.eclipse.sensinact.gateway.filters.esri.geometry.EsriUtils.WGS84_COORDS;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.function.Predicate;
 
+import org.eclipse.sensinact.filters.location.api.LocationMatchFactory;
 import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection;
 import org.eclipse.sensinact.filters.resource.selector.api.LocationSelection.MatchType;
-import org.eclipse.sensinact.gateway.filters.esri.geometry.EsriUtils;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.esri.core.geometry.Geometry;
-import com.esri.core.geometry.OperatorFactoryLocal;
-import com.esri.core.geometry.OperatorRelate;
 
 /**
  * This class uses the ESRI Geometry API to compute whether the location filter matches the location of a provider
@@ -97,55 +90,36 @@ public class LocationSelectionCriterion {
      */
     private static final String DISJOINT = "FF*FF****";
 
-    private static final OperatorRelate RELATE_OPERATOR = (OperatorRelate) OperatorFactoryLocal.getInstance().getOperator(Relate);
-
-    private final Predicate<GeoJsonObject> locationFilter;
+    private final LocationSelection ls;
 
     public LocationSelectionCriterion(LocationSelection ls) {
-        this.locationFilter = toLocationFilter(ls);
+        this.ls = ls;
     }
 
-    public Predicate<GeoJsonObject> locationFilter() {
-        return locationFilter;
-    }
-
-    private static Predicate<GeoJsonObject> toLocationFilter(LocationSelection ls) {
-
-        Geometry target = EsriUtils.toEsriGeometry(ls.value());
-
-        Double radius = ls.radius();
-        if(radius != null) {
-            target = EsriUtils.bufferGeometry(target, radius);
+    public Predicate<GeoJsonObject> locationFilter(LocationMatchFactory factory) {
+        if(factory == null) {
+            LOG.error("Unable to create a location match for {} as no factory is available", ls);
+            throw new IllegalArgumentException("Location filtering is not enabled. Please provide a LocationMatchFactory service");
         }
-        // We accelerate the value as it will potentially be called for every provider
-        // in the gateway, and for every subsequent update
-        RELATE_OPERATOR.accelerateGeometry(target, null, enumMedium);
-
-        Predicate<GeoJsonObject> filter = Objects::nonNull;
-        return filter.and(getGeometryFilter(ls.type(), target));
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Creating location match for {} using factory {}", ls, factory);
+        }
+        return factory.toMatchPredicate(ls.value(), ls.radius(), getDE_9IM(ls.type()));
     }
 
-    private static Predicate<GeoJsonObject> getGeometryFilter(MatchType type, final Geometry targetValue) {
-        Predicate<Geometry> locationCheck = switch(type) {
+    private static List<String> getDE_9IM(MatchType type) {
+        return switch(type) {
             case CONTAINS:
-                yield l -> RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, CONTAINS, null);
+                yield List.of(CONTAINS);
             case DISJOINT:
-                yield l -> RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, DISJOINT, null);
+                yield List.of(DISJOINT);
             case INTERSECTS:
-                yield l -> {
-                    return RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_1, null) ||
-                            RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_2, null) ||
-                            RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_3, null) ||
-                            RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, INTERSECTS_4, null);
-                };
+                yield List.of(INTERSECTS_1, INTERSECTS_2, INTERSECTS_3, INTERSECTS_4);
             case WITHIN:
-                yield l -> RELATE_OPERATOR.execute(l, targetValue, WGS84_COORDS, WITHIN, null);
+                yield List.of(WITHIN);
             default:
+                LOG.error("Unable to create matrices for match type {}", type);
                 throw new IllegalArgumentException("Unknown match type " + type);
-        };
-        return l -> {
-            Geometry g = EsriUtils.toEsriGeometry(l);
-            return !g.isEmpty() && locationCheck.test(g);
         };
     }
 

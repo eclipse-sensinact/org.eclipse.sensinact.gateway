@@ -108,7 +108,7 @@ public class ObservedPropertiesDelegateSensorthings extends AbstractDelegate {
             throw new NotFoundException();
         }
         return RootResourceDelegateSensorthings.getObservationList(getSession(), getSensorThingDtoMapper(), getMapper(),
-                uriInfo, getExpansions(), getObservationResourceSnapshot(id2), parseFilter(OBSERVATIONS),
+                uriInfo, requestContext, getExpansions(), getObservationResourceSnapshot(id2), parseFilter(OBSERVATIONS),
                 getHistoryProvider(), getMaxResult(), getCacheObservationIfHistoryMemory());
     }
 

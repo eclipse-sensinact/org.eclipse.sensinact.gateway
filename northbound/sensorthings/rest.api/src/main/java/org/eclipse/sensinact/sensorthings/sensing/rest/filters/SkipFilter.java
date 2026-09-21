@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.eclipse.sensinact.sensorthings.sensing.dto.ResultList;
 import org.eclipse.sensinact.sensorthings.sensing.dto.Self;
+import org.eclipse.sensinact.sensorthings.sensing.rest.PaginationConstants;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -34,11 +35,14 @@ import jakarta.ws.rs.core.Response.Status;
 @Priority(ENTITY_CODER + 2)
 public class SkipFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    static final String SKIP_PROP = "org.eclipse.sensinact.sensorthings.sensing.rest.skip";
+    static final String SKIP_PROP = PaginationConstants.SKIP_PROP;
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
+        if (requestContext.getProperty(PaginationConstants.PAGINATION_APPLIED) != null) {
+            return;
+        }
         Integer skip = (Integer) requestContext.getProperty(SKIP_PROP);
         if (skip == null || skip == 0) {
             return;

@@ -15,6 +15,10 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>api</artifactId>
     </dependency>
@@ -35,6 +39,13 @@
       <plugin>
         <groupId>biz.aQute.bnd</groupId>
         <artifactId>bnd-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <configuration>
+          <excludeFilterFile>spotbugs-security-exclude.xml</excludeFilterFile>
+        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.northbound.rest.impl;
 
 import java.security.Principal;
+import java.util.Collection;
 
 import org.eclipse.sensinact.northbound.rest.impl.AuthenticationFilter.UserInfoPrincipal;
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
@@ -34,6 +35,28 @@ public class SensinactSessionProvider implements ContextResolver<SensiNactSessio
     @Context
     SecurityContext context;
 
+    class MyUserInfo implements UserInfo {
+        @Override
+        public String getUserId() {
+            return context.getUserPrincipal().getName();
+        }
+
+        @Override
+        public Collection<String> getGroups() {
+            throw new UnsupportedOperationException("Unimplemented method 'getGroups'");
+        }
+
+        @Override
+        public boolean isAuthenticated() {
+            return true;
+        }
+
+        @Override
+        public boolean isMemberOfGroup(String group) {
+            return context.isUserInRole(group);
+        }
+    }
+
     @Override
     public SensiNactSession getContext(Class<?> type) {
         SensiNactSessionManager manager = (SensiNactSessionManager) application.getProperties().get("session.manager");
@@ -42,9 +65,10 @@ public class SensinactSessionProvider implements ContextResolver<SensiNactSessio
         if (principal instanceof UserInfoPrincipal) {
             UserInfoPrincipal uiPrincipal = (UserInfoPrincipal) principal;
             return manager.getDefaultSession(uiPrincipal.getUserInfo());
-        } else if (principal == null) {
+        } else if (principal != null) {
+            return manager.getDefaultSession(new MyUserInfo());
+        } else {
             return manager.getDefaultSession(UserInfo.ANONYMOUS);
         }
-        throw new IllegalArgumentException("Unable to establish user context");
     }
 }

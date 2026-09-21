@@ -15,6 +15,9 @@ package org.eclipse.sensinact.gateway.southbound.http.factory;
 import static java.util.stream.Collectors.toMap;
 
 import java.lang.reflect.Array;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -157,6 +160,13 @@ public class HttpDeviceFactory {
      */
     private void runTask(final ParsedHttpTask task) {
         try {
+            if (task.url.startsWith("file://")) {
+                Path path = Path.of(URI.create(task.url));
+                byte[] content = Files.readAllBytes(path);
+                mappingHandler.handle(task.mapping, Map.of(), content);
+                return;
+            }
+
             // Client is already configured
             final HttpClient client = rcSharer.newClient(task);
             client.start();

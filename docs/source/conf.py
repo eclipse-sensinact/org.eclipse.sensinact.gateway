@@ -19,10 +19,26 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Eclipse sensiNact"
-copyright = "2023, Eclipse sensiNact contributors"
-author = "Eclipse sensiNact contributors"
-release = "0.0.2"
+import datetime
+import pathlib
+import re
+
+project = "Eclipse sensiNact™"
+copyright = (
+    f"{datetime.date.today().year} by Eclipse Foundation. "
+    "Eclipse sensiNact™ is a trademark of Eclipse Foundation AISBL"
+)
+author = "Eclipse sensiNact™ contributors"
+# The version lives in exactly one place: the -Drevision= line in
+# .mvn/maven.config at the repository root (x.y.z, the -SNAPSHOT is the
+# separate -Dchangelist= line). Read it from there so the docs can never
+# drift from the build.
+_maven_config = pathlib.Path(__file__).resolve().parents[2] / ".mvn" / "maven.config"
+_revision = re.search(r"^-Drevision=(\S+)", _maven_config.read_text(), re.MULTILINE)
+if _revision is None:
+    raise RuntimeError(f"no -Drevision= line in {_maven_config}")
+release = _revision.group(1)
+version = release
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -56,7 +72,7 @@ html_favicon = "_static/sensiNact_logo.png"
 # https://piccolo-theme.readthedocs.io/en/latest/configuration.html
 
 html_theme_options = {
-    "source_url": "https://github.com/eclipse/org.eclipse.sensinact.gateway",
+    "source_url": "https://github.com/eclipse-sensinact/org.eclipse.sensinact.gateway",
     "source_icon": "github",
 }
 

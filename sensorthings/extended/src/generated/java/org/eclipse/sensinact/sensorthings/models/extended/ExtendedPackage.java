@@ -17,9 +17,9 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EReference;
 
-import org.eclipse.sensinact.model.core.provider.ProviderPackage;
+import org.eclipse.fennec.emf.osgi.annotation.provide.EPackage;
 
-import org.gecko.emf.osgi.annotation.provide.EPackage;
+import org.eclipse.sensinact.model.core.provider.ProviderPackage;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -41,7 +41,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @generated
  */
 @ProviderType
-@EPackage(uri = ExtendedPackage.eNS_URI, genModel = "/model/sensorthings.extended.genmodel", genModelSourceLocations = {"src/main/resources/model/sensorthings.extended.genmodel","extended/src/main/resources/model/sensorthings.extended.genmodel"}, ecore="/model/sensorthings.extended.ecore", ecoreSourceLocations="/src/main/resources/model/sensorthings.extended.ecore")
+@EPackage(uri = ExtendedPackage.eNS_URI, genModel = "/model/sensorthings.extended.genmodel", genModelSourceLocations = {"src/main/resources/model/sensorthings.extended.genmodel","extended/src/main/resources/model/sensorthings.extended.genmodel"}, ecore = "/model/sensorthings.extended.ecore", ecoreSourceLocations = "/src/main/resources/model/sensorthings.extended.ecore")
 public interface ExtendedPackage extends org.eclipse.emf.ecore.EPackage {
 	/**
 	 * The package name.

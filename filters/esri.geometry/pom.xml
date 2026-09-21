@@ -26,6 +26,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.esri.geometry</groupId>
       <artifactId>esri-geometry-api</artifactId>
       <version>2.2.4</version>
@@ -33,6 +37,11 @@
     <dependency>
       <groupId>org.eclipse.sensinact.gateway.core</groupId>
       <artifactId>geo-json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.sensinact.gateway.filters</groupId>
+      <artifactId>filters.core</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

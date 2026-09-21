@@ -1,0 +1,13 @@
+# Normalize all text files to LF in the repo and in the working tree,
+# regardless of platform. Binary files are auto-detected and left untouched.
+* text=auto eol=lf
+
+# Explicitly binary content
+*.jar    binary
+*.bundle binary
+*.png    binary
+*.jpg    binary
+*.gif    binary
+*.ico    binary
+*.pdf    binary
+*.zip    binary

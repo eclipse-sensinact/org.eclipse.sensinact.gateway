@@ -14,9 +14,9 @@ package org.eclipse.sensinact.filters.resource.selector.api;
 
 import java.util.List;
 
-import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection.MatchType;
 import org.eclipse.sensinact.filters.resource.selector.jackson.ResourceSelectorDeserializer;
+import org.jspecify.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Feature;
@@ -31,7 +31,7 @@ import tools.jackson.databind.annotation.JsonDeserialize;
  *   <emphasis>OR</emphasis> semantic. Providers are selected if they match any of the
  *   supplied {@link ProviderSelection} filters.</li>
  *   <li>The resources section selects additional resource values to include in the
- *   selection. It is not permitted to use a {@link ResourceValueFilter} in the resources.
+ *   selection. It is not permitted to use a {@link ValueSelection} in the resources.
  *   If a {@link ResourceSelection} in the resources section is not found in a selected
  *   provider then it will be silently ignored for that provider.</li>
  * </ul>
@@ -56,11 +56,13 @@ public record ResourceSelector(
         /**
          * The providers that should be selected by this {@link ResourceSelector}
          */
+        @Nullable
         List<ProviderSelection> providers,
 
         /**
          * The additional resources that should be selected by this {@link ResourceSelector}
          */
+        @Nullable
         List<ResourceSelection> resources) {
 
     public ResourceSelector {
@@ -98,15 +100,18 @@ public record ResourceSelector(
             /**
              * A selection for the service. If <code>null</code> then any service will match
              */
+            @Nullable
             Selection service,
             /**
              * A selection for the resource. If <code>null</code> then any resource will match
              */
+            @Nullable
             Selection resource,
             /**
              * A selection based on the value of the resource. Multiple matches are combined using
              * an <emphasis>AND</emphasis> semantic.
              */
+            @Nullable
             @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<ValueSelection> value) {
 
         public ResourceSelection {
@@ -129,24 +134,29 @@ public record ResourceSelector(
             /**
              * A selection for the model URI. If <code>null</code> then any model URI will match
              */
+            @Nullable
             Selection modelUri,
             /**
              * A selection for the model. If <code>null</code> then any model will match
              */
+            @Nullable
             Selection model,
             /**
              * A selection for the provider. If <code>null</code> then any provider will match
              */
+            @Nullable
             Selection provider,
             /**
              * A selection for the resources. If <code>null</code> or empty then no resources are included
              * with the selection. If set then any matching resources will be included in the snapshot.
              */
+            @Nullable
             @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<ResourceSelection> resources,
             /**
              * A selection for the location. If <code>null</code> or empty then no location filtering
              * will occur. If set then the provider location will be included in the snapshot.
              */
+            @Nullable
             @JsonFormat(with = Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY) List<LocationSelection> location) {
 
         public ProviderSelection {

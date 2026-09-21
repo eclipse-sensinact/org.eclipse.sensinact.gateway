@@ -15,9 +15,13 @@ package org.eclipse.sensinact.filters.resource.selector.impl;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -27,6 +31,7 @@ import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
+import org.eclipse.sensinact.filters.location.api.LocationMatchFactory;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.Selection;
 import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
@@ -39,25 +44,40 @@ public class ResourceSelectorCriterion implements ICriterion {
 
     static final Predicate<?> ALWAYS = x -> Boolean.TRUE;
     static final Predicate<?> NEVER = x -> Boolean.FALSE;
+    static final BiPredicate<?,?> BI_ALWAYS = (x,y) -> Boolean.TRUE;
 
     private final ResourceSelector rs;
 
     private final boolean allowSingleLevelWildcards;
+
+    private final Supplier<LocationMatchFactory> getCurrentMatchFactory;
 
     private final List<ProviderSelectionCriterion> providerSelections;
 
     private final List<ResourceSelectionCriterion> additionalResources;
 
     private final Predicate<ProviderSnapshot> providerFilter;
-    private final BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter;
     private final Predicate<ServiceSnapshot> serviceFilter;
     private final Predicate<ResourceSnapshot> resourceFilter;
 
     private final ResourceValueFilter valueFilter;
 
-    public ResourceSelectorCriterion(ResourceSelector rs, boolean allowSingleLevelWildcards) {
+    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
+    /**
+     * Guarded by {@link #rwLock}
+     */
+    private LocationMatchFactory locationMatchFactory;
+    /**
+     * Guarded by {@link #rwLock}
+     */
+    private BiPredicate<ProviderSnapshot, GeoJsonObject> locationFilter;
+
+    public ResourceSelectorCriterion(ResourceSelector rs, boolean allowSingleLevelWildcards,
+            Supplier<LocationMatchFactory> lmfSupplier) {
         this.rs = rs;
         this.allowSingleLevelWildcards = allowSingleLevelWildcards;
+        this.getCurrentMatchFactory = lmfSupplier;
 
         this.providerSelections = rs.providers().stream().map(ProviderSelectionCriterion::new).toList();
         this.additionalResources = rs.resources().stream().map(ResourceSelectionCriterion::new).toList();
@@ -65,11 +85,6 @@ public class ResourceSelectorCriterion implements ICriterion {
         this.providerFilter = providerSelections.stream()
                 .map(ProviderSelectionCriterion::providerFilter)
                 .reduce(ResourceSelectorCriterion::combineFilters)
-                .orElse(null);
-
-        this.locationFilter = providerSelections.stream()
-                .map(ProviderSelectionCriterion::locationFilter)
-                .reduce(BiPredicate::or)
                 .orElse(null);
 
         Stream<Predicate<ServiceSnapshot>> services = Stream.concat(
@@ -102,6 +117,10 @@ public class ResourceSelectorCriterion implements ICriterion {
         return a == ALWAYS ? a : b == ALWAYS ? b : a.or(b);
     }
 
+    static <T,U> BiPredicate<T,U> combineFilters(BiPredicate<T,U> a, BiPredicate<T,U> b) {
+        return a == BI_ALWAYS ? a : b == BI_ALWAYS ? b : a.or(b);
+    }
+
     @SuppressWarnings("unchecked")
     static <T> Predicate<T> always() {
         return (Predicate<T>) ALWAYS;
@@ -112,9 +131,66 @@ public class ResourceSelectorCriterion implements ICriterion {
         return (Predicate<T>) NEVER;
     }
 
+    @SuppressWarnings("unchecked")
+    static <T,U> BiPredicate<T, U> biAlways() {
+        return (BiPredicate<T, U>) BI_ALWAYS;
+    }
+
     @Override
     public BiPredicate<ProviderSnapshot, GeoJsonObject> getLocationFilter() {
-        return locationFilter;
+        // No need to lock if no location filtering applies
+        if(providerSelections.stream()
+                .noneMatch(ProviderSelectionCriterion::hasLocationRestriction)) {
+            return null;
+        }
+        // Check for cached filter
+        Lock read = rwLock.readLock();
+        read.lock();
+        LocationMatchFactory lmf;
+        BiPredicate<ProviderSnapshot, GeoJsonObject> filter = null;
+        try {
+            lmf = getCurrentMatchFactory.get();
+            if(locationMatchFactory == lmf) {
+                filter = locationFilter;
+            }
+        } finally {
+            read.unlock();
+        }
+        // If we find it return it
+        if(filter != null) {
+            return filter == BI_ALWAYS ? null : filter;
+        }
+
+        // Now make it outside the lock
+        filter = providerSelections.stream()
+                .map(psc -> psc.locationFilter(lmf))
+                .reduce(ResourceSelectorCriterion::combineFilters)
+                .orElse(biAlways());
+        // Check the race and set the cache
+        Lock write = rwLock.writeLock();
+        try {
+            write.lock();
+            // Check again as someone may have beaten us to it
+            LocationMatchFactory lmf2 = getCurrentMatchFactory.get();
+            if(lmf != lmf2) {
+                // Uh oh, it changed underneath us
+                filter = null;
+            } else if (locationMatchFactory == lmf) {
+                // Someone else won, use theirs
+                filter = locationFilter;
+            } else {
+                // We won, set the cache
+                locationMatchFactory = lmf;
+                locationFilter = filter;
+            }
+        } finally {
+            write.unlock();
+        }
+        if(filter == null) {
+            // Try again
+            return getLocationFilter();
+        }
+        return filter == BI_ALWAYS ? null : filter;
     }
 
     @Override

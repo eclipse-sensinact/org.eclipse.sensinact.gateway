@@ -9,30 +9,18 @@
 *
 * Contributors:
 *   Kentyou - initial implementation
+*   Data In Motion - rework onto the history storage SPI
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.history.timescale;
 
-import static org.osgi.service.typedevent.TypedEventConstants.TYPED_EVENT_TOPICS;
-
 import java.sql.Connection;
-import java.sql.Statement;
-import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.eclipse.sensinact.core.command.AbstractSensinactCommand;
-import org.eclipse.sensinact.core.command.AbstractTwinCommand;
-import org.eclipse.sensinact.core.command.GatewayThread;
-import org.eclipse.sensinact.core.model.SensinactModelManager;
-import org.eclipse.sensinact.core.snapshot.ICriterion;
-import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
-import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
-import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
+import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryStorage;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
@@ -45,19 +33,22 @@ import org.osgi.service.transaction.control.ScopedWorkException;
 import org.osgi.service.transaction.control.TransactionControl;
 import org.osgi.service.transaction.control.jdbc.JDBCConnectionProvider;
 import org.osgi.service.transaction.control.jdbc.JDBCConnectionProviderFactory;
-import org.osgi.service.typedevent.TypedEventHandler;
-import org.osgi.service.typedevent.annotations.RequireTypedEvent;
-import org.osgi.util.promise.Promise;
-import org.osgi.util.promise.PromiseFactory;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
-
+/**
+ * Lifecycle of the PostgreSQL/TimescaleDB history backend: manages the
+ * DataSource and tx-control provider and registers a
+ * {@link TimescaleHistoryStorage} as a {@link HistoryStorage} service. The
+ * history-core engine wires it to the event bus and exposes it as a
+ * HistoryProvider plus the legacy ACT facade.
+ *
+ * PID and configuration keys are unchanged from the pre-rework provider;
+ * selector changes now take effect immediately because every configuration
+ * update re-registers the service with fresh properties.
+ */
 @Component(service = {}, immediate = true, configurationPid = "sensinact.history.timescale", configurationPolicy = ConfigurationPolicy.REQUIRE)
-@RequireTypedEvent
 public class TimescaleHistoricalStore {
 
     private static final String NOT_SET = "<<NOT_SET>>";
@@ -86,6 +77,9 @@ public class TimescaleHistoricalStore {
          *         <code>include.resources</code> selection.
          */
         String[] exclude_resources() default {};
+
+        /** @return the largest page a single range query returns */
+        int max_page_size() default 10_000;
     }
 
     @Reference
@@ -94,76 +88,95 @@ public class TimescaleHistoricalStore {
     @Reference
     JDBCConnectionProviderFactory providerFactory;
 
-    @Reference
-    GatewayThread gatewayThread;
-
-    @Reference
-    ResourceSelectorFilterFactory filterFactory;
-
-    private final ObjectMapper mapper = new ObjectMapper();
-
+    private BundleContext context;
     private Config config;
-
-    private ICriterion include;
-
-    private ICriterion exclude;
-
     private JDBCConnectionProvider provider;
-
     private final AtomicReference<Connection> connection = new AtomicReference<>();
-
-    private ServiceRegistration<?> reg;
+    private ServiceRegistration<HistoryStorage> registration;
 
     @Activate
-    void start(BundleContext ctx, Config config) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Starting the TimescaleDB history store");
-        }
-
-        String[] resources = config.include_resources();
-        if (resources.length == 0) {
+    void start(BundleContext context, Config config) {
+        logger.debug("Starting the TimescaleDB history store");
+        if (config.include_resources().length == 0) {
             throw new IllegalArgumentException("At least one include resource selector must be set");
         }
-
-        ICriterion includeFilter = filterFactory.parseResourceSelector(Arrays.stream(resources).map(this::fromString));
-
-        ICriterion excludeFilter;
-        resources = config.exclude_resources();
-        if (resources.length == 0) {
-            excludeFilter = null;
-        } else {
-            excludeFilter = filterFactory.parseResourceSelector(Arrays.stream(resources).map(this::fromString));
-        }
-
         synchronized (this) {
+            this.context = context;
             this.config = config;
-            this.include = includeFilter;
-            this.exclude = excludeFilter;
         }
-
-        doStart(ctx);
+        doStart();
     }
 
-    private ResourceSelector fromString(String s) {
-        try {
-            return mapper.readValue(s, ResourceSelector.class);
-        } catch (JacksonException j) {
-            throw new IllegalArgumentException("Unable to read Resource Selector " + s);
+    @Modified
+    void update(BundleContext context, Config config) {
+        Config oldConfig;
+        synchronized (this) {
+            oldConfig = this.config;
+            this.config = config;
+        }
+
+        if (Objects.equals(oldConfig.url(), config.url()) && Objects.equals(oldConfig.user(), config.user())
+                && Objects.equals(oldConfig._password(), config._password())) {
+            logger.debug("Re-registering the history storage with updated properties");
+            // a fresh instance so the engine can tell the registrations apart;
+            // initialization is idempotent and the connection is kept
+            TimescaleHistoryStorage storage = new TimescaleHistoryStorage(this::inTransaction, connection::get,
+                    config.max_page_size());
+            storage.initialize();
+            registerStorage(storage);
+        } else {
+            logger.debug("Restarting the Timescale DB connection due to a config change");
+            doStart();
         }
     }
 
-    void doStart(BundleContext ctx) {
+    @Deactivate
+    void stop() {
+        logger.debug("Stopping the TimescaleDB history store");
+        safeUnregister();
+        setProvider(null);
+    }
+
+    private void doStart() {
+        TimescaleHistoryStorage storage;
         try {
             setProvider(createProvider(config));
-            setupTables();
+            storage = new TimescaleHistoryStorage(this::inTransaction, connection::get, config.max_page_size());
+            storage.initialize();
         } catch (Exception e) {
-            if (logger.isWarnEnabled()) {
-                logger.warn("An error occurred setting up database access", e);
-            }
+            logger.warn("An error occurred setting up database access", e);
             safeUnregister();
             return;
         }
-        registerListener(ctx);
+        registerStorage(storage);
+    }
+
+    private <T> T inTransaction(Callable<T> operation) {
+        try {
+            return txControl.required(operation::call);
+        } catch (ScopedWorkException e) {
+            throw e.asRuntimeException();
+        }
+    }
+
+    private void registerStorage(TimescaleHistoryStorage storage) {
+        if (storage == null) {
+            return;
+        }
+        Hashtable<String, Object> properties = new Hashtable<>();
+        properties.put(HistoryStorage.PROP_NAME, config.provider());
+        properties.put(HistoryStorage.PROP_INCLUDE, config.include_resources());
+        if (config.exclude_resources().length > 0) {
+            properties.put(HistoryStorage.PROP_EXCLUDE, config.exclude_resources());
+        }
+
+        ServiceRegistration<HistoryStorage> previous;
+        synchronized (this) {
+            previous = registration;
+            registration = context.registerService(HistoryStorage.class, storage, properties);
+        }
+        safeUnregister(previous);
+        logger.info("Timescale history storage {} registered", config.provider());
     }
 
     private JDBCConnectionProvider createProvider(Config config) {
@@ -186,173 +199,26 @@ public class TimescaleHistoricalStore {
         }
 
         if (old != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Releasing configured Timescale DB connections");
-            }
+            logger.debug("Releasing configured Timescale DB connections");
             providerFactory.releaseProvider(old);
         }
     }
 
-    @Modified
-    void update(BundleContext ctx, Config config) {
-        Config oldConfig;
-        synchronized (this) {
-            oldConfig = this.config;
-            this.config = config;
-        }
-
-        if (Objects.equals(oldConfig.url(), config.url()) && Objects.equals(oldConfig.user(), config.user())
-                && Objects.equals(oldConfig._password(), config._password())) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Not updating the Timescale DB connection as there is no need");
-            }
-            // No need to update the provider
-            registerListener(ctx);
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Restarting the Timescale DB connection due to a config change");
-            }
-            doStart(ctx);
-        }
-    }
-
-    @Deactivate
-    void stop() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Stopping the TimescaleDB history store");
-        }
-        safeUnregister();
-        gatewayThread.execute(new AbstractSensinactCommand<Void>() {
-
-            @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, SensinactModelManager modelMgr,
-                    PromiseFactory promiseFactory) {
-                SensinactProvider sp = twin.getProvider(config.provider());
-                if (sp != null) {
-                    sp.delete();
-                }
-                return promiseFactory.resolved(null);
-            }
-        });
-        setProvider(null);
-    }
-
     private void safeUnregister() {
-        ServiceRegistration<?> reg;
+        ServiceRegistration<HistoryStorage> current;
         synchronized (this) {
-            reg = this.reg;
-            this.reg = null;
+            current = registration;
+            registration = null;
         }
-        safeUnregister(reg);
+        safeUnregister(current);
     }
 
-    private void safeUnregister(ServiceRegistration<?> reg) {
-        if (reg != null) {
+    private static void safeUnregister(ServiceRegistration<?> registration) {
+        if (registration != null) {
             try {
-                reg.unregister();
-            } catch (IllegalStateException ise) {
-            }
-        }
-    }
-
-    private void setupTables() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Creating database tables if needed");
-        }
-        Connection conn = connection.get();
-        try {
-            txControl.required(() -> {
-                Statement s = conn.createStatement();
-                s.execute("CREATE SCHEMA IF NOT EXISTS sensinact;");
-                s.execute(
-                        "CREATE TABLE IF NOT EXISTS sensinact.numeric_data ( time TIMESTAMPTZ NOT NULL, modelpackageuri VARCHAR(128) NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data NUMERIC )");
-                s.execute("SELECT create_hypertable('sensinact.numeric_data', 'time', if_not_exists => TRUE);");
-                s.execute(
-                        "CREATE TABLE IF NOT EXISTS sensinact.text_data ( time TIMESTAMPTZ NOT NULL, modelpackageuri VARCHAR(128) NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data text )");
-                s.execute("SELECT create_hypertable('sensinact.text_data', 'time', if_not_exists => TRUE);");
-                s.execute("CREATE EXTENSION IF NOT EXISTS Postgis;");
-                s.execute(
-                        "CREATE TABLE IF NOT EXISTS sensinact.geo_data ( time TIMESTAMPTZ NOT NULL, modelpackageuri VARCHAR(128) NOT NULL, model VARCHAR(128) NOT NULL, provider VARCHAR(128) NOT NULL, service VARCHAR(128) NOT NULL, resource VARCHAR(128) NOT NULL, data geography(POINT,4326) )");
-                s.execute("SELECT create_hypertable('sensinact.geo_data', 'time', if_not_exists => TRUE);");
-
-                // Create indexes for optimal query performance
-                // Composite indexes for (provider, service, resource, time) - most selective
-                // columns first
-                s.execute(
-                        "CREATE INDEX IF NOT EXISTS idx_numeric_data_provider_service_resource_time ON sensinact.numeric_data (provider, service, resource, time DESC);");
-                s.execute(
-                        "CREATE INDEX IF NOT EXISTS idx_text_data_provider_service_resource_time ON sensinact.text_data (provider, service, resource, time DESC);");
-                s.execute(
-                        "CREATE INDEX IF NOT EXISTS idx_geo_data_provider_service_resource_time ON sensinact.geo_data (provider, service, resource, time DESC);");
-                // Time-only indexes for time-range queries (TimescaleDB handles these well but
-                // explicit indexes help)
-                s.execute("CREATE INDEX IF NOT EXISTS idx_numeric_data_time ON sensinact.numeric_data (time DESC);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_text_data_time ON sensinact.text_data (time DESC);");
-                s.execute("CREATE INDEX IF NOT EXISTS idx_geo_data_time ON sensinact.geo_data (time DESC);");
-                // Covering indexes for count queries - includes all columns needed for
-                // filtering
-                s.execute(
-                        "CREATE INDEX IF NOT EXISTS idx_numeric_data_covering ON sensinact.numeric_data (provider, service, resource) INCLUDE (time);");
-                s.execute(
-                        "CREATE INDEX IF NOT EXISTS idx_text_data_covering ON sensinact.text_data (provider, service, resource) INCLUDE (time);");
-                s.execute(
-                        "CREATE INDEX IF NOT EXISTS idx_geo_data_covering ON sensinact.geo_data (provider, service, resource) INCLUDE (time);");
-                return null;
-            });
-        } catch (ScopedWorkException e) {
-            logger.error("Error setting up history tables. The history provider might not work", e.getCause());
-        }
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("Database tables created");
-        }
-    }
-
-    private void registerListener(BundleContext ctx) {
-        ServiceRegistration<?> reg;
-        ICriterion include;
-        ICriterion exclude;
-        synchronized (this) {
-            reg = this.reg;
-            this.reg = null;
-            include = this.include;
-            exclude = this.exclude;
-        }
-        if (reg == null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Registering listener for data update events");
-            }
-
-            List<String> dataTopics = Optional.ofNullable(include.dataTopics())
-                    .map(l -> l.stream().filter(Objects::nonNull).toList())
-                    .orElse(null);
-
-            reg = ctx.registerService(TypedEventHandler.class,
-                    new TimescaleDatabaseWorker(txControl, connection::get, include, exclude),
-                    new Hashtable<>(Map.of(TYPED_EVENT_TOPICS, dataTopics, "sensiNact.whiteboard.resource",
-                            true, "sensiNact.provider.name", config.provider())));
-            synchronized (this) {
-                if (this.reg == null) {
-                    this.reg = reg;
-                    reg = null;
-                }
-            }
-            safeUnregister(reg);
-
-            gatewayThread.execute(new AbstractTwinCommand<Void>() {
-                @Override
-                protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                    if (twin.getProvider(config.provider()) == null) {
-                        twin.createProvider("https://eclipse.org/sensinact/sensiNactHistory", "sensiNactHistory",
-                                config.provider());
-                    }
-                    return pf.resolved(null);
-                }
-            });
-
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Listener is already registered for data update events");
+                registration.unregister();
+            } catch (IllegalStateException e) {
+                // already unregistered
             }
         }
     }

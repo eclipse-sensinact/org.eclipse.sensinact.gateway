@@ -12,20 +12,26 @@
 **********************************************************************/
 package org.eclipse.sensinact.filters.resource.selector.impl;
 
+import static org.osgi.service.component.annotations.ReferencePolicy.DYNAMIC;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.eclipse.sensinact.core.snapshot.ICriterion;
 import org.eclipse.sensinact.filters.api.FilterParserException;
 import org.eclipse.sensinact.filters.api.IFilterParser;
+import org.eclipse.sensinact.filters.location.api.LocationMatchFactory;
 import org.eclipse.sensinact.filters.propertytypes.FiltersSupported;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelector;
 import org.eclipse.sensinact.filters.resource.selector.api.ResourceSelectorFilterFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
@@ -49,9 +55,22 @@ public class ResourceSelectorComponent implements ResourceSelectorFilterFactory,
     @Activate
     Config config;
 
+    private final AtomicReference<LocationMatchFactory> locationMatchFactory =
+            new AtomicReference<>();
+
+    @Reference(policy = DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
+    void setLocationMatchFactory(LocationMatchFactory locationMatchFactory) {
+        this.locationMatchFactory.set(locationMatchFactory);
+    }
+
+    void unsetLocationMatchFactory(LocationMatchFactory locationMatchFactory) {
+        this.locationMatchFactory.compareAndSet(locationMatchFactory, null);
+    }
+
     @Override
     public ICriterion parseResourceSelector(ResourceSelector selector) {
-        return new ResourceSelectorCriterion(selector, config.single_level_wildcard_enabled());
+        return new ResourceSelectorCriterion(selector, config.single_level_wildcard_enabled(),
+                locationMatchFactory::get);
     }
 
     @Override

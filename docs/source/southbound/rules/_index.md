@@ -4,7 +4,7 @@ Eclipse sensiNact provides *rules* as an opportunity for gateway modules to reac
 
 ## Using Rules
 
-For more information about how rules work in Eclipse sensinact you may wish to look at the [Rules Whiteboard](./rules-whiteboard.md)
+For more information about how rules work in Eclipse sensiNact you may wish to look at the [Rules Whiteboard](./rules-whiteboard.md)
 
 ## Rule Engine integrations
 
