@@ -155,7 +155,11 @@ public class TimescaleHistoricalStore {
         try {
             return txControl.required(operation::call);
         } catch (ScopedWorkException e) {
-            throw e.asRuntimeException();
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException runtime) {
+                throw runtime;
+            }
+            throw new IllegalStateException(cause == null ? e.getMessage() : cause.getMessage(), cause);
         }
     }
 
