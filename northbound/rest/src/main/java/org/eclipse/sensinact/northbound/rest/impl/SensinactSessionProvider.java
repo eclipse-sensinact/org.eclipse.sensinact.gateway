@@ -19,6 +19,8 @@ import org.eclipse.sensinact.northbound.rest.impl.AuthenticationFilter.UserInfoP
 import org.eclipse.sensinact.northbound.security.api.UserInfo;
 import org.eclipse.sensinact.northbound.session.SensiNactSession;
 import org.eclipse.sensinact.northbound.session.SensiNactSessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.Context;
@@ -29,16 +31,31 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 public class SensinactSessionProvider implements ContextResolver<SensiNactSession> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SensinactSessionProvider.class);
+
     @Context
     Application application;
 
     @Context
     SecurityContext context;
 
+    /**
+     * User of a principal that is not a {@link UserInfoPrincipal}. The default
+     * session of the user keeps this object long after the request that created
+     * it, while the injected security context is only valid during a request:
+     * the user id is therefore read once, at creation
+     */
     class MyUserInfo implements UserInfo {
+
+        private final String userId;
+
+        MyUserInfo(Principal principal) {
+            this.userId = principal.getName();
+        }
+
         @Override
         public String getUserId() {
-            return context.getUserPrincipal().getName();
+            return userId;
         }
 
         @Override
@@ -53,7 +70,13 @@ public class SensinactSessionProvider implements ContextResolver<SensiNactSessio
 
         @Override
         public boolean isMemberOfGroup(String group) {
-            return context.isUserInRole(group);
+            try {
+                return context.isUserInRole(group);
+            } catch (IllegalStateException e) {
+                // Outside of a request, the injected context can't be used
+                LOG.debug("Can't check if user {} is in role {} outside of a request", userId, group, e);
+                return false;
+            }
         }
     }
 
@@ -66,7 +89,7 @@ public class SensinactSessionProvider implements ContextResolver<SensiNactSessio
             UserInfoPrincipal uiPrincipal = (UserInfoPrincipal) principal;
             return manager.getDefaultSession(uiPrincipal.getUserInfo());
         } else if (principal != null) {
-            return manager.getDefaultSession(new MyUserInfo());
+            return manager.getDefaultSession(new MyUserInfo(principal));
         } else {
             return manager.getDefaultSession(UserInfo.ANONYMOUS);
         }
