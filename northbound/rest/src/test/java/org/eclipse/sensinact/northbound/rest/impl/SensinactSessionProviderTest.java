@@ -92,6 +92,19 @@ public class SensinactSessionProviderTest {
     }
 
     @Test
+    void userIdIsUpdatedDuringARequest() {
+        UserInfo user = sessionUserOf("adminTester");
+
+        Principal renamed = () -> "adminTester2";
+        when(securityContext.getUserPrincipal()).thenReturn(renamed);
+        assertEquals("adminTester2", user.getUserId());
+
+        // The last id read is the one kept outside of a request
+        endRequest();
+        assertEquals("adminTester2", user.getUserId());
+    }
+
+    @Test
     void groupsAreCheckedDuringTheRequest() {
         UserInfo user = sessionUserOf("adminTester");
 

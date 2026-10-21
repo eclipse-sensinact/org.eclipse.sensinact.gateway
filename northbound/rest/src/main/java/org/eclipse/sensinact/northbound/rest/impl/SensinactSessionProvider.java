@@ -43,11 +43,12 @@ public class SensinactSessionProvider implements ContextResolver<SensiNactSessio
      * User of a principal that is not a {@link UserInfoPrincipal}. The default
      * session of the user keeps this object long after the request that created
      * it, while the injected security context is only valid during a request:
-     * the user id is therefore read once, at creation
+     * the last user id read from the context is therefore kept for the calls
+     * made outside of a request
      */
     class MyUserInfo implements UserInfo {
 
-        private final String userId;
+        private volatile String userId;
 
         MyUserInfo(Principal principal) {
             this.userId = principal.getName();
@@ -55,6 +56,15 @@ public class SensinactSessionProvider implements ContextResolver<SensiNactSessio
 
         @Override
         public String getUserId() {
+            try {
+                final Principal principal = context.getUserPrincipal();
+                if (principal != null) {
+                    userId = principal.getName();
+                }
+            } catch (IllegalStateException e) {
+                // Outside of a request, the injected context can't be used
+                LOG.debug("Can't read the user id outside of a request, keeping {}", userId, e);
+            }
             return userId;
         }
 
