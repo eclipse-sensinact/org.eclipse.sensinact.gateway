@@ -38,6 +38,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
@@ -56,9 +57,10 @@ public class SecureAccessTest {
             @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.northbound.rest", location = "?", properties = {
                     @Property(key = "allow.anonymous", value = "false"),
                     @Property(key = "fizz", value = "buzz") })) Configuration cm,
-            @InjectService(filter = "(fizz=buzz)", cardinality = 0) ServiceAware<Application> a)
+            @InjectService(filter = "(fizz=buzz)", cardinality = 0) ServiceAware<Application> a,
+            @InjectService JakartarsServiceRuntime runtime)
             throws InterruptedException {
-        a.waitForService(5000);
+        utils.awaitDeployed(runtime, a);
         for (int i = 0; i < 10; i++) {
             try {
                 if (utils.queryStatus("/").statusCode() == 503)

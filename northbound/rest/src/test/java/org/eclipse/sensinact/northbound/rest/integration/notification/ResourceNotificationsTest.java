@@ -95,9 +95,10 @@ public class ResourceNotificationsTest {
             @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.northbound.rest", location = "?", properties = {
                     @Property(key = "allow.anonymous", value = "true"),
                     @Property(key = "buzz", value = "fizzbuzz") })) Configuration cm,
-            @InjectService(filter = "(buzz=fizzbuzz)", cardinality = 0) ServiceAware<Application> a)
+            @InjectService(filter = "(buzz=fizzbuzz)", cardinality = 0) ServiceAware<Application> a,
+            @InjectService JakartarsServiceRuntime runtime)
             throws InterruptedException {
-        a.waitForService(5000);
+        utils.awaitDeployed(runtime, a);
         for (int i = 0; i < 10; i++) {
             try {
                 if (utils.queryStatus("/").statusCode() == 200)

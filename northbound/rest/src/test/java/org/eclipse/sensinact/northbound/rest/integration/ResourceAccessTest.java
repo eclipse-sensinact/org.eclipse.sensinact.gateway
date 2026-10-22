@@ -52,6 +52,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
@@ -69,9 +70,10 @@ import jakarta.ws.rs.core.Application;
 public class ResourceAccessTest {
 
     @BeforeEach
-    public void await(@InjectService(filter = "(foobar=fizz)", cardinality = 0) ServiceAware<Application> a)
+    public void await(@InjectService(filter = "(foobar=fizz)", cardinality = 0) ServiceAware<Application> a,
+            @InjectService JakartarsServiceRuntime runtime)
             throws InterruptedException {
-        a.waitForService(5000);
+        utils.awaitDeployed(runtime, a);
         for (int i = 0; i < 20; i++) {
             try {
                 if (utils.queryStatus("/").statusCode() == 200)
