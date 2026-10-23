@@ -36,6 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.framework.BundleContext;
+import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
@@ -104,8 +105,9 @@ class HistoryActGoldenResponseTest {
 
     @BeforeEach
     void await(@InjectService(filter = "(foobar=history-golden)", cardinality = 0) ServiceAware<Application> a,
+            @InjectService JakartarsServiceRuntime runtime,
             @InjectBundleContext BundleContext context) throws Exception {
-        a.waitForService(5000);
+        utils.awaitDeployed(runtime, a);
         waitForRestApi(Duration.ofSeconds(5));
 
         context.registerService(HistoryQueriesStub.class, new HistoryQueriesStub(),

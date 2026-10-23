@@ -25,6 +25,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpRequest.Builder;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodySubscribers;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -32,6 +33,12 @@ import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.northbound.query.api.AbstractResultDTO;
 import org.eclipse.sensinact.northbound.query.api.EResultType;
 import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
+import org.opentest4j.AssertionFailedError;
+import org.osgi.framework.Constants;
+import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
+import org.osgi.test.common.service.ServiceAware;
+
+import jakarta.ws.rs.core.Application;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -62,6 +69,25 @@ public class TestUtils {
         dto.value = value;
         dto.type = type;
         return dto;
+    }
+
+    /**
+     * Waits until the Jakarta REST whiteboard serves the given application.
+     *
+     * The application service is registered before the whiteboard replaces the
+     * context of the previous application, which still answers until then.
+     */
+    public void awaitDeployed(final JakartarsServiceRuntime runtime, final ServiceAware<Application> application)
+            throws InterruptedException {
+        application.waitForService(5000);
+        final Long serviceId = (Long) application.getServiceReference().getProperty(Constants.SERVICE_ID);
+        for (int i = 0; i < 100; i++) {
+            if (Arrays.stream(runtime.getRuntimeDTO().applicationDTOs).anyMatch(a -> a.serviceId == serviceId)) {
+                return;
+            }
+            Thread.sleep(50);
+        }
+        throw new AssertionFailedError("REST application " + serviceId + " was not deployed");
     }
 
     /**
