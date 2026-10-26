@@ -12,6 +12,7 @@
 
 package org.eclipse.sensinact.northbound.security.authorization.casbin.integration;
 
+import static org.eclipse.sensinact.northbound.security.authorization.casbin.integration.AuthorizationEngineAwaiter.awaitEngineBound;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -121,9 +122,11 @@ public class CasbinAuthConfigTest {
                     "role:user, *, *, *, *, *, describe|read, allow, 1000", "role:user, *, *, nope, *, *, *, deny, 0",
                     "role:user, *, *, *, *, *, *, allow, 1000", }) })
     void userTest(
-            // Injecting the Authorization Engine ensures that the configured component is available
-            // before the test starts, so it should be present in the sessions that we make
+            // Injecting the Authorization Engine ensures that the configured component is registered, but
+            // not that the session manager has been bound to it yet
             @InjectService(filter = "(name=userTest)") AuthorizationEngine engine) throws Exception {
+        awaitEngineBound(() -> sessionManager.createNewSession(makeUser("foo", "user")),
+                s -> s.describeResource("nope", "svc", "rc"));
         final SensiNactSession session = sessionManager.createNewSession(makeUser("foo", "user"));
 
         // Access the sensiNact provider
@@ -156,9 +159,11 @@ public class CasbinAuthConfigTest {
             @Property(key = "policies", type = Type.Array, value = { "anonymous, *, *, public, data, *, read, allow, 0",
                     "anonymous, *, *, public, action, comment, describe|act, allow, 0", }) })
     void anonymousTest(
-            // Injecting the Authorization Engine ensures that the configured component is available
-            // before the test starts, so it should be present in the sessions that we make
+            // Injecting the Authorization Engine ensures that the configured component is registered, but
+            // not that the session manager has been bound to it yet
             @InjectService(filter = "(name=anonymousTest)") AuthorizationEngine engine) throws Exception {
+        awaitEngineBound(sessionManager::createNewAnonymousSession,
+                s -> s.getResourceValue("provider", "svc", "rc", Integer.class));
         final SensiNactSession session = sessionManager.createNewAnonymousSession();
         // Access the sensiNact provider
         Instant startValue = session.getResourceValue("sensiNact", "system", "started", Instant.class);

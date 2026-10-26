@@ -12,6 +12,7 @@
 
 package org.eclipse.sensinact.northbound.security.authorization.casbin.integration;
 
+import static org.eclipse.sensinact.northbound.security.authorization.casbin.integration.AuthorizationEngineAwaiter.awaitEngineBound;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -210,9 +211,11 @@ public class FineAuthorizationTest {
                     "externalSensor, https://example.org/sensor#, *, *, sensor, *, UPDATE, allow, 0",
                     "role:admin, *, *, *, *, *, *, allow, -1", "role:anonymous, *, *, *, *, *, *, deny, -1000", }) })
     void testSessionsDenyByDefault(
-            // Injecting the Authorization Engine ensures that the configured component is available
-            // before the test starts, so it should be present in the sessions that we make
+            // Injecting the Authorization Engine ensures that the configured component is registered, but
+            // not that the session manager has been bound to it yet
             @InjectService(filter ="(name=testSessionsDenyByDefault)") AuthorizationEngine ae) throws Exception {
+        awaitEngineBound(sessionManager::createNewAnonymousSession, s -> s.describeProvider("basic"));
+
         final AtomicReference<SensiNactSession> sessionRef = new AtomicReference<>();
 
         // Anonymous
