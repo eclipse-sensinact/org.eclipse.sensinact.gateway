@@ -41,8 +41,10 @@ import org.testcontainers.utility.DockerImageName;
 /**
  * Pins the one-time migration from the pre-rework three-table schema: rows
  * become readable through the unified schema with their historical value
- * shapes, and the legacy tables are renamed rather than dropped. Uses the
- * timescaledb-ha image because the legacy geo table needs PostGIS.
+ * shapes, and the legacy tables are renamed rather than dropped. A point with
+ * non-finite ordinates is included because ST_AsGeoJSON renders those as bare
+ * NaN tokens, which are not JSON and used to abort the whole migration. Uses
+ * the timescaledb-ha image because the legacy geo table needs PostGIS.
  */
 @Testcontainers
 @EnabledIf("dockerAvailable")
@@ -94,6 +96,9 @@ class LegacyMigrationTest {
             stmt.execute("INSERT INTO sensinact.geo_data VALUES"
                     + " ('2020-01-01T00:00:00Z', 'uri', 'm', 'p', 's', 'location',"
                     + " ST_GeomFromGeoJSON('{\"type\":\"Point\",\"coordinates\":[5.7,12.3]}')::geography)");
+            stmt.execute("INSERT INTO sensinact.geo_data VALUES"
+                    + " ('2020-01-01T00:00:00Z', 'uri', 'm', 'p', 's', 'brokenLocation',"
+                    + " ST_SetSRID(ST_MakePoint('NaN'::float8, 'NaN'::float8), 4326)::geography)");
         }
 
         TxRunner plain = new TxRunner() {
@@ -123,6 +128,8 @@ class LegacyMigrationTest {
         Object location = storage.latestValue(new ResourcePath("p", "s", "location")).orElseThrow().getValue();
         assertTrue(location instanceof Point, "migrated geo row is not a Point: " + location);
         assertEquals(5.7d, ((Point) location).coordinates().longitude(), 0.000001);
+
+        assertEquals(1, storage.count(new ResourcePath("p", "s", "brokenLocation"), TimeRange.ALL));
 
         assertEquals(1, storage.count(new ResourcePath("p", "s", "state"), TimeRange.ALL));
         try (Statement stmt = connection.createStatement();
