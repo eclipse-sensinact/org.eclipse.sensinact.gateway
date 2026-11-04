@@ -82,6 +82,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
@@ -133,6 +134,15 @@ public class MqttSslAuthTest {
      * MQTT broker
      */
     private static Server server;
+
+    /**
+     * MQTT broker without client authentication, with a plain port to publish
+     */
+    private static Server serverAuthOnlyServer;
+
+    private static final int SERVER_AUTH_ONLY_PORT = 2185;
+    private static final int SERVER_AUTH_ONLY_SSL_PORT = 2186;
+    private static final int SERVER_AUTH_ONLY_WSS_PORT = 2187;
 
     /**
      * Generates the certificates used in the tests
@@ -200,6 +210,22 @@ public class MqttSslAuthTest {
         // Client authentication
         config.setProperty(BrokerConstants.NEED_CLIENT_AUTH, "true");
         server.startServer(config);
+
+        // Same certificate, without client authentication
+        serverAuthOnlyServer = new Server();
+        final IConfig serverAuthOnlyConfig = new MemoryConfig(new Properties());
+        serverAuthOnlyConfig.setProperty(IConfig.HOST_PROPERTY_NAME, "localhost");
+        serverAuthOnlyConfig.setProperty(IConfig.PORT_PROPERTY_NAME, String.valueOf(SERVER_AUTH_ONLY_PORT));
+        serverAuthOnlyConfig.setProperty(IConfig.SSL_PORT_PROPERTY_NAME, String.valueOf(SERVER_AUTH_ONLY_SSL_PORT));
+        serverAuthOnlyConfig.setProperty(IConfig.WSS_PORT_PROPERTY_NAME, String.valueOf(SERVER_AUTH_ONLY_WSS_PORT));
+        serverAuthOnlyConfig.setProperty(IConfig.WEB_SOCKET_PATH_PROPERTY_NAME, "/ws");
+        serverAuthOnlyConfig.setProperty(IConfig.KEY_STORE_TYPE, SSLUtils.PKCS12);
+        serverAuthOnlyConfig.setProperty(IConfig.JKS_PATH_PROPERTY_NAME, SERVER_CERT_P12);
+        serverAuthOnlyConfig.setProperty(IConfig.KEY_STORE_PASSWORD_PROPERTY_NAME, SERVER_CERT_PASS);
+        serverAuthOnlyConfig.setProperty(IConfig.KEY_MANAGER_PASSWORD_PROPERTY_NAME, SERVER_CERT_PASS);
+        // The default store is already locked by the first broker
+        serverAuthOnlyConfig.setProperty(IConfig.PERSISTENCE_ENABLED_PROPERTY_NAME, "false");
+        serverAuthOnlyServer.startServer(serverAuthOnlyConfig);
     }
 
     /**
@@ -209,6 +235,10 @@ public class MqttSslAuthTest {
     static void stopServerAndcleanupCertificates() {
         try {
             server.stopServer();
+        } catch (Exception e) {
+        }
+        try {
+            serverAuthOnlyServer.stopServer();
         } catch (Exception e) {
         }
 
@@ -418,8 +448,28 @@ public class MqttSslAuthTest {
         return mock;
     }
 
+    MqttClientConfiguration makeServerAuthConfig(final String trustedCertPem, final String trustStorePath,
+            final String trustStorePassword) {
+        MqttClientConfiguration mock = Mockito.mock(MqttClientConfiguration.class);
+        if (trustedCertPem != null) {
+            Mockito.when(mock.auth_trusted_certs()).thenReturn(new String[] { trustedCertPem });
+        }
+        if (trustStorePath != null) {
+            Mockito.when(mock.auth_truststore_type()).thenReturn(SSLUtils.PKCS12);
+            Mockito.when(mock.auth_truststore_path()).thenReturn(trustStorePath);
+            Mockito.when(mock._auth_truststore_password()).thenReturn(trustStorePassword);
+        }
+        return mock;
+    }
+
     MqttClientHandler setupHandler(final MqttClientConfiguration baseSslConfig, final String handlerId,
             final boolean useWebsocket, final String... topics) throws Exception {
+        return setupHandler(baseSslConfig, handlerId, useWebsocket, 2183, 2184, topics);
+    }
+
+    MqttClientHandler setupHandler(final MqttClientConfiguration baseSslConfig, final String handlerId,
+            final boolean useWebsocket, final int sslPort, final int wssPort, final String... topics)
+            throws Exception {
         MqttClientHandler handler = new MqttClientHandler();
         Mockito.when(baseSslConfig.id()).thenReturn(handlerId);
         Mockito.when(baseSslConfig.host()).thenReturn("localhost");
@@ -427,10 +477,10 @@ public class MqttSslAuthTest {
 
         if (useWebsocket) {
             Mockito.when(baseSslConfig.protocol()).thenReturn("ws");
-            Mockito.when(baseSslConfig.port()).thenReturn(2184);
+            Mockito.when(baseSslConfig.port()).thenReturn(wssPort);
             Mockito.when(baseSslConfig.path()).thenReturn("/ws");
         } else {
-            Mockito.when(baseSslConfig.port()).thenReturn(2183);
+            Mockito.when(baseSslConfig.port()).thenReturn(sslPort);
         }
 
         handler.activate(baseSslConfig);
@@ -526,5 +576,41 @@ public class MqttSslAuthTest {
         assertEquals("id-auth-ssl", msg.getHandlerId());
         assertEquals(topic, msg.getTopic());
         assertEquals(content, new String(msg.getPayload(), StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Ensure a client trusting the server certificate connects without a client
+     * certificate
+     */
+    @ParameterizedTest(name = "websocket={0}, trust={1}")
+    @CsvSource({ "false,pem", "true,pem", "false,p12", "true,p12" })
+    void testMqttServerAuthenticationOnly(final boolean useWebsocket, final String trust) throws Exception {
+        final BlockingQueue<IMqttMessage> messages = new ArrayBlockingQueue<>(32);
+        final IMqttMessageListener listener = (handler, topic, msg) -> messages.add(msg);
+
+        final String topic = "sensinact/mqtt/server-auth";
+        final MqttClientConfiguration config = "pem".equals(trust) ? makeServerAuthConfig(TRUST_CERT_PEM, null, null)
+                : makeServerAuthConfig(null, TRUST_CERT_P12, TRUST_CERT_PASS);
+        final MqttClientHandler handler = setupHandler(config, "id-server-auth", useWebsocket,
+                SERVER_AUTH_ONLY_SSL_PORT, SERVER_AUTH_ONLY_WSS_PORT, topic);
+        handlers.add(handler);
+        handler.addListener(listener, Map.of(IMqttMessageListener.MQTT_TOPICS_FILTERS, new String[] { topic }));
+
+        final MqttClient publisher = new MqttClient("tcp://localhost:" + SERVER_AUTH_ONLY_PORT,
+                MqttClient.generateClientId(), null);
+        try {
+            publisher.connect();
+            publisher.publish(topic, "server-auth".getBytes(StandardCharsets.UTF_8), 1, false);
+        } finally {
+            if (publisher.isConnected()) {
+                publisher.disconnect();
+            }
+            publisher.close();
+        }
+
+        final IMqttMessage msg = messages.poll(1, TimeUnit.SECONDS);
+        assertNotNull(msg);
+        assertEquals("id-server-auth", msg.getHandlerId());
+        assertEquals("server-auth", new String(msg.getPayload(), StandardCharsets.UTF_8));
     }
 }

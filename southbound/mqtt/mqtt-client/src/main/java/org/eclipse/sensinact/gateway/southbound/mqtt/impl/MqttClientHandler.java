@@ -222,8 +222,8 @@ public class MqttClientHandler implements MqttCallback {
             options.setPassword(userPass.toCharArray());
         }
 
-        // Setup certificate-based authentication
-        if (config.auth_keystore_path() != null || config.auth_clientcert_path() != null) {
+        // Setup TLS, for the server and/or the client authentication
+        if (SSLUtils.hasTlsSettings(config)) {
             options.setSocketFactory(SSLUtils.setupSSLSocketFactory(config));
         }
 
@@ -242,7 +242,7 @@ public class MqttClientHandler implements MqttCallback {
             throw new IllegalArgumentException("No MQTT host given");
         }
 
-        final boolean clientAuth = config.auth_keystore_path() != null || config.auth_clientcert_path() != null;
+        final boolean tls = SSLUtils.hasTlsSettings(config);
         String protocol = config.protocol();
         if (protocol == null || protocol.isBlank()) {
             protocol = "tcp";
@@ -250,13 +250,13 @@ public class MqttClientHandler implements MqttCallback {
             protocol = protocol.strip().toLowerCase();
         }
 
-        if (clientAuth) {
+        if (tls) {
             if ("tcp".equals(protocol)) {
                 protocol = "ssl";
             } else if ("ws".equals(protocol)) {
                 protocol = "wss";
-            } else {
-                logger.warn("Trying to use client authentication on an unsecure connection.");
+            } else if (!"ssl".equals(protocol) && !"wss".equals(protocol)) {
+                logger.warn("Trying to use TLS settings on an unsecure connection.");
             }
         }
 
