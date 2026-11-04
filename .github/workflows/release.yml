@@ -1,0 +1,84 @@
+# Release workflow. A release is cut by pushing a tag that equals revision
+# in .mvn/maven.config (no prefix, e.g. 0.0.2). The workflow refuses a tag
+# that does not match revision and refuses a non-empty changelist, so a tag
+# alone can never publish an unintended version.
+# The artifacts are built with all tests, signed and published to Maven
+# Central automatically - the tag check above is the only gate.
+name: release
+
+on:
+  push:
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*'
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Release ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    if: github.repository == 'eclipse-sensinact/org.eclipse.sensinact.gateway'
+
+    steps:
+    - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+    - name: Guard - tag must equal the version in .mvn/maven.config
+      env:
+        # passed through the environment, never pasted into the script
+        TAG: ${{ github.ref_name }}
+      run: |
+        cfg=.mvn/maven.config
+        [ "$(grep -c '^-Drevision=' "$cfg")" = 1 ] \
+          || { echo "::error file=$cfg::expected exactly one -Drevision= line"; exit 1; }
+        [ "$(grep -c '^-Dchangelist=' "$cfg")" = 1 ] \
+          || { echo "::error file=$cfg::expected exactly one -Dchangelist= line"; exit 1; }
+        rev=$(sed -n 's/^-Drevision=//p' "$cfg")
+        cl=$(sed -n 's/^-Dchangelist=//p' "$cfg")
+        echo "$rev" | grep -Eqx '[0-9]+\.[0-9]+\.[0-9]+' \
+          || { echo "::error file=$cfg::revision '$rev' is not a plain x.y.z release version"; exit 1; }
+        [ -z "$cl" ] \
+          || { echo "::error file=$cfg::changelist must be empty (-Dchangelist=) for a release, found '$cl'"; exit 1; }
+        [ "$TAG" = "$rev" ] \
+          || { echo "::error::tag '$TAG' does not match revision '$rev' in $cfg"; exit 1; }
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+        # server id used by the central-publishing-maven-plugin in pom.xml
+        server-id: central
+        server-username: CENTRAL_USERNAME
+        server-password: CENTRAL_PASSWORD
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+    - name: Build, test and publish the release
+      run: mvn -B -ntp -P ci-build -P deploy deploy
+      env:
+        CENTRAL_USERNAME: ${{ secrets.CENTRAL_SONATYPE_TOKEN_USERNAME }}
+        CENTRAL_PASSWORD: ${{ secrets.CENTRAL_SONATYPE_TOKEN_PASSWORD }}
+        MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+
+    - name: Upload release jars
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: release-${{ github.ref_name }}
+        path: |
+          **/target/*.jar
+          **/target/*.zip
+        if-no-files-found: warn
+
+    - name: Upload test reports
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: test-reports-${{ github.ref_name }}
+        path: |
+          **/target/surefire-reports/*.xml
+          **/target/failsafe-reports/*.xml
+        if-no-files-found: ignore

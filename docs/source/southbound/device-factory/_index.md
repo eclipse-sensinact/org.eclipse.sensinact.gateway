@@ -17,4 +17,5 @@ core
 csv
 json
 tuto-parser
+adr_strategie_reference_json_parser_parent_nodes
 ```

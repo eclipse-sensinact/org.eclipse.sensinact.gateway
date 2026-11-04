@@ -25,6 +25,7 @@ import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryCapability;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryPage;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
+import org.eclipse.sensinact.sensorthings.sensing.rest.impl.HistoryProviderLookup;
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryQuery;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.provider.SortOrder;
@@ -147,7 +148,7 @@ class HistoryResourceHelperSensinact {
     }
 
     static HistoryProvider historyProvider(Application application) {
-        return (HistoryProvider) application.getProperties().get("sensinact.history.service");
+        return HistoryProviderLookup.from(application);
     }
 
     /**

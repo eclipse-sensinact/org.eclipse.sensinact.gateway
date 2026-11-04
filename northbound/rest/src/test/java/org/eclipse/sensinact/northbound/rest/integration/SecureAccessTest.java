@@ -17,7 +17,9 @@ import static jakarta.ws.rs.core.HttpHeaders.WWW_AUTHENTICATE;
 import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -108,15 +110,13 @@ public class SecureAccessTest {
         String path = String.join("/", "providers", PROVIDER, "services", SERVICE, "resources", RESOURCE, "GET");
 
         // Check for 503
-        HttpResponse<?> response = utils.queryStatus(path);
+        HttpResponse<?> response = awaitStatus(path, Status.SERVICE_UNAVAILABLE.getStatusCode());
         assertEquals(Status.SERVICE_UNAVAILABLE.getStatusCode(), response.statusCode());
 
         ctx.registerService(Authenticator.class, new TokenValidator(TOKEN), null);
         ctx.registerService(Authenticator.class, new BasicValidator(USER, CREDENTIAL), null);
 
-        Thread.sleep(500);
-
-        response = utils.queryStatus(path);
+        response = awaitStatus(path, UNAUTHORIZED.getStatusCode());
         assertEquals(UNAUTHORIZED.getStatusCode(), response.statusCode());
         assertEquals("Bearer realm=test, Basic realm=test2", response.headers().firstValue(WWW_AUTHENTICATE).get());
 
@@ -127,6 +127,33 @@ public class SecureAccessTest {
         assertEquals(VALUE, r.value);
         assertEquals(dto.type.getName(), r.type);
         assertFalse(Instant.ofEpochMilli(r.timestamp).isBefore(updateTime), "Timestamp wasn't updated");
+    }
+
+    /**
+     * The runtime restarts the REST application when the session manager is reconfigured, which can still be
+     * under way when the test starts. Requests made meanwhile get a 404 or a connection error, so retry until the
+     * expected status is seen.
+     *
+     * @return The last response, whatever its status
+     */
+    private HttpResponse<?> awaitStatus(String path, int expected) throws InterruptedException {
+        HttpResponse<?> response = null;
+        IOException error = null;
+        for (int i = 0; i < 50; i++) {
+            try {
+                response = utils.queryStatus(path);
+                if (response.statusCode() == expected) {
+                    return response;
+                }
+            } catch (IOException e) {
+                error = e;
+            }
+            Thread.sleep(100);
+        }
+        if (response == null) {
+            fail("No response from " + path, error);
+        }
+        return response;
     }
 
     private static class TokenValidator implements Authenticator {

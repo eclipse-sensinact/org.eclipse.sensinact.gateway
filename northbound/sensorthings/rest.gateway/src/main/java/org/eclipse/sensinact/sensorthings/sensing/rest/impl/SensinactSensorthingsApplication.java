@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider;
 import org.eclipse.sensinact.northbound.filters.sensorthings.ISensorthingsFilterParser;
@@ -127,8 +128,12 @@ public class SensinactSensorthingsApplication extends Application {
         props.put("sensinact.history.result.limit", resultMax);
         props.put("cache.historical.location", cacheHl);
         props.put("cache.expanded.observation", cacheObs);
+        // the whiteboard copies these properties once, at registration: hand it a
+        // supplier so a provider that registers later is still found (see HistoryProviderLookup)
+        props.put(HistoryProviderLookup.HISTORY_PROVIDER_SUPPLIER,
+                (Supplier<Optional<HistoryProvider>>) this::selectedHistoryProvider);
         selectedHistoryProvider().ifPresent(provider -> {
-            props.put("sensinact.history.service", provider);
+            props.put(HistoryProviderLookup.HISTORY_PROVIDER, provider);
             // legacy key, kept for consumers still selecting by name
             props.put("sensinact.history.provider", provider.getName());
         });

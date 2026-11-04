@@ -18,12 +18,12 @@ Recommended requirements to support more users and sensors
 
 ## Get the distribution zip file
 
-Eclipse sensiNact is published to the Eclipse Nexus repository instance at [repo.eclipse.org](https://repo.eclipse.org) after each successful repository update.
+Eclipse sensiNact releases are published to [Maven Central](https://central.sonatype.com/search?namespace=org.eclipse.sensinact.gateway.distribution), and a SNAPSHOT of the current development state is published to the [Sonatype Central snapshot repository](https://central.sonatype.com/repository/maven-snapshots/) after each successful build of the `master` branch.
 You may either get the latest public distribution or generate the distribution from source.
 
 ### Get the zip file with a browser (easy)
 
-You may download the distribution with your web browser via the [search link](https://repo.eclipse.org/#nexus-search;gav~org.eclipse.sensinact.gateway.distribution~assembly~~~). Just download the artifact (assembly-XXX.zip file) to your computer.
+You may download a released distribution with your web browser from [Maven Central](https://central.sonatype.com/search?namespace=org.eclipse.sensinact.gateway.distribution&name=assembly). Just download the artifact (assembly-XXX.zip file) to your computer.
 
 ### Get the zip file with Maven (medium)
 
@@ -32,7 +32,7 @@ You can use maven to get the distribution zip file. You will need maven with the
 Get the sensinact.zip file:
 ```bash
 mvn dependency:get \
-    -DremoteRepositories=https://repo.eclipse.org/content/groups/sensinact/ \
+    -DremoteRepositories=https://central.sonatype.com/repository/maven-snapshots/ \
     -Dartifact=org.eclipse.sensinact.gateway.distribution:assembly:0.0.2-SNAPSHOT:zip \
     -Ddest=sensinact.zip
 ```
@@ -41,7 +41,7 @@ mvn dependency:get \
 
 You can clone and compile the project to generate the distribution ZIP file. You will need git, maven and a java jdk.
 
-1. Clone the project [repository](https://github.com/eclipse/org.eclipse.sensinact.gateway): `git clone https://github.com/eclipse/org.eclipse.sensinact.gateway.git`
+1. Clone the project [repository](https://github.com/eclipse-sensinact/org.eclipse.sensinact.gateway): `git clone https://github.com/eclipse-sensinact/org.eclipse.sensinact.gateway.git`
 2. Compile it using Maven: `mvn clean install`
    ```{note}
    Some integration tests require Docker to run, for example to test the Timescale history provider.
