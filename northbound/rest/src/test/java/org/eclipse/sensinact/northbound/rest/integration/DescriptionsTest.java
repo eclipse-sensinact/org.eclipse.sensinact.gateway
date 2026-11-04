@@ -44,6 +44,7 @@ import org.eclipse.sensinact.northbound.query.dto.result.TypedResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
+import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.WithConfiguration;
@@ -62,9 +63,10 @@ import tools.jackson.databind.JsonNode;
 public class DescriptionsTest {
 
     @BeforeEach
-    public void await(@InjectService(filter = "(foo=bar)", cardinality = 0) ServiceAware<Application> a)
+    public void await(@InjectService(filter = "(foo=bar)", cardinality = 0) ServiceAware<Application> a,
+            @InjectService JakartarsServiceRuntime runtime)
             throws InterruptedException {
-        a.waitForService(5000);
+        utils.awaitDeployed(runtime, a);
         for (int i = 0; i < 20; i++) {
             try {
                 if (utils.queryStatus("/").statusCode() == 200)

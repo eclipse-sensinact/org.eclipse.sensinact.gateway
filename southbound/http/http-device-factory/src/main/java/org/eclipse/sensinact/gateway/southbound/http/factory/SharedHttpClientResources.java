@@ -17,7 +17,9 @@ import java.time.temporal.ChronoUnit;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.dynamic.HttpClientTransportDynamic;
+import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.io.ClientConnector;
+import org.eclipse.jetty.io.MappedByteBufferPool;
 import org.eclipse.jetty.util.SocketAddressResolver;
 import org.eclipse.jetty.util.SocketAddressResolver.Async;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -37,6 +39,7 @@ public class SharedHttpClientResources {
     private QueuedThreadPool sharedPool;
     private Scheduler sharedScheduler;
     private Async sharedAddressResolver;
+    private ByteBufferPool sharedBufferPool;
 
     @Activate
     void activate() throws Exception {
@@ -49,6 +52,9 @@ public class SharedHttpClientResources {
         sharedScheduler.start();
 
         sharedAddressResolver = new SocketAddressResolver.Async(sharedPool, sharedScheduler, 15000);
+
+        // A pool per client leaks: its thread-local cache keeps one direct buffer per pool thread
+        sharedBufferPool = new MappedByteBufferPool();
     }
 
     @Deactivate
@@ -58,6 +64,7 @@ public class SharedHttpClientResources {
         sharedPool.stop();
         sharedPool = null;
         sharedAddressResolver = null;
+        sharedBufferPool = null;
     }
 
     /**
@@ -85,12 +92,14 @@ public class SharedHttpClientResources {
         final ClientConnector clientConnector = new ClientConnector();
         clientConnector.setExecutor(sharedPool);
         clientConnector.setScheduler(sharedScheduler);
+        clientConnector.setByteBufferPool(sharedBufferPool);
         clientConnector.setSslContextFactory(sslContextFactory);
         clientConnector.setConnectTimeout(Duration.of(task.timeout, ChronoUnit.SECONDS));
 
         // Construct the client with shared address resolver
         final HttpClient client = new HttpClient(new HttpClientTransportDynamic(clientConnector));
         client.setSocketAddressResolver(sharedAddressResolver);
+        client.setByteBufferPool(sharedBufferPool);
 
         // HTTP behavior
         client.setFollowRedirects(task.followHttpRedirect);
