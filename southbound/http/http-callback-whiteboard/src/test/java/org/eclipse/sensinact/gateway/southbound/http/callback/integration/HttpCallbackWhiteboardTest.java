@@ -54,7 +54,8 @@ public class HttpCallbackWhiteboardTest {
 
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
 
-        Mockito.verify(callback, Mockito.timeout(1000)).activate(stringCaptor.capture());
+        // The whiteboard is only active once Jetty has restarted on the port of the test
+        Mockito.verify(callback, Mockito.timeout(10000)).activate(stringCaptor.capture());
 
         String uri = stringCaptor.getValue();
 
@@ -91,7 +92,8 @@ public class HttpCallbackWhiteboardTest {
 
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
 
-        Mockito.verify(callback, Mockito.timeout(1000)).activate(stringCaptor.capture());
+        // The whiteboard is only active once Jetty has restarted on the port of the test
+        Mockito.verify(callback, Mockito.timeout(10000)).activate(stringCaptor.capture());
 
         String uri = stringCaptor.getValue();
 

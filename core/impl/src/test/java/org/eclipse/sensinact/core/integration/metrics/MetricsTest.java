@@ -38,7 +38,6 @@ import org.eclipse.sensinact.core.metrics.IMetricsMultiGauge;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
-import org.eclipse.sensinact.core.twin.SensinactResource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -243,12 +242,13 @@ public class MetricsTest {
     void testProvider(@InjectService(filter = "(enabled=true)") IMetricsManager metrics) throws Exception {
         metrics.getCounter("toto").inc();
 
-        // Wait for a bit
+        // Wait for a bit: the reporter calls the gauges before notifying the
+        // listeners, so a report can be in progress when a poll times out
         boolean atLeastOne = false;
         for (int trial = 0; trial < 5; trial++) {
             final BulkGenericDto bulk = queue.poll(1, TimeUnit.SECONDS);
             atLeastOne |= bulk != null;
-            if (gaugeCalled.get() && !gaugesCalled.isEmpty()) {
+            if (atLeastOne && gaugeCalled.get() && !gaugesCalled.isEmpty()) {
                 break;
             }
         }
@@ -256,17 +256,20 @@ public class MetricsTest {
         assertTrue(gaugeCalled.get(), "Gauge was not called");
         assertFalse(gaugesCalled.isEmpty(), "Multigauge was not called");
 
-        // Check if the provider exists
-        thread.execute(new AbstractTwinCommand<Void>() {
-            @Override
-            protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                SensinactResource resource = twin.getResource("sensiNact-metrics", "metrics", "toto");
-                if (resource == null) {
-                    return pf.failed(new AssertionError("Resource not found"));
-                } else {
-                    return pf.resolved(null);
+        // Check if the provider exists: the provider handler is a listener too,
+        // which may be notified after ours
+        boolean found = false;
+        for (int trial = 0; trial < 50 && !found; trial++) {
+            found = thread.execute(new AbstractTwinCommand<Boolean>() {
+                @Override
+                protected Promise<Boolean> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                    return pf.resolved(twin.getResource("sensiNact-metrics", "metrics", "toto") != null);
                 }
+            }).getValue();
+            if (!found) {
+                Thread.sleep(100);
             }
-        }).getValue();
+        }
+        assertTrue(found, "Resource not found");
     }
 }
