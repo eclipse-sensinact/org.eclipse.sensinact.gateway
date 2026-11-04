@@ -42,7 +42,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.opentest4j.AssertionFailedError;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
+import org.osgi.service.jakartars.runtime.dto.ApplicationDTO;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.postgresql.ds.PGSimpleDataSource;
@@ -51,6 +58,7 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import jakarta.ws.rs.core.Application;
 import tools.jackson.core.type.TypeReference;
 
 /**
@@ -103,6 +111,7 @@ public class HistoryProviderRegisteredAfterApplicationTest extends AbstractInteg
 
     @BeforeEach
     void registerTheApplicationBeforeAnyHistoryProviderExists(TestInfo testInfo,
+            @InjectBundleContext BundleContext bc, @InjectService JakartarsServiceRuntime runtime,
             @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.history.timescale", location = "?")) Configuration historyConfig,
             @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.sensorthings.northbound.rest", location = "?")) Configuration sensorthingsConfig)
             throws Exception {
@@ -111,6 +120,7 @@ public class HistoryProviderRegisteredAfterApplicationTest extends AbstractInteg
         this.historyStorageConfiguration = historyConfig;
 
         selectHistoryProvider(sensorthingsConfig, HISTORY_PROVIDER_NAME);
+        waitForSelectedApplicationDeployed(bc, runtime);
         waitForSensorthingsAPI();
         waitForHistoryProvider(false);
 
@@ -164,6 +174,30 @@ public class HistoryProviderRegisteredAfterApplicationTest extends AbstractInteg
         }
         properties.put("history.provider", providerName);
         sensorthingsConfig.update(properties);
+    }
+
+    /**
+     * Selecting the history provider restarts the application, but the whiteboard deploys the new instance
+     * asynchronously. Until then the previous instance keeps answering, and it never sees a history provider that
+     * registers later, so only wait for the API once the new instance is the deployed one.
+     */
+    private void waitForSelectedApplicationDeployed(BundleContext bc, JakartarsServiceRuntime runtime)
+            throws Exception {
+        String filter = "(&(objectClass=" + Application.class.getName() + ")(test.class=" + getClass().getName()
+                + ")(history.provider=" + HISTORY_PROVIDER_NAME + "))";
+        long timeout = System.currentTimeMillis() + 10000;
+        do {
+            for (ServiceReference<Application> reference : bc.getServiceReferences(Application.class, filter)) {
+                long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);
+                for (ApplicationDTO deployed : runtime.getRuntimeDTO().applicationDTOs) {
+                    if (deployed.serviceId == serviceId) {
+                        return;
+                    }
+                }
+            }
+            Thread.sleep(50);
+        } while (System.currentTimeMillis() < timeout);
+        fail("The application selecting the history provider was not deployed in " + testInfo.getDisplayName());
     }
 
     private void waitForSensorthingsAPI() {
