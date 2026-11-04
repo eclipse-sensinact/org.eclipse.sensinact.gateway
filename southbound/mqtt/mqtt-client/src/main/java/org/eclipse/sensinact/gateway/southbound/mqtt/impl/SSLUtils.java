@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -75,6 +76,34 @@ public class SSLUtils {
         if (array != null) {
             Arrays.fill(array, (char) 0);
         }
+    }
+
+    /**
+     * Checks if the configuration holds TLS settings, for the server or the
+     * client authentication
+     *
+     * @param config MQTT client configuration
+     * @return True if an SSL socket factory must be set up
+     */
+    public static boolean hasTlsSettings(final MqttClientConfiguration config) {
+        final String[] trustedCerts = config.auth_trusted_certs();
+        return hasClientAuthentication(config) || isSet(config.auth_truststore_path())
+                || isSet(config.auth_clientcert_ca_path())
+                || (trustedCerts != null && Arrays.stream(trustedCerts).anyMatch(SSLUtils::isSet));
+    }
+
+    /**
+     * Checks if the configuration holds a client key store or certificate
+     *
+     * @param config MQTT client configuration
+     * @return True if the client must authenticate with a certificate
+     */
+    private static boolean hasClientAuthentication(final MqttClientConfiguration config) {
+        return isSet(config.auth_keystore_path()) || isSet(config.auth_clientcert_path());
+    }
+
+    private static boolean isSet(final String value) {
+        return value != null && !value.isBlank();
     }
 
     /**
@@ -229,7 +258,9 @@ public class SSLUtils {
         final CertKeys keys = new CertKeys();
         try {
             loadTrustStore(config, keys);
-            loadKeyStore(config, keys);
+            if (hasClientAuthentication(config)) {
+                loadKeyStore(config, keys);
+            }
             return setupSSLSocketFactory(keys, config.auth_truststore_default_merge(), config.auth_allow_expired());
         } finally {
             clearArray(keys.keyPassword);
@@ -255,12 +286,18 @@ public class SSLUtils {
             final boolean allowExpired) throws KeyStoreException, IOException, NoSuchAlgorithmException,
             CertificateException, KeyManagementException, UnrecoverableKeyException {
 
-        // Prepare the key manager
-        final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmf.init(keys.keyStore, keys.keyPassword);
+        // Prepare the key manager, if the client authenticates with a certificate
+        final KeyManager[] keyManagers;
+        if (keys.keyStore != null) {
+            final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(keys.keyStore, keys.keyPassword);
+            keyManagers = kmf.getKeyManagers();
+        } else {
+            keyManagers = null;
+        }
 
         // Prepare the trust store
-        if (!keys.trustStore.aliases().hasMoreElements()) {
+        if (!keys.trustStore.aliases().hasMoreElements() && keys.keyStore != null) {
             // Trust store is empty, use the key store instead
             keys.trustStore = keys.keyStore;
         }
@@ -285,7 +322,7 @@ public class SSLUtils {
         }
 
         final SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
-        sslContext.init(kmf.getKeyManagers(), trustManagers, new SecureRandom());
+        sslContext.init(keyManagers, trustManagers, new SecureRandom());
         return sslContext.getSocketFactory();
     }
 }

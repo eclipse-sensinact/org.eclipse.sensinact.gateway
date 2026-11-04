@@ -28,7 +28,10 @@ services:
       - POSTGRES_USER=sensorthings
       - POSTGRES_PASSWORD=ChangeMe
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d sensorthings -U sensorthings "]
+      # Over TCP: the temporary server of the database initialisation only
+      # listens on the Unix socket, and would be seen as ready
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -d sensorthings -U sensorthings"]
       interval: 2s
       timeout: 2s
       retries: 10
+      start_period: 60s

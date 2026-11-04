@@ -18,9 +18,10 @@ The supported configuration keys are:
 * `id`: internal ID of the MQTT client. It will be given to the notified listeners as handler ID
 * `client.id`: MQTT client ID, as given to the broker during connection
 * `client.reconnect.delay`: MQTT client reconnection delay in milliseconds (500ms by default)
-* `protocol`: either `tcp` (default) or `ssl` to choose between plain and SSL connection
+* `protocol`: `tcp` (default) or `ssl` for a plain or TLS connection, `ws` or `wss` for a WebSocket or secure WebSocket connection
 * `host`: host name or IP address of the MQTT broker to connect
 * `port`: port of the MQTT broker to connect (1883 by default)
+* `path`: WebSocket path, only used with `ws` and `wss` (`/` by default)
 * `user`: user name
 * `.password`: user password
 * `topics`: list of topic patterns the client must subscribe to. Joker characters `#` and `+` are supported
@@ -36,15 +37,19 @@ Here is an example of configuration of an MQTT client:
 }
 ```
 
-### MQTT client TLS authentication
+### MQTT client TLS
 
-The MQTT client supports certificate authentication, using either a keystore or a set of PEM files.
+The MQTT client sets up TLS as soon as one of the following options is given:
+* a trust store (`auth.truststore.path`) or trusted certificates (`auth.trusted.certs`, `auth.clientcert.ca.path`), to authenticate a broker whose certificate is not signed by an authority of the Java default trust store
+* a key store (`auth.keystore.path`) or a client certificate (`auth.clientcert.path`), to authenticate the client with a certificate
+
+A broker can be authenticated without any client certificate: the trust options are enough.
 
 ```{note}
-If either a keystore or client certificate is given, the `protocol` configuration will become `ssl` if not explicitly set.
+If any of these options is given, a `tcp` protocol becomes `ssl` and a `ws` protocol becomes `wss`.
 ```
 
-Some options are commons to both kinds of keystore:
+Some options are common to all TLS connections:
 * `auth.allow.expired`: A boolean flag to indicate that expired certificates are considered valid (false by default).
 * `auth.truststore.default.merge`: A boolean flag to indicate if we want to use the Java default trust store in addition to the configured one (true by default).
 
@@ -53,7 +58,7 @@ When relying on a PKCS#12 or a Java (JKS) key store, you can use the following c
 * `auth.keystore.path`: Path to the Java keystore, containing the client certificate
 * `.auth.keystore.password`: Password of the Java keystore
 * `auth.truststore.type`:  Type of Java trust store, either `JKS` or `PKCS12` (default)
-* `auth.truststore.path`: Path to the Java trust store, containing the certificate of the authority that signed the client (and optionally the server) certificate(s).
+* `auth.truststore.path`: Path to the Java trust store, containing the certificates of the authorities to trust: the one that signed the server certificate and, with client authentication, the one that signed the client certificate.
 * `.auth.truststore.password`: Password of the Java trust store
 
 Here is an example:
@@ -98,6 +103,19 @@ Here is an example:
   "auth.clientcert.key": "/secure/client.key",
   ".auth.clientcert.key.password": "secret",
   "auth.allow.expired": true
+}
+```
+
+Here is an example of a broker authenticated by its certificate, without client certificate:
+```json
+{
+  "id": "mqtt-handler-server-auth",
+  "protocol": "ssl",
+  "host": "some.broker.com",
+  "port": 8883,
+  "client.id": "mqtt.client.id",
+  "topics": [ "sensinact/mqtt/test/+" ],
+  "auth.trusted.certs": [ "/secure/broker-ca.pem" ]
 }
 ```
 
