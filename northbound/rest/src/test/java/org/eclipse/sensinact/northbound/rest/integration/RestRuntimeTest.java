@@ -35,6 +35,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.jakartars.runtime.JakartarsServiceRuntime;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
@@ -57,9 +58,10 @@ public class RestRuntimeTest {
             @InjectConfiguration(withConfig = @WithConfiguration(pid = "sensinact.northbound.rest", location = "?", properties = {
                     @Property(key = "allow.anonymous", value = "true"),
                     @Property(key = "foobar", value = "fizz") })) Configuration cm,
-            @InjectService(filter = "(foobar=fizz)", cardinality = 0) ServiceAware<Application> a)
+            @InjectService(filter = "(foobar=fizz)", cardinality = 0) ServiceAware<Application> a,
+            @InjectService JakartarsServiceRuntime runtime)
             throws InterruptedException {
-        a.waitForService(5000);
+        utils.awaitDeployed(runtime, a);
         for (int i = 0; i < 10; i++) {
             try {
                 if (utils.queryStatus("/").statusCode() == 200)
