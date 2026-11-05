@@ -18,6 +18,7 @@ import java.lang.reflect.Array;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -85,7 +86,6 @@ public class HttpDeviceFactory {
      */
     @Activate
     void activate(final HttpDeviceFactoryConfiguration configuration) throws Exception {
-        scheduledExecutor = new ScheduledThreadPoolExecutor(1);
         final ObjectMapper mapper = JsonMapper.builder()
                 .configure(EnumFeature.READ_ENUMS_USING_TO_STRING, false)
                 .configure(EnumFeature.WRITE_ENUMS_USING_TO_STRING, false)
@@ -93,17 +93,61 @@ public class HttpDeviceFactory {
 
         final HttpDeviceFactoryConfigurationTaskDTO[] oneShotTasks = loadTasks(mapper,
                 HttpDeviceFactoryConfigurationTaskDTO.class, configuration.tasks_oneshot());
+        final HttpDeviceFactoryConfigurationPeriodicDTO[] periodicTasks = loadTasks(mapper,
+                HttpDeviceFactoryConfigurationPeriodicDTO.class, configuration.tasks_periodic());
+
+        // Refuse an invalid mapping before running any task
+        validateMappings(oneShotTasks);
+        validateMappings(periodicTasks);
+
+        scheduledExecutor = new ScheduledThreadPoolExecutor(1);
+
         if (oneShotTasks != null) {
             for (HttpDeviceFactoryConfigurationTaskDTO task : oneShotTasks) {
                 runTask(new ParsedHttpTask(task));
             }
         }
 
-        final HttpDeviceFactoryConfigurationPeriodicDTO[] periodicTasks = loadTasks(mapper,
-                HttpDeviceFactoryConfigurationPeriodicDTO.class, configuration.tasks_periodic());
         if (periodicTasks != null) {
             for (HttpDeviceFactoryConfigurationPeriodicDTO task : periodicTasks) {
                 runScheduledTask(new ParsedHttpPeriodicTask(task));
+            }
+        }
+    }
+
+    /**
+     * Adds the description of the source to the context of a payload, so that
+     * the device factory names it in its logs
+     *
+     * @param context Context of the payload (response headers)
+     * @param url     URL of the task
+     * @return A new context with the source
+     */
+    private static Map<String, String> sourceContext(final Map<String, String> context, final String url) {
+        final Map<String, String> withSource = new HashMap<>(context);
+        withSource.put(IDeviceMappingHandler.CONTEXT_SOURCE, "HTTP " + url);
+        return withSource;
+    }
+
+    /**
+     * Checks the mapping of each task
+     *
+     * @param tasks Tasks, can be null
+     * @throws IllegalArgumentException Invalid mapping
+     */
+    private void validateMappings(final HttpDeviceFactoryConfigurationTaskDTO[] tasks) {
+        if (tasks == null) {
+            return;
+        }
+
+        for (final HttpDeviceFactoryConfigurationTaskDTO task : tasks) {
+            if (task.mapping != null) {
+                try {
+                    mappingHandler.validate(task.mapping);
+                } catch (IllegalArgumentException e) {
+                    logger.error("Invalid mapping for {}: {}", task.url, e.getMessage());
+                    throw e;
+                }
             }
         }
     }
@@ -163,7 +207,7 @@ public class HttpDeviceFactory {
             if (task.url.startsWith("file://")) {
                 Path path = Path.of(URI.create(task.url));
                 byte[] content = Files.readAllBytes(path);
-                mappingHandler.handle(task.mapping, Map.of(), content);
+                mappingHandler.handle(task.mapping, sourceContext(Map.of(), task.url), content);
                 return;
             }
 
@@ -211,9 +255,11 @@ public class HttpDeviceFactory {
                     final int status = response.getStatus();
                     if (status >= 200 && status < 300) {
                         try {
-                            mappingHandler.handle(task.mapping, headers.get(), getContent());
+                            mappingHandler.handle(task.mapping, sourceContext(headers.get(), task.url),
+                                    getContent());
                         } catch (DeviceFactoryException e) {
-                            logger.error("Error parsing input from {}: {}", task.url, e.getMessage(), e);
+                            // Already reported by the device factory
+                            logger.debug("Error parsing input from {}: {}", task.url, e.getMessage(), e);
                         }
                     } else {
                         logger.error("HTTP error {} accessing {}", status, task.url);

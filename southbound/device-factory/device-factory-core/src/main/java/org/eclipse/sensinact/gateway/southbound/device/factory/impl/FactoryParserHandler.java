@@ -27,6 +27,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.UnsupportedTemporalTypeException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -72,7 +74,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,6 +144,72 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
+     * Error reporter of each configuration: the callers keep the same
+     * configuration instance as long as it is not updated. The keys are
+     * compared by identity because {@link DeviceMappingConfigurationDTO} does
+     * not override equals(): two sources with the same mapping must not share
+     * their reporter.
+     */
+    private final Map<DeviceMappingConfigurationDTO, ErrorReporter> reporters = Collections
+            .synchronizedMap(new WeakHashMap<>());
+
+    /**
+     * Returns the error reporter of a configuration
+     */
+    private ErrorReporter getReporter(final DeviceMappingConfigurationDTO configuration) {
+        return reporters.computeIfAbsent(configuration, c -> new ErrorReporter(logger, metrics));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Parses every entry of the mapping: invalid policies, entries, resource
+     * paths or variable keys, default values that can't be converted to the
+     * entry type and a missing provider place holder are refused. The parser is
+     * still checked when a payload is handled, as it can be registered later.
+     */
+    @Override
+    public void validate(final DeviceMappingConfigurationDTO configuration) throws IllegalArgumentException {
+        ensureOptions(configuration);
+        try {
+            final RecordState state = computeInitialState(configuration, Map.of());
+            if (state.placeholders.get(KEY_PROVIDER) == null) {
+                throw new IllegalArgumentException("No provider mapping given");
+            }
+            for (final ResourceRecordMapping rcMapping : state.rcMappings) {
+                checkDefaultValue(rcMapping, configuration.mappingOptions);
+            }
+        } catch (InvalidResourcePathException e) {
+            throw new IllegalArgumentException("Invalid mapping: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Gives default options to a configuration with an explicit null
+     * <code>mapping.options</code>, which Jackson leaves null
+     */
+    private static void ensureOptions(final DeviceMappingConfigurationDTO configuration) {
+        if (configuration.mappingOptions == null) {
+            configuration.mappingOptions = new DeviceMappingOptionsDTO();
+        }
+    }
+
+    /**
+     * Checks that the default value of an entry can be converted to its type
+     */
+    private void checkDefaultValue(final ResourceRecordMapping rcMapping, final DeviceMappingOptionsDTO options) {
+        final RecordPath path = rcMapping.getRecordPath();
+        if (path.hasDefaultValue() && path.getDefaultValue() != null) {
+            try {
+                path.convertValue(path.getDefaultValue(), options);
+            } catch (Exception e) {
+                throw new IllegalArgumentException(String.format("Invalid default value for %s: %s",
+                        rcMapping.getResourcePath(), e.getMessage()), e);
+            }
+        }
+    }
+
+    /**
      * New parser service registered
      */
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -181,27 +248,38 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     public void handle(final DeviceMappingConfigurationDTO configuration, final Map<String, String> context,
             final byte[] payload) throws DeviceFactoryException {
 
-        // Check parser ID
+        // The callers only log what this method throws at debug level
+        final ErrorReporter reporter = getReporter(configuration);
+        final String source = context != null ? context.get(CONTEXT_SOURCE) : null;
+        ensureOptions(configuration);
+
         final String parserId = configuration.parser;
-        if (parserId == null || parserId.isBlank()) {
-            throw new MissingParserException("No parser ID given");
-        }
-
-        // Extract mapping information
         final RecordState globalState;
-        try (IMetricTimer timer = metrics.withTimer("device.factory.mapping.setup.time")) {
-            globalState = computeInitialState(configuration, context);
+        final ComponentServiceObjects<IDeviceMappingParser> cso;
+        try {
+            // Check parser ID
+            if (parserId == null || parserId.isBlank()) {
+                throw new MissingParserException("No parser ID given");
+            }
+
+            // Extract mapping information
+            try (IMetricTimer timer = metrics.withTimer("device.factory.mapping.setup.time")) {
+                globalState = computeInitialState(configuration, context);
+            }
+
+            // Check if a provider is set
+            if (globalState.placeholders.get(KEY_PROVIDER) == null) {
+                throw new IllegalArgumentException("No provider mapping given");
+            }
+
+            // Find it
+            cso = findParser(parserId);
+        } catch (DeviceFactoryException | RuntimeException e) {
+            reporter.report(ErrorReporter.Type.CONFIGURATION, configuration.mappingOptions, source, "Can't use the device mapping: {}",
+                    e.getMessage(), e);
+            throw e;
         }
 
-        // Check if a provider is set
-        if (globalState.placeholders.get(KEY_PROVIDER) == null) {
-            throw new IllegalArgumentException("No provider mapping given");
-        }
-
-        final boolean logErrors = configuration.mappingOptions.logErrors;
-
-        // Find it
-        final ComponentServiceObjects<IDeviceMappingParser> cso = findParser(parserId);
         final IDeviceMappingParser parser = cso.getService();
         try {
             // Use it
@@ -217,40 +295,40 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                 for (final IDeviceMappingRecord record : records) {
                     try {
                         try (IMetricTimer timer = metrics.withTimer("device.factory.record.mapping.time")) {
-                            bulk.dtos.addAll(handleRecord(configuration, globalState, record));
+                            bulk.dtos.addAll(handleRecord(configuration, globalState, reporter, source, record));
                         }
-                    } catch (InvalidResourcePathException | ParserException | VariableNotFoundException e) {
-                        if (logErrors) {
-                            logger.error("Error parsing record with parser {}: {}", parserId, e.getMessage(), e);
-                        }
+                    } catch (RejectedRecordException e) {
+                        reporter.report(e.getType(), configuration.mappingOptions, source, "Record rejected by parser {}: {}", parserId,
+                                e.getMessage());
+                    } catch (InvalidResourcePathException | ParserException | VariableNotFoundException
+                            | RuntimeException e) {
+                        // One bad record never drops the others
+                        reporter.report(ErrorReporter.Type.RECORD, configuration.mappingOptions, source, "Error parsing record with parser {}: {}",
+                                parserId, e.getMessage(), e);
                     }
                 }
 
                 if (!bulk.dtos.isEmpty()) {
                     // Send all updates to the gateway thread at once
-                    Promise<?> pushUpdate = dataUpdate.pushUpdate(bulk);
-                    if (logErrors) {
-                        pushUpdate = pushUpdate.onFailure((t) -> {
-                            if (t instanceof FailedUpdatesException) {
-                                for (DataUpdateException ex : ((FailedUpdatesException) t).getFailedUpdates()) {
-                                    logger.error("Error updating digital twin of {}/{}/{} with parser {}: {}",
-                                            ex.getProvider(), ex.getService(), ex.getResource(), parserId,
-                                            ex.getMessage(), ex);
-                                }
-                            } else {
-                                logger.error("Error updating digital twin with parser {}: {}", parserId, t.getMessage(),
-                                        t);
+                    dataUpdate.pushUpdate(bulk).onFailure((t) -> {
+                        if (t instanceof FailedUpdatesException) {
+                            for (DataUpdateException ex : ((FailedUpdatesException) t).getFailedUpdates()) {
+                                reporter.report(ErrorReporter.Type.UPDATE, configuration.mappingOptions, source,
+                                        "Error updating digital twin of {}/{}/{} with parser {}: {}", ex.getProvider(),
+                                        ex.getService(), ex.getResource(), parserId, ex.getMessage(), ex);
                             }
-                        });
-                    }
+                        } else {
+                            reporter.report(ErrorReporter.Type.UPDATE, configuration.mappingOptions, source,
+                                    "Error updating digital twin with parser {}: {}", parserId, t.getMessage(), t);
+                        }
+                    });
                 }
-            } else if (logErrors) {
-                logger.error("No record found by parser {}", parserId);
+            } else {
+                reporter.report(ErrorReporter.Type.NO_RECORD, configuration.mappingOptions, source, "No record found by parser {}", parserId);
             }
         } catch (Exception e) {
-            if (logErrors) {
-                logger.error("Error parsing payload with parser {}", parserId, e);
-            }
+            reporter.report(ErrorReporter.Type.PAYLOAD, configuration.mappingOptions, source, "Error parsing payload with parser {}: {}", parserId,
+                    e.getMessage(), e);
             throw e;
         } finally {
             cso.ungetService(parser);
@@ -272,7 +350,13 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             return value != null ? String.valueOf(value) : null;
         } else {
             final RecordPath path = ((ResourceRecordMapping) mapping).getRecordPath();
-            return record.getFieldString(path, options);
+            final String value = record.getFieldString(path, options);
+            if (value == null && path.hasDefaultValue()) {
+                // Place holders and variables keep their default value on a missing or null field
+                final Object defaultValue = path.getDefaultValue();
+                return defaultValue != null ? String.valueOf(defaultValue) : null;
+            }
+            return value;
         }
     }
 
@@ -290,7 +374,111 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             return ((ResourceLiteralMapping) mapping).getTypedValue(options);
         } else {
             final RecordPath path = ((ResourceRecordMapping) mapping).getRecordPath();
+            final Object value = record.getField(path, options);
+            if (value == null && path.hasDefaultValue()) {
+                // Place holders and variables keep their default value on a missing or null field
+                return getDefaultValue(path, options);
+            }
+            return value;
+        }
+    }
+
+    /**
+     * Returns the default value of an entry, converted to its type
+     *
+     * @param path    Record path of the entry
+     * @param options Device mapping options
+     * @return The converted default value, null if not set
+     */
+    private Object getDefaultValue(final RecordPath path, final DeviceMappingOptionsDTO options) {
+        final Object defaultValue = path.getDefaultValue();
+        return defaultValue != null ? path.convertValue(defaultValue, options) : null;
+    }
+
+    /**
+     * Reads the value of a path entry according to its policies
+     *
+     * @param record   Current record
+     * @param mapping  Entry mapping, with its policies merged over the global ones
+     * @param reporter Error reporter of the configuration
+     * @param source   Description of the source of the payload, can be null
+     * @param provider Provider of the record
+     * @param options  Device mapping options
+     * @return The value, {@link Constants#IGNORE} to skip the entry
+     * @throws RejectedRecordException The value rejects the record
+     */
+    private Object readValue(final IDeviceMappingRecord record, final ResourceRecordMapping mapping,
+            final ErrorReporter reporter, final String source, final String provider,
+            final DeviceMappingOptionsDTO options)
+            throws RejectedRecordException {
+        final MappingPolicies policies = mapping.getPolicies();
+        final RecordPath path = mapping.getRecordPath();
+
+        final boolean present;
+        try {
+            present = record.hasField(path);
+        } catch (Exception e) {
+            // A record that can't be walked is not a value: lenient doesn't apply
+            throw new RejectedRecordException(ErrorReporter.Type.INVALID_VALUE,
+                    String.format("Can't read %s (path %s): %s", target(provider, mapping), path, e.getMessage()),
+                    e);
+        }
+
+        if (!present) {
+            if (!policies.isOptional()) {
+                throw new RejectedRecordException(ErrorReporter.Type.MISSING_VALUE,
+                        String.format("Missing value for %s (path %s)", target(provider, mapping), path));
+            }
+
+            // Normal traffic with optional entries: the message is built only when logged
+            if (reporter.count(ErrorReporter.Type.OPTIONAL_MISSING, options)) {
+                reporter.log(ErrorReporter.Type.OPTIONAL_MISSING, options, source,
+                        "Missing optional value for {} (path {})", target(provider, mapping), path);
+            }
+            return fallback(path, policies, provider, mapping, options);
+        }
+
+        try {
             return record.getField(path, options);
+        } catch (Exception e) {
+            if (!policies.isLenient()) {
+                throw new RejectedRecordException(ErrorReporter.Type.INVALID_VALUE, String.format(
+                        "Invalid value for %s (path %s): %s", target(provider, mapping), path, e.getMessage()), e);
+            }
+
+            if (reporter.count(ErrorReporter.Type.LENIENT_INVALID, options)) {
+                reporter.log(ErrorReporter.Type.LENIENT_INVALID, options, source,
+                        "Invalid value tolerated for {} (path {}): {}", target(provider, mapping), path,
+                        e.getMessage());
+            }
+            return fallback(path, policies, provider, mapping, options);
+        }
+    }
+
+    /**
+     * Describes an entry of a record in the messages, only built on errors
+     */
+    private static String target(final String provider, final ResourceRecordMapping mapping) {
+        return provider + "/" + mapping.getResourcePath();
+    }
+
+    /**
+     * Returns what a tolerated value becomes: ignored or the default value
+     */
+    private Object fallback(final RecordPath path, final MappingPolicies policies, final String provider,
+            final ResourceRecordMapping mapping, final DeviceMappingOptionsDTO options)
+            throws RejectedRecordException {
+        if (!policies.usesDefault()) {
+            return Constants.IGNORE;
+        }
+
+        try {
+            return getDefaultValue(path, options);
+        } catch (Exception e) {
+            throw new RejectedRecordException(ErrorReporter.Type.INVALID_VALUE,
+                    String.format("Invalid default value for %s (path %s): %s", target(provider, mapping), path,
+                            e.getMessage()),
+                    e);
         }
     }
 
@@ -306,7 +494,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
      * @throws VariableNotFoundException    Error resolving variables
      */
     private List<GenericDto> handleRecord(final DeviceMappingConfigurationDTO configuration,
-            final RecordState globalState, final IDeviceMappingRecord record)
+            final RecordState globalState, final ErrorReporter reporter, final String source,
+            final IDeviceMappingRecord record)
             throws InvalidResourcePathException, ParserException, VariableNotFoundException {
 
         final DeviceMappingOptionsDTO options = configuration.mappingOptions;
@@ -366,20 +555,17 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             final String service = rcMapping.getService();
             final String rcName = rcMapping.getResource();
 
-            try {
-                final Object value = record.getField(rcMapping.getRecordPath(), options);
-                if (value != Constants.IGNORE) {
-                    final ValueType valueType = rcMapping.getRecordPath().getValueType();
-                    if (rcMapping.isMetadata()) {
-                        allMetadata.computeIfAbsent(service, k -> new HashMap<>())
-                                .computeIfAbsent(rcName, k -> new HashMap<>()).put(rcMapping.getMetadata(), value);
-                    } else {
-                        bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
-                                valueType.toJavaClass(), timestamp));
-                    }
+            // A value rejected by its policies rejects the whole record
+            final Object value = readValue(record, rcMapping, reporter, source, provider, options);
+            if (value != Constants.IGNORE) {
+                final ValueType valueType = rcMapping.getRecordPath().getValueType();
+                if (rcMapping.isMetadata()) {
+                    allMetadata.computeIfAbsent(service, k -> new HashMap<>())
+                            .computeIfAbsent(rcName, k -> new HashMap<>()).put(rcMapping.getMetadata(), value);
+                } else {
+                    bulk.add(makeDto(modelPackageUri, model, provider, service, rcName, value,
+                            valueType.toJavaClass(), timestamp));
                 }
-            } catch (Exception e) {
-                logger.warn("Error reading mapping for {}/{}/{}: {}", provider, service, rcName, e.getMessage());
             }
         }
 
@@ -492,9 +678,20 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
 
         final ResourceMappingHandler handler = new ResourceMappingHandler();
 
+        // Merged once per payload, not per record
+        final MappingPolicies globalPolicies = MappingPolicies.of(configuration.mappingOptions.policies)
+                .over(MappingPolicies.DEFAULTS);
+
         for (Entry<String, Object> entry : configuration.mapping.entrySet()) {
             final String key = entry.getKey();
             final IResourceMapping mapping = handler.parseMapping(key, entry.getValue());
+            final boolean isVariable = key.startsWith("$") && !key.startsWith("${");
+            if ((key.startsWith("@") || isVariable) && entry.getValue() instanceof Map<?, ?> raw
+                    && raw.containsKey("policies")) {
+                // Policies apply to resources and metadata only
+                throw new IllegalArgumentException("Policies are not supported on " + key);
+            }
+
             if (key.startsWith("@")) {
                 // Placeholder
                 placeholders.put(key, mapping);
@@ -510,7 +707,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                 if (mapping.isLiteral()) {
                     rcLiterals.add((ResourceLiteralMapping) mapping);
                 } else {
-                    rcMappings.add((ResourceRecordMapping) mapping);
+                    final ResourceRecordMapping rcMapping = (ResourceRecordMapping) mapping;
+                    rcMappings.add(rcMapping.withPolicies(rcMapping.getPolicies().over(globalPolicies)));
                 }
             }
         }

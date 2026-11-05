@@ -36,4 +36,16 @@ public interface IDeviceMappingRecord {
      * @return The field value as a string
      */
     String getFieldString(final RecordPath field, final DeviceMappingOptionsDTO options);
+
+    /**
+     * Checks if the field exists in the record, even with a null value. Parsers
+     * that can't tell a missing field from a null one keep this default, which
+     * reads every missing field as a null value.
+     *
+     * @param field Field path
+     * @return True if the field exists in the record
+     */
+    default boolean hasField(final RecordPath field) {
+        return true;
+    }
 }

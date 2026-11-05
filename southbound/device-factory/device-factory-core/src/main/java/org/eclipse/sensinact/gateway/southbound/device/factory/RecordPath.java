@@ -221,7 +221,11 @@ public class RecordPath {
      */
     public RecordPath fillInVariables(final Map<String, String> variables) throws VariableNotFoundException {
         if (VariableSolver.containsVariables(strPath)) {
-            return new RecordPath(VariableSolver.fillInVariables(strPath, variables), valueType);
+            final RecordPath filled = new RecordPath(VariableSolver.fillInVariables(strPath, variables), valueType);
+            // Keep the default value of the entry
+            filled.hasDefaultValue = hasDefaultValue;
+            filled.defaultValue = defaultValue;
+            return filled;
         } else {
             return copy();
         }
