@@ -393,8 +393,8 @@ public class CSVParserTest {
     void testMissingColumn() throws Exception {
         final String mapping = """
                 {"parser": "csv", "parser.options": {"header": true},
-                 "mapping": {"@provider": "Name", "data/value": "Value", %s},
-                 "mapping.options": {"format.date": "d.M.y", "format.time": "H:m"}}""";
+                "mapping": {"@provider": "Name", "data/value": "Value", %s},
+                "mapping.options": {"format.date": "d.M.y", "format.time": "H:m"}}""";
         final byte[] fileContent = readFile("csv/csv-header.csv");
 
         // Default value of the entry
@@ -421,7 +421,7 @@ public class CSVParserTest {
     void testShortRow() throws Exception {
         final DeviceMappingConfigurationDTO config = new ObjectMapper().readValue("""
                 {"parser": "csv", "parser.options": {"header": true},
-                 "mapping": {"@provider": "Name", "data/value": {"path": "Value", "type": "int"}}}""",
+                "mapping": {"@provider": "Name", "data/value": {"path": "Value", "type": "int"}}}""",
                 DeviceMappingConfigurationDTO.class);
         final byte[] payload = "Name,Value\nshort-ok,42\nshort-missing\n".getBytes(StandardCharsets.UTF_8);
 

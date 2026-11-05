@@ -401,7 +401,7 @@ public class JSONParserTest {
     void testNullAndMissingFields() throws Exception {
         final DeviceMappingConfigurationDTO config = new ObjectMapper().readValue("""
                 {"parser": "json", "mapping": {"@provider": "Name",
-                 "data/value": {"path": "Value", "type": "int", "default": 5}}}""",
+                "data/value": {"path": "Value", "type": "int", "default": 5}}}""",
                 DeviceMappingConfigurationDTO.class);
         final byte[] payload = """
                 [{"Name": "JsonNull", "Value": null}, {"Name": "JsonMissing"}]""".getBytes(StandardCharsets.UTF_8);
@@ -421,7 +421,7 @@ public class JSONParserTest {
     void testArrayInPlaceOfAnObject() throws Exception {
         final DeviceMappingConfigurationDTO config = new ObjectMapper().readValue("""
                 {"parser": "json", "mapping": {"@provider": "Name",
-                 "data/value": {"path": "Data/Value", "type": "int"}}}""", DeviceMappingConfigurationDTO.class);
+                "data/value": {"path": "Data/Value", "type": "int"}}}""", DeviceMappingConfigurationDTO.class);
         final byte[] payload = """
                 [{"Name": "JsonObject", "Data": {"Value": 4}}, {"Name": "JsonArray", "Data": [1, 2]}]"""
                 .getBytes(StandardCharsets.UTF_8);
