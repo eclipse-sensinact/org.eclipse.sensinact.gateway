@@ -12,18 +12,25 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.LongSupplier;
 
 import org.eclipse.sensinact.core.metrics.IMetricCounter;
 import org.eclipse.sensinact.core.metrics.IMetricsManager;
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 
 /**
- * Reports the errors of one mapping configuration: the first error of each
- * type is always logged, so that a misconfigured mapping gives a hint, the
- * next ones only when the errors are logged. Every error is counted in the
+ * Reports the errors of one mapping configuration. When the errors are not
+ * logged (<code>log.errors</code> false), the first error of each type is
+ * logged anyway, so that a misconfigured mapping gives a hint, then at most one
+ * per type and per <code>log.errors.interval</code>, with the number of errors
+ * not logged since the previous one: a source that degrades later stays
+ * visible without filling the logs. Every error is counted in the
  * metrics, as <code>device.factory.error.&lt;type&gt;</code>, and every
  * tolerated value as <code>device.factory.tolerated.&lt;type&gt;</code>.
  * <p>
@@ -119,22 +126,49 @@ public class ErrorReporter {
     private final IMetricCounter[] counters;
 
     /**
-     * Types already reported at least once
+     * Value of {@link #lastLogged} before the first log of a type
      */
-    private final AtomicBoolean[] reported;
+    private static final long NEVER = Long.MIN_VALUE;
+
+    /**
+     * Clock, in milliseconds
+     */
+    private final LongSupplier clock;
+
+    /**
+     * Time of the last log of each type, without <code>log.errors</code>
+     */
+    private final AtomicLong[] lastLogged;
+
+    /**
+     * Errors of each type not logged since its last log
+     */
+    private final AtomicLong[] suppressed;
 
     /**
      * @param logger  Logger to use
      * @param metrics Metrics manager, can be null
      */
     public ErrorReporter(final Logger logger, final IMetricsManager metrics) {
+        this(logger, metrics, System::currentTimeMillis);
+    }
+
+    /**
+     * @param logger  Logger to use
+     * @param metrics Metrics manager, can be null
+     * @param clock   Clock in milliseconds, for tests
+     */
+    ErrorReporter(final Logger logger, final IMetricsManager metrics, final LongSupplier clock) {
         this.logger = logger;
+        this.clock = clock;
 
         final Type[] types = Type.values();
-        reported = new AtomicBoolean[types.length];
+        lastLogged = new AtomicLong[types.length];
+        suppressed = new AtomicLong[types.length];
         counters = metrics != null ? new IMetricCounter[types.length] : null;
         for (final Type type : types) {
-            reported[type.ordinal()] = new AtomicBoolean();
+            lastLogged[type.ordinal()] = new AtomicLong(NEVER);
+            suppressed[type.ordinal()] = new AtomicLong();
             if (counters != null) {
                 // Built once: the manager creates a new counter at each call
                 counters[type.ordinal()] = metrics.getCounter(type.getCounterName());
@@ -143,60 +177,93 @@ public class ErrorReporter {
     }
 
     /**
-     * Counts an error and tells if it must be logged: the first of its type, or
-     * any when the errors are logged. Lets the caller build its message only
-     * when it is logged.
+     * Counts an error and tells if it must be logged: always with
+     * <code>log.errors</code>, otherwise the first of its type and then one per
+     * interval. Lets the caller build its message only when it is logged.
      *
-     * @param type      Error type
-     * @param logErrors Value of the <code>log.errors</code> mapping option
+     * @param type    Error type
+     * @param options Mapping options: <code>log.errors</code> and
+     *                <code>log.errors.interval</code>
      * @return True if the error must be logged
      */
-    public boolean count(final Type type, final boolean logErrors) {
-        if (counters != null && counters[type.ordinal()] != null) {
-            counters[type.ordinal()].inc();
+    public boolean count(final Type type, final DeviceMappingOptionsDTO options) {
+        final int index = type.ordinal();
+        if (counters != null && counters[index] != null) {
+            counters[index].inc();
         }
 
-        final AtomicBoolean done = reported[type.ordinal()];
-        // Read first: no write once the type has been reported
-        final boolean first = !done.get() && !done.getAndSet(true);
-        return first || logErrors;
+        if (options.logErrors) {
+            return true;
+        }
+
+        final AtomicLong last = lastLogged[index];
+        final long previous = last.get();
+        final long now = clock.getAsLong();
+        final long interval = options.logErrorsInterval * 1000L;
+        final boolean due = previous == NEVER || (interval > 0 && now - previous >= interval);
+        // Only one of concurrent errors wins the slot
+        if (due && last.compareAndSet(previous, now)) {
+            return true;
+        }
+
+        suppressed[index].incrementAndGet();
+        return false;
     }
 
     /**
-     * Logs an error counted with {@link #count(Type, boolean)}
+     * Logs an error counted with {@link #count(Type, DeviceMappingOptionsDTO)},
+     * with the number of errors of its type not logged since the previous one
      *
-     * @param type      Error type
-     * @param logErrors Value of the <code>log.errors</code> mapping option
-     * @param source    Description of the source of the payload, can be null
-     * @param format    Message format
-     * @param args      Message arguments, the last one can be an exception
+     * @param type    Error type
+     * @param options Mapping options
+     * @param source  Description of the source of the payload, can be null
+     * @param format  Message format
+     * @param args    Message arguments, the last one can be an exception
      */
-    public void log(final Type type, final boolean logErrors, final String source, final String format,
-            final Object... args) {
-        final Object[] safe = safeArguments(logErrors, args);
-        if (source == null) {
-            logger.atLevel(type.getLevel()).log(format, safe);
-        } else {
-            final Object[] withSource = new Object[safe.length + 1];
-            withSource[0] = sanitize(source);
-            System.arraycopy(safe, 0, withSource, 1, safe.length);
-            logger.atLevel(type.getLevel()).log("{}: " + format, withSource);
+    public void log(final Type type, final DeviceMappingOptionsDTO options, final String source,
+            final String format, final Object... args) {
+        final Object[] safe = safeArguments(options.logErrors, args);
+        final long notLogged = suppressed[type.ordinal()].getAndSet(0);
+
+        final StringBuilder fullFormat = new StringBuilder();
+        final List<Object> fullArgs = new ArrayList<>(safe.length + 2);
+        if (source != null) {
+            fullFormat.append("{}: ");
+            fullArgs.add(sanitize(source));
         }
+        fullFormat.append(format);
+        if (notLogged > 0) {
+            fullFormat.append(" ({} similar errors not logged since the previous one)");
+        }
+
+        // The exception, if any, stays last
+        final boolean withThrowable = safe.length > 0 && safe[safe.length - 1] instanceof Throwable;
+        final int plain = withThrowable ? safe.length - 1 : safe.length;
+        for (int i = 0; i < plain; i++) {
+            fullArgs.add(safe[i]);
+        }
+        if (notLogged > 0) {
+            fullArgs.add(notLogged);
+        }
+        if (withThrowable) {
+            fullArgs.add(safe[safe.length - 1]);
+        }
+        logger.atLevel(type.getLevel()).log(fullFormat.toString(), fullArgs.toArray());
     }
 
     /**
      * Counts an error and logs it if needed
      *
-     * @param type      Error type
-     * @param logErrors Value of the <code>log.errors</code> mapping option
-     * @param source    Description of the source of the payload, can be null
-     * @param format    Message format
-     * @param args      Message arguments, the last one can be an exception
+     * @param type    Error type
+     * @param options Mapping options
+     * @param source  Description of the source of the payload, can be null
+     * @param format  Message format
+     * @param args    Message arguments, the last one can be an exception
      */
-    public void report(final Type type, final boolean logErrors, final String source, final String format,
-            final Object... args) {
-        if (count(type, logErrors)) {
-            log(type, logErrors, source, format, args);
+    public void report(final Type type, final DeviceMappingOptionsDTO options, final String source,
+            final String format, final Object... args) {
+        if (count(type, options)) {
+            log(type, options, source, format, args);
         }
     }
 

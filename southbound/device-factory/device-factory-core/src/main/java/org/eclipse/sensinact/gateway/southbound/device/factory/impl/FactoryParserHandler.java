@@ -252,7 +252,6 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
         final ErrorReporter reporter = getReporter(configuration);
         final String source = context != null ? context.get(CONTEXT_SOURCE) : null;
         ensureOptions(configuration);
-        final boolean logErrors = configuration.mappingOptions.logErrors;
 
         final String parserId = configuration.parser;
         final RecordState globalState;
@@ -276,7 +275,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             // Find it
             cso = findParser(parserId);
         } catch (DeviceFactoryException | RuntimeException e) {
-            reporter.report(ErrorReporter.Type.CONFIGURATION, logErrors, source, "Can't use the device mapping: {}",
+            reporter.report(ErrorReporter.Type.CONFIGURATION, configuration.mappingOptions, source, "Can't use the device mapping: {}",
                     e.getMessage(), e);
             throw e;
         }
@@ -299,12 +298,12 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                             bulk.dtos.addAll(handleRecord(configuration, globalState, reporter, source, record));
                         }
                     } catch (RejectedRecordException e) {
-                        reporter.report(e.getType(), logErrors, source, "Record rejected by parser {}: {}", parserId,
+                        reporter.report(e.getType(), configuration.mappingOptions, source, "Record rejected by parser {}: {}", parserId,
                                 e.getMessage());
                     } catch (InvalidResourcePathException | ParserException | VariableNotFoundException
                             | RuntimeException e) {
                         // One bad record never drops the others
-                        reporter.report(ErrorReporter.Type.RECORD, logErrors, source, "Error parsing record with parser {}: {}",
+                        reporter.report(ErrorReporter.Type.RECORD, configuration.mappingOptions, source, "Error parsing record with parser {}: {}",
                                 parserId, e.getMessage(), e);
                     }
                 }
@@ -314,21 +313,21 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                     dataUpdate.pushUpdate(bulk).onFailure((t) -> {
                         if (t instanceof FailedUpdatesException) {
                             for (DataUpdateException ex : ((FailedUpdatesException) t).getFailedUpdates()) {
-                                reporter.report(ErrorReporter.Type.UPDATE, logErrors, source,
+                                reporter.report(ErrorReporter.Type.UPDATE, configuration.mappingOptions, source,
                                         "Error updating digital twin of {}/{}/{} with parser {}: {}", ex.getProvider(),
                                         ex.getService(), ex.getResource(), parserId, ex.getMessage(), ex);
                             }
                         } else {
-                            reporter.report(ErrorReporter.Type.UPDATE, logErrors, source,
+                            reporter.report(ErrorReporter.Type.UPDATE, configuration.mappingOptions, source,
                                     "Error updating digital twin with parser {}: {}", parserId, t.getMessage(), t);
                         }
                     });
                 }
             } else {
-                reporter.report(ErrorReporter.Type.NO_RECORD, logErrors, source, "No record found by parser {}", parserId);
+                reporter.report(ErrorReporter.Type.NO_RECORD, configuration.mappingOptions, source, "No record found by parser {}", parserId);
             }
         } catch (Exception e) {
-            reporter.report(ErrorReporter.Type.PAYLOAD, logErrors, source, "Error parsing payload with parser {}: {}", parserId,
+            reporter.report(ErrorReporter.Type.PAYLOAD, configuration.mappingOptions, source, "Error parsing payload with parser {}: {}", parserId,
                     e.getMessage(), e);
             throw e;
         } finally {
@@ -432,8 +431,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             }
 
             // Normal traffic with optional entries: the message is built only when logged
-            if (reporter.count(ErrorReporter.Type.OPTIONAL_MISSING, options.logErrors)) {
-                reporter.log(ErrorReporter.Type.OPTIONAL_MISSING, options.logErrors, source,
+            if (reporter.count(ErrorReporter.Type.OPTIONAL_MISSING, options)) {
+                reporter.log(ErrorReporter.Type.OPTIONAL_MISSING, options, source,
                         "Missing optional value for {} (path {})", target(provider, mapping), path);
             }
             return fallback(path, policies, provider, mapping, options);
@@ -447,8 +446,8 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
                         "Invalid value for %s (path %s): %s", target(provider, mapping), path, e.getMessage()), e);
             }
 
-            if (reporter.count(ErrorReporter.Type.LENIENT_INVALID, options.logErrors)) {
-                reporter.log(ErrorReporter.Type.LENIENT_INVALID, options.logErrors, source,
+            if (reporter.count(ErrorReporter.Type.LENIENT_INVALID, options)) {
+                reporter.log(ErrorReporter.Type.LENIENT_INVALID, options, source,
                         "Invalid value tolerated for {} (path {}): {}", target(provider, mapping), path,
                         e.getMessage());
             }
