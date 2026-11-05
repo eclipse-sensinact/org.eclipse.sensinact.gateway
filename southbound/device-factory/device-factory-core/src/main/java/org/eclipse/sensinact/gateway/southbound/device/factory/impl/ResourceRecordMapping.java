@@ -30,6 +30,11 @@ public class ResourceRecordMapping extends AbstractResourceMapping {
     private final RecordPath recordPath;
 
     /**
+     * Policies set on the entry, over the global ones
+     */
+    private final MappingPolicies policies;
+
+    /**
      * Parses the resource path
      *
      * @param rcPath     Mapping resource path
@@ -37,13 +42,48 @@ public class ResourceRecordMapping extends AbstractResourceMapping {
      * @throws InvalidResourcePathException Error parsing the resource path
      */
     public ResourceRecordMapping(final String rcPath, final RecordPath recordPath) throws InvalidResourcePathException {
+        this(rcPath, recordPath, MappingPolicies.NONE);
+    }
+
+    /**
+     * Parses the resource path
+     *
+     * @param rcPath     Mapping resource path
+     * @param recordPath Mapping record path
+     * @param policies   Policies set on the entry
+     * @throws InvalidResourcePathException Error parsing the resource path
+     */
+    public ResourceRecordMapping(final String rcPath, final RecordPath recordPath, final MappingPolicies policies)
+            throws InvalidResourcePathException {
         super(rcPath);
         this.recordPath = recordPath;
+        this.policies = policies;
     }
 
     @Override
     protected IResourceMapping newInstance(final String path) throws InvalidResourcePathException {
-        return new ResourceRecordMapping(path, recordPath);
+        return new ResourceRecordMapping(path, recordPath, policies);
+    }
+
+    /**
+     * Returns the policies of the entry
+     */
+    public MappingPolicies getPolicies() {
+        return policies;
+    }
+
+    /**
+     * Returns a copy of this mapping with other policies
+     *
+     * @param newPolicies Policies of the copy
+     * @return The copy, or this mapping if the policies are the same
+     * @throws InvalidResourcePathException Invalid resource path
+     */
+    public ResourceRecordMapping withPolicies(final MappingPolicies newPolicies) throws InvalidResourcePathException {
+        if (policies.equals(newPolicies)) {
+            return this;
+        }
+        return new ResourceRecordMapping(getResourcePath(), recordPath, newPolicies);
     }
 
     @Override
@@ -80,6 +120,6 @@ public class ResourceRecordMapping extends AbstractResourceMapping {
             newRcPath = VariableSolver.fillInVariables(newRcPath, variables);
         }
 
-        return new ResourceRecordMapping(newRcPath, newRecordPath);
+        return new ResourceRecordMapping(newRcPath, newRecordPath, policies);
     }
 }

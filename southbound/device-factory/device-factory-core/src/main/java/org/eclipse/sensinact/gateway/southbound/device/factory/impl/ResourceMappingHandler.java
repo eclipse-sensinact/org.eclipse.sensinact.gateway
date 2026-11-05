@@ -12,12 +12,14 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.sensinact.gateway.southbound.device.factory.IResourceMapping;
 import org.eclipse.sensinact.gateway.southbound.device.factory.InvalidResourcePathException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
 import org.eclipse.sensinact.gateway.southbound.device.factory.ValueType;
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.MappingPolicy;
 
 public class ResourceMappingHandler {
 
@@ -43,6 +45,17 @@ public class ResourceMappingHandler {
      * Type of resource behind the path
      */
     private final static String KEY_TYPE = "type";
+
+    /**
+     * Policies of a path-based entry, over the global ones
+     */
+    private final static String KEY_POLICIES = "policies";
+
+    /**
+     * Policies implied by a default value: a missing value takes it
+     */
+    private final static MappingPolicies DEFAULT_VALUE_POLICIES = MappingPolicies
+            .of(List.of(MappingPolicy.OPTIONAL, MappingPolicy.DEFAULT));
 
     /**
      * Parses a mapping configuration
@@ -83,6 +96,9 @@ public class ResourceMappingHandler {
         }
 
         if (mapping.containsKey(KEY_LITERAL)) {
+            if (mapping.containsKey(KEY_POLICIES)) {
+                throw new IllegalArgumentException("Policies are not supported on the literal entry " + key);
+            }
             return new ResourceLiteralMapping(key, valueType, mapping.get(KEY_LITERAL));
         } else if (mapping.containsKey(KEY_PATH)) {
             return loadRecordMapping(key, valueType, mapping);
@@ -100,10 +116,13 @@ public class ResourceMappingHandler {
         }
 
         final RecordPath recordPath = RecordPath.fromObject(rawPath, valueType);
+        MappingPolicies policies = MappingPolicies.parse(rawMapping.get(KEY_POLICIES));
         if (rawMapping.containsKey(KEY_DEFAULT)) {
             recordPath.setDefaultValue(rawMapping.get(KEY_DEFAULT));
+            // Keeps the behaviour of the mappings written before the policies
+            policies = policies.over(DEFAULT_VALUE_POLICIES);
         }
 
-        return new ResourceRecordMapping(key, recordPath);
+        return new ResourceRecordMapping(key, recordPath, policies);
     }
 }

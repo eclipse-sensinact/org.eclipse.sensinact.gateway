@@ -105,6 +105,13 @@ public class MqttDeviceFactoryHandler implements IMqttMessageListener {
             throw new IllegalArgumentException("Invalid mapping configuration", e);
         }
 
+        try {
+            mappingHandler.validate(mappingConfiguration);
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid MQTT mapping configuration: {}", e.getMessage());
+            throw e;
+        }
+
         // Register the listener service
         final BundleContext context = componentContext.getBundleContext();
         final Hashtable<String, Object> properties = new Hashtable<>();
@@ -136,11 +143,15 @@ public class MqttDeviceFactoryHandler implements IMqttMessageListener {
         Map<String, String> context = new HashMap<>();
         context.put("handlerId", handlerId);
         fillTopicSegments(topic, context);
+        // Named by the device factory in its logs
+        context.put(IDeviceMappingHandler.CONTEXT_SOURCE,
+                String.format("MQTT handler '%s', topic '%s'", handlerId, topic));
 
         try {
             mappingHandler.handle(mappingConfiguration, context, message.getPayload());
         } catch (DeviceFactoryException e) {
-            logger.error("Error handling MQTT payload from handler '{}' on topic '{}': {}", handlerId, topic,
+            // Already reported by the device factory
+            logger.debug("Error handling MQTT payload from handler '{}' on topic '{}': {}", handlerId, topic,
                     e.getMessage(), e);
         }
     }

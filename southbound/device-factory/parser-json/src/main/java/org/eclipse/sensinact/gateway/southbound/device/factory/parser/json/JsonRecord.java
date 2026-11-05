@@ -55,7 +55,12 @@ public class JsonRecord implements IDeviceMappingRecord {
      */
     private JsonNode getPath(JsonNode node, RecordPath pathPart) {
         if (node.isArray()) {
-            return node.get(pathPart.asInt());
+            try {
+                return node.get(pathPart.asInt());
+            } catch (NumberFormatException e) {
+                // A name can't index an array: the field is missing
+                return null;
+            }
         }
 
         return node.get(pathPart.asString());
@@ -75,14 +80,17 @@ public class JsonRecord implements IDeviceMappingRecord {
         return current;
     }
 
+    @Override
+    public boolean hasField(final RecordPath field) {
+        // An explicit null is a value
+        return walkPath(field) != null;
+    }
+
     private Object getRawField(RecordPath field) {
+        // The device factory applies the default value, according to the policies
         final JsonNode node = walkPath(field);
         if (node == null || node.isNull()) {
-            if (field.hasDefaultValue()) {
-                return field.getDefaultValue();
-            } else {
-                return null;
-            }
+            return null;
         }
 
         if (node.isObject()) {
@@ -127,15 +135,9 @@ public class JsonRecord implements IDeviceMappingRecord {
     @Override
     public String getFieldString(RecordPath field, final DeviceMappingOptionsDTO options) {
         final JsonNode node = walkPath(field);
-        if (node != null && node.isValueNode()) {
+        if (node != null && node.isValueNode() && !node.isNull()) {
             return node.asText();
         }
-
-        if (field.hasDefaultValue()) {
-            final Object defaultValue = field.getDefaultValue();
-            return defaultValue != null ? String.valueOf(defaultValue) : null;
-        } else {
-            return null;
-        }
+        return null;
     }
 }

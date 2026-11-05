@@ -684,4 +684,42 @@ public class HttpDeviceFactoryTest {
             config.delete();
         }
     }
+
+    @Test
+    void testInvalidPoliciesRefused() throws Exception {
+        final Logger logger = (Logger) LoggerFactory.getLogger(HttpDeviceFactory.class);
+        final BlockingQueue<String> queue = new ArrayBlockingQueue<String>(128);
+        final AppenderBase<ILoggingEvent> logSpy = new AppenderBase<>() {
+            @Override
+            protected void append(ILoggingEvent eventObject) {
+                queue.offer(eventObject.getFormattedMessage());
+            }
+        };
+        logSpy.start();
+        logger.addAppender(logSpy);
+
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            final DeviceMappingConfigurationDTO mappingConf = new DeviceMappingConfigurationDTO();
+            mappingConf.parser = "json";
+            mappingConf.mapping = Map.of("@provider", "provider", "data/value",
+                    Map.of("path", "value", "policies", List.of("optional", "required")));
+
+            final Map<String, Object> httpMapping = Map.of("url", "http://localhost:" + httpPort + "/static",
+                    "mapping", mappingConf);
+            config.update(new Hashtable<>(Map.of("tasks.oneshot", mapper.writeValueAsString(List.of(httpMapping)))));
+
+            // The configuration is refused before any task runs
+            String message;
+            do {
+                message = queue.poll(5, TimeUnit.SECONDS);
+            } while (message != null && !message.startsWith("Invalid mapping"));
+            assertNotNull(message, "Invalid policies accepted");
+            assertTrue(message.contains("optional") && message.contains("required"), message);
+        } finally {
+            logger.detachAppender(logSpy);
+            logSpy.stop();
+            config.delete();
+        }
+    }
 }

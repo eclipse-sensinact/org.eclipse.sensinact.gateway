@@ -22,7 +22,21 @@ import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMapping
 public interface IDeviceMappingHandler {
 
     /**
-     * Handles the content of the given payload and updates resources accordingly
+     * Context entry describing the source of a payload, for example the MQTT
+     * handler and topic or the HTTP URL: the handler names it in its log
+     * messages
+     */
+    String CONTEXT_SOURCE = "source";
+
+    /**
+     * Handles the content of the given payload and updates resources accordingly.
+     * <p>
+     * Callers must give the same configuration instance as long as the
+     * configuration doesn't change: the reporting of errors (the first error of
+     * each kind is always logged) is kept per instance. The device factory
+     * implementation reports the errors itself, so its callers can log what
+     * this method throws at debug level; they should describe the source of the
+     * payload in the {@link #CONTEXT_SOURCE} entry of the context.
      *
      * @param configuration Mapping configuration (must contain the parser ID)
      * @param payload       Raw content to parse
@@ -30,5 +44,15 @@ public interface IDeviceMappingHandler {
      */
     void handle(DeviceMappingConfigurationDTO configuration, Map<String, String> context, byte[] payload)
             throws MissingParserException, InvalidResourcePathException, ParserException, DeviceFactoryException;
+
+    /**
+     * Checks a mapping configuration before using it, so that an invalid one can
+     * be refused when it is set rather than at each payload
+     *
+     * @param configuration Mapping configuration
+     * @throws IllegalArgumentException Invalid configuration
+     */
+    default void validate(DeviceMappingConfigurationDTO configuration) throws IllegalArgumentException {
+    }
 
 }

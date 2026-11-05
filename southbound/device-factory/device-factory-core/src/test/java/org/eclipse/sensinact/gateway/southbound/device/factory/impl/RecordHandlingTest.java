@@ -13,7 +13,9 @@
 package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.time.Instant;
@@ -30,14 +32,17 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
+import org.eclipse.sensinact.core.metrics.IMetricCounter;
 import org.eclipse.sensinact.core.metrics.IMetricsManager;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.BulkGenericDto;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
 import org.eclipse.sensinact.gateway.geojson.Point;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingParser;
+import org.eclipse.sensinact.gateway.southbound.device.factory.MissingParserException;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingConfigurationDTO;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
+import org.eclipse.sensinact.gateway.southbound.device.factory.dto.MappingPolicy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -539,5 +544,292 @@ public class RecordHandlingTest {
         deviceMapper.handle(config, Map.of(), new byte[0]);
         GenericDto dtoFullzone = getResourceValue("provider", "data", "val");
         assertEquals(Instant.parse("2026-08-11T09:57:22Z"), dtoFullzone.timestamp);
+    }
+
+    /**
+     * Two records: a valid one for provider "ok" and the given one for provider
+     * "test", both with a "data/value" integer entry and a "data/other" one
+     */
+    private void setPolicyRecords(final Map<String, Object> tested) {
+        final Map<String, Object> valid = Map.of("p", "ok", "val", 1, "other", "a");
+        final Map<String, Object> record = new HashMap<>(tested);
+        record.put("p", "test");
+        record.put("other", "b");
+        parser.setRecords(List.of(new MapRecord(valid), new MapRecord(record)));
+    }
+
+    private DeviceMappingConfigurationDTO preparePolicyConfig(final Object valueMapping,
+            final MappingPolicy... globalPolicies) {
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+        config.mapping.put("@provider", "p");
+        config.mapping.put("data/value", valueMapping);
+        config.mapping.put("data/other", "other");
+        config.mappingOptions.policies = List.of(globalPolicies);
+        return config;
+    }
+
+    /**
+     * Checks that the valid record was applied and the tested one rejected
+     */
+    private void assertTestedRecordRejected() {
+        assertEquals(1, getResourceValue("ok", "data", "value", Integer.class));
+        assertNull(getResourceValue("test", "data", "other"), "Record not rejected");
+    }
+
+    @Test
+    void testMissingRequiredValueRejectsRecord() throws Exception {
+        setPolicyRecords(Map.of());
+        deviceMapper.handle(preparePolicyConfig(Map.of("path", "val", "type", "int")), Map.of(), new byte[0]);
+        assertTestedRecordRejected();
+    }
+
+    @Test
+    void testInvalidStrictValueRejectsRecord() throws Exception {
+        setPolicyRecords(Map.of("val", "n/a"));
+        deviceMapper.handle(preparePolicyConfig(Map.of("path", "val", "type", "int")), Map.of(), new byte[0]);
+        assertTestedRecordRejected();
+    }
+
+    @Test
+    void testOptionalMissingValueIgnored() throws Exception {
+        setPolicyRecords(Map.of());
+        deviceMapper.handle(preparePolicyConfig(Map.of("path", "val", "type", "int"), MappingPolicy.OPTIONAL),
+                Map.of(), new byte[0]);
+        assertEquals("b", getResourceValue("test", "data", "other", String.class));
+        assertNull(getResourceValue("test", "data", "value"), "Ignored value sent");
+    }
+
+    @Test
+    void testOptionalMissingValueWithoutDefaultIsNull() throws Exception {
+        setPolicyRecords(Map.of());
+        deviceMapper.handle(preparePolicyConfig(
+                Map.of("path", "val", "type", "int", "policies", List.of("optional", "default"))), Map.of(),
+                new byte[0]);
+        final GenericDto dto = getResourceValue("test", "data", "value");
+        assertNotNull(dto, "Default value not sent");
+        assertNull(dto.value);
+    }
+
+    @Test
+    void testLenientInvalidValueIgnored() throws Exception {
+        setPolicyRecords(Map.of("val", "n/a"));
+        deviceMapper.handle(preparePolicyConfig(Map.of("path", "val", "type", "int"), MappingPolicy.LENIENT),
+                Map.of(), new byte[0]);
+        assertEquals("b", getResourceValue("test", "data", "other", String.class));
+        assertNull(getResourceValue("test", "data", "value"), "Ignored value sent");
+    }
+
+    @Test
+    void testLenientInvalidValueTakesDefault() throws Exception {
+        setPolicyRecords(Map.of("val", "n/a"));
+        // The default key implies the default fallback
+        deviceMapper.handle(preparePolicyConfig(
+                Map.of("path", "val", "type", "int", "default", "0", "policies", List.of("lenient"))), Map.of(),
+                new byte[0]);
+        assertEquals(0, getResourceValue("test", "data", "value", Integer.class));
+    }
+
+    @Test
+    void testDefaultKeyAppliesToMissingValue() throws Exception {
+        setPolicyRecords(Map.of());
+        // Mapping written before the policies: still valid
+        deviceMapper.handle(preparePolicyConfig(Map.of("path", "val", "type", "int", "default", 7)), Map.of(),
+                new byte[0]);
+        assertEquals(7, getResourceValue("test", "data", "value", Integer.class));
+    }
+
+    @Test
+    void testDefaultKeyKeptWithVariablePath() throws Exception {
+        setPolicyRecords(Map.of());
+        deviceMapper.handle(preparePolicyConfig(Map.of("path", "${context.field}", "type", "int", "default", 3)),
+                Map.of("field", "missing"), new byte[0]);
+        assertEquals(3, getResourceValue("test", "data", "value", Integer.class));
+    }
+
+    @Test
+    void testExplicitNullIsNull() throws Exception {
+        final Map<String, Object> record = new HashMap<>();
+        record.put("val", null);
+        setPolicyRecords(record);
+        deviceMapper.handle(preparePolicyConfig(Map.of("path", "val", "type", "int", "default", 7)), Map.of(),
+                new byte[0]);
+        final GenericDto dto = getResourceValue("test", "data", "value");
+        assertNotNull(dto, "Null value not sent");
+        assertNull(dto.value, "Default value applied to an explicit null");
+    }
+
+    @Test
+    void testEntryOverridesGlobalPoliciesByPair() throws Exception {
+        final DeviceMappingConfigurationDTO config = preparePolicyConfig(
+                Map.of("path", "val", "type", "int", "policies", List.of("required")), MappingPolicy.OPTIONAL,
+                MappingPolicy.LENIENT);
+
+        // The entry is required: a missing value rejects the record
+        setPolicyRecords(Map.of());
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        assertTestedRecordRejected();
+
+        // The entry keeps the global lenient policy
+        bulks.clear();
+        setPolicyRecords(Map.of("val", "n/a"));
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        assertEquals("b", getResourceValue("test", "data", "other", String.class));
+        assertNull(getResourceValue("test", "data", "value"), "Ignored value sent");
+    }
+
+    @Test
+    void testValidatePolicies() throws Exception {
+        deviceMapper.validate(preparePolicyConfig(Map.of("path", "val", "policies", List.of("Optional", "DEFAULT")),
+                MappingPolicy.LENIENT));
+
+        assertThrows(IllegalArgumentException.class, () -> deviceMapper
+                .validate(preparePolicyConfig(Map.of("path", "val", "policies", List.of("optional", "required")))));
+        assertThrows(IllegalArgumentException.class,
+                () -> deviceMapper.validate(preparePolicyConfig(Map.of("path", "val", "policies", List.of("lax")))));
+        assertThrows(IllegalArgumentException.class,
+                () -> deviceMapper.validate(preparePolicyConfig(Map.of("path", "val", "policies", "optional"))));
+        assertThrows(IllegalArgumentException.class, () -> deviceMapper
+                .validate(preparePolicyConfig("val", MappingPolicy.STRICT, MappingPolicy.LENIENT)));
+
+        // Not a policy matter: still checked when a payload is handled
+        final DeviceMappingConfigurationDTO noParser = preparePolicyConfig("val");
+        noParser.parser = null;
+        deviceMapper.validate(noParser);
+    }
+
+    @Test
+    void testArrayInPlaceOfAnObjectRejectsOnlyItsRecord() throws Exception {
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+        config.mapping.put("@provider", "p");
+        config.mapping.put("data/value", "d/h");
+        parser.setRecords(List.of(new MapRecord(Map.of("p", "ok", "d", Map.of("h", 1))),
+                new MapRecord(Map.of("p", "test", "d", List.of(1, 2)))));
+
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        assertEquals(1, getResourceValue("ok", "data", "value", Integer.class));
+        assertNull(getResourceValue("test", "data", "value"), "Record not rejected");
+    }
+
+    @Test
+    void testUnusableConfigurationIsCounted() throws Exception {
+        final IMetricCounter counter = Mockito.mock(IMetricCounter.class);
+        Mockito.when(deviceMapper.metrics.getCounter("device.factory.error.configuration")).thenReturn(counter);
+
+        final DeviceMappingConfigurationDTO config = preparePolicyConfig("val");
+        config.parser = "unknown";
+        assertThrows(MissingParserException.class, () -> deviceMapper.handle(config, Map.of(), new byte[0]));
+        Mockito.verify(counter).inc();
+    }
+
+    @Test
+    void testRejectionsAreCounted() throws Exception {
+        final IMetricCounter counter = Mockito.mock(IMetricCounter.class);
+        Mockito.when(deviceMapper.metrics.getCounter("device.factory.error.missing_value")).thenReturn(counter);
+
+        setPolicyRecords(Map.of());
+        final DeviceMappingConfigurationDTO config = preparePolicyConfig(Map.of("path", "val", "type", "int"));
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        Mockito.verify(counter, Mockito.times(2)).inc();
+    }
+
+    @Test
+    void testMetadataEntryPolicies() throws Exception {
+        setPolicyRecords(Map.of());
+        final DeviceMappingConfigurationDTO config = preparePolicyConfig("val");
+        config.mapping.put("data/value/unit", Map.of("path", "unit", "default", "%"));
+
+        // The default key makes the metadata optional
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        assertEquals("%", getResourceMetadata("ok", "data", "value", "unit"));
+
+        // Required by default: the record is rejected
+        bulks.clear();
+        config.mapping.put("data/value/unit", "unit");
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        assertNull(getResourceValue("ok", "data", "value"), "Record not rejected");
+    }
+
+    @Test
+    void testNullActionAppliesToAnExplicitNull() throws Exception {
+        final Map<String, Object> record = new HashMap<>();
+        record.put("val", null);
+        setPolicyRecords(record);
+        final DeviceMappingConfigurationDTO config = preparePolicyConfig(Map.of("path", "val", "type", "int"));
+        config.mappingOptions.nullAction = NullAction.IGNORE;
+
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        final GenericDto dto = getResourceValue("test", "data", "value");
+        assertNotNull(dto, "Null value not sent");
+        assertNull(dto.value);
+        assertEquals(NullAction.IGNORE, dto.nullAction);
+    }
+
+    @Test
+    void testValidateDefaultsAndUnsupportedPolicies() throws Exception {
+        // A default value that can't be converted to the entry type
+        assertThrows(IllegalArgumentException.class, () -> deviceMapper
+                .validate(preparePolicyConfig(Map.of("path", "val", "type", "int", "default", "n/a"))));
+
+        // Policies on a place holder, a variable or a literal
+        final DeviceMappingConfigurationDTO placeholder = preparePolicyConfig("val");
+        placeholder.mapping.put("@name", Map.of("path", "n", "policies", List.of("optional")));
+        assertThrows(IllegalArgumentException.class, () -> deviceMapper.validate(placeholder));
+
+        final DeviceMappingConfigurationDTO variable = preparePolicyConfig("val");
+        variable.mapping.put("$v", Map.of("path", "n", "policies", List.of("optional")));
+        assertThrows(IllegalArgumentException.class, () -> deviceMapper.validate(variable));
+
+        assertThrows(IllegalArgumentException.class, () -> deviceMapper.validate(
+                preparePolicyConfig(Map.of("literal", "x", "policies", List.of("optional")))));
+
+        // A resource named after a variable is not a variable
+        final DeviceMappingConfigurationDTO named = preparePolicyConfig("val");
+        named.mapping.put("${context.svc}/data", Map.of("path", "val", "policies", List.of("optional")));
+        deviceMapper.validate(named);
+
+        // The provider is required
+        final DeviceMappingConfigurationDTO noProvider = preparePolicyConfig("val");
+        noProvider.mapping.remove("@provider");
+        assertThrows(IllegalArgumentException.class, () -> deviceMapper.validate(noProvider));
+    }
+
+    @Test
+    void testNullMappingOptions() throws Exception {
+        setPolicyRecords(Map.of("val", 2));
+        final DeviceMappingConfigurationDTO config = preparePolicyConfig(Map.of("path", "val", "type", "int"));
+        config.mappingOptions = null;
+
+        deviceMapper.validate(config);
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        assertEquals(2, getResourceValue("test", "data", "value", Integer.class));
+    }
+
+    @Test
+    void testPoliciesOnAVariableNamedResource() throws Exception {
+        setPolicyRecords(Map.of());
+        final DeviceMappingConfigurationDTO config = preparePolicyConfig("val");
+        config.mapping.remove("data/value");
+        config.mapping.put("${context.svc}/value", Map.of("path", "val", "type", "int", "policies", List.of("optional")));
+
+        deviceMapper.handle(config, Map.of("svc", "data"), new byte[0]);
+        // Missing but optional: the record is applied without the value
+        assertEquals("b", getResourceValue("test", "data", "other", String.class));
+        assertNull(getResourceValue("test", "data", "value"));
+    }
+
+    @Test
+    void testUnparseableDateRejectsOnlyItsRecord() throws Exception {
+        // Worked example 3 of the specification, KP-89
+        final DeviceMappingConfigurationDTO config = prepareConfig();
+        config.mapping.put("@provider", "p");
+        config.mapping.put("@datetime", "time");
+        config.mapping.put("data/value", "val");
+        parser.setRecords(List.of(new MapRecord(Map.of("p", "IST-0001", "time", "2026-10-12T08:00:00Z", "val", 1)),
+                new MapRecord(Map.of("p", "IST-0002", "time", "not-a-date", "val", 2))));
+
+        deviceMapper.handle(config, Map.of(), new byte[0]);
+        assertEquals(1, getResourceValue("IST-0001", "data", "value", Integer.class));
+        assertNull(getResourceValue("IST-0002", "data", "value"), "Record with a bad date applied");
     }
 }
