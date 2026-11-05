@@ -24,9 +24,9 @@ public interface IDeviceMappingHandler {
     /**
      * Context entry describing the source of a payload, for example the MQTT
      * handler and topic or the HTTP URL: the handler names it in its log
-     * messages
+     * messages. Namespaced so that it does not hide an HTTP response header.
      */
-    String CONTEXT_SOURCE = "source";
+    String CONTEXT_SOURCE = "sensinact.source";
 
     /**
      * Handles the content of the given payload and updates resources accordingly.

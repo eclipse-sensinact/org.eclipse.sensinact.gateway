@@ -70,8 +70,8 @@ public class ErrorReporterTest {
         verify(logger, times(1)).atLevel(Level.ERROR);
 
         // Another type is reported once too, at its own level
-        reporter.report(ErrorReporter.Type.OPTIONAL_MISSING, QUIET, null, "first warning");
-        reporter.report(ErrorReporter.Type.OPTIONAL_MISSING, QUIET, null, "second warning");
+        reporter.report(ErrorReporter.Type.LENIENT_INVALID, QUIET, null, "first warning");
+        reporter.report(ErrorReporter.Type.LENIENT_INVALID, QUIET, null, "second warning");
         verify(logger, times(1)).atLevel(Level.WARN);
 
         // A warning doesn't hide the first error of another type
@@ -136,6 +136,13 @@ public class ErrorReporterTest {
 
         reporter.report(ErrorReporter.Type.RECORD, QUIET, "MQTT handler 'h', topic 'a/b'", "Error: {}", "value");
         verify(builder).log("{}: Error: {}", new Object[] { "MQTT handler 'h', topic 'a/b'", "value" });
+    }
+
+    @Test
+    void testOptionalMissingAtDebug() {
+        // Expected by the mapping: never above debug
+        assertEquals(Level.DEBUG, ErrorReporter.Type.OPTIONAL_MISSING.getLevel());
+        assertEquals(Level.WARN, ErrorReporter.Type.LENIENT_INVALID.getLevel());
     }
 
     @Test
