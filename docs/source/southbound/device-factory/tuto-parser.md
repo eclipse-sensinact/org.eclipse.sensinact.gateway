@@ -35,7 +35,7 @@ This `IDeviceMappingParser` interface defines only one method:
 The parser will extract records from the payload. Usually, we consider one record per provider update, but it is also possible to have one record per service or even per resource.
 Note that it is not possible to have one record for multiple providers.
 
-A parser record must implement the `org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord` interface that defined 2 methods:
+A parser record must implement the `org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord` interface that defines 2 methods, and a third one with a default implementation:
 * ```java
   Object getField(RecordPath field, DeviceMappingOptionsDTO options)
   ```
@@ -51,6 +51,16 @@ A parser record must implement the `org.eclipse.sensinact.gateway.southbound.dev
   It accepts the following arguments:
   * `field`: path to the value, as defined in the device mapping configuration. This also contains the expected value type, the default value...
   * `options`: device mapping options as given in the configuration: numbers locale, date/time format...
+
+* ```java
+  boolean hasField(RecordPath field)
+  ```
+  This method tells if the field exists in the record, even with a `null` value.
+  The device factory uses it to apply the [missing value policies](core.md#missing-and-invalid-values).
+  The default implementation returns `true`: a parser that doesn't override it reads every missing field as a `null` value.
+
+`getField` and `getFieldString` must return `null` for a missing field: the device factory applies the default value of the entry itself, according to its policies.
+A value that can't be converted to the expected type must throw an exception: the device factory handles it according to the conversion policies.
 
 Each parser should implement its own Record object.
 

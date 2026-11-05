@@ -241,6 +241,11 @@ It is also possible to set a default value:
 
 The record path configuration can define a default value.
 The default value will be treated as if it was read by the parser and will therefore be converted to the value type, if defined.
+A default value that can't be converted to the value type is refused when the configuration is loaded.
+
+The default value is used when the field is missing from the record: an entry with a `default` key behaves as if it had the `optional` and `default` [policies](#missing-and-invalid-values).
+An explicit `null` value in the record is a value: it is kept as `null` and doesn't take the default value of a resource or metadata entry.
+Place holders (`@provider`, `@name`...) and variables still take their default value when their field is missing or `null`.
 
 ```json
 {
@@ -294,6 +299,49 @@ And the following configuration:
 We will have the provider friendly name set to "Thomas" and the "greet" service will have two resources:
 * "hello": "Hello Thomas!"
 * "bye": "Bye Thomas!"
+
+### Missing and invalid values
+
+A resource or metadata entry can't always be read from a record:
+* its field can be missing from the record;
+* its value can't be converted to the value type of the entry, for example `"n/a"` for an `int`.
+
+By default, both cases reject the whole record: none of its values is applied, the other records of the payload are still handled, and the error is logged (see [error handling](#error-handling-options)).
+An explicit `null` value is not an error: the resource is set to `null`, according to the `null.action` option.
+
+This behaviour is set by policies, given as an array in the `policies` key of the mapping options, for all entries, or of an entry.
+The policies go by pairs of opposites:
+
+| Pair | Policies | Default | Case |
+|------|----------|---------|------|
+| Presence | `required` / `optional` | `required` | The field is missing from the record |
+| Conversion | `strict` / `lenient` | `strict` | The value can't be converted to the value type |
+| Fallback | `ignore` / `default` | `ignore` | What a tolerated value becomes: the resource keeps its previous value (`ignore`), or takes the default value of the entry, `null` if not set (`default`) |
+
+The policies of an entry are merged pair by pair with the global ones: a pair set on the entry replaces the global one, the other pairs keep the global value.
+An array holding both members of a pair, an unknown policy, or policies on a place holder, a variable or a literal are refused when the configuration is loaded.
+Resources and metadata named after a variable, such as `${svcName}/data`, accept policies.
+The fallback pair applies to both missing and invalid values of an entry: an entry can't take its default value for a missing field and ignore an invalid one.
+
+For example, with the following mapping:
+```json
+{
+    "parser": "json",
+    "mapping": {
+        "@provider": "station",
+        "weather/temperature": {"path": "temperature", "type": "double"},
+        "weather/humidity": {"path": "humidity", "type": "int", "policies": ["optional"]},
+        "weather/pressure": {"path": "pressure", "type": "int", "default": 1013}
+    },
+    "mapping.options": {"policies": ["lenient"]}
+}
+```
+
+* a record without `temperature` is rejected (required by default);
+* a record with `"temperature": "n/a"` is applied without the temperature, which keeps its previous value (lenient, ignore);
+* a record without `humidity` is applied without the humidity (optional, ignore);
+* a record without `pressure` sets the pressure to 1013 (its `default` key implies `optional` and `default`);
+* a record with `"humidity": null` sets the humidity to `null`.
 
 ### Variables
 
@@ -379,3 +427,26 @@ Dates without timezone are considered to be in UTC.
 Some locale use specific characters for decimal separator or negative sign.
 It is possible to set the locale for all numbers parsed in a record using:
   * `numbers.locale`: the name of the locale to use to parse numbers, *e.g.* `fr`, `en_us`, `zh_Hand_TW`.
+
+### Error handling options
+
+  * `policies`: the policies applied to missing and invalid values of all entries, see [missing and invalid values](#missing-and-invalid-values). Default: `["required", "strict", "ignore"]`.
+  * `null.action`: what an explicit `null` value does to a resource, a value of the sensiNact `NullAction` enumeration: `UPDATE` (default) sets the resource to `null`, `IGNORE` keeps its previous value, `UPDATE_IF_PRESENT` sets it to `null` only if it already has a value, `REMOVE_OVERLAY` removes the metadata value set on the resource, so that the metadata value of the model applies.
+  * `log.errors`: if `true`, every error is logged. Default: `false`.
+
+Whatever `log.errors` says, the first error of each kind is logged once per configuration, so that a misconfigured mapping always gives a hint.
+The kinds are:
+* at `ERROR` level: unusable configuration (no parser, invalid mapping), payload that can't be parsed, payload without records, record rejected by a place holder or a variable, record rejected by a missing value, record rejected by an invalid value, failed digital twin update;
+* at `WARN` level: missing value tolerated by the `optional` policy, invalid value tolerated by the `lenient` policy.
+
+The next errors of the same kind are only logged when `log.errors` is `true`, with the stack trace of their cause when there is one (payload, record, update and configuration errors).
+Values read from the payload are truncated and their line breaks escaped in the log messages.
+Every error, logged or not, is also counted in the `device.factory.error.<kind>` metrics counters, for example `device.factory.error.missing_value`, and every tolerated value in the `device.factory.tolerated.<kind>` counters (`optional_missing`, `lenient_invalid`).
+These counters are only kept when the sensiNact metrics are enabled (`enabled` set to `true` in the `sensinact.metrics` configuration).
+
+Each message names the source of the payload when the caller gives it in the `source` entry of the context: the MQTT device factory gives its handler and the topic, the HTTP device factory the URL of the task.
+That entry is also available to the mapping as the `${context.source}` variable.
+When the configuration of the device factory changes, the first error of each kind is logged again; the metrics counters are not reset.
+
+The MQTT and HTTP device factories check the mapping when their configuration is set: invalid policies, entries, resource paths or variable keys, default values that can't be converted to their type and a missing `@provider` refuse the configuration, with an error in the log.
+The parser is checked when a payload is handled, as it can be installed later.
