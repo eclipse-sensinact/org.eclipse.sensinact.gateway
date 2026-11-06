@@ -80,19 +80,29 @@ public class ErrorReporter {
         UPDATE(Level.ERROR),
 
         /**
-         * A missing optional value was tolerated
+         * A missing optional value was tolerated: expected, so only for debugging
          */
-        OPTIONAL_MISSING(Level.WARN),
+        OPTIONAL_MISSING(Level.DEBUG, true),
 
         /**
          * A value that can't be converted was tolerated
          */
-        LENIENT_INVALID(Level.WARN);
+        LENIENT_INVALID(Level.WARN, true);
 
         private final Level level;
 
+        /**
+         * Tolerated by the policies: not an error
+         */
+        private final boolean tolerated;
+
         Type(final Level level) {
+            this(level, false);
+        }
+
+        Type(final Level level, final boolean tolerated) {
             this.level = level;
+            this.tolerated = tolerated;
         }
 
         /**
@@ -107,7 +117,7 @@ public class ErrorReporter {
          * are not errors
          */
         public String getCounterName() {
-            final String prefix = level == Level.WARN ? "device.factory.tolerated." : "device.factory.error.";
+            final String prefix = tolerated ? "device.factory.tolerated." : "device.factory.error.";
             return prefix + name().toLowerCase(Locale.ROOT);
         }
     }

@@ -431,7 +431,7 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
             }
 
             // Normal traffic with optional entries: the message is built only when logged
-            if (reporter.count(ErrorReporter.Type.OPTIONAL_MISSING, options)) {
+            if (reporter.count(ErrorReporter.Type.OPTIONAL_MISSING, options) && logger.isDebugEnabled()) {
                 reporter.log(ErrorReporter.Type.OPTIONAL_MISSING, options, source,
                         "Missing optional value for {} (path {})", target(provider, mapping), path);
             }

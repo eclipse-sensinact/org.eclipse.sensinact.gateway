@@ -207,7 +207,12 @@ public class HttpDeviceFactory {
             if (task.url.startsWith("file://")) {
                 Path path = Path.of(URI.create(task.url));
                 byte[] content = Files.readAllBytes(path);
-                mappingHandler.handle(task.mapping, sourceContext(Map.of(), task.url), content);
+                try {
+                    mappingHandler.handle(task.mapping, sourceContext(Map.of(), task.url), content);
+                } catch (DeviceFactoryException e) {
+                    // Already reported by the device factory
+                    logger.debug("Error parsing input from {}: {}", task.url, e.getMessage(), e);
+                }
                 return;
             }
 
