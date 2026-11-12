@@ -262,6 +262,29 @@ public class HttpDeviceFactoryTest {
     }
 
     @Test
+    void testTaskTimeout() throws Exception {
+        // Register listener
+        setupProvidersHandling("timeout-provider");
+
+        final String mappingConfig = "{\"parser\": \"json\", \"mapping\": {\"@provider\": \"id\", \"data/value\": \"v\"}}";
+        handler.setData("/data", "{\"id\": \"timeout-provider\", \"v\": 1}");
+        // The server answers after the 1 second timeout of the task
+        handler.setPause("/data", 3000);
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            config.update(new Hashtable<>(Map.of("tasks.oneshot", "[{\"url\": \"http://localhost:" + httpPort
+                    + "/data\", \"timeout\": 1, \"mapping\": " + mappingConfig + "}]")));
+
+            // The request was sent, but its late response is not handled
+            assertNull(queues.get(0).poll(5, TimeUnit.SECONDS));
+            assertEquals(1, handler.nbVisits("/data"));
+        } finally {
+            config.delete();
+            queues.clear();
+        }
+    }
+
+    @Test
     void testFileScheme() throws Exception {
         // Excepted providers
         final String provider1 = "file-provider1";
