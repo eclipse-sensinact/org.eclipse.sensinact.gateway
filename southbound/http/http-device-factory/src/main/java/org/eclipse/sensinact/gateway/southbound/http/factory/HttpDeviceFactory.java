@@ -223,6 +223,10 @@ public class HttpDeviceFactory {
             // Prepare request
             final Request request = client.newRequest(task.url);
             request.method(task.method);
+            if (task.timeout > 0) {
+                // The client only applies it to the connection
+                request.timeout(task.timeout, TimeUnit.SECONDS);
+            }
             request.headers((headers) -> {
                 for (final KeyValue<String, String> header : task.getHeaders()) {
                     headers.add(header.key(), header.value());
