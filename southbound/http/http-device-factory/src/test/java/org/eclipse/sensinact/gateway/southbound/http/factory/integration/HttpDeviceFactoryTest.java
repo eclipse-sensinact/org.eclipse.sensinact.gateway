@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
@@ -67,6 +68,7 @@ import org.slf4j.LoggerFactory;
 
 import tools.jackson.databind.ObjectMapper;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
@@ -252,6 +254,29 @@ public class HttpDeviceFactoryTest {
             assertEquals("[{\"A\":1}]", requestBodyList.get(0));
             // Only 1 call should have been made
             assertEquals(1, handler.nbVisitedPaths());
+            assertEquals(1, handler.nbVisits("/data"));
+        } finally {
+            config.delete();
+            queues.clear();
+        }
+    }
+
+    @Test
+    void testTaskTimeout() throws Exception {
+        // Register listener
+        setupProvidersHandling("timeout-provider");
+
+        final String mappingConfig = "{\"parser\": \"json\", \"mapping\": {\"@provider\": \"id\", \"data/value\": \"v\"}}";
+        handler.setData("/data", "{\"id\": \"timeout-provider\", \"v\": 1}");
+        // The server answers after the 1 second timeout of the task
+        handler.setPause("/data", 3000);
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            config.update(new Hashtable<>(Map.of("tasks.oneshot", "[{\"url\": \"http://localhost:" + httpPort
+                    + "/data\", \"timeout\": 1, \"mapping\": " + mappingConfig + "}]")));
+
+            // The request was sent, but its late response is not handled
+            assertNull(queues.get(0).poll(5, TimeUnit.SECONDS));
             assertEquals(1, handler.nbVisits("/data"));
         } finally {
             config.delete();
@@ -683,5 +708,95 @@ public class HttpDeviceFactoryTest {
             logSpy.stop();
             config.delete();
         }
+    }
+
+    @Test
+    void testInvalidPoliciesRefused() throws Exception {
+        final Logger logger = (Logger) LoggerFactory.getLogger(HttpDeviceFactory.class);
+        final BlockingQueue<String> queue = new ArrayBlockingQueue<String>(128);
+        final AppenderBase<ILoggingEvent> logSpy = new AppenderBase<>() {
+            @Override
+            protected void append(ILoggingEvent eventObject) {
+                queue.offer(eventObject.getFormattedMessage());
+            }
+        };
+        logSpy.start();
+        logger.addAppender(logSpy);
+
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            final DeviceMappingConfigurationDTO mappingConf = new DeviceMappingConfigurationDTO();
+            mappingConf.parser = "json";
+            mappingConf.mapping = Map.of("@provider", "provider", "data/value",
+                    Map.of("path", "value", "policies", List.of("optional", "required")));
+
+            final Map<String, Object> httpMapping = Map.of("url", "http://localhost:" + httpPort + "/static",
+                    "mapping", mappingConf);
+            config.update(new Hashtable<>(Map.of("tasks.oneshot", mapper.writeValueAsString(List.of(httpMapping)))));
+
+            // The configuration is refused before any task runs
+            String message;
+            do {
+                message = queue.poll(5, TimeUnit.SECONDS);
+            } while (message != null && !message.startsWith("Invalid mapping"));
+            assertNotNull(message, "Invalid policies accepted");
+            assertTrue(message.contains("optional") && message.contains("required"), message);
+        } finally {
+            logger.detachAppender(logSpy);
+            logSpy.stop();
+            config.delete();
+        }
+    }
+
+    @Test
+    void testFileSchemeErrorReportedOnce() throws Exception {
+        final BlockingQueue<String> factoryErrors = new ArrayBlockingQueue<>(16);
+        final BlockingQueue<String> httpErrors = new ArrayBlockingQueue<>(16);
+        final Logger factoryLogger = (Logger) LoggerFactory
+                .getLogger("org.eclipse.sensinact.gateway.southbound.device.factory.impl.FactoryParserHandler");
+        final Logger httpLogger = (Logger) LoggerFactory.getLogger(HttpDeviceFactory.class);
+        final AppenderBase<ILoggingEvent> factorySpy = errorSpy(factoryErrors);
+        final AppenderBase<ILoggingEvent> httpSpy = errorSpy(httpErrors);
+        factoryLogger.addAppender(factorySpy);
+        httpLogger.addAppender(httpSpy);
+
+        final Path invalid = Files.createTempFile("invalid", ".json");
+        Files.writeString(invalid, "{\"name\": ");
+        final Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            config.update(new Hashtable<>(Map.of("tasks.oneshot", "[{\"url\": \"" + invalid.toUri()
+                    + "\", \"mapping\": {\"parser\": \"json\", \"mapping\": {\"@provider\": \"name\"}}}]")));
+
+            // Reported by the device factory, naming the file
+            final String reported = factoryErrors.poll(5, TimeUnit.SECONDS);
+            assertNotNull(reported, "Error not reported");
+            assertTrue(reported.contains(invalid.toUri().toString()), reported);
+
+            // Not logged again by the HTTP device factory
+            assertNull(httpErrors.poll(1, TimeUnit.SECONDS), "Error logged twice");
+        } finally {
+            factoryLogger.detachAppender(factorySpy);
+            httpLogger.detachAppender(httpSpy);
+            factorySpy.stop();
+            httpSpy.stop();
+            config.delete();
+            Files.deleteIfExists(invalid);
+        }
+    }
+
+    /**
+     * Collects the messages of the ERROR events of a logger
+     */
+    private static AppenderBase<ILoggingEvent> errorSpy(final BlockingQueue<String> queue) {
+        final AppenderBase<ILoggingEvent> spy = new AppenderBase<>() {
+            @Override
+            protected void append(final ILoggingEvent event) {
+                if (event.getLevel() == Level.ERROR) {
+                    queue.offer(event.getFormattedMessage());
+                }
+            }
+        };
+        spy.start();
+        return spy;
     }
 }

@@ -61,6 +61,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.namespace.service.ServiceNamespace;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
@@ -70,7 +71,11 @@ import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 import org.osgi.util.promise.Promises;
+import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
@@ -306,5 +311,58 @@ public class MqttDeviceFactoryTest {
         // Wait for the provider to NOT appear
         assertNull(queue.poll(1, TimeUnit.SECONDS));
         assertNull(session.describeProvider(handlerProvider));
+    }
+
+    /**
+     * Valid policies are accepted at activation
+     */
+    @WithConfiguration(pid = "sensinact.mqtt.device.factory", location = "?", properties = {
+            @Property(key = "name", value = "testValidPolicies"),
+            @Property(key = "mqtt.handler.id", value = "handler1"),
+            @Property(key = "mapping", value = "{\"parser\": \"json\", \"mapping\": {\"@provider\": \"Name\", "
+                    + "\"data/value\": {\"path\": \"Value\", \"policies\": [\"optional\", \"default\"]}}, "
+                    + "\"mapping.options\": {\"policies\": [\"lenient\"]}}") })
+    @Test
+    void testValidPolicies(@InjectService(filter = "(name=testValidPolicies)") IMqttMessageListener listener) {
+        assertNotNull(listener);
+    }
+
+    /**
+     * Invalid policies refuse the configuration: an error is logged, no
+     * listener is registered
+     */
+    @Test
+    void testInvalidPolicies(@InjectBundleContext BundleContext ctx, @InjectService ConfigurationAdmin configAdmin)
+            throws Exception {
+        final Logger logger = (Logger) LoggerFactory
+                .getLogger("org.eclipse.sensinact.gateway.southbound.mqtt.factory.MqttDeviceFactoryHandler");
+        final BlockingQueue<String> errors = new ArrayBlockingQueue<>(16);
+        final AppenderBase<ILoggingEvent> logSpy = new AppenderBase<>() {
+            @Override
+            protected void append(final ILoggingEvent event) {
+                errors.offer(event.getFormattedMessage());
+            }
+        };
+        logSpy.start();
+        logger.addAppender(logSpy);
+
+        final Configuration config = configAdmin.getConfiguration("sensinact.mqtt.device.factory", "?");
+        try {
+            config.update(new Hashtable<>(Map.of("name", "testInvalidPolicies", "mqtt.handler.id", "handler1",
+                    "mapping", "{\"parser\": \"json\", \"mapping\": {\"@provider\": \"Name\", "
+                            + "\"data/value\": {\"path\": \"Value\", \"policies\": [\"strict\", \"lenient\"]}}}")));
+
+            String message;
+            do {
+                message = errors.poll(5, TimeUnit.SECONDS);
+            } while (message != null && !message.startsWith("Invalid MQTT mapping configuration"));
+            assertNotNull(message, "Invalid policies accepted");
+            assertTrue(ctx.getServiceReferences(IMqttMessageListener.class, "(name=testInvalidPolicies)").isEmpty(),
+                    "Listener registered");
+        } finally {
+            logger.detachAppender(logSpy);
+            logSpy.stop();
+            config.delete();
+        }
     }
 }

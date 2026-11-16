@@ -16,10 +16,12 @@ package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -390,5 +392,42 @@ public class JSONParserTest {
         assertEquals(48.858396, geoPoint.coordinates().latitude(), 0.001);
         assertEquals(2.350484, geoPoint.coordinates().longitude(), 0.001);
         assertTrue(Double.isNaN(geoPoint.coordinates().elevation()));
+    }
+
+    /**
+     * An explicit null is a value, a missing field takes the default value
+     */
+    @Test
+    void testNullAndMissingFields() throws Exception {
+        final DeviceMappingConfigurationDTO config = new ObjectMapper().readValue("""
+                {"parser": "json", "mapping": {"@provider": "Name",
+                "data/value": {"path": "Value", "type": "int", "default": 5}}}""",
+                DeviceMappingConfigurationDTO.class);
+        final byte[] payload = """
+                [{"Name": "JsonNull", "Value": null}, {"Name": "JsonMissing"}]""".getBytes(StandardCharsets.UTF_8);
+
+        deviceMapper.handle(config, Map.of(), payload);
+
+        final GenericDto nullValue = getResourceValue("JsonNull", "data", "value");
+        assertNotNull(nullValue, "Explicit null not sent");
+        assertNull(nullValue.value);
+        assertEquals(5, getResourceValue("JsonMissing", "data", "value", Integer.class));
+    }
+
+    /**
+     * An array where the mapping expects an object rejects its record only
+     */
+    @Test
+    void testArrayInPlaceOfAnObject() throws Exception {
+        final DeviceMappingConfigurationDTO config = new ObjectMapper().readValue("""
+                {"parser": "json", "mapping": {"@provider": "Name",
+                "data/value": {"path": "Data/Value", "type": "int"}}}""", DeviceMappingConfigurationDTO.class);
+        final byte[] payload = """
+                [{"Name": "JsonObject", "Data": {"Value": 4}}, {"Name": "JsonArray", "Data": [1, 2]}]"""
+                .getBytes(StandardCharsets.UTF_8);
+
+        deviceMapper.handle(config, Map.of(), payload);
+        assertEquals(4, getResourceValue("JsonObject", "data", "value", Integer.class));
+        assertNull(getResourceValue("JsonArray", "data", "value"));
     }
 }

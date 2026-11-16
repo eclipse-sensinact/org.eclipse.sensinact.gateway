@@ -12,6 +12,8 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.device.factory.dto;
 
+import java.util.List;
+
 import org.eclipse.sensinact.core.annotation.dto.NullAction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -50,4 +52,17 @@ public class DeviceMappingOptionsDTO {
 
     @JsonProperty("log.errors")
     public boolean logErrors = false;
+
+    /**
+     * Without <code>log.errors</code>: minimum delay in seconds between two logs
+     * of the same type of error, after the first one; 0 logs only the first one
+     */
+    @JsonProperty("log.errors.interval")
+    public long logErrorsInterval = 300;
+
+    /**
+     * Policies of the mapping entries, which an entry can override pair by pair
+     */
+    @JsonProperty("policies")
+    public List<MappingPolicy> policies = List.of();
 }

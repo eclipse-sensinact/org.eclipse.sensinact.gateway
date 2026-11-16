@@ -16,15 +16,11 @@ import org.apache.commons.csv.CSVRecord;
 import org.eclipse.sensinact.gateway.southbound.device.factory.IDeviceMappingRecord;
 import org.eclipse.sensinact.gateway.southbound.device.factory.RecordPath;
 import org.eclipse.sensinact.gateway.southbound.device.factory.dto.DeviceMappingOptionsDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Device factory CSV record handler
  */
 public class CsvRecord implements IDeviceMappingRecord {
-
-    private final Logger logger = LoggerFactory.getLogger(CsvRecord.class);
 
     /**
      * Current CSV record
@@ -61,14 +57,24 @@ public class CsvRecord implements IDeviceMappingRecord {
                 return this.record.get(path.asString());
             }
         } catch (IllegalArgumentException e) {
-            // Couldn't parse value
-            if (path.hasDefaultValue()) {
-                final Object defaultValue = path.getDefaultValue();
-                return defaultValue != null ? String.valueOf(defaultValue) : null;
+            // Missing column: the device factory applies the policies
+            return null;
+        }
+    }
+
+    @Override
+    public boolean hasField(final RecordPath path) {
+        try {
+            if (path.isInt() || columnIndexOnly) {
+                final int index = path.asInt();
+                return index >= 0 && index < record.size();
             } else {
-                logger.warn("Error reading CSV record: {} (path: {})", e.getMessage(), path);
-                return null;
+                // isMapped() only checks the header, isSet() also the length of the row
+                return record.isSet(path.asString());
             }
+        } catch (IllegalArgumentException e) {
+            // Not a column index
+            return false;
         }
     }
 

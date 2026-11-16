@@ -14,6 +14,7 @@ package org.eclipse.sensinact.gateway.southbound.device.factory.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -383,5 +384,50 @@ public class CSVParserTest {
 
         assertEquals("3.4", getResourceValue(provider, service, "a", String.class));
         assertEquals("42", getResourceValue(provider, service, "b", String.class));
+    }
+
+    /**
+     * A missing column follows the mapping policies
+     */
+    @Test
+    void testMissingColumn() throws Exception {
+        final String mapping = """
+                {"parser": "csv", "parser.options": {"header": true},
+                "mapping": {"@provider": "Name", "data/value": "Value", %s},
+                "mapping.options": {"format.date": "d.M.y", "format.time": "H:m"}}""";
+        final byte[] fileContent = readFile("csv/csv-header.csv");
+
+        // Default value of the entry
+        DeviceMappingConfigurationDTO config = new ObjectMapper().readValue(
+                String.format(mapping, "\"data/missing\": {\"path\": \"Missing\", \"type\": \"int\", \"default\": 5}"),
+                DeviceMappingConfigurationDTO.class);
+        deviceMapper.handle(config, Map.of(), fileContent);
+        // CSV values are strings when untyped
+        assertEquals("42", getResourceValue("header-provider1", "data", "value", String.class));
+        assertEquals(5, getResourceValue("header-provider1", "data", "missing", Integer.class));
+
+        // Required by default: the records are rejected
+        bulks.clear();
+        config = new ObjectMapper().readValue(String.format(mapping, "\"data/missing\": \"Missing\""),
+                DeviceMappingConfigurationDTO.class);
+        deviceMapper.handle(config, Map.of(), fileContent);
+        assertNull(getResourceValue("header-provider1", "data", "value"));
+    }
+
+    /**
+     * A row shorter than the header misses its last columns
+     */
+    @Test
+    void testShortRow() throws Exception {
+        final DeviceMappingConfigurationDTO config = new ObjectMapper().readValue("""
+                {"parser": "csv", "parser.options": {"header": true},
+                "mapping": {"@provider": "Name", "data/value": {"path": "Value", "type": "int"}}}""",
+                DeviceMappingConfigurationDTO.class);
+        final byte[] payload = "Name,Value\nshort-ok,42\nshort-missing\n".getBytes(StandardCharsets.UTF_8);
+
+        deviceMapper.handle(config, Map.of(), payload);
+        assertEquals(42, getResourceValue("short-ok", "data", "value", Integer.class));
+        // Required value missing: the record is rejected, not set to null
+        assertNull(getResourceValue("short-missing", "data", "value"));
     }
 }

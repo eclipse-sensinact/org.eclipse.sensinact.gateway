@@ -55,16 +55,32 @@ public class MapRecord implements IDeviceMappingRecord {
     }
 
     private Object getRawField(RecordPath field) {
-        final Object node = walkPath(field);
-        if (node == null) {
-            if (field.hasDefaultValue()) {
-                return field.getDefaultValue();
+        // The device factory applies the default value
+        return walkPath(field);
+    }
+
+    @Override
+    public boolean hasField(final RecordPath field) {
+        Object current = root;
+        for (RecordPath part : field.parts()) {
+            if (current instanceof List<?> list) {
+                final int index;
+                try {
+                    index = part.asInt();
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+                if (index < 0 || index >= list.size()) {
+                    return false;
+                }
+                current = list.get(index);
+            } else if (current instanceof Map<?, ?> map && map.containsKey(part.asString())) {
+                current = map.get(part.asString());
             } else {
-                return null;
+                return false;
             }
         }
-
-        return node;
+        return true;
     }
 
     @Override
@@ -80,15 +96,6 @@ public class MapRecord implements IDeviceMappingRecord {
     @Override
     public String getFieldString(RecordPath field, final DeviceMappingOptionsDTO options) {
         final Object node = walkPath(field);
-        if (node != null) {
-            return String.valueOf(node);
-        }
-
-        if (field.hasDefaultValue()) {
-            final Object defaultValue = field.getDefaultValue();
-            return defaultValue != null ? String.valueOf(defaultValue) : null;
-        } else {
-            return null;
-        }
+        return node != null ? String.valueOf(node) : null;
     }
 }
