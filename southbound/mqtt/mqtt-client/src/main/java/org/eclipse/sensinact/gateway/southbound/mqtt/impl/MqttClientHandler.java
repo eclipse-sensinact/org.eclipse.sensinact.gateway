@@ -88,6 +88,12 @@ public class MqttClientHandler implements MqttCallback {
 
     private String clientId;
 
+    /**
+     * Names this handler and its broker in the log messages, as the messages of
+     * the device factory name their source
+     */
+    private String source;
+
     private MqttConnectOptions connectOptions;
 
     /**
@@ -132,7 +138,7 @@ public class MqttClientHandler implements MqttCallback {
         } else if (reconnectDelayMs > Duration.ofHours(1).toMillis()) {
             reconnectDelayMs = (int) Duration.ofHours(1).toMillis();
         }
-        final String broker = makeBrokerUri(config);
+        final String brokerUri = makeBrokerUri(config);
         clientId = makeClientId(config);
         topics = config.topics();
         if (topics == null || topics.length == 0) {
@@ -147,11 +153,13 @@ public class MqttClientHandler implements MqttCallback {
             handlerId = configId;
         }
 
+        source = "MQTT handler '" + handlerId + "' (" + brokerUri + ")";
+
         connectOptions = setupOptions(config);
 
         // Start client (blocking)
         logger.debug("Connecting MQTT client with ID {}", clientId);
-        client = new MqttClient(broker, clientId);
+        client = new MqttClient(brokerUri, clientId);
         client.setCallback(this);
         client.setManualAcks(true);
         try {
@@ -159,7 +167,7 @@ public class MqttClientHandler implements MqttCallback {
         } catch (MqttException e) {
             if (e.getCause() instanceof ConnectException) {
                 connectionLost(e);
-                logger.warn("MQTT client {} started, but currently unconnected", clientId);
+                logger.warn("{}: client {} started, but currently unconnected", source, clientId);
                 return;
             } else {
                 // We fail to start due to the misconfiguration
@@ -180,7 +188,8 @@ public class MqttClientHandler implements MqttCallback {
             try {
                 client.subscribe(topic);
             } catch (MqttException e) {
-                logger.error("MQTT Client {} is unable to subscribe to topic {}", clientId, topic);
+                logger.error("{}: client {} is unable to subscribe to topic {}: {}", source, clientId, topic,
+                        e.getMessage());
             }
         }
     }
@@ -281,7 +290,8 @@ public class MqttClientHandler implements MqttCallback {
      */
     @Override
     public void connectionLost(final Throwable cause) {
-        logger.warn("Connection to MQTT broker lost: {}. Waiting before reconnecting.", cause.getMessage());
+        logger.warn("{}: Connection to the broker lost: {}. Waiting before reconnecting.", source,
+                cause.getMessage());
 
         if (reconnectTimer != null) {
             reconnectTimer.cancel();
@@ -294,18 +304,18 @@ public class MqttClientHandler implements MqttCallback {
             public void run() {
                 try {
                     if (client == null) {
-                        logger.error("Trying to reconnect a null client.");
+                        logger.error("{}: Trying to reconnect a null client.", source);
                         return;
                     }
                     client.connect(connectOptions);
                 } catch (MqttException e) {
                     if (e.getCause() instanceof ConnectException) {
-                        logger.error("Error trying to reconnect to MQTT broker: {}", e.getMessage(), e);
+                        logger.error("{}: Error trying to reconnect to the broker: {}", source, e.getMessage(), e);
                         connectionLost(e);
                     } else {
                         logger.error(
-                                "Fatal error trying to reconnect to MQTT broker: {}. No further reconnection will be attempted",
-                                e.getMessage(), e);
+                                "{}: Fatal error trying to reconnect to the broker: {}. No further reconnection will be attempted",
+                                source, e.getMessage(), e);
                     }
                     return;
                 }

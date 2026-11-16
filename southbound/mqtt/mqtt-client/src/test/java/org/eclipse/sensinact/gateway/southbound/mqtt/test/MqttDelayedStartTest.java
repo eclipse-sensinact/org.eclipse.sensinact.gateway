@@ -15,11 +15,14 @@ package org.eclipse.sensinact.gateway.southbound.mqtt.test;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -34,7 +37,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
@@ -126,6 +134,43 @@ public class MqttDelayedStartTest {
         assertNotNull(msg);
         assertEquals(topic, msg.getTopic());
         assertEquals(content, new String(msg.getPayload(), UTF_8));
+    }
+
+    @Test
+    void testConnectionLogsNameTheHandlerAndTheBroker() throws Exception {
+        final List<String> messages = new CopyOnWriteArrayList<>();
+        final AppenderBase<ILoggingEvent> appender = new AppenderBase<>() {
+            @Override
+            protected void append(final ILoggingEvent event) {
+                messages.add(event.getFormattedMessage());
+            }
+        };
+        appender.start();
+        final Logger logger = (Logger) LoggerFactory.getLogger(MqttClientHandler.class);
+        final Level previousLevel = logger.getLevel();
+        logger.setLevel(Level.WARN);
+        logger.addAppender(appender);
+        try {
+            // No broker is running: the client starts unconnected, then retries
+            handler.activate(getConfig());
+
+            final String source = "MQTT handler 'id1' (tcp://127.0.0.1:2183): ";
+            assertTrue(messages.stream().anyMatch(m -> m.startsWith(source + "Connection to the broker lost: ")),
+                    messages::toString);
+            assertTrue(messages.stream().anyMatch(m -> m.startsWith(source) && m.contains("currently unconnected")),
+                    messages::toString);
+            // The reconnection delay of the configuration is 1 s
+            for (int i = 0; i < 30 && messages.stream()
+                    .noneMatch(m -> m.startsWith(source + "Error trying to reconnect to the broker: ")); i++) {
+                Thread.sleep(100);
+            }
+            assertTrue(messages.stream().anyMatch(m -> m.startsWith(source + "Error trying to reconnect to the broker: ")),
+                    messages::toString);
+        } finally {
+            logger.detachAppender(appender);
+            logger.setLevel(previousLevel);
+            appender.stop();
+        }
     }
 
     @Test
