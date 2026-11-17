@@ -755,6 +755,41 @@ public class HttpDeviceFactoryTest {
     }
 
     /**
+     * A task that cannot be read is logged, as a mapping that is refused is
+     */
+    @Test
+    void testUnreadableTaskLogged() throws Exception {
+        final Logger logger = (Logger) LoggerFactory.getLogger(HttpDeviceFactory.class);
+        final BlockingQueue<String> queue = new ArrayBlockingQueue<String>(128);
+        final AppenderBase<ILoggingEvent> logSpy = new AppenderBase<>() {
+            @Override
+            protected void append(ILoggingEvent eventObject) {
+                if (eventObject.getLevel() == Level.ERROR) {
+                    queue.offer(eventObject.getFormattedMessage());
+                }
+            }
+        };
+        logSpy.start();
+        logger.addAppender(logSpy);
+
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            // The mapping is a string, not an object
+            final Map<String, Object> httpMapping = Map.of("url", "http://localhost:" + httpPort + "/static",
+                    "period", 1, "mapping", "broken");
+            config.update(new Hashtable<>(Map.of("tasks.periodic", mapper.writeValueAsString(List.of(httpMapping)))));
+
+            final String message = queue.poll(5, TimeUnit.SECONDS);
+            assertNotNull(message, "An unreadable task was not logged");
+            assertTrue(message.startsWith("Invalid HTTP task configuration"), message);
+        } finally {
+            logger.detachAppender(logSpy);
+            logSpy.stop();
+            config.delete();
+        }
+    }
+
+    /**
      * The failures of the requests follow log.errors and log.errors.interval,
      * like the errors of the payload
      */

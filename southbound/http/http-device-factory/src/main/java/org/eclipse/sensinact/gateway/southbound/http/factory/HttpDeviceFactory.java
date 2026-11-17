@@ -91,10 +91,18 @@ public class HttpDeviceFactory {
                 .configure(EnumFeature.WRITE_ENUMS_USING_TO_STRING, false)
                 .build();
 
-        final HttpDeviceFactoryConfigurationTaskDTO[] oneShotTasks = loadTasks(mapper,
-                HttpDeviceFactoryConfigurationTaskDTO.class, configuration.tasks_oneshot());
-        final HttpDeviceFactoryConfigurationPeriodicDTO[] periodicTasks = loadTasks(mapper,
-                HttpDeviceFactoryConfigurationPeriodicDTO.class, configuration.tasks_periodic());
+        final HttpDeviceFactoryConfigurationTaskDTO[] oneShotTasks;
+        final HttpDeviceFactoryConfigurationPeriodicDTO[] periodicTasks;
+        try {
+            oneShotTasks = loadTasks(mapper, HttpDeviceFactoryConfigurationTaskDTO.class,
+                    configuration.tasks_oneshot());
+            periodicTasks = loadTasks(mapper, HttpDeviceFactoryConfigurationPeriodicDTO.class,
+                    configuration.tasks_periodic());
+        } catch (final Exception e) {
+            // Otherwise only the component framework reports it, and no task runs
+            logger.error("Invalid HTTP task configuration: {}", e.getMessage());
+            throw e;
+        }
 
         // Refuse an invalid mapping before running any task
         validateMappings(oneShotTasks);
