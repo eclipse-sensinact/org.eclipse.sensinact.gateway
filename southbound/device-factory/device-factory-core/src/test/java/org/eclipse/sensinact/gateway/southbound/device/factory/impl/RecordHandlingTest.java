@@ -722,6 +722,17 @@ public class RecordHandlingTest {
     }
 
     @Test
+    void testRequestFailuresAreCounted() throws Exception {
+        final IMetricCounter counter = Mockito.mock(IMetricCounter.class);
+        Mockito.when(deviceMapper.metrics.getCounter("device.factory.error.request")).thenReturn(counter);
+
+        final DeviceMappingConfigurationDTO config = preparePolicyConfig("val");
+        deviceMapper.reportRequestFailure(config, "HTTP error {} accessing {}", 503, "http://localhost/a");
+        deviceMapper.reportRequestFailure(config, "HTTP error {} accessing {}", 503, "http://localhost/a");
+        Mockito.verify(counter, Mockito.times(2)).inc();
+    }
+
+    @Test
     void testRejectionsAreCounted() throws Exception {
         final IMetricCounter counter = Mockito.mock(IMetricCounter.class);
         Mockito.when(deviceMapper.metrics.getCounter("device.factory.error.missing_value")).thenReturn(counter);

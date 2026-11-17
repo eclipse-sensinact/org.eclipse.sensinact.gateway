@@ -50,6 +50,12 @@ public class ErrorReporter {
         CONFIGURATION(Level.ERROR),
 
         /**
+         * The request for the payload failed: error status, connection failure,
+         * timeout
+         */
+        REQUEST(Level.ERROR),
+
+        /**
          * The payload can't be parsed
          */
         PAYLOAD(Level.ERROR),
