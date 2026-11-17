@@ -130,6 +130,24 @@ public class HttpDeviceFactory {
     }
 
     /**
+     * Reports the failure of a request: like the errors of the payload, it
+     * follows <code>log.errors</code> and <code>log.errors.interval</code> of the
+     * mapping of the task
+     *
+     * @param task   Task whose request failed
+     * @param format Message format
+     * @param args   Message arguments, the last one can be an exception
+     */
+    private void reportRequestFailure(final ParsedHttpTask task, final String format, final Object... args) {
+        if (task.mapping != null) {
+            mappingHandler.reportRequestFailure(task.mapping, format, args);
+        } else {
+            // Without mapping, there are no options to apply
+            logger.error(format, args);
+        }
+    }
+
+    /**
      * Checks the mapping of each task
      *
      * @param tasks Tasks, can be null
@@ -255,7 +273,7 @@ public class HttpDeviceFactory {
 
                 @Override
                 public void onFailure(final Response response, final Throwable failure) {
-                    logger.error("Error accessing {}: {} ({})", task.url, failure.getMessage(),
+                    reportRequestFailure(task, "Error accessing {}: {} ({})", task.url, failure.getMessage(),
                             failure.getClass().getName(), failure);
                 }
 
@@ -271,7 +289,7 @@ public class HttpDeviceFactory {
                             logger.debug("Error parsing input from {}: {}", task.url, e.getMessage(), e);
                         }
                     } else {
-                        logger.error("HTTP error {} accessing {}", status, task.url);
+                        reportRequestFailure(task, "HTTP error {} accessing {}", status, task.url);
                     }
                 }
 
@@ -282,7 +300,7 @@ public class HttpDeviceFactory {
                 }
             });
         } catch (Exception ex) {
-            logger.error("Error querying {}", task.url, ex);
+            reportRequestFailure(task, "Error querying {}", task.url, ex);
         }
     }
 

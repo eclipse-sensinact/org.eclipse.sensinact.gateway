@@ -148,6 +148,7 @@ public class ErrorReporterTest {
     @Test
     void testCounterNames() {
         assertEquals("device.factory.error.missing_value", ErrorReporter.Type.MISSING_VALUE.getCounterName());
+        assertEquals("device.factory.error.request", ErrorReporter.Type.REQUEST.getCounterName());
         assertEquals("device.factory.tolerated.optional_missing",
                 ErrorReporter.Type.OPTIONAL_MISSING.getCounterName());
     }

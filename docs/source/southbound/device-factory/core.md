@@ -438,11 +438,11 @@ It is possible to set the locale for all numbers parsed in a record using:
 Whatever `log.errors` says, the first error of each kind is logged, so that a misconfigured mapping always gives a hint.
 When `log.errors` is `false`, the next errors of the same kind are then logged at most once per `log.errors.interval`, with the number of errors not logged since the previous message, so that a source that starts failing later stays visible without filling the logs.
 The kinds are:
-* at `ERROR` level: unusable configuration (no parser, invalid mapping), payload that can't be parsed, payload without records, record rejected by a place holder or a variable, record rejected by a missing value, record rejected by an invalid value, failed digital twin update;
+* at `ERROR` level: unusable configuration (no parser, invalid mapping), failed request for the payload (HTTP error status, connection failure, timeout; `request` counter), payload that can't be parsed, payload without records, record rejected by a place holder or a variable, record rejected by a missing value, record rejected by an invalid value, failed digital twin update;
 * at `WARN` level: invalid value tolerated by the `lenient` policy;
 * at `DEBUG` level: missing value of an `optional` entry, which is expected.
 
-When `log.errors` is `true`, every error is logged, with the stack trace of its cause when there is one (payload, record, update and configuration errors).
+When `log.errors` is `true`, every error is logged, with the stack trace of its cause when there is one (request, payload, record, update and configuration errors).
 Values read from the payload are truncated and their line breaks escaped in the log messages.
 Every error, logged or not, is also counted in the `device.factory.error.<kind>` metrics counters, for example `device.factory.error.missing_value`, and every tolerated value in the `device.factory.tolerated.<kind>` counters (`optional_missing`, `lenient_invalid`).
 These counters are only kept when the sensiNact metrics are enabled (`enabled` set to `true` in the `sensinact.metrics` configuration).
