@@ -93,6 +93,8 @@ public class AbstractIntegrationTest {
 
     private static final UserInfo USER = UserInfo.ANONYMOUS;
 
+    private static final long APPLICATION_TIMEOUT_MS = 30_000;
+
     @InjectService
     protected DataUpdate push;
 
@@ -116,10 +118,18 @@ public class AbstractIntegrationTest {
                 bc.createFilter("(&(objectClass=jakarta.ws.rs.core.Application)(test.class=" + test.getName() + "))"),
                 null);
 
+        Application app;
         tracker.open();
-
-        Application app = tracker.waitForService(5000);
-        assertNotNull(app);
+        try {
+            // The application is re-created for every test, and a loaded CI runner can
+            // take well over 5 seconds to tear down the previous one and start the next
+            app = tracker.waitForService(APPLICATION_TIMEOUT_MS);
+            assertNotNull(app, () -> "No SensorThings application registered for " + info.getDisplayName()
+                    + " within " + APPLICATION_TIMEOUT_MS + "ms");
+        } finally {
+            // the tracker is only needed to find the application, so don't leak it
+            tracker.close();
+        }
         assertInstanceOf(SensinactSensorthingsApplication.class, app);
 
         sessionManager = ((SensinactSensorthingsApplication) app).getSessionManager();
