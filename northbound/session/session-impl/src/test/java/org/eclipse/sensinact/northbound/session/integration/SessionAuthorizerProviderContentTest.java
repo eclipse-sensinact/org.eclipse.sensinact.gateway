@@ -66,6 +66,9 @@ public class SessionAuthorizerProviderContentTest {
 
     private static final String PROVIDER = "TwinObjectsProvider";
 
+    /** A provider with one service and one resource, which the tests link to the first one */
+    private static final String CHILD = "LinkedChildProvider";
+
     private static final UserInfo BOB = new TestUserInfo("bob", true);
 
     /** What the authorizer was given: the calls with an object, with what it could read in it, and the calls by name */
@@ -102,6 +105,14 @@ public class SessionAuthorizerProviderContentTest {
             dto.timestamp = Instant.now();
             push.pushUpdate(dto).getValue();
         }
+        GenericDto child = new GenericDto();
+        child.provider = CHILD;
+        child.service = "svc";
+        child.resource = "res";
+        child.value = 1;
+        child.type = Integer.class;
+        child.timestamp = Instant.now();
+        push.pushUpdate(child).getValue();
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put("scope", "SessionAuthorizerProviderContentTest");
         registration = context.registerService(AuthorizationEngine.class, new RecordingEngine(recorder), properties);
@@ -114,9 +125,11 @@ public class SessionAuthorizerProviderContentTest {
         thread.execute(new AbstractTwinCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                SensinactProvider sp = twin.getProvider(PROVIDER);
-                if (sp != null) {
-                    sp.delete();
+                for (String name : List.of(PROVIDER, CHILD)) {
+                    SensinactProvider sp = twin.getProvider(name);
+                    if (sp != null) {
+                        sp.delete();
+                    }
                 }
                 return pf.resolved(null);
             }
@@ -190,6 +203,32 @@ public class SessionAuthorizerProviderContentTest {
         session().serviceSnapshot(PROVIDER, "svc2");
         assertTrue(recorder.objects.contains("service DESCRIBE " + PROVIDER + "/svc2 [r3]"),
                 recorder.objects.toString());
+    }
+
+    @Test
+    void testLinkedProvidersOfListProviders() {
+        session().linkProviders(PROVIDER, CHILD);
+        recorder.clear();
+        session().listProviders();
+        // The child is a provider of the list, and a linked provider of the first one: the filter of each runs in the
+        // command, with the twin object, which has its services and resources
+        List<String> childCalls = recorder.objects.stream().filter(c -> c.startsWith("provider DESCRIBE " + CHILD))
+                .toList();
+        assertEquals(2, childCalls.size(), recorder.objects.toString());
+        assertTrue(childCalls.stream().allMatch(c -> c.contains("[admin, svc]") && c.contains("svc=[res]")),
+                childCalls.toString());
+        assertTrue(recorder.names.stream().noneMatch(c -> c.contains(CHILD)), recorder.names.toString());
+    }
+
+    @Test
+    void testLinkedProvidersOfAProviderSnapshotAreTestedByName() {
+        session().linkProviders(PROVIDER, CHILD);
+        recorder.clear();
+        assertTrue(session().describeProvider(PROVIDER).linkedProviders.contains(CHILD));
+        // The links of a snapshot are filtered after the command, from their snapshots, which have no service and no
+        // twin: by name
+        assertTrue(recorder.names.contains("provider DESCRIBE " + CHILD), recorder.names.toString());
+        assertTrue(recorder.objects.stream().noneMatch(c -> c.contains(CHILD)), recorder.objects.toString());
     }
 
     @Test
