@@ -694,11 +694,13 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     /**
-     * Authorizes collection of a provider snapshot, including whether location access is permitted.
+     * Authorizes collection of a provider snapshot, including whether location access is permitted, with the twin
+     * object of the provider when it has one: a snapshot has no service yet when it is tested.
      * <p>
      * This should be used before geo-filtering, as the provider's location may not be visible to
      * the caller.
      *
+     * @param twin the twin of the command that takes the snapshot
      * @param ps
      * @param useLocation
      * @return
@@ -727,6 +729,17 @@ public class SensiNactSessionImpl implements SensiNactSession {
                         ss.getName());
     }
 
+    /**
+     * Authorizes collection of a provider snapshot, including whether location access is permitted, by names only: for
+     * a snapshot that has no twin object, such as a linked provider tested after its command.
+     * <p>
+     * This should be used before geo-filtering, as the provider's location may not be visible to
+     * the caller.
+     *
+     * @param ps
+     * @param useLocation
+     * @return
+     */
     private boolean authorizeProvider(CommonProviderSnapshot ps, boolean useLocation) {
         if(useLocation && !hasReadResourcePermission(ps, "admin", "location")) {
             return false;
@@ -796,16 +809,6 @@ public class SensiNactSessionImpl implements SensiNactSession {
             // Not permitted to see this provider
             return null;
         }
-    }
-
-    /**
-     * Authorizes DESCRIBE access for the supplied service
-     * @param ss
-     * @return
-     */
-    private boolean authorizeService(ServiceSnapshot ss) {
-        ProviderSnapshot ps = ss.getProvider();
-        return authorizer.hasServicePermission(DESCRIBE, ps.getModelPackageUri(), ps.getModelName(), ps.getName(), ss.getName());
     }
 
     /**
@@ -1025,7 +1028,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     SensinactProvider sp = m.getProvider(provider);
                     if(sp != null) {
                         // With the service twin, the authorizer reads its resources
-                        final SensinactService ss = sp.getServices().get(service);
+                        final SensinactService ss = m.getService(provider, service);
                         final boolean allowed = ss != null ? authorizer.hasServicePermission(DESCRIBE, ss)
                                 : authorizer.hasServicePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service);
                         if(!allowed) {

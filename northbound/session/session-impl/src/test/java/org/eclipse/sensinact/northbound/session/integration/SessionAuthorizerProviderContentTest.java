@@ -13,6 +13,7 @@
 package org.eclipse.sensinact.northbound.session.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
@@ -26,11 +27,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.sensinact.core.authorization.Authorizer;
+import org.eclipse.sensinact.core.authorization.NotPermittedException;
 import org.eclipse.sensinact.core.authorization.PermissionLevel;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
 import org.eclipse.sensinact.core.push.DataUpdate;
 import org.eclipse.sensinact.core.push.dto.GenericDto;
+import org.eclipse.sensinact.core.snapshot.ProviderSnapshot;
+import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
 import org.eclipse.sensinact.core.twin.SensinactService;
@@ -115,7 +119,7 @@ public class SessionAuthorizerProviderContentTest {
         push.pushUpdate(child).getValue();
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put("scope", "SessionAuthorizerProviderContentTest");
-        registration = context.registerService(AuthorizationEngine.class, new RecordingEngine(recorder), properties);
+        registration = context.registerService(AuthorizationEngine.class, new RecordingEngine(recorder, null), properties);
         awaitEngineBound();
     }
 
@@ -238,14 +242,50 @@ public class SessionAuthorizerProviderContentTest {
         assertTrue(recorder.names.contains("service DESCRIBE " + PROVIDER + "/nothing"), recorder.names.toString());
     }
 
+    /** Replace the engine by one that allows a provider or a service only when it contains the resource */
+    private void allowOnlyWhatContains(String resource) throws InterruptedException {
+        registration.unregister();
+        Hashtable<String, Object> properties = new Hashtable<>();
+        properties.put("scope", "SessionAuthorizerProviderContentTest");
+        registration = context.registerService(AuthorizationEngine.class, new RecordingEngine(recorder, resource),
+                properties);
+        awaitEngineBound();
+    }
+
+    @Test
+    void testWhatIsDeniedFromItsContentIsHidden() throws Exception {
+        // The scenario of this change: only the content of a provider or a service tells whether it is allowed.
+        // r3 is in svc2 of the first provider only
+        allowOnlyWhatContains("r3");
+        // The first provider is allowed from the content of its second service, the linked one has no r3
+        List<String> names = session().listProviders().stream().map(p -> p.provider).toList();
+        assertTrue(names.contains(PROVIDER), names.toString());
+        assertTrue(!names.contains(CHILD), names.toString());
+        assertEquals(PROVIDER, session().describeProvider(PROVIDER).provider);
+        // The service that holds r3 is allowed, the other one is hidden
+        assertEquals("svc2", session().describeService(PROVIDER, "svc2").service);
+        assertThrows(NotPermittedException.class, () -> session().describeService(PROVIDER, "svc1"));
+        assertThrows(NotPermittedException.class, () -> session().serviceSnapshot(PROVIDER, "svc1"));
+        assertThrows(NotPermittedException.class, () -> session().providerSnapshot(CHILD, EnumSet.noneOf(
+                SensinactDigitalTwin.SnapshotOption.class)));
+        // The services of the snapshot of the first provider are filtered with their own content
+        ProviderSnapshot snapshot = session().providerSnapshot(PROVIDER,
+                EnumSet.noneOf(SensinactDigitalTwin.SnapshotOption.class));
+        assertEquals(List.of("svc2"), snapshot.getServices().stream().map(ServiceSnapshot::getName).toList());
+    }
+
     // The engine under test
 
     private static final class RecordingEngine implements AuthorizationEngine {
 
         private final Recorder recorder;
 
-        RecordingEngine(Recorder recorder) {
+        /** The resource that a provider or a service must contain to be allowed, null to allow everything */
+        private final String required;
+
+        RecordingEngine(Recorder recorder, String required) {
             this.recorder = recorder;
+            this.required = required;
         }
 
         @Override
@@ -286,7 +326,7 @@ public class SessionAuthorizerProviderContentTest {
                             new TreeSet<>(service.getResources().keySet()).stream().toList()));
                     recorder.objects.add("provider " + level + " " + provider.getName() + " "
                             + new TreeSet<>(provider.getServices().keySet()) + " " + below);
-                    return true;
+                    return required == null || below.values().stream().anyMatch(r -> r.contains(required));
                 }
 
                 @Override
@@ -300,7 +340,7 @@ public class SessionAuthorizerProviderContentTest {
                 public boolean hasServicePermission(PermissionLevel level, SensinactService service) {
                     recorder.objects.add("service " + level + " " + service.getProvider().getName() + "/"
                             + service.getName() + " " + new TreeSet<>(service.getResources().keySet()));
-                    return true;
+                    return required == null || service.getResources().containsKey(required);
                 }
 
                 @Override
