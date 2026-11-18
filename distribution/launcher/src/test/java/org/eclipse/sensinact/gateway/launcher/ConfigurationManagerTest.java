@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,9 +29,12 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -223,6 +227,49 @@ class ConfigurationManagerTest {
             assertTrue(activeConfigs.containsKey("test1"));
             assertTrue(activeConfigs.containsKey("test2"));
             assertEquals(2, activeConfigs.size());
+        }
+
+        @Test
+        void testUpdateLeavesNoTemporaryFile() throws Exception {
+            manager.updateConfigurations(Map.of("test1", new Hashtable<>(Map.of("txt", "A"))), null);
+            assertTrue(semaphore.tryAcquire(1, 1, SECONDS));
+
+            assertTrue(Files.size(configFile) > 0);
+            try (var files = Files.list(tmpFolder)) {
+                assertEquals(List.of(configFile.getFileName()), files.map(Path::getFileName).toList());
+            }
+        }
+
+        @Test
+        void testFileIsNeverSeenEmptyDuringUpdate() throws Exception {
+            manager.updateConfigurations(Map.of("test1", new Hashtable<>(Map.of("txt", "A"))), null);
+            assertTrue(semaphore.tryAcquire(1, 1, SECONDS));
+
+            // The file is watched, so a reader must never catch it truncated or missing
+            final AtomicBoolean running = new AtomicBoolean(true);
+            final AtomicInteger bad = new AtomicInteger();
+            final Thread reader = new Thread(() -> {
+                while (running.get()) {
+                    try {
+                        if (Files.size(configFile) == 0) {
+                            bad.incrementAndGet();
+                        }
+                    } catch (IOException e) {
+                        bad.incrementAndGet();
+                    }
+                }
+            });
+            reader.start();
+            try {
+                for (int i = 0; i < 200; i++) {
+                    manager.updateConfigurations(Map.of("test1", new Hashtable<>(Map.of("txt", "A" + i))), null);
+                }
+            } finally {
+                running.set(false);
+                reader.join();
+            }
+
+            assertEquals(0, bad.get());
         }
     }
 
