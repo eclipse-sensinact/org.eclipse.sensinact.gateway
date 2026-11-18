@@ -26,6 +26,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
@@ -156,7 +157,7 @@ public class ConfigurationManager {
                     // there has been a change, so assume there has
                     executor.submit(this::reloadConfigFile);
                     break;
-                } else if (Files.isSameFile(configFile, configFolder.resolve((Path) watchEvent.context()))) {
+                } else if (configFile.getFileName().equals(watchEvent.context())) {
                     // There has been a change to the config file
                     executor.submit(this::reloadConfigFile);
                     break;
@@ -239,6 +240,12 @@ public class ConfigurationManager {
 
     private void reloadConfigFile() {
         try {
+            if (Files.exists(configFile) && Files.size(configFile) == 0) {
+                // Something is rewriting the file in place and has truncated it, so there is
+                // nothing to parse yet: wait for the change that follows
+                LOGGER.debug("The configuration file {} is empty, ignoring this change", configFile);
+                return;
+            }
             ConfigurationResource config = loadConfigFile();
 
             Map<String, Configuration> existingConfigs = Optional
@@ -337,10 +344,13 @@ public class ConfigurationManager {
             allConfigurations.putAll(mergedConfigs);
         }
 
-        // Write down the new configuration
-        try (Writer writer = Files.newBufferedWriter(configFile)) {
+        // Write down the new configuration. The file is watched, so it must never be seen
+        // empty or half written: write a sibling file then atomically move it into place
+        final Path tmpFile = configFile.resolveSibling(configFile.getFileName() + ".tmp");
+        try (Writer writer = Files.newBufferedWriter(tmpFile)) {
             Configurations.buildWriter().build(writer).writeConfigurationResource(configResource);
         }
+        Files.move(tmpFile, configFile, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
 
         // Force reload (in right thread)
         final Thread watchThread = currentWatchThread.get();
