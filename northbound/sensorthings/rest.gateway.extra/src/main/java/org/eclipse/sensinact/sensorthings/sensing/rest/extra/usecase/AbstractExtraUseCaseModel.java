@@ -77,7 +77,7 @@ public abstract class AbstractExtraUseCaseModel<M extends Id, S> extends Abstrac
 
     protected void updateObservationMemoryHistory(IDtoMemoryCache<ExpandedObservation> cacheObs, ObjectMapper mapper,
             ResourceSnapshot resource) {
-        if (resource != null) {
+        if (resource != null && resource.isSet()) {
             ExpandedObservation oldObs = DtoMapperSimple.parseExpandObservation(mapper, resource.getValue().getValue());
             cacheObs.addDto(oldObs.id() + "~" + DtoMapperSimple.stampToId(resource.getValue().getTimestamp()), oldObs);
 
