@@ -16,6 +16,7 @@ import static org.eclipse.sensinact.core.authorization.PermissionLevel.DESCRIBE;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.READ;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.UPDATE;
 import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDER_IDS;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.ALLOW;
 import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.DENY;
 import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.UNKNOWN;
 
@@ -23,12 +24,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -63,6 +67,7 @@ import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.snapshot.Snapshot;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
@@ -84,6 +89,8 @@ import org.eclipse.sensinact.northbound.session.ServiceDescription;
 import org.eclipse.sensinact.northbound.session.SnapshotUpdate;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableLinkedProviderSnapshot;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableProviderSnapshot;
+import org.eclipse.sensinact.northbound.session.snapshot.ImmutableResourceSnapshot;
+import org.eclipse.sensinact.northbound.session.snapshot.ImmutableServiceSnapshot;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -449,6 +456,15 @@ public class SensiNactSessionImpl implements SensiNactSession {
                                 break;
 
                             default: {
+                                // The twin object, as for the other checks of this method
+                                final PreAuth readAuth = preAuthorizer.preAuthResource(READ, provider, service, resource);
+                                if (readAuth != ALLOW && (readAuth == DENY
+                                        || !authorizer.hasResourcePermission(READ, sensinactResource))) {
+                                    // DESCRIBE does not give the value: show a resource that has none
+                                    result.valueType = ValueType.UPDATABLE;
+                                    val = pf.resolved(result);
+                                    break;
+                                }
                                 Promise<? extends TimedValue<?>> promise;
                                 if (sensinactResource.isMultiple()) {
                                     promise = sensinactResource.getMultiValue(Object.class, GetLevel.NORMAL);
@@ -644,7 +660,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
         Promise<List<ProviderSnapshot>> snapshots;
         if (filter == null) {
             snapshots = thread.execute(getCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(m, ps, false),
-                    ss -> authorizeService(m, ss), resource, snapshotOptions), Function.identity(), null));
+                    ss -> authorizeService(m, ss), resource, snapshotOptions), this::withholdUnreadValues, null));
             if(waitForGateway) {
                 safeGetValue(snapshots);
             }
@@ -659,7 +675,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 Predicate<ServiceSnapshot> service = ss -> authorizeService(m, ss);
                 return m.filteredSnapshot(location, pf == null ? provider : provider.and(pf),
                         sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf));
-            }, Function.identity(), null));
+            }, this::withholdUnreadValues, null)); // before the value filter, which must not see unread values
             if(waitForGateway) {
                 safeGetValue(snapshots);
             }
@@ -809,6 +825,56 @@ public class SensiNactSessionImpl implements SensiNactSession {
             // Not permitted to see this provider
             return null;
         }
+    }
+
+    /**
+     * Whether the caller may read the value of a resource: the value needs READ, DESCRIBE gives the metadata only
+     */
+    private boolean canReadValue(String uri, String model, String provider, String service, String resource) {
+        final PreAuth preAuth = preAuthorizer.preAuthResource(READ, provider, service, resource);
+        return preAuth == ALLOW
+                || (preAuth == UNKNOWN && authorizer.hasResourcePermission(READ, uri, model, provider, service, resource));
+    }
+
+    private List<ProviderSnapshot> withholdUnreadValues(List<ProviderSnapshot> snapshots) {
+        return snapshots.stream().map(this::withholdUnreadValues).toList();
+    }
+
+    /**
+     * Replaces each resource that the caller cannot read by a copy with no value
+     *
+     * @return the snapshot itself when the caller can read all its values
+     */
+    private ProviderSnapshot withholdUnreadValues(ProviderSnapshot ps) {
+        // One authorizer call per resource: decide first, and copy nothing when everything can be read
+        final Set<ResourceSnapshot> hidden = Collections.newSetFromMap(new IdentityHashMap<>());
+        ps.getServices().forEach(ss -> ss.getResources().stream().filter(rs -> !canReadValue(ps, ss, rs))
+                .forEach(hidden::add));
+        if (hidden.isEmpty()) {
+            return ps;
+        }
+        final List<ServiceSnapshot> services = new ArrayList<>();
+        for (ServiceSnapshot ss : ps.getServices()) {
+            final List<ResourceSnapshot> resources = new ArrayList<>();
+            for (ResourceSnapshot rs : ss.getResources()) {
+                if (!hidden.contains(rs)) {
+                    resources.add(rs);
+                } else {
+                    resources.add(new ImmutableResourceSnapshot(null, rs.getName(), rs.getValueType(),
+                            rs.getResourceType(), rs.getType(), new DefaultTimedValue<>(), rs.getMetadata(),
+                            rs.getArguments(), rs.isMultiple()));
+                }
+            }
+            services.add(new ImmutableServiceSnapshot(null, ss.getName(), resources));
+        }
+        return new ImmutableProviderSnapshot(ps.getModelPackageUri(), ps.getModelName(), ps.getName(),
+                ps.getSnapshotTime(), services, ps.getLinkedProviders());
+    }
+
+    /** By names, like {@link #authorizeResource}: a snapshot has no twin object. Actions have no value. */
+    private boolean canReadValue(ProviderSnapshot ps, ServiceSnapshot ss, ResourceSnapshot rs) {
+        return rs.getResourceType() == ResourceType.ACTION || canReadValue(ps.getModelPackageUri(),
+                ps.getModelName(), ps.getName(), ss.getName(), rs.getName());
     }
 
     /**
@@ -1011,7 +1077,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 // Only get the parts of the snapshot that we're allowed to see
                 return m.snapshotProvider(provider, ss -> authorizeService(m, ss),
                         includeResources ? this::authorizeResource : x -> false, snapshotOptions);
-            }, this::safeProviderSnapshot);
+            }, ps -> safeProviderSnapshot(withholdUnreadValues(ps)));
     }
 
     @Override
@@ -1046,7 +1112,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 }
                 // Only get the parts of the snapshot that we're allowed to see
                 return m.snapshotService(provider, service, this::authorizeResource);
-        }, Function.identity());
+        }, ss -> withholdUnreadValues(ss.getProvider()).getService(ss.getName()));
     }
 
     @Override
@@ -1077,7 +1143,8 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 }
                 // Only get the parts of the snapshot that we're allowed to see
                 return m.snapshotResource(provider, service, resource);
-        }, Function.identity());
+        }, rs -> withholdUnreadValues(rs.getService().getProvider()).getResource(rs.getService().getName(),
+                rs.getName()));
     }
 
     @Override

@@ -228,6 +228,9 @@ public class ObservationsExtraUseCase extends AbstractExtraUseCaseModelDelete<Ex
 
         Instant timestamp = DtoToModelMapper.getTimestampFromId(observationId);
 
+        if (!resourceSnapshot.isSet()) {
+            throw new NotFoundException();
+        }
         Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
         if (isHistoryMemory() && cacheObs.getDto(request.id()) != null) {
             ExpandedObservation obs = cacheObs.getDto(request.id());
