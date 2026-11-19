@@ -92,7 +92,7 @@ public class LocationsExtraUseCase extends AbstractExtraUseCaseModelDelete<Expan
 
     private void updateHistoricalLocationMemoryHistory(List<ResourceSnapshot> providerThings) {
         if (providerThings != null) {
-            providerThings.stream().forEach(thing -> {
+            providerThings.stream().filter(ResourceSnapshot::isSet).forEach(thing -> {
                 cacheHl.addDto(
                         thing.getService().getProvider().getName() + "~"
                                 + DtoMapperSimple.stampToId(thing.getValue().getTimestamp()),

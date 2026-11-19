@@ -71,6 +71,9 @@ public class HistoricalLocationExtraUseCase
 
         Instant timestamp = DtoToModelMapper.getTimestampFromId(request.id());
         ResourceSnapshot resourceSnapshot = getResourceLocationFromThing(request, ThingId);
+        if (!resourceSnapshot.isSet()) {
+            throw new NotFoundException();
+        }
         Instant milliTimestamp = resourceSnapshot.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
 
         if (isHistoryMemory() && cacheHl.getDto(request.id()) != null) {

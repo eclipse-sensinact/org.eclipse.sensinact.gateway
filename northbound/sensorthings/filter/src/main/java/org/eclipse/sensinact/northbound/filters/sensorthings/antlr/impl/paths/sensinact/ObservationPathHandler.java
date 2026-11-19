@@ -39,6 +39,9 @@ public class ObservationPathHandler {
         if (parts.length == 1) {
             switch (parts[0]) {
             case "id":
+                if (!resource.isSet()) {
+                    return null;
+                }
                 // Provider~Service~Resource~Timestamp
                 return String.join("~", provider.getName(), resource.getService().getName(), resource.getName(),
                         PathUtils.timestampToString(resource.getValue().getTimestamp()));
