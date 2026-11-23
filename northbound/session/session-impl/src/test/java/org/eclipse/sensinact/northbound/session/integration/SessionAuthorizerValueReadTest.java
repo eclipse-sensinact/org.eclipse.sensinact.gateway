@@ -254,6 +254,66 @@ public class SessionAuthorizerValueReadTest {
         assertTrue(session().filteredSnapshot(valueIs(HIDDEN, 42)).isEmpty());
     }
 
+    /** A filter on the providers or the services, with no value filter */
+    private static ICriterion filter(Predicate<ProviderSnapshot> providerFilter,
+            Predicate<ServiceSnapshot> serviceFilter) {
+        return new ICriterion() {
+            @Override
+            public BiPredicate<ProviderSnapshot, GeoJsonObject> getLocationFilter() {
+                return null;
+            }
+
+            @Override
+            public Predicate<ProviderSnapshot> getProviderFilter() {
+                return providerFilter;
+            }
+
+            @Override
+            public Predicate<ServiceSnapshot> getServiceFilter() {
+                return serviceFilter;
+            }
+
+            @Override
+            public Predicate<ResourceSnapshot> getResourceFilter() {
+                return null;
+            }
+
+            @Override
+            public ResourceValueFilter getResourceValueFilter() {
+                return null;
+            }
+        };
+    }
+
+    @Test
+    void testFilteredSnapshotProviderFilter() {
+        List<ProviderSnapshot> snapshots = session().filteredSnapshot(filter(ps -> PROVIDER.equals(ps.getName()), null));
+        assertEquals(List.of(PROVIDER), snapshots.stream().map(ProviderSnapshot::getName).toList());
+        assertEquals(42, snapshots.get(0).getResource("svc", READABLE).getValue().getValue());
+        assertNoValue(snapshots.get(0).getResource("svc", HIDDEN));
+    }
+
+    @Test
+    void testFilteredSnapshotServiceFilter(@InjectService DataUpdate push) throws Exception {
+        // A second service, which the filter must leave out
+        GenericDto dto = new GenericDto();
+        dto.provider = PROVIDER;
+        dto.service = "other";
+        dto.resource = "extra";
+        dto.value = 42;
+        dto.type = Integer.class;
+        push.pushUpdate(dto).getValue();
+
+        List<ProviderSnapshot> snapshots = session().filteredSnapshot(filter(null, ss -> "svc".equals(ss.getName())));
+        assertTrue(snapshots.stream().flatMap(ps -> ps.getServices().stream()).allMatch(
+                ss -> "svc".equals(ss.getName())));
+        ProviderSnapshot snapshot = snapshots.stream().filter(p -> PROVIDER.equals(p.getName())).findFirst()
+                .orElseThrow();
+        assertEquals(List.of("svc"), snapshot.getServices().stream().map(ServiceSnapshot::getName).toList());
+        assertEquals(42, snapshot.getResource("svc", READABLE).getValue().getValue());
+        assertNoValue(snapshot.getResource("svc", HIDDEN));
+    }
+
     @Test
     void testPreAuthorizerShortCircuits() throws Exception {
         // ALLOW and DENY are not asked again to the authorizer

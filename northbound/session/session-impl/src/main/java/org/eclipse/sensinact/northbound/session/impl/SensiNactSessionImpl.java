@@ -24,15 +24,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -456,10 +453,9 @@ public class SensiNactSessionImpl implements SensiNactSession {
                                 break;
 
                             default: {
-                                // The twin object, as for the other checks of this method
-                                final PreAuth readAuth = preAuthorizer.preAuthResource(READ, provider, service, resource);
-                                if (readAuth != ALLOW && (readAuth == DENY
-                                        || !authorizer.hasResourcePermission(READ, sensinactResource))) {
+                                final SensinactProvider sp = sensinactResource.getService().getProvider();
+                                if (!canReadValue(sp.getModelPackageUri(), sp.getModelName(), provider, service,
+                                        resource)) {
                                     // DESCRIBE does not give the value: show a resource that has none
                                     result.valueType = ValueType.UPDATABLE;
                                     val = pf.resolved(result);
@@ -846,26 +842,31 @@ public class SensiNactSessionImpl implements SensiNactSession {
      * @return the snapshot itself when the caller can read all its values
      */
     private ProviderSnapshot withholdUnreadValues(ProviderSnapshot ps) {
-        // One authorizer call per resource: decide first, and copy nothing when everything can be read
-        final Set<ResourceSnapshot> hidden = Collections.newSetFromMap(new IdentityHashMap<>());
-        ps.getServices().forEach(ss -> ss.getResources().stream().filter(rs -> !canReadValue(ps, ss, rs))
-                .forEach(hidden::add));
-        if (hidden.isEmpty()) {
-            return ps;
-        }
-        final List<ServiceSnapshot> services = new ArrayList<>();
+        // One authorizer call per resource, in a single pass. Only lists of references are built here: the
+        // constructors of the immutable snapshots copy their children, so they are called only if a value is hidden
+        boolean anyHidden = false;
+        final List<List<ResourceSnapshot>> resourcesOfServices = new ArrayList<>();
         for (ServiceSnapshot ss : ps.getServices()) {
             final List<ResourceSnapshot> resources = new ArrayList<>();
             for (ResourceSnapshot rs : ss.getResources()) {
-                if (!hidden.contains(rs)) {
+                if (canReadValue(ps, ss, rs)) {
                     resources.add(rs);
                 } else {
+                    anyHidden = true;
                     resources.add(new ImmutableResourceSnapshot(null, rs.getName(), rs.getValueType(),
                             rs.getResourceType(), rs.getType(), new DefaultTimedValue<>(), rs.getMetadata(),
                             rs.getArguments(), rs.isMultiple()));
                 }
             }
-            services.add(new ImmutableServiceSnapshot(null, ss.getName(), resources));
+            resourcesOfServices.add(resources);
+        }
+        if (!anyHidden) {
+            return ps;
+        }
+        final List<ServiceSnapshot> services = new ArrayList<>();
+        int index = 0;
+        for (ServiceSnapshot ss : ps.getServices()) {
+            services.add(new ImmutableServiceSnapshot(null, ss.getName(), resourcesOfServices.get(index++)));
         }
         return new ImmutableProviderSnapshot(ps.getModelPackageUri(), ps.getModelName(), ps.getName(),
                 ps.getSnapshotTime(), services, ps.getLinkedProviders());
