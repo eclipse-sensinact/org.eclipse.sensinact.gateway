@@ -64,6 +64,9 @@ public class HistoricalLocationsDelegateSensorthings extends AbstractDelegate {
         ProviderSnapshot providerSnapshot = validateAndGetProvider(provider);
         ResourceSnapshot location = providerSnapshot.getResource(DtoMapperSimple.SERVICE_ADMIN,
                 DtoMapperSimple.LOCATION);
+        if (!location.isSet()) {
+            throw new NotFoundException();
+        }
         Instant resourceStamp = location.getValue().getTimestamp().truncatedTo(ChronoUnit.MILLIS);
         if (isHistoryMemory() && getCacheHistoricalLocation().getDto(id) != null) {
             Optional<HistoricalLocation> historicalLocation = getSensorThingDtoMapper().toHistoricalLocation(
