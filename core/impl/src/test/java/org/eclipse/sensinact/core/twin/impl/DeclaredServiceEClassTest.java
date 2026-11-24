@@ -14,10 +14,15 @@ package org.eclipse.sensinact.core.twin.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.time.Instant;
 import java.util.Collections;
 
 import org.eclipse.emf.common.util.URI;
@@ -30,12 +35,15 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.sensinact.core.command.impl.ActionHandler;
 import org.eclipse.sensinact.core.emf.model.EMFModel;
+import org.eclipse.sensinact.core.emf.model.EMFService;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider;
 import org.eclipse.sensinact.core.emf.twin.SensinactEMFService;
 import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
 import org.eclipse.sensinact.core.model.impl.SensinactModelManagerImpl;
 import org.eclipse.sensinact.core.model.nexus.ModelNexus;
 import org.eclipse.sensinact.core.notification.impl.NotificationAccumulator;
+import org.eclipse.sensinact.core.twin.SensinactResource;
+import org.eclipse.sensinact.core.twin.TimedValue;
 import org.eclipse.sensinact.model.core.provider.DynamicProvider;
 import org.eclipse.sensinact.model.core.provider.Provider;
 import org.eclipse.sensinact.model.core.provider.ProviderPackage;
@@ -48,32 +56,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.osgi.util.promise.PromiseFactory;
 
 /**
- * Two APIs take an {@link EClass} for a service, and both ignore it when the
- * model <em>declares</em> the service name. They throw nothing and log nothing,
- * so the caller believes the service is typed, and it is not.
+ * Two APIs take an {@link EClass} for a service, and these tests pin what each of
+ * them does with it.
  *
  * <ul>
- * <li>{@code EMFModel.createServiceWithEClass(name, eClass)} builds an
- * unattached {@code ServiceImpl} handle over the EClass and writes nothing into
- * the model EClass. Its one caller in the gateway is {@code SetValueCommand},
- * for a value push that carries a {@code DataUpdateDto.serviceEClass} for a
- * service the model does <em>not</em> declare.</li>
- * <li>{@code SensinactEMFProvider.getOrCreateService(name, eClass)} reaches
- * {@code ModelNexus.createServiceInstance}, which for a declared name
- * instantiates {@code serviceFeature.getEType()} and drops the EClass of its
- * own signature.</li>
+ * <li>{@code SensinactEMFProvider.getOrCreateService(name, eClass)} honours a sub
+ * type of the EClass the service has, by creating or retyping the stored instance
+ * with it. That is the supported way to give one provider's service - the admin
+ * included - resources that its declaration does not list. The EClass the service
+ * already has, and any super type of it, change nothing, and an unrelated EClass is
+ * refused.</li>
+ * <li>{@code EMFModel.createServiceWithEClass(name, eClass)} builds an unattached
+ * handle and writes nothing into the model, so it cannot retype a service name the
+ * model declares and refuses one. {@code admin} is declared by {@code Provider} for
+ * every model there is, and its declaration belongs to the shared provider package,
+ * so no model-level API can retype it.</li>
  * </ul>
  *
- * {@code admin} is declared by {@code Provider} for every model there is, so no
- * EClass-taking API can retype it. The only route that works is a pushed or
- * updated <em>instance</em>, through {@code EMFCompareUtil.copyOldService}.
- *
- * <p>
- * Each test below accepts <b>either</b> acceptable outcome: an
- * {@link IllegalArgumentException} that refuses the call, or the EClass being
- * honoured. Only the third outcome - a silent success that changes nothing -
- * fails the test. The last test is the contrast and passes today: the same API
- * honours the EClass for a name the model does not declare.
+ * Which resources a service has is read from the stored instance, so a service
+ * created or retyped here is read back in full through every path -
+ * {@code SensinactDigitalTwin.getResource}, {@code SensinactProvider.getResource},
+ * the service listing and the snapshots.
  */
 @ExtendWith(MockitoExtension.class)
 public class DeclaredServiceEClassTest {
@@ -81,6 +84,12 @@ public class DeclaredServiceEClassTest {
     private static final String TEST_MODEL = "testmodel";
     private static final String TEST_PROVIDER = "testprovider";
     private static final String ADMIN = "admin";
+
+    private static final String EXTRA_ADMIN_RESOURCE = "testAdmin";
+    private static final BigInteger EXTRA_ADMIN_VALUE = new BigInteger("1000");
+
+    private static final String DECLARED_SERVICE = "testService1";
+    private static final String EXTRA_SERVICE_RESOURCE = "complexTest";
 
     @Mock
     NotificationAccumulator accumulator;
@@ -138,101 +147,198 @@ public class DeclaredServiceEClassTest {
         assertNotNull(ePackage);
     }
 
+    private EClass eClass(String name) {
+        return (EClass) ePackage.getEClassifier(name);
+    }
+
     private EClass testAdmin() {
-        return (EClass) ePackage.getEClassifier("TestAdmin");
+        return eClass("TestAdmin");
     }
 
     /**
-     * {@code createServiceWithEClass("admin", TestAdmin)} reports success - the
-     * handle it returns even carries the {@code testAdmin} resource - and changes
-     * nothing. The model keeps the inherited {@code Provider.admin} reference, so
-     * every provider of that model still gets a plain {@code Admin}.
+     * Asserts that a resource is visible through every read path, not only the one
+     * that resolves the service EClass from the stored instance.
+     */
+    private void assertReadableEverywhere(SensinactEMFProvider provider, String service, String resource) {
+        assertNotNull(twinImpl.getResource(provider.getName(), service, resource),
+                "SensinactDigitalTwin.getResource cannot see " + service + "/" + resource);
+        assertNotNull(provider.getResource(service, resource),
+                "SensinactProvider.getResource cannot see " + service + "/" + resource);
+        assertNotNull(twinImpl.snapshotResource(provider.getName(), service, resource),
+                "snapshotResource cannot see " + service + "/" + resource);
+        assertTrue(provider.getServices().get(service).getResources().containsKey(resource),
+                "the service listing does not contain " + service + "/" + resource);
+    }
+
+    /**
+     * {@code createServiceWithEClass} cannot change what a model declares, so it
+     * refuses a service name the model declares rather than returning a handle that
+     * leads nowhere. {@code admin} is declared by {@code Provider} for every model.
      */
     @Test
-    void createServiceWithEClass_onTheDeclaredAdmin_mustNotSilentlyDoNothing() {
+    void createServiceWithEClass_onTheDeclaredAdmin_isRefused() {
         EMFModel model = manager.createModel(TEST_MODEL).build();
 
-        try {
-            model.createServiceWithEClass(ADMIN, testAdmin());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            // acceptable: the call refuses a service name the model declares
-            return;
-        }
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> model.createServiceWithEClass(ADMIN, testAdmin()));
+        assertTrue(e.getMessage().contains(ADMIN), "the message does not name the declared service: " + e.getMessage());
 
-        // it did not refuse, so it must have been honoured
-        assertEquals(testAdmin(), manager.getModel(TEST_MODEL).getServices().get(ADMIN).getServiceEClass(),
-                "the model still declares the inherited Admin after createServiceWithEClass");
-
+        // and nothing was changed on the way out
+        assertEquals(ProviderPackage.Literals.ADMIN,
+                manager.getModel(TEST_MODEL).getServices().get(ADMIN).getServiceEClass());
         SensinactEMFProvider provider = twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
-        assertEquals(testAdmin(), provider.getEMFProvider().getAdmin().eClass(),
-                "the provider was built with a plain Admin");
+        assertEquals(ProviderPackage.Literals.ADMIN, provider.getEMFProvider().getAdmin().eClass());
     }
 
     /**
-     * The same for the live provider: {@code getOrCreateService("admin", X)}
-     * returns the existing plain {@code Admin} and never looks at X.
+     * The handle is still what it always was for a service name the model does not
+     * declare. This is the one gateway caller of the method, {@code SetValueCommand},
+     * which pushes a value carrying a {@code DataUpdateDto.serviceEClass}.
      */
     @Test
-    void getOrCreateService_onTheDeclaredAdmin_mustNotSilentlyIgnoreTheEClass() {
+    void createServiceWithEClass_onAnUndeclaredName_stillBuildsTheHandle() {
+        EMFModel model = manager.createModel(TEST_MODEL).build();
+
+        EMFService handle = model.createServiceWithEClass("notDeclared", eClass("TestService1"));
+
+        assertEquals(eClass("TestService1"), handle.getServiceEClass());
+        assertTrue(handle.getResources().containsKey("foo"), "the handle does not list the resources of its EClass");
+    }
+
+    /**
+     * The live provider: {@code getOrCreateService} retypes the stored admin to the
+     * sub type, and the resource the sub type adds is then readable through every
+     * path. It has no value until it is given one, which a caller can tell from a
+     * resource that does not exist.
+     */
+    @Test
+    void getOrCreateService_onTheDeclaredAdmin_retypesTheStoredInstance() throws Exception {
         manager.createModel(TEST_MODEL).build();
         SensinactEMFProvider provider = twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
 
-        SensinactEMFService service;
-        try {
-            service = provider.getOrCreateService(ADMIN, testAdmin());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            // acceptable: the call refuses to retype a declared service
-            return;
-        }
+        SensinactEMFService service = provider.getOrCreateService(ADMIN, testAdmin());
 
-        assertEquals(testAdmin(), service.getServiceEClass(),
-                "getOrCreateService returned a service typed with the declared EClass, not the one asked for");
-        assertEquals(testAdmin(), provider.getEMFProvider().getAdmin().eClass(),
-                "the stored admin keeps its declared type");
+        assertEquals(testAdmin(), service.getServiceEClass());
+        assertEquals(testAdmin(), provider.getEMFProvider().getAdmin().eClass(), "the stored admin was not retyped");
+        assertReadableEverywhere(provider, ADMIN, EXTRA_ADMIN_RESOURCE);
+
+        // it exists and reads as unset, and it takes a value
+        SensinactResource resource = twinImpl.getResource(TEST_PROVIDER, ADMIN, EXTRA_ADMIN_RESOURCE);
+        TimedValue<?> unset = resource.getValue().getValue();
+        assertNull(unset.getValue());
+        assertNull(unset.getTimestamp());
+
+        resource.setValue(EXTRA_ADMIN_VALUE, Instant.now()).getValue();
+        assertEquals(EXTRA_ADMIN_VALUE,
+                twinImpl.getResource(TEST_PROVIDER, ADMIN, EXTRA_ADMIN_RESOURCE).getValue().getValue().getValue());
     }
 
     /**
-     * It is not an admin-only defect. {@code testService1} is declared by
-     * {@code TemperatureSensor} and does not exist on a fresh provider, so the call
-     * really <em>creates</em> the instance - and still drops the EClass of its own
-     * signature, although {@code TestServiceWithComplex} is a subtype of the
-     * declared {@code TestService1}.
+     * Retyping keeps what the admin already carried, values and metadata alike. The
+     * admin of a new provider holds its friendly name, its model and its package uri,
+     * each with a timestamp.
      */
     @Test
-    void getOrCreateService_onADeclaredService_mustNotSilentlyIgnoreTheEClass() {
-        EClass subType = (EClass) ePackage.getEClassifier("TestServiceWithComplex");
+    void getOrCreateService_retypingTheAdmin_keepsItsValuesAndMetadata() throws Exception {
+        manager.createModel(TEST_MODEL).build();
+        SensinactEMFProvider provider = twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
 
-        Provider sensor = (Provider) EcoreUtil.create((EClass) ePackage.getEClassifier("TemperatureSensor"));
+        TimedValue<?> before = twinImpl.getResource(TEST_PROVIDER, ADMIN, "friendlyName").getValue().getValue();
+        assertEquals(TEST_PROVIDER, before.getValue());
+        assertNotNull(before.getTimestamp());
+
+        provider.getOrCreateService(ADMIN, testAdmin());
+
+        assertEquals(TEST_PROVIDER, provider.getEMFProvider().getAdmin().getFriendlyName());
+        TimedValue<?> after = twinImpl.getResource(TEST_PROVIDER, ADMIN, "friendlyName").getValue().getValue();
+        assertEquals(before.getValue(), after.getValue(), "the retyped admin lost its friendly name");
+        assertEquals(before.getTimestamp(), after.getTimestamp(), "the retyped admin lost its metadata");
+        assertEquals(TEST_MODEL, provider.getEMFProvider().getAdmin().getModel());
+    }
+
+    /**
+     * The EClass a service already has, and any super type of it, change nothing. This
+     * is what keeps a retyped service retyped: every value push resolves the service
+     * EClass from the model, which is the super type, and must not downgrade the
+     * instance.
+     */
+    @Test
+    void getOrCreateService_withTheDeclaredEClass_doesNotDowngradeARetypedService() {
+        manager.createModel(TEST_MODEL).build();
+        SensinactEMFProvider provider = twinImpl.createProvider(TEST_MODEL, TEST_PROVIDER);
+        provider.getOrCreateService(ADMIN, testAdmin());
+
+        // the super type, as SetValueCommand passes it for every push
+        SensinactEMFService again = provider.getOrCreateService(ADMIN, ProviderPackage.Literals.ADMIN);
+
+        assertEquals(testAdmin(), again.getServiceEClass(), "the service was downgraded to the declared EClass");
+        assertEquals(testAdmin(), provider.getEMFProvider().getAdmin().eClass(), "the stored admin was downgraded");
+        assertReadableEverywhere(provider, ADMIN, EXTRA_ADMIN_RESOURCE);
+
+        // and the same for the EClass it already has
+        assertEquals(testAdmin(), provider.getOrCreateService(ADMIN, testAdmin()).getServiceEClass());
+    }
+
+    /**
+     * It is not an admin-only concern. {@code testService1} is declared by
+     * {@code TemperatureSensor} and does not exist on a fresh provider, so the call
+     * really <em>creates</em> the instance, with the sub type it was given.
+     */
+    @Test
+    void getOrCreateService_onADeclaredService_createsItWithTheGivenEClass() {
+        EClass subType = eClass("TestServiceWithComplex");
+
+        Provider sensor = (Provider) EcoreUtil.create(eClass("TemperatureSensor"));
         sensor.setId("sensor");
         nexus.save(sensor);
 
         SensinactEMFProvider provider = twinImpl.getProvider("sensor");
         assertNotNull(provider);
 
-        SensinactEMFService service;
-        try {
-            service = provider.getOrCreateService("testService1", subType);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            // acceptable: the call refuses to retype a declared service
-            return;
-        }
+        SensinactEMFService service = provider.getOrCreateService(DECLARED_SERVICE, subType);
 
-        assertEquals(subType, service.getServiceEClass(),
-                "getOrCreateService instantiated the declared EType and dropped the EClass it was given");
+        assertEquals(subType, service.getServiceEClass());
+        assertEquals(subType, provider.getEMFProvider().getService(DECLARED_SERVICE).eClass(),
+                "the stored instance was created with the declared EType");
+        assertReadableEverywhere(provider, DECLARED_SERVICE, EXTRA_SERVICE_RESOURCE);
     }
 
     /**
-     * The contrast, and it passes today: for a name the model does <em>not</em>
-     * declare, on a {@link DynamicProvider}, the very same method honours the
-     * EClass. That branch is the only one in
-     * {@code ModelNexus.createServiceInstance} that reads the parameter.
+     * An EClass that is neither a sub type nor a super type of the one the service has
+     * cannot be applied, and saying so is the whole point: a caller cannot tell a
+     * service that was retyped from one that silently was not.
+     */
+    @Test
+    void getOrCreateService_withAnUnrelatedEClass_isRefused() {
+        Provider sensor = (Provider) EcoreUtil.create(eClass("TemperatureSensor"));
+        sensor.setId("sensor");
+        nexus.save(sensor);
+
+        SensinactEMFProvider provider = twinImpl.getProvider("sensor");
+        assertNotNull(provider);
+
+        // on creation of the instance
+        IllegalArgumentException onCreate = assertThrows(IllegalArgumentException.class,
+                () -> provider.getOrCreateService(DECLARED_SERVICE, eClass("TestService2")));
+        assertTrue(onCreate.getMessage().contains("TestService2"), onCreate.getMessage());
+
+        // and on an instance that exists already
+        IllegalArgumentException onRetype = assertThrows(IllegalArgumentException.class,
+                () -> provider.getOrCreateService(ADMIN, eClass("TestService2")));
+        assertTrue(onRetype.getMessage().contains("TestService2"), onRetype.getMessage());
+        assertEquals(ProviderPackage.Literals.ADMIN, provider.getEMFProvider().getAdmin().eClass(),
+                "the refused call changed the stored admin");
+    }
+
+    /**
+     * For a name the model does <em>not</em> declare, on a {@link DynamicProvider},
+     * the EClass is taken as it stands - it has no declaration to agree with.
      */
     @Test
     void getOrCreateService_onAnUndeclaredName_honoursTheEClass() {
-        EClass serviceType = (EClass) ePackage.getEClassifier("TestService1");
+        EClass serviceType = eClass("TestService1");
 
-        DynamicProvider sensor = (DynamicProvider) EcoreUtil
-                .create((EClass) ePackage.getEClassifier("DynamicTemperatureSensor"));
+        DynamicProvider sensor = (DynamicProvider) EcoreUtil.create(eClass("DynamicTemperatureSensor"));
         sensor.setId("dynamicsensor");
         nexus.save(sensor);
 

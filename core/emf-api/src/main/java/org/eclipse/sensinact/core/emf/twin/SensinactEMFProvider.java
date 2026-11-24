@@ -51,8 +51,24 @@ public interface SensinactEMFProvider extends SensinactProvider {
     /**
      * The digital twins for the service with the given name for this provider A new
      * Instance will be create if non exists.
+     * <p>
+     * {@code serviceEClass} is honoured when it is a sub type of the EClass the
+     * service has, which is how a service of this provider gains resources its
+     * declaration does not list. An existing instance is retyped to it, keeping every
+     * value and all the metadata it already carries; the resources the sub type adds
+     * read as unset until they are given a value. The EClass the service already has,
+     * and any super type of it, change nothing, so a caller that passes the declared
+     * service type never downgrades a service that was retyped before.
      *
-     * @return
+     * @param name          the service name
+     * @param serviceEClass the EClass the service should have, may be {@code null} to
+     *                      take the declared one
+     * @return the digital twin of the service
+     * @throws IllegalArgumentException if {@code serviceEClass} is neither a sub type
+     *                                  nor a super type of the EClass the service has,
+     *                                  or if this provider neither declares
+     *                                  {@code name} nor is a
+     *                                  {@link org.eclipse.sensinact.model.core.provider.DynamicProvider}
      */
     SensinactEMFService getOrCreateService(String name, EClass serviceEClass);
 

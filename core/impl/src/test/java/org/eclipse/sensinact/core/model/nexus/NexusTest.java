@@ -813,9 +813,9 @@ public class NexusTest {
             Provider p2 = nexus.createProviderInstance("TestModel", "testproviderNew", now);
             Provider p3 = nexus.createProviderInstance("something_else", "something_else", now);
 
-            nexus.handleDataUpdate(p, service.getName(), service, model2, resource, "test", now);
-            nexus.handleDataUpdate(p2, service2.getName(), service2, model2, resource2, "test2", now);
-            nexus.handleDataUpdate(p3, service3.getName(), service3, model2, resource3, "test2", now);
+            nexus.handleDataUpdate(p, service.getName(), service, null, resource, "test", now);
+            nexus.handleDataUpdate(p2, service2.getName(), service2, null, resource2, "test2", now);
+            nexus.handleDataUpdate(p3, service3.getName(), service3, null, resource3, "test2", now);
 
             nexus.linkProviders("testprovider", "testproviderNew", Instant.now());
 
