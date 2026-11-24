@@ -13,13 +13,19 @@
 package org.eclipse.sensinact.gateway.southbound.history.core.ingest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -33,10 +39,12 @@ import org.eclipse.sensinact.gateway.geojson.GeoJsonObject;
 import org.eclipse.sensinact.gateway.southbound.history.core.filter.ChangeCondition;
 import org.eclipse.sensinact.gateway.southbound.history.core.filter.ChangeCondition.Mode;
 import org.eclipse.sensinact.gateway.southbound.history.core.filter.ConfiguredIngestFilter;
+import org.eclipse.sensinact.gateway.southbound.history.core.ingest.IngestionPipeline.RetiredStep;
 import org.eclipse.sensinact.gateway.southbound.history.inmemory.InMemoryHistoryStorage;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.provider.TimeRange;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoricalRecord;
+import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryRecordingStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -199,5 +207,189 @@ class IngestionPipelineTest {
 
         pipeline.handle(update("a", 1L, T0));
         assertTrue(true);
+    }
+
+    /** Recording step keeping what it receives, and optionally failing. */
+    private static class CapturingStep implements HistoryRecordingStep {
+        final List<HistoricalRecord> records = new ArrayList<>();
+        RuntimeException failure;
+
+        @Override
+        public void record(HistoricalRecord record) {
+            records.add(record);
+            if (failure != null) {
+                RuntimeException toThrow = failure;
+                failure = null;
+                throw toThrow;
+            }
+        }
+    }
+
+    private static ConfiguredIngestFilter deadbandFilter() {
+        return new ConfiguredIngestFilter("db", List.of(), criterion(List.of("DATA/*"), event -> true), null,
+                new ChangeCondition(Mode.DEADBAND, new BigDecimal("0.5"), null, null));
+    }
+
+    @Test
+    void givenReplacementStepWhenUpdatesAreHandledThenStepReceivesEveryRecordInsteadOfStorage() {
+        CapturingStep step = new CapturingStep();
+        IngestionPipeline pipeline = new IngestionPipeline("test", storage, null, null);
+        pipeline.replaceRecordingStep(step);
+
+        pipeline.handle(update("a", 1L, T0));
+        pipeline.handle(update("b", "x", T0));
+
+        assertEquals(List.of("a", "b"), step.records.stream().map(r -> r.path().resource()).toList());
+        assertEquals(0, count("a"));
+        assertEquals(0, count("b"));
+    }
+
+    @Test
+    void givenReplacementStepWhenUpdateIsFilteredOutThenStepDoesNotReceiveIt() {
+        CapturingStep step = new CapturingStep();
+        ICriterion exclude = criterion(null, event -> "drop".equals(event.resource()));
+        IngestionPipeline pipeline = new IngestionPipeline("test", storage, null, exclude);
+        pipeline.replaceRecordingStep(step);
+
+        pipeline.handle(update("drop", 1L, T0));
+        pipeline.handle(update("keep", 1L, T0));
+
+        assertEquals(List.of("keep"), step.records.stream().map(r -> r.path().resource()).toList());
+    }
+
+    @Test
+    void givenStepReturnsNormallyWhenValueIsWithinDeadbandThenItIsSuppressed() {
+        CapturingStep step = new CapturingStep();
+        IngestionPipeline pipeline = new IngestionPipeline("test", storage, null, null);
+        pipeline.setFilters(List.of(deadbandFilter()));
+        pipeline.replaceRecordingStep(step);
+
+        pipeline.handle(update("temp", 21.0d, T0));
+        pipeline.handle(update("temp", 21.1d, T0.plusSeconds(10)));
+
+        assertEquals(1, step.records.size());
+    }
+
+    @Test
+    void givenStepThrowsWhenNextValueIsWithinDeadbandThenItIsStillHandedOver() {
+        CapturingStep step = new CapturingStep();
+        step.failure = new IllegalStateException("step failed");
+        IngestionPipeline pipeline = new IngestionPipeline("test", storage, null, null);
+        pipeline.setFilters(List.of(deadbandFilter()));
+        pipeline.replaceRecordingStep(step);
+
+        pipeline.handle(update("temp", 21.0d, T0));
+        pipeline.handle(update("temp", 21.1d, T0.plusSeconds(10)));
+
+        assertEquals(2, step.records.size());
+    }
+
+    @Test
+    void givenNewStepWhenItReplacesTheCurrentOneThenThePreviousIsReturnedAndOnlyTheNewOneRecords() {
+        CapturingStep first = new CapturingStep();
+        CapturingStep second = new CapturingStep();
+        IngestionPipeline pipeline = new IngestionPipeline("test", storage, null, null);
+        pipeline.replaceRecordingStep(first);
+
+        HistoryRecordingStep previous = pipeline.replaceRecordingStep(second).retire();
+        pipeline.handle(update("a", 1L, T0));
+
+        assertSame(first, previous);
+        assertEquals(0, first.records.size());
+        assertEquals(1, second.records.size());
+    }
+
+    @Test
+    void givenNoReplacementWhenStepIsReplacedThenTheBuiltInStepIsReturned() {
+        IngestionPipeline pipeline = new IngestionPipeline("test", storage, null, null);
+
+        HistoryRecordingStep previous = pipeline.replaceRecordingStep(new CapturingStep()).retire();
+
+        assertInstanceOf(DirectRecordingStep.class, previous);
+    }
+
+    @Test
+    void givenReplacementStepWhenDefaultIsRestoredThenRecordsGoToStorageAgain() {
+        CapturingStep step = new CapturingStep();
+        IngestionPipeline pipeline = new IngestionPipeline("test", storage, null, null);
+        pipeline.replaceRecordingStep(step);
+
+        HistoryRecordingStep previous = pipeline.replaceRecordingStep(null).retire();
+        pipeline.handle(update("a", 1L, T0));
+
+        assertSame(step, previous);
+        assertEquals(0, step.records.size());
+        assertEquals(1, count("a"));
+    }
+
+    @Test
+    void givenRecordInProgressWhenStepIsRetiredThenRetirementWaitsForTheRecord() throws Exception {
+        CountDownLatch inRecord = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        List<String> events = new CopyOnWriteArrayList<>();
+        CapturingStep step = new CapturingStep() {
+            @Override
+            public void record(HistoricalRecord record) {
+                inRecord.countDown();
+                try {
+                    events.add(release.await(5, TimeUnit.SECONDS) ? "record-end" : "record-timeout");
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                super.record(record);
+            }
+        };
+        IngestionPipeline pipeline = new IngestionPipeline("test", storage, null, null);
+        pipeline.replaceRecordingStep(step);
+        Thread handler = new Thread(() -> pipeline.handle(update("a", 1L, T0)));
+        handler.start();
+        assertTrue(inRecord.await(5, TimeUnit.SECONDS));
+
+        RetiredStep replaced = pipeline.replaceRecordingStep(null);
+        Thread retirer = new Thread(() -> {
+            replaced.retire();
+            events.add("retired");
+        });
+        retirer.start();
+        retirer.join(300);
+        release.countDown();
+        retirer.join(5_000);
+        handler.join(5_000);
+
+        assertEquals(List.of("record-end", "retired"), events);
+    }
+
+    @Test
+    void givenRecordInProgressWhenStepIsReplacedThenTheNextRecordGoesToTheNewStepAtOnce() throws Exception {
+        CountDownLatch inRecord = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        CapturingStep blocked = new CapturingStep() {
+            @Override
+            public void record(HistoricalRecord record) {
+                inRecord.countDown();
+                try {
+                    release.await(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                super.record(record);
+            }
+        };
+        CapturingStep next = new CapturingStep();
+        IngestionPipeline pipeline = new IngestionPipeline("test", storage, null, null);
+        pipeline.replaceRecordingStep(blocked);
+        Thread handler = new Thread(() -> pipeline.handle(update("a", 1L, T0)));
+        handler.start();
+        assertTrue(inRecord.await(5, TimeUnit.SECONDS));
+
+        pipeline.replaceRecordingStep(next);
+        pipeline.handle(update("b", 1L, T0));
+
+        // recorded while the previous step is still busy with its record
+        assertEquals(1, next.records.size());
+        assertEquals(0, blocked.records.size());
+        release.countDown();
+        handler.join(5_000);
+        assertEquals(1, blocked.records.size());
     }
 }

@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.notification.ResourceDataNotification;
@@ -29,6 +30,7 @@ import org.eclipse.sensinact.gateway.southbound.history.core.ValueNormalizer;
 import org.eclipse.sensinact.gateway.southbound.history.provider.ResourcePath;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoricalRecord;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryIngestFilter;
+import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryRecordingStep;
 import org.eclipse.sensinact.gateway.southbound.history.storage.HistoryStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,11 @@ import org.slf4j.LoggerFactory;
  * The pipeline tracks the last stored value per resource — the comparison
  * basis handed to {@link HistoryIngestFilter#shouldStore} — in memory; the
  * first update after a restart is therefore always stored.
+ *
+ * Accepted records are handed to a {@link HistoryRecordingStep}: the built-in
+ * one writes them to the storage at once, a replacement can be set with
+ * {@link #replaceRecordingStep(HistoryRecordingStep)}. A record counts as
+ * stored when the step returns normally.
  */
 public class IngestionPipeline {
 
@@ -55,6 +62,9 @@ public class IngestionPipeline {
     private final ICriterion backendExclude;
 
     private volatile List<HistoryIngestFilter> filters = List.of();
+    // the step in use, locked while it handles a record: retiring a replaced
+    // step waits for that record, so the step receives nothing once retired
+    private final AtomicReference<StepHolder> current;
     private final Map<ResourcePath, TimedValue<?>> lastStored = new ConcurrentHashMap<>();
 
     public IngestionPipeline(String providerName, HistoryStorage storage, ICriterion backendInclude,
@@ -63,6 +73,52 @@ public class IngestionPipeline {
         this.storage = storage;
         this.backendInclude = backendInclude;
         this.backendExclude = backendExclude;
+        this.current = new AtomicReference<>(new StepHolder(new DirectRecordingStep(storage)));
+    }
+
+    /**
+     * Replaces the step recording the accepted records; {@code null} restores
+     * the built-in step, which writes to the storage at once. Does not wait:
+     * the records that follow go to the new step.
+     *
+     * @return the previous step, which the caller retires and then closes
+     */
+    public RetiredStep replaceRecordingStep(HistoryRecordingStep newStep) {
+        return new RetiredStep(
+                current.getAndSet(new StepHolder(newStep == null ? new DirectRecordingStep(storage) : newStep)));
+    }
+
+    /** A step taken out of the pipeline. */
+    public static final class RetiredStep {
+
+        private final StepHolder holder;
+
+        private RetiredStep(StepHolder holder) {
+            this.holder = holder;
+        }
+
+        /**
+         * Waits for the record the step may still be handling; the step
+         * receives no record afterwards.
+         *
+         * @return the step, ready to be closed
+         */
+        public HistoryRecordingStep retire() {
+            synchronized (holder) {
+                holder.retired = true;
+            }
+            return holder.step;
+        }
+    }
+
+    private static final class StepHolder {
+
+        final HistoryRecordingStep step;
+        boolean retired;
+
+        StepHolder(HistoryRecordingStep step) {
+            this.step = step;
+        }
     }
 
     /** Replaces the applicable filters (already scoped to this backend). */
@@ -124,11 +180,21 @@ public class IngestionPipeline {
             }
         }
 
-        try {
-            storage.store(List.of(record));
-            lastStored.put(record.path(), new DefaultTimedValue<>(record.value(), record.timestamp()));
-        } catch (RuntimeException e) {
-            logger.warn("History backend {} failed to store an update for {}", providerName, record.path(), e);
+        while (true) {
+            StepHolder holder = current.get();
+            synchronized (holder) {
+                if (holder.retired) {
+                    // replaced while this record waited: the new step is current
+                    continue;
+                }
+                try {
+                    holder.step.record(record);
+                    lastStored.put(record.path(), new DefaultTimedValue<>(record.value(), record.timestamp()));
+                } catch (RuntimeException e) {
+                    logger.warn("History backend {} failed to store an update for {}", providerName, record.path(), e);
+                }
+                return;
+            }
         }
     }
 
