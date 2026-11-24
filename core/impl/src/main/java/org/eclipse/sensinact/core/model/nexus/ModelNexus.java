@@ -784,6 +784,7 @@ public class ModelNexus {
     private EAttribute doCreateResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue, Map<String, Object> defaultMetadata, List<MetadataValue> metadata, boolean hasGetter,
             long getterCacheMs, boolean hasSetter, int lowerBound, int upperBound) {
+        assertEClassIsExtendable(service);
         assertResourceNotExist(service, resource);
         ResourceMetadata resourceMetaData = EMFUtil.createResourceAttribute(service, resource, type, defaultValue,
                 lowerBound, upperBound);
@@ -804,6 +805,36 @@ public class ModelNexus {
             m.put(entry.getKey(), EMFUtil.createMetadataValue(null, entry.getValue()));
         }
         return new BasicEMap<>(m);
+    }
+
+    /**
+     * Refuses to add a feature to an EClass that has generated Java.
+     * <p>
+     * A generated {@code EObject} answers {@code eClass() == eStaticClass()}, so EMF
+     * resolves its features through the generated switches, which cannot know a
+     * feature added at run time: {@code eDerivedStructuralFeatureID} falls through to
+     * the open-feature path, which calls back into the custom
+     * {@code Service.eIsSet(EStructuralFeature)}, and the two recurse until the stack
+     * is gone. Worse, a generated EClass is a singleton of its package, so the damage
+     * is not confined to one model - adding a resource to {@code Admin}, which every
+     * provider of every model shares, breaks every later {@code createProvider}.
+     * <p>
+     * Extending a <em>sub type</em> of a generated EClass is safe and is the supported
+     * way to add resources to a service the core declares: the instances of a sub type
+     * created at run time are not answered by the generated switches. See
+     * {@code SensinactEMFProvider.getOrCreateService(String, EClass)}.
+     *
+     * @param eClass the EClass a feature would be added to
+     * @throws IllegalArgumentException if {@code eClass} has a generated
+     *                                  implementation
+     */
+    private void assertEClassIsExtendable(EClass eClass) {
+        if (eClass.getInstanceClassName() != null) {
+            throw new IllegalArgumentException("The EClass " + eClass.getName() + " of package "
+                    + eClass.getEPackage().getNsURI() + " has a generated implementation and cannot be given features"
+                    + " at run time. Declare them in its Ecore model, or use a sub type of it for the service of one"
+                    + " provider.");
+        }
     }
 
     private void assertResourceNotExist(EClass service, String resource) {
@@ -842,6 +873,7 @@ public class ModelNexus {
     }
 
     private EReference doCreateService(EClass model, String refName, String serviceModelName, Instant timestamp) {
+        assertEClassIsExtendable(model);
         EPackage ePackage = model.getEPackage();
         EClass service = EMFUtil.createEClass(NamingUtils.sanitizeName(serviceModelName, false), ePackage, null,
                 ProviderPackage.Literals.SERVICE);
@@ -1132,6 +1164,7 @@ public class ModelNexus {
             List<Entry<String, Class<?>>> namedParameterTypes, Map<String, Object> defaultMetadata,
             int lowerBound, int upperBound) {
 
+        assertEClassIsExtendable(serviceEClass);
         assertResourceNotExist(serviceEClass, name);
 
         List<EParameter> params = namedParameterTypes.stream()
