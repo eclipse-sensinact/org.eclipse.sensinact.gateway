@@ -1197,6 +1197,61 @@ public class SensiNactSessionImpl implements SensiNactSession {
         return linkOrUnlinkProviders(parent, child, false);
     }
 
+    /** Prefix of the package of a model created without package, as in the model manager of the core */
+    private static final String DEFAULT_PACKAGE_BASE = "https://eclipse.org/sensinact/";
+
+    /**
+     * Checks that the user may update each resource that setProvider writes. One refusal refuses the whole update.
+     * <ul>
+     * <li>Each resource is checked like an existing resource set alone: the pre-authorizer, then the authorizer for
+     * UPDATE. The authorizer is not asked hasProviderPermission(UPDATE): about the provider, only the
+     * pre-authorizer is asked, by setProvider.</li>
+     * <li>The authorizer gets the model and model package that the push uses: those of the provider when it exists,
+     * else those of the request, with the provider name as default model and
+     * https://eclipse.org/sensinact/&lt;model&gt; as default package.</li>
+     * </ul>
+     */
+    private void checkResourcesUpdate(String provider, String modelPackageUri, String model, List<GenericDto> dtos) {
+        final List<GenericDto> toAsk = new ArrayList<>();
+        for (GenericDto dto : dtos) {
+            final PreAuth preAuth = preAuthorizer.preAuthResource(UPDATE, provider, dto.service, dto.resource);
+            if (preAuth == DENY) {
+                throw notPermittedToSet(provider, dto);
+            } else if (preAuth != ALLOW) {
+                toAsk.add(dto);
+            }
+        }
+        if (!toAsk.isEmpty()) {
+            checkWithException();
+            for (GenericDto dto : toAsk) {
+                if (!authorizer.hasResourcePermission(UPDATE, modelPackageUri, model, provider, dto.service,
+                        dto.resource)) {
+                    throw notPermittedToSet(provider, dto);
+                }
+            }
+        }
+    }
+
+    private NotPermittedException notPermittedToSet(String provider, GenericDto dto) {
+        return new NotPermittedException(String.format("The user %s does not have permission to set resource %s",
+                user.getUserId(), String.format("%s/%s/%s", provider, dto.service, dto.resource)));
+    }
+
+    /** The model package and the name of the model of an existing provider, null when there is none */
+    private String[] modelOf(String provider) {
+        return safeExecute(new AbstractTwinCommand<String[]>() {
+            @Override
+            protected Promise<String[]> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                try {
+                    final SensinactProvider sp = twin.getProvider(provider);
+                    return pf.resolved(sp == null ? null : new String[] { sp.getModelPackageUri(), sp.getModelName() });
+                } catch (Throwable t) {
+                    return pf.failed(t);
+                }
+            }
+        });
+    }
+
     @Override
     public ProviderDescription setProvider(String provider, Map<String, Object> rcValues, DataUpdate push) {
         if (preAuthorizer.preAuthProvider(UPDATE, provider) == DENY) {
@@ -1205,8 +1260,31 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
 
         // Extract special values
-        final String modelPackageUri = (String) rcValues.remove("@modelPackageUri");
-        final String model = (String) rcValues.remove("@model");
+        String modelPackageUri = (String) rcValues.remove("@modelPackageUri");
+        if (modelPackageUri != null && modelPackageUri.isBlank()) {
+            // The model lookups of the core read a blank package as the default one (the provider lookup does not)
+            modelPackageUri = null;
+        }
+        String model = (String) rcValues.remove("@model");
+        // The model of an existing provider is its own: what is checked is what is written. A request naming
+        // another one is refused, but only once the resources are checked, so that the refusal does not tell a user
+        // without rights that the provider exists
+        final String[] existing = modelOf(provider);
+        boolean otherModel = false;
+        if (existing != null) {
+            otherModel = (modelPackageUri != null && !modelPackageUri.equals(existing[0]))
+                    || (model != null && !model.equals(existing[1]));
+            modelPackageUri = existing[0];
+            model = existing[1];
+        } else if (model == null) {
+            // Same default as SetValueCommand, so that the authorizer sees the model that is written
+            model = provider;
+        }
+        if (existing == null && modelPackageUri == null) {
+            // Same default as the model manager (EMFUtil.constructPackageUri in core.impl, not exported here): the
+            // prefix is duplicated, so it must follow that method (which has a TODO about sanitizing the name)
+            modelPackageUri = DEFAULT_PACKAGE_BASE + model;
+        }
         final String svcModel = (String) rcValues.remove("@serviceModel");
         Instant timestamp = Instant.now();
 
@@ -1245,6 +1323,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
             }
 
             bulk.dtos.add(dto);
+        }
+        checkResourcesUpdate(provider, modelPackageUri, model, bulk.dtos);
+        // Nothing to write creates nothing: the refusal would only tell that the provider exists
+        if (otherModel && !bulk.dtos.isEmpty()) {
+            throw new IllegalArgumentException(String.format(
+                    "Provider %s already exists with another model than the requested one", provider));
         }
         try {
             push.pushUpdate(bulk).getValue();

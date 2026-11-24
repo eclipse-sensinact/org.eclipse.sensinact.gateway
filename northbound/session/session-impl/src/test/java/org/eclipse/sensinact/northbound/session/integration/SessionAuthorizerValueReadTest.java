@@ -16,12 +16,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +32,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import org.eclipse.sensinact.core.authorization.Authorizer;
+import org.eclipse.sensinact.core.authorization.NotPermittedException;
 import org.eclipse.sensinact.core.authorization.PermissionLevel;
 import org.eclipse.sensinact.core.command.AbstractTwinCommand;
 import org.eclipse.sensinact.core.command.GatewayThread;
@@ -83,6 +87,8 @@ public class SessionAuthorizerValueReadTest {
     private static final String HIDDEN = "hidden";
 
     private final List<String> readCalls = new CopyOnWriteArrayList<>();
+    /** The questions of UPDATE: the model and the target */
+    private final List<String> updateCalls = new CopyOnWriteArrayList<>();
 
     private ServiceRegistration<AuthorizationEngine> registration;
 
@@ -113,9 +119,11 @@ public class SessionAuthorizerValueReadTest {
         thread.execute(new AbstractTwinCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                SensinactProvider sp = twin.getProvider(PROVIDER);
-                if (sp != null) {
-                    sp.delete();
+                for (String name : new String[] { PROVIDER, "CreatedProvider", "NewProvider", "ModelProvider" }) {
+                    SensinactProvider sp = twin.getProvider(name);
+                    if (sp != null) {
+                        sp.delete();
+                    }
                 }
                 return pf.resolved(null);
             }
@@ -124,26 +132,26 @@ public class SessionAuthorizerValueReadTest {
 
     /** Use an engine that answers the pre-authorization of READ as given and denies READ on the hidden resource */
     private void useEngine(PreAuth readPreAuth) throws InterruptedException {
+        useEngine(readPreAuth, PreAuth.UNKNOWN);
+    }
+
+    private void useEngine(PreAuth readPreAuth, PreAuth updatePreAuth) throws InterruptedException {
         if (registration != null) {
             registration.unregister();
         }
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put("scope", "SessionAuthorizerValueReadTest");
-        registration = context.registerService(AuthorizationEngine.class, new Engine(readPreAuth), properties);
+        final Engine engine = new Engine(readPreAuth, updatePreAuth);
+        registration = context.registerService(AuthorizationEngine.class, engine, properties);
         // The session manager binds the engine dynamically and expires its sessions: wait until a new one uses it
         final long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
         while (System.nanoTime() < deadline) {
             try {
                 sessionManager.getDefaultSession(BOB).describeResource(PROVIDER, "svc", HIDDEN);
-                // The engine is bound once its answer can be seen: UNKNOWN asks the authorizer, ALLOW shows the
-                // hidden value, DENY hides the readable one
-                final boolean bound = switch (readPreAuth) {
-                case UNKNOWN -> !readCalls.isEmpty();
-                case ALLOW -> sessionManager.getDefaultSession(BOB).describeResource(PROVIDER, "svc", HIDDEN).value != null;
-                case DENY -> sessionManager.getDefaultSession(BOB).describeResource(PROVIDER, "svc", READABLE).value == null;
-                };
-                if (bound) {
+                // The engine is bound once a session asked it for its pre-authorizer
+                if (engine.used) {
                     readCalls.clear();
+                    updateCalls.clear();
                     return;
                 }
             } catch (RuntimeException e) {
@@ -337,16 +345,144 @@ public class SessionAuthorizerValueReadTest {
         assertEquals(1, readCalls.stream().filter(c -> c.endsWith("/" + READABLE)).count(), readCalls.toString());
     }
 
+    private String modelUriOf(GatewayThread thread, String provider) throws Exception {
+        return thread.execute(new AbstractTwinCommand<String>() {
+            @Override
+            protected Promise<String> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                return pf.resolved(twin.getProvider(provider).getModelPackageUri());
+            }
+        }).getValue();
+    }
+
+    private Object valueOf(GatewayThread thread, String provider, String resource) throws Exception {
+        return thread.execute(new AbstractTwinCommand<Object>() {
+            @Override
+            protected Promise<Object> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                SensinactProvider sp = twin.getProvider(provider);
+                if (sp == null) {
+                    return pf.resolved(null);
+                }
+                return twin.getResource(provider, "svc", resource).getValue(Object.class).map(tv -> tv.getValue());
+            }
+        }).getValue();
+    }
+
+    /** The update of a provider writes resources: each one needs UPDATE and one refusal refuses all of them */
+    @Test
+    void testSetProviderAsksUpdateOfEachResource(@InjectService DataUpdate push, @InjectService GatewayThread thread)
+            throws Exception {
+        session().setProvider(PROVIDER, new HashMap<>(Map.of("svc/" + READABLE, 1)), push);
+        assertEquals(1, valueOf(thread, PROVIDER, READABLE));
+
+        // One resource that is refused: nothing is written, the one that is allowed neither
+        assertThrows(NotPermittedException.class, () -> session().setProvider(PROVIDER,
+                new HashMap<>(Map.of("svc/" + READABLE, 2, "svc/" + HIDDEN, 2)), push));
+        assertEquals(1, valueOf(thread, PROVIDER, READABLE));
+        assertEquals(42, valueOf(thread, PROVIDER, HIDDEN));
+
+        // The creation of a provider is decided the same way
+        assertThrows(NotPermittedException.class, () -> session().setProvider("CreatedProvider",
+                new HashMap<>(Map.of("svc/" + HIDDEN, 2)), push));
+        assertNull(valueOf(thread, "CreatedProvider", HIDDEN));
+    }
+
+    /** The model of an existing provider is its own: another one is refused, its own one is accepted */
+    @Test
+    void testSetProviderRefusesAnotherModelThanTheProviderOne(@InjectService DataUpdate push,
+            @InjectService GatewayThread thread) throws Exception {
+        final String uri = modelUriOf(thread, PROVIDER);
+        assertThrows(IllegalArgumentException.class, () -> session().setProvider(PROVIDER,
+                new HashMap<>(Map.of("@model", "otherModel", "svc/" + READABLE, 3)), push));
+        assertThrows(IllegalArgumentException.class, () -> session().setProvider(PROVIDER,
+                new HashMap<>(Map.of("@modelPackageUri", "https://example.com/other/", "svc/" + READABLE, 3)), push));
+        assertEquals(42, valueOf(thread, PROVIDER, READABLE));
+
+        // A user who cannot write is not told that the provider exists: same refusal as for a missing provider
+        assertThrows(NotPermittedException.class, () -> session().setProvider(PROVIDER,
+                new HashMap<>(Map.of("@model", "otherModel", "svc/" + HIDDEN, 3)), push));
+        assertThrows(NotPermittedException.class, () -> session().setProvider("NewProvider",
+                new HashMap<>(Map.of("@model", "otherModel", "svc/" + HIDDEN, 3)), push));
+        // A blank package is an absent one
+        updateCalls.clear();
+        session().setProvider(PROVIDER, new HashMap<>(Map.of("@modelPackageUri", " ", "svc/" + READABLE, 3)), push);
+        assertEquals(3, valueOf(thread, PROVIDER, READABLE));
+        assertEquals(List.of(uri + " " + PROVIDER + " " + PROVIDER + "/svc/" + READABLE), updateCalls);
+        updateCalls.clear();
+
+        // Nothing to write: no refusal, which would only tell that the provider exists
+        session().setProvider(PROVIDER, new HashMap<>(Map.of("@model", "otherModel")), push);
+        updateCalls.clear();
+
+        session().setProvider(PROVIDER,
+                new HashMap<>(Map.of("@modelPackageUri", uri, "@model", PROVIDER, "svc/" + READABLE, 3)), push);
+        assertEquals(3, valueOf(thread, PROVIDER, READABLE));
+        assertEquals(List.of(uri + " " + PROVIDER + " " + PROVIDER + "/svc/" + READABLE), updateCalls);
+    }
+
+    /** A new provider is asked about the model and package that the push writes: the requested ones, else its own name and the default package */
+    @Test
+    void testSetProviderAsksTheModelOfANewProvider(@InjectService DataUpdate push, @InjectService GatewayThread thread)
+            throws Exception {
+        // The default package of the core, which setProvider copies
+        assertEquals("https://eclipse.org/sensinact/" + PROVIDER, modelUriOf(thread, PROVIDER));
+        session().setProvider("NewProvider", new HashMap<>(Map.of("svc/" + READABLE, 6)), push);
+        assertEquals(6, valueOf(thread, "NewProvider", READABLE));
+        assertEquals(List.of("https://eclipse.org/sensinact/NewProvider NewProvider NewProvider/svc/" + READABLE), updateCalls);
+
+        updateCalls.clear();
+        session().setProvider("ModelProvider", new HashMap<>(Map.of("@model", "requestedModel", "svc/" + READABLE, 7)),
+                push);
+        assertEquals(7, valueOf(thread, "ModelProvider", READABLE));
+        assertEquals(List.of("https://eclipse.org/sensinact/requestedModel requestedModel ModelProvider/svc/" + READABLE), updateCalls);
+    }
+
+    /** Nothing to write, nothing to ask */
+    @Test
+    void testSetProviderWithoutResource(@InjectService DataUpdate push) throws Exception {
+        session().setProvider(PROVIDER, new HashMap<>(), push);
+        assertTrue(updateCalls.isEmpty(), updateCalls.toString());
+    }
+
+    /** The pre-authorizer answers first: a DENY refuses everything before any question or write */
+    @Test
+    void testSetProviderPreAuthorizerDeny(@InjectService DataUpdate push, @InjectService GatewayThread thread)
+            throws Exception {
+        useEngine(PreAuth.UNKNOWN, PreAuth.DENY);
+        assertThrows(NotPermittedException.class, () -> session().setProvider(PROVIDER,
+                new HashMap<>(Map.of("svc/" + READABLE, 4, "svc/" + HIDDEN, 4)), push));
+        assertTrue(updateCalls.isEmpty(), updateCalls.toString());
+        assertEquals(42, valueOf(thread, PROVIDER, READABLE));
+    }
+
+    /** An ALLOW of the pre-authorizer is not asked again, the other resources are */
+    @Test
+    void testSetProviderPreAuthorizerAllow(@InjectService DataUpdate push, @InjectService GatewayThread thread)
+            throws Exception {
+        useEngine(PreAuth.UNKNOWN, PreAuth.ALLOW);
+        session().setProvider(PROVIDER, new HashMap<>(Map.of("svc/" + READABLE, 5, "svc/" + HIDDEN, 5)), push);
+        assertEquals(5, valueOf(thread, PROVIDER, READABLE));
+        assertEquals(5, valueOf(thread, PROVIDER, HIDDEN));
+        assertEquals(1, updateCalls.size(), updateCalls.toString());
+        assertTrue(updateCalls.get(0).endsWith("/" + READABLE), updateCalls.toString());
+    }
+
     private final class Engine implements AuthorizationEngine {
 
         private final PreAuth readPreAuth;
 
-        Engine(PreAuth readPreAuth) {
+        private final PreAuth updatePreAuth;
+
+        /** Set when a session uses this engine, which tells it from the previous one */
+        volatile boolean used;
+
+        Engine(PreAuth readPreAuth, PreAuth updatePreAuth) {
             this.readPreAuth = readPreAuth;
+            this.updatePreAuth = updatePreAuth;
         }
 
         @Override
         public PreAuthorizer createPreAuthorizer(UserInfo user) {
+            used = true;
             return new PreAuthorizer() {
                 @Override
                 public PreAuth preAuthProvider(PermissionLevel level, String provider) {
@@ -361,7 +497,11 @@ public class SessionAuthorizerValueReadTest {
                 @Override
                 public PreAuth preAuthResource(PermissionLevel level, String provider, String service,
                         String resource) {
-                    return level == PermissionLevel.READ ? readPreAuth : PreAuth.UNKNOWN;
+                    return switch (level) {
+                    case READ -> readPreAuth;
+                    case UPDATE -> HIDDEN.equals(resource) ? updatePreAuth : PreAuth.UNKNOWN;
+                    default -> PreAuth.UNKNOWN;
+                    };
                 }
             };
         }
@@ -383,6 +523,10 @@ public class SessionAuthorizerValueReadTest {
                 @Override
                 public boolean hasResourcePermission(PermissionLevel level, String uri, String model, String provider,
                         String service, String resource) {
+                    if (level == PermissionLevel.UPDATE) {
+                        updateCalls.add(uri + " " + model + " " + provider + "/" + service + "/" + resource);
+                        return !HIDDEN.equals(resource);
+                    }
                     if (level != PermissionLevel.READ) {
                         return true;
                     }
