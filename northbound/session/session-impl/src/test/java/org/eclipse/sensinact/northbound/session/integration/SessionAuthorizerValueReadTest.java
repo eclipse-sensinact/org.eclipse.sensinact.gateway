@@ -119,7 +119,8 @@ public class SessionAuthorizerValueReadTest {
         thread.execute(new AbstractTwinCommand<Void>() {
             @Override
             protected Promise<Void> call(SensinactDigitalTwin twin, PromiseFactory pf) {
-                for (String name : new String[] { PROVIDER, "CreatedProvider", "NewProvider", "ModelProvider" }) {
+                for (String name : new String[] { PROVIDER, "CreatedProvider", "NewProvider", "ModelProvider",
+                        "Odd Name 1", "BlankModel" }) {
                     SensinactProvider sp = twin.getProvider(name);
                     if (sp != null) {
                         sp.delete();
@@ -434,6 +435,29 @@ public class SessionAuthorizerValueReadTest {
                 push);
         assertEquals(7, valueOf(thread, "ModelProvider", READABLE));
         assertEquals(List.of("https://eclipse.org/sensinact/requestedModel requestedModel ModelProvider/svc/" + READABLE), updateCalls);
+    }
+
+    /** The package asked is the one the core writes, whatever its rule for the name of the model */
+    @Test
+    void testSetProviderAsksThePackageThatTheCoreWrites(@InjectService DataUpdate push,
+            @InjectService GatewayThread thread) throws Exception {
+        session().setProvider("Odd Name 1", new HashMap<>(Map.of("svc/" + READABLE, 8)), push);
+        assertEquals(List.of(modelUriOf(thread, "Odd Name 1") + " Odd Name 1 Odd Name 1/svc/" + READABLE), updateCalls);
+    }
+
+    /** A blank model is an absent one, as a blank package */
+    @Test
+    void testSetProviderReadsABlankModelAsAbsent(@InjectService DataUpdate push, @InjectService GatewayThread thread)
+            throws Exception {
+        final String uri = modelUriOf(thread, PROVIDER);
+        session().setProvider(PROVIDER, new HashMap<>(Map.of("@model", " ", "svc/" + READABLE, 9)), push);
+        assertEquals(9, valueOf(thread, PROVIDER, READABLE));
+        assertEquals(List.of(uri + " " + PROVIDER + " " + PROVIDER + "/svc/" + READABLE), updateCalls);
+
+        updateCalls.clear();
+        session().setProvider("BlankModel", new HashMap<>(Map.of("@model", "", "svc/" + READABLE, 10)), push);
+        assertEquals(List.of("https://eclipse.org/sensinact/BlankModel BlankModel BlankModel/svc/" + READABLE),
+                updateCalls);
     }
 
     /** Nothing to write, nothing to ask */

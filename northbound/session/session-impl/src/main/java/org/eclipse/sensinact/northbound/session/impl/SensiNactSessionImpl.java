@@ -1266,6 +1266,10 @@ public class SensiNactSessionImpl implements SensiNactSession {
             modelPackageUri = null;
         }
         String model = (String) rcValues.remove("@model");
+        if (model != null && model.isBlank()) {
+            // A blank model is an absent one, as a blank package
+            model = null;
+        }
         // The model of an existing provider is its own: what is checked is what is written. A request naming
         // another one is refused, but only once the resources are checked, so that the refusal does not tell a user
         // without rights that the provider exists
