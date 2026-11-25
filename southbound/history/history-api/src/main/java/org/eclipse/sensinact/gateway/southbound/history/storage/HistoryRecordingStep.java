@@ -51,7 +51,9 @@ public interface HistoryRecordingStep extends AutoCloseable {
      * to the new step at once, so they may be written before the records this
      * step still holds. Called on the thread of a service event or of the
      * deactivation of the engine, outside the lock of the engine and before
-     * the storage is released: it must not block for long.
+     * the storage is released: it must not block for long, as the closes and
+     * releases of every backend of the engine run one after the other, so a
+     * slow call also delays the releases of the other backends.
      */
     @Override
     default void close() {

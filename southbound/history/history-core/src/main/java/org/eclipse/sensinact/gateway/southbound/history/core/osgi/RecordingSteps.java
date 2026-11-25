@@ -12,6 +12,7 @@
 **********************************************************************/
 package org.eclipse.sensinact.gateway.southbound.history.core.osgi;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -49,8 +50,13 @@ final class RecordingSteps {
         return providerName.equals(String.valueOf(property));
     }
 
+    /** A factory slower than this delays the other history events visibly */
+    static final Duration SLOW_CREATE = Duration.ofSeconds(1);
+
     /**
-     * Creates the step of a backend with a factory.
+     * Creates the step of a backend with a factory; a factory that takes more
+     * than {@link #SLOW_CREATE} is logged, as the lock of the engine is held
+     * meanwhile.
      *
      * @param factoryId the service id of the factory, for the logs
      * @return the step, or {@code null} when the factory declines the backend
@@ -58,6 +64,7 @@ final class RecordingSteps {
      */
     static HistoryRecordingStep create(HistoryRecordingStepFactory factory, Object factoryId, String providerName,
             HistoryStorage storage) {
+        long start = System.nanoTime();
         try {
             HistoryRecordingStep step = factory.create(new RecordingContext(providerName, storage));
             if (step == null) {
@@ -69,6 +76,13 @@ final class RecordingSteps {
             logger.error("The recording step factory service {} failed for the history backend {}", factoryId,
                     providerName, e);
             return null;
+        } finally {
+            Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
+            if (elapsed.compareTo(SLOW_CREATE) > 0) {
+                logger.warn("The recording step factory service {} took {} ms to create the step of the history "
+                        + "backend {}: the other history events waited meanwhile", factoryId, elapsed.toMillis(),
+                        providerName);
+            }
         }
     }
 

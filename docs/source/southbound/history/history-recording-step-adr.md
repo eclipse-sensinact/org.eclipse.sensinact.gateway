@@ -216,8 +216,9 @@ without a factory it uses the built-in step (constraint 1).
   update the last stored value, as today.
 - **Last stored value.** The engine updates it when `record` returns normally. For the
   built-in step this is exactly today's behaviour. For a step that writes later, it means
-  "handed over", not "written": a failure of the later write is not seen by the engine.
-  This is documented in the interface.
+  "handed over", not "written": a failure of the later write is not seen by the engine, so
+  a change condition (deadband) can suppress a value that is close to one the step later
+  drops. This is documented in the interface.
 - **Shutdown.** `close` is called when the backend stops or the step is replaced, once the
   step no longer receives records, outside the lock of the engine and before the storage
   is released. After a stop, a late record goes to the storage directly, as before the
@@ -291,7 +292,10 @@ left unchanged.**
 - Cons: `close` runs on a service event thread, outside the lock of the engine, and the
   closes and service releases of all events run one after the other so that a storage is
   never released while a step still writes to it: a slow `close` delays the service
-  events that end in a release, not the others. The contract has no timeout.
+  events that end in a release, including the releases of the other backends, not the
+  others. The contract has no timeout: abandoning a slow `close` would release the storage
+  while the step still holds records. Ordering the releases per backend would remove the
+  delay for the other backends; it is a possible follow-up.
 - Alternative: no `close`. Pros: smaller API. Cons: buffered records and threads are lost at
   every stop and every replacement.
 
@@ -320,6 +324,20 @@ restarted.**
 - Alternative: `create(String providerName, HistoryStorage storage)`. Pros: one type less
   and a factory can be a two-argument lambda. Cons: the signature cannot evolve without a
   major version.
+
+**10. Creation of a step: `create` is called while the engine holds its lock.**
+
+- Pros: the selection, the creation and the swap of the steps of a backend happen in one
+  consistent state of the factories, storages and filters; no lock order to define.
+- Cons: a slow factory delays every storage, filter and factory event, and the releases
+  queued after them, for as long as it runs; recording and queries continue with the
+  current steps. A call longer than one second is logged as a warning, so that a slow
+  factory is visible.
+- Alternative: create the step outside the lock of the engine, with a lock per backend
+  taken before it, a new reading of the factories under the lock of the engine and a
+  stopped flag. Pros: a slow factory delays only its backend. Cons: a lock order and more
+  states to test, for a gain on gateways with several history backends only; a possible
+  follow-up.
 
 ### Consequences
 

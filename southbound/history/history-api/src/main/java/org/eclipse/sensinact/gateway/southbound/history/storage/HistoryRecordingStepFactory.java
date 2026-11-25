@@ -44,7 +44,8 @@ public interface HistoryRecordingStepFactory {
      *
      * Called while the engine holds its lock: it must return quickly, must not
      * wait for another service, must not register or unregister services and
-     * must not call the history.
+     * must not call the history. A call longer than one second is logged as a
+     * warning.
      *
      * When a backend is replaced by a newer registration with the same
      * provider name, the new step is created before the previous one is
