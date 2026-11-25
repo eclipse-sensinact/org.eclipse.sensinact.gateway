@@ -406,6 +406,27 @@ public class ModelNexus {
         return createServiceInstance(provider, serviceName, serviceEClass, null);
     }
 
+    /**
+     * Creates the instance of a service for a provider.
+     * <p>
+     * For a service the model declares, {@code serviceEClass} is honoured when it is
+     * a sub type of the declared service type, and refused when it is unrelated to
+     * it - see {@link #selectServiceEClass(EClass, EClass, String)}. For a service
+     * the model does not declare, which only exists on a {@link DynamicProvider},
+     * the instance is created with {@code serviceEClass} as it stands.
+     *
+     * @param provider         the provider to create the service instance on
+     * @param serviceName      the name of the service
+     * @param serviceEClass    the EClass to use, may be {@code null} to take the
+     *                         declared one
+     * @param serviceReference the declared service reference, or {@code null} to
+     *                         look it up by name
+     * @return the new service instance
+     * @throws IllegalArgumentException if the provider neither declares the service
+     *                                  nor is a {@link DynamicProvider}, or if
+     *                                  {@code serviceEClass} is unrelated to the
+     *                                  declared service type
+     */
     public Service createServiceInstance(Provider provider, String serviceName, EClass serviceEClass,
             EReference serviceReference) {
         String providerName = provider.getId();
@@ -424,11 +445,92 @@ public class ModelNexus {
             service = (Service) EcoreUtil.create(serviceEClass);
             ((DynamicProvider) provider).getServices().put(serviceName, service);
         } else {
-            service = (Service) EcoreUtil.create((EClass) serviceFeature.get().getEType());
+            EClass declared = (EClass) serviceFeature.get().getEType();
+            service = (Service) EcoreUtil.create(selectServiceEClass(declared, serviceEClass, serviceName));
             provider.eSet(serviceFeature.get(), service);
         }
         accumulator.addService(packageUri, modelName, providerName, serviceName);
         return service;
+    }
+
+    /**
+     * Picks the {@link EClass} a service instance is created with. A model declares
+     * a service with one EClass, and a caller may ask for a sub type of it, which is
+     * the only way a service can carry more resources than its declaration lists.
+     * <p>
+     * The rule is the one {@code EMFCompareUtil} already applies to an incoming
+     * service instance: a sub type is honoured, the declared type itself and any
+     * super type of it leave the declaration in place, and an unrelated EClass is
+     * refused rather than silently dropped.
+     *
+     * @param declared    the EClass the model declares for the service
+     * @param requested   the EClass the caller asked for, may be {@code null}
+     * @param serviceName the name of the service, for the error message
+     * @return the EClass to instantiate, never {@code null}
+     * @throws IllegalArgumentException if {@code requested} is neither a sub type
+     *                                  nor a super type of {@code declared}
+     */
+    private EClass selectServiceEClass(EClass declared, EClass requested, String serviceName) {
+        if (requested == null || requested == declared) {
+            return declared;
+        }
+        if (declared.isSuperTypeOf(requested)) {
+            return requested;
+        }
+        if (requested.isSuperTypeOf(declared)) {
+            return declared;
+        }
+        throw new IllegalArgumentException("The service " + serviceName + " is declared as " + declared.getName()
+                + ", which is unrelated to the requested " + requested.getName());
+    }
+
+    /**
+     * Retypes the stored instance of a service to a sub type of its current EClass,
+     * keeping every value and all the metadata it already carries. The resources the
+     * sub type adds exist from then on, and read as unset until they are given a
+     * value.
+     * <p>
+     * A request for the EClass the instance already has, or for a super type of it,
+     * is a no-op and returns the instance unchanged. This matters for every caller
+     * that passes the EClass its model declares, such as
+     * {@code SetValueCommand}: a service that was retyped must not be downgraded
+     * again by the next value push.
+     *
+     * @param provider     the provider holding the service, must be stored in this
+     *                     nexus
+     * @param serviceName  the name of the service
+     * @param serviceEClass the EClass to retype the instance to
+     * @return the stored service instance, retyped if it had to be
+     * @throws IllegalArgumentException if there is no such service instance, or if
+     *                                  {@code serviceEClass} is unrelated to the
+     *                                  EClass of the stored instance
+     */
+    public Service retypeServiceInstance(Provider provider, String serviceName, EClass serviceEClass) {
+        Service existing = provider.getService(serviceName);
+        if (existing == null) {
+            throw new IllegalArgumentException(
+                    "There is no service instance " + serviceName + " on provider " + provider.getId());
+        }
+        if (existing.eClass() == serviceEClass || serviceEClass.isSuperTypeOf(existing.eClass())) {
+            return existing;
+        }
+        if (!existing.eClass().isSuperTypeOf(serviceEClass)) {
+            throw new IllegalArgumentException("The stored service " + serviceName + " of provider "
+                    + provider.getId() + " is a " + existing.eClass().getName()
+                    + ", which is unrelated to the requested " + serviceEClass.getName());
+        }
+
+        Service retyped = (Service) EcoreUtil.create(serviceEClass);
+        existing.eClass().getEAllStructuralFeatures().forEach(f -> retyped.eSet(f, existing.eGet(f)));
+
+        Optional<EReference> serviceFeature = getServiceReferencesForModel(provider.eClass())
+                .filter(ref -> serviceName.equals(ref.getName())).findFirst();
+        if (serviceFeature.isPresent()) {
+            provider.eSet(serviceFeature.get(), retyped);
+        } else {
+            ((DynamicProvider) provider).getServices().put(serviceName, retyped);
+        }
+        return retyped;
     }
 
     private void handleDataUpdate(Provider provider, String serviceName, Service service,
@@ -682,6 +784,7 @@ public class ModelNexus {
     private EAttribute doCreateResource(EClass service, String resource, Class<?> type, Instant timestamp,
             Object defaultValue, Map<String, Object> defaultMetadata, List<MetadataValue> metadata, boolean hasGetter,
             long getterCacheMs, boolean hasSetter, int lowerBound, int upperBound) {
+        assertEClassIsExtendable(service);
         assertResourceNotExist(service, resource);
         ResourceMetadata resourceMetaData = EMFUtil.createResourceAttribute(service, resource, type, defaultValue,
                 lowerBound, upperBound);
@@ -702,6 +805,36 @@ public class ModelNexus {
             m.put(entry.getKey(), EMFUtil.createMetadataValue(null, entry.getValue()));
         }
         return new BasicEMap<>(m);
+    }
+
+    /**
+     * Refuses to add a feature to an EClass that has generated Java.
+     * <p>
+     * A generated {@code EObject} answers {@code eClass() == eStaticClass()}, so EMF
+     * resolves its features through the generated switches, which cannot know a
+     * feature added at run time: {@code eDerivedStructuralFeatureID} falls through to
+     * the open-feature path, which calls back into the custom
+     * {@code Service.eIsSet(EStructuralFeature)}, and the two recurse until the stack
+     * is gone. Worse, a generated EClass is a singleton of its package, so the damage
+     * is not confined to one model - adding a resource to {@code Admin}, which every
+     * provider of every model shares, breaks every later {@code createProvider}.
+     * <p>
+     * Extending a <em>sub type</em> of a generated EClass is safe and is the supported
+     * way to add resources to a service the core declares: the instances of a sub type
+     * created at run time are not answered by the generated switches. See
+     * {@code SensinactEMFProvider.getOrCreateService(String, EClass)}.
+     *
+     * @param eClass the EClass a feature would be added to
+     * @throws IllegalArgumentException if {@code eClass} has a generated
+     *                                  implementation
+     */
+    private void assertEClassIsExtendable(EClass eClass) {
+        if (eClass.getInstanceClassName() != null) {
+            throw new IllegalArgumentException("The EClass " + eClass.getName() + " of package "
+                    + eClass.getEPackage().getNsURI() + " has a generated implementation and cannot be given features"
+                    + " at run time. Declare them in its Ecore model, or use a sub type of it for the service of one"
+                    + " provider.");
+        }
     }
 
     private void assertResourceNotExist(EClass service, String resource) {
@@ -740,6 +873,7 @@ public class ModelNexus {
     }
 
     private EReference doCreateService(EClass model, String refName, String serviceModelName, Instant timestamp) {
+        assertEClassIsExtendable(model);
         EPackage ePackage = model.getEPackage();
         EClass service = EMFUtil.createEClass(NamingUtils.sanitizeName(serviceModelName, false), ePackage, null,
                 ProviderPackage.Literals.SERVICE);
@@ -973,7 +1107,11 @@ public class ModelNexus {
     public Map<String, EClass> getDefinedServiceForProvider(Provider provider) {
         Map<String, EClass> result = new LinkedHashMap<>();
         getServiceReferencesForModel(provider.eClass()).forEach((feature) -> {
-            result.put(feature.getName(), feature.getEReferenceType());
+            // The stored instance may be a sub type of the declared service type. It is the
+            // instance that decides which resources a service has, exactly as the services map
+            // of a DynamicProvider does below, and as Provider.getServiceEClass(String) does.
+            Service instance = provider.eIsSet(feature) ? (Service) provider.eGet(feature) : null;
+            result.put(feature.getName(), instance == null ? feature.getEReferenceType() : instance.eClass());
         });
 
         if (provider instanceof DynamicProvider) {
@@ -985,8 +1123,9 @@ public class ModelNexus {
     public Map<String, Entry<EClass, Service>> getServiceInstancesForProvider(Provider provider) {
         Map<String, Entry<EClass, Service>> result = new LinkedHashMap<>();
         getServiceReferencesForModel(provider.eClass()).forEach((feature) -> {
-            result.put(feature.getName(), new AbstractMap.SimpleImmutableEntry<>((EClass) feature.getEType(),
-                    provider.eIsSet(feature) ? (Service) provider.eGet(feature) : null));
+            Service instance = provider.eIsSet(feature) ? (Service) provider.eGet(feature) : null;
+            result.put(feature.getName(), new AbstractMap.SimpleImmutableEntry<>(
+                    instance == null ? (EClass) feature.getEType() : instance.eClass(), instance));
         });
 
         if (provider instanceof DynamicProvider) {
@@ -1025,6 +1164,7 @@ public class ModelNexus {
             List<Entry<String, Class<?>>> namedParameterTypes, Map<String, Object> defaultMetadata,
             int lowerBound, int upperBound) {
 
+        assertEClassIsExtendable(serviceEClass);
         assertResourceNotExist(serviceEClass, name);
 
         List<EParameter> params = namedParameterTypes.stream()

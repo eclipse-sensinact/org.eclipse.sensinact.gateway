@@ -473,8 +473,11 @@ public class SensinactDigitalTwinImpl extends CommandScopedImpl implements Sensi
             return null;
         }
 
-        final EStructuralFeature sf = nexusProvider.eClass().getEStructuralFeature(serviceName);
-        final Optional<ETypedElement> foundRc = nexusImpl.getResourcesForService((EClass) sf.getEType())
+        // The EClass of the entry is the one of the stored service instance, which may be a sub
+        // type of the declared service type. Resolving the resource from the declaration instead
+        // hid every resource a sub type adds, and threw a NullPointerException for a service of a
+        // DynamicProvider, which is no feature of the provider EClass.
+        final Optional<ETypedElement> foundRc = nexusImpl.getResourcesForService(service.getKey())
                 .filter(f -> f.getName().equals(resourceName)).findFirst();
         if (foundRc.isEmpty()) {
             // Resource not found

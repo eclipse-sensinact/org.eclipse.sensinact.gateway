@@ -95,6 +95,20 @@ public class ModelImpl extends CommandScopedImpl implements EMFModel {
 
     @Override
     public EMFService createServiceWithEClass(String svc, EClass svcEClass) {
+        checkValid();
+        // A service name the model declares cannot be retyped from here. The handle this
+        // method returns carries no model change at all, and for an inherited reference
+        // such as Provider.admin there is nothing it could change: the declaration belongs
+        // to the shared provider package, and Ecore has no per-subclass redefinition of a
+        // feature. Creating a resource on such a handle would add the feature to the one
+        // Admin EClass the whole runtime shares. A service instance is typed per provider
+        // instead, through SensinactEMFProvider.getOrCreateService(String, EClass).
+        EReference declared = nexusImpl.getServiceForModel(eClass, svc);
+        if (declared != null && declared.getEReferenceType() != svcEClass) {
+            throw new IllegalArgumentException("The model " + name + " declares the service " + svc + " as "
+                    + declared.getEReferenceType().getName() + " and createServiceWithEClass cannot change that."
+                    + " Use SensinactEMFProvider.getOrCreateService(name, eClass) per provider instead.");
+        }
         return new ServiceImpl(active, this, svc, svcEClass, nexusImpl);
     }
 

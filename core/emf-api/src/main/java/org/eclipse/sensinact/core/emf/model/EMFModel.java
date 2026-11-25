@@ -32,5 +32,23 @@ public interface EMFModel extends Model {
 
     EMFServiceBuilder<EMFService> createService(String service, String serviceModelName);
 
+    /**
+     * Creates a service handle over the given {@link EClass} for a service name this
+     * model does <em>not</em> declare.
+     * <p>
+     * The handle carries no change to the model itself, so it cannot retype a service
+     * the model already declares - for an inherited declaration such as the admin
+     * service there is nothing it could change. To give the service of one provider
+     * an EClass that adds resources, use
+     * {@link org.eclipse.sensinact.core.emf.twin.SensinactEMFProvider#getOrCreateService(String, EClass)}
+     * with a sub type of the declared service type.
+     *
+     * @param svc       the service name
+     * @param svcEClass the EClass of the service
+     * @return a handle over {@code svcEClass}
+     * @throws IllegalArgumentException if this model declares {@code svc} with a
+     *                                  different EClass, or declares it as something
+     *                                  that is not a service
+     */
     EMFService createServiceWithEClass(String svc, EClass svcEClass);
 }

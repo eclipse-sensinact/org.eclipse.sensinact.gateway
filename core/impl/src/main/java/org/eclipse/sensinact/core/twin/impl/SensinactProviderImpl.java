@@ -137,6 +137,11 @@ public class SensinactProviderImpl extends CommandScopedImpl implements Sensinac
         Service serviceInstance = provider.getService(name);
         if (serviceInstance == null) {
             serviceInstance = nexus.createServiceInstance(provider, name, serviceEClass);
+        } else if (serviceEClass != null && serviceEClass != serviceInstance.eClass()) {
+            // The service exists already. A sub type of the stored instance is honoured by
+            // retyping it, which is how a service gains the resources its declaration does
+            // not list; the declared type itself and any super type of it change nothing.
+            serviceInstance = nexus.retypeServiceInstance(provider, name, serviceEClass);
         }
         return new SensinactServiceImpl(active, this, provider, name, serviceInstance.eClass(), nexus, promiseFactory);
     }
