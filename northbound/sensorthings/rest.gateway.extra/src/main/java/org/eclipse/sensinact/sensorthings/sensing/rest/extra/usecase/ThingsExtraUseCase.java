@@ -182,7 +182,7 @@ public class ThingsExtraUseCase extends AbstractExtraUseCaseModelDelete<Expanded
     private void updateHistoricalLocationMemoryHistory(ExtraUseCaseRequest<ExpandedThing> request,
             ResourceSnapshot resourceLocation) {
         System.out.println("update historical Cache");
-        if (resourceLocation != null) {
+        if (resourceLocation != null && resourceLocation.isSet()) {
             Instant stamp = resourceLocation.getValue().getTimestamp();
             String idCache = request.id();
             System.out.println("update historical Cache done " + idCache + "~" + DtoMapperSimple.stampToId(stamp));

@@ -46,6 +46,24 @@ public interface IDeviceMappingHandler {
             throws MissingParserException, InvalidResourcePathException, ParserException, DeviceFactoryException;
 
     /**
+     * Reports the failure of a caller to get the payload (HTTP error status,
+     * connection failure, timeout), like the errors of the payload: with
+     * <code>log.errors</code> false, the first failure is logged, then at most one
+     * per <code>log.errors.interval</code>. The failure is always counted in the
+     * metrics. The default implementation ignores it.
+     * <p>
+     * Callers must give the same configuration instance as for
+     * {@link #handle(DeviceMappingConfigurationDTO, Map, byte[])}, as the
+     * reporting is kept per instance.
+     *
+     * @param configuration Mapping configuration
+     * @param format        Message format, which names the source of the payload
+     * @param args          Message arguments, the last one can be an exception
+     */
+    default void reportRequestFailure(DeviceMappingConfigurationDTO configuration, String format, Object... args) {
+    }
+
+    /**
      * Checks a mapping configuration before using it, so that an invalid one can
      * be refused when it is set rather than at each payload
      *

@@ -269,7 +269,10 @@ public class HistoryProviderRegisteredAfterApplicationTest extends AbstractInteg
         int current = -1;
         int unchangedPolls = 0;
         try (Connection connection = getDataSource().getConnection()) {
-            for (int i = 0; i < 200; i++) {
+            // A time limit, not an iteration count: ingestion speed depends on the runner
+            // and a stalled count is already caught below
+            final long deadline = System.currentTimeMillis() + 120_000;
+            while (System.currentTimeMillis() < deadline) {
                 try (ResultSet rows = connection.createStatement()
                         .executeQuery("SELECT COUNT(*) FROM " + table + " " + where)) {
                     assertTrue(rows.next());

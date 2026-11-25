@@ -16,6 +16,7 @@ import static org.eclipse.sensinact.core.authorization.PermissionLevel.DESCRIBE;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.READ;
 import static org.eclipse.sensinact.core.authorization.PermissionLevel.UPDATE;
 import static org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption.INCLUDE_LINKED_PROVIDER_IDS;
+import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.ALLOW;
 import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.DENY;
 import static org.eclipse.sensinact.northbound.security.api.PreAuthorizer.PreAuth.UNKNOWN;
 
@@ -63,6 +64,7 @@ import org.eclipse.sensinact.core.snapshot.ResourceSnapshot;
 import org.eclipse.sensinact.core.snapshot.ResourceValueFilter;
 import org.eclipse.sensinact.core.snapshot.ServiceSnapshot;
 import org.eclipse.sensinact.core.snapshot.Snapshot;
+import org.eclipse.sensinact.core.twin.DefaultTimedValue;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin;
 import org.eclipse.sensinact.core.twin.SensinactDigitalTwin.SnapshotOption;
 import org.eclipse.sensinact.core.twin.SensinactProvider;
@@ -84,6 +86,8 @@ import org.eclipse.sensinact.northbound.session.ServiceDescription;
 import org.eclipse.sensinact.northbound.session.SnapshotUpdate;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableLinkedProviderSnapshot;
 import org.eclipse.sensinact.northbound.session.snapshot.ImmutableProviderSnapshot;
+import org.eclipse.sensinact.northbound.session.snapshot.ImmutableResourceSnapshot;
+import org.eclipse.sensinact.northbound.session.snapshot.ImmutableServiceSnapshot;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
@@ -449,6 +453,14 @@ public class SensiNactSessionImpl implements SensiNactSession {
                                 break;
 
                             default: {
+                                final SensinactProvider sp = sensinactResource.getService().getProvider();
+                                if (!canReadValue(sp.getModelPackageUri(), sp.getModelName(), provider, service,
+                                        resource)) {
+                                    // DESCRIBE does not give the value: show a resource that has none
+                                    result.valueType = ValueType.UPDATABLE;
+                                    val = pf.resolved(result);
+                                    break;
+                                }
                                 Promise<? extends TimedValue<?>> promise;
                                 if (sensinactResource.isMultiple()) {
                                     promise = sensinactResource.getMultiValue(Object.class, GetLevel.NORMAL);
@@ -555,8 +567,8 @@ public class SensiNactSessionImpl implements SensiNactSession {
             SensinactService ss = m.getService(provider, service);
             if(ss != null) {
                 if(preAuth == UNKNOWN) {
-                    SensinactProvider sp = ss.getProvider();
-                    if(!authorizer.hasServicePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service)) {
+                    // The twin object gives the authorizer the resources of the service
+                    if(!authorizer.hasServicePermission(DESCRIBE, ss)) {
                         throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s",
                                 user.getUserId(), String.format("%s/%s", provider, service)));
                     }
@@ -611,15 +623,14 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public List<ProviderDescription> listProviders() {
         return executeGetCommand((m) -> m.getProviders(), (providers) -> providers.stream()
-                .filter(snProvider -> authorizer.hasProviderPermission(DESCRIBE, snProvider.getModelPackageUri(),
-                        snProvider.getModelName(), snProvider.getName()))
+                // The twin object gives the authorizer the services and resources of the provider
+                .filter(snProvider -> authorizer.hasProviderPermission(DESCRIBE, snProvider))
                 .map((snProvider) -> {
                     final ProviderDescription description = new ProviderDescription();
                     description.provider = snProvider.getName();
                     description.services = List.copyOf(snProvider.getServices().keySet());
                     description.linkedProviders = snProvider.getLinkedProviders().stream()
-                            .filter(lp -> authorizer.hasProviderPermission(DESCRIBE, lp.getModelPackageUri(),
-                                    lp.getModelName(), lp.getName()))
+                            .filter(lp -> authorizer.hasProviderPermission(DESCRIBE, lp))
                             .map(SensinactProvider::getName)
                             .toList();
                     return description;
@@ -640,24 +651,27 @@ public class SensiNactSessionImpl implements SensiNactSession {
             EnumSet<SnapshotOption> snapshotOptions, boolean waitForGateway) {
         // We check validity here as we don't use the blocking safeExecute
         checkWithException();
-        Predicate<ServiceSnapshot> service = this::authorizeService;
         Predicate<ResourceSnapshot> resource = this::authorizeResource;
 
         Promise<List<ProviderSnapshot>> snapshots;
         if (filter == null) {
-            snapshots = thread.execute(getCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(ps, false),
-                    service, resource, snapshotOptions), Function.identity(), null));
+            snapshots = thread.execute(getCommand((m) -> m.filteredSnapshot(null, ps -> authorizeProvider(m, ps, false),
+                    ss -> authorizeService(m, ss), resource, snapshotOptions), this::withholdUnreadValues, null));
             if(waitForGateway) {
                 safeGetValue(snapshots);
             }
         } else {
             BiPredicate<ProviderSnapshot, GeoJsonObject> location = filter.getLocationFilter();
-            Predicate<ProviderSnapshot> provider = ps -> authorizeProvider(ps, location != null);
             Predicate<ProviderSnapshot> pf = filter.getProviderFilter();
             Predicate<ServiceSnapshot> sf = filter.getServiceFilter();
             Predicate<ResourceSnapshot> rf = filter.getResourceFilter();
-            snapshots = thread.execute(getCommand((m) -> m.filteredSnapshot(location, pf == null ? provider : provider.and(pf),
-                    sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf)), Function.identity(), null));
+            snapshots = thread.execute(getCommand((m) -> {
+                // The authorizer is given the twin objects, which have the descendants: the snapshots have none yet
+                Predicate<ProviderSnapshot> provider = ps -> authorizeProvider(m, ps, location != null);
+                Predicate<ServiceSnapshot> service = ss -> authorizeService(m, ss);
+                return m.filteredSnapshot(location, pf == null ? provider : provider.and(pf),
+                        sf == null ? service : service.and(sf), rf == null ? resource : resource.and(rf));
+            }, this::withholdUnreadValues, null)); // before the value filter, which must not see unread values
             if(waitForGateway) {
                 safeGetValue(snapshots);
             }
@@ -692,7 +706,44 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     /**
-     * Authorizes collection of a provider snapshot, including whether location access is permitted.
+     * Authorizes collection of a provider snapshot, including whether location access is permitted, with the twin
+     * object of the provider when it has one: a snapshot has no service yet when it is tested.
+     * <p>
+     * This should be used before geo-filtering, as the provider's location may not be visible to
+     * the caller.
+     *
+     * @param twin the twin of the command that takes the snapshot
+     * @param ps
+     * @param useLocation
+     * @return
+     */
+    private boolean authorizeProvider(SensinactDigitalTwin twin, CommonProviderSnapshot ps, boolean useLocation) {
+        if(useLocation && !hasReadResourcePermission(ps, "admin", "location")) {
+            return false;
+        }
+        // A snapshot has no service yet when it is tested: the twin object gives the authorizer the descendants
+        final SensinactProvider provider = twin.getProvider(ps.getName());
+        return provider != null ? authorizer.hasProviderPermission(DESCRIBE, provider)
+                : authorizer.hasProviderPermission(DESCRIBE, ps.getModelPackageUri(), ps.getModelName(), ps.getName());
+    }
+
+    /**
+     * Authorizes DESCRIBE access for the supplied service snapshot, with the twin object of the service when it has one
+     * @param twin the twin of the command that takes the snapshot
+     * @param ss
+     * @return
+     */
+    private boolean authorizeService(SensinactDigitalTwin twin, ServiceSnapshot ss) {
+        final ProviderSnapshot ps = ss.getProvider();
+        final SensinactService service = twin.getService(ps.getName(), ss.getName());
+        return service != null ? authorizer.hasServicePermission(DESCRIBE, service)
+                : authorizer.hasServicePermission(DESCRIBE, ps.getModelPackageUri(), ps.getModelName(), ps.getName(),
+                        ss.getName());
+    }
+
+    /**
+     * Authorizes collection of a provider snapshot, including whether location access is permitted, by names only: for
+     * a snapshot that has no twin object, such as a linked provider tested after its command.
      * <p>
      * This should be used before geo-filtering, as the provider's location may not be visible to
      * the caller.
@@ -773,13 +824,58 @@ public class SensiNactSessionImpl implements SensiNactSession {
     }
 
     /**
-     * Authorizes DESCRIBE access for the supplied service
-     * @param ss
-     * @return
+     * Whether the caller may read the value of a resource: the value needs READ, DESCRIBE gives the metadata only
      */
-    private boolean authorizeService(ServiceSnapshot ss) {
-        ProviderSnapshot ps = ss.getProvider();
-        return authorizer.hasServicePermission(DESCRIBE, ps.getModelPackageUri(), ps.getModelName(), ps.getName(), ss.getName());
+    private boolean canReadValue(String uri, String model, String provider, String service, String resource) {
+        final PreAuth preAuth = preAuthorizer.preAuthResource(READ, provider, service, resource);
+        return preAuth == ALLOW
+                || (preAuth == UNKNOWN && authorizer.hasResourcePermission(READ, uri, model, provider, service, resource));
+    }
+
+    private List<ProviderSnapshot> withholdUnreadValues(List<ProviderSnapshot> snapshots) {
+        return snapshots.stream().map(this::withholdUnreadValues).toList();
+    }
+
+    /**
+     * Replaces each resource that the caller cannot read by a copy with no value
+     *
+     * @return the snapshot itself when the caller can read all its values
+     */
+    private ProviderSnapshot withholdUnreadValues(ProviderSnapshot ps) {
+        // One authorizer call per resource, in a single pass. Only lists of references are built here: the
+        // constructors of the immutable snapshots copy their children, so they are called only if a value is hidden
+        boolean anyHidden = false;
+        final List<List<ResourceSnapshot>> resourcesOfServices = new ArrayList<>();
+        for (ServiceSnapshot ss : ps.getServices()) {
+            final List<ResourceSnapshot> resources = new ArrayList<>();
+            for (ResourceSnapshot rs : ss.getResources()) {
+                if (canReadValue(ps, ss, rs)) {
+                    resources.add(rs);
+                } else {
+                    anyHidden = true;
+                    resources.add(new ImmutableResourceSnapshot(null, rs.getName(), rs.getValueType(),
+                            rs.getResourceType(), rs.getType(), new DefaultTimedValue<>(), rs.getMetadata(),
+                            rs.getArguments(), rs.isMultiple()));
+                }
+            }
+            resourcesOfServices.add(resources);
+        }
+        if (!anyHidden) {
+            return ps;
+        }
+        final List<ServiceSnapshot> services = new ArrayList<>();
+        int index = 0;
+        for (ServiceSnapshot ss : ps.getServices()) {
+            services.add(new ImmutableServiceSnapshot(null, ss.getName(), resourcesOfServices.get(index++)));
+        }
+        return new ImmutableProviderSnapshot(ps.getModelPackageUri(), ps.getModelName(), ps.getName(),
+                ps.getSnapshotTime(), services, ps.getLinkedProviders());
+    }
+
+    /** By names, like {@link #authorizeResource}: a snapshot has no twin object. Actions have no value. */
+    private boolean canReadValue(ProviderSnapshot ps, ServiceSnapshot ss, ResourceSnapshot rs) {
+        return rs.getResourceType() == ResourceType.ACTION || canReadValue(ps.getModelPackageUri(),
+                ps.getModelName(), ps.getName(), ss.getName(), rs.getName());
     }
 
     /**
@@ -966,7 +1062,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 if(preAuth == UNKNOWN) {
                     SensinactProvider sp = m.getProvider(provider);
                     if(sp != null) {
-                        if(!authorizer.hasProviderPermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider)) {
+                        if(!authorizer.hasProviderPermission(DESCRIBE, sp)) {
                             throw new NotPermittedException(String.format("The user %s does not have permission to describe provider %s",
                                     user.getUserId(), String.format("%s", provider)));
                         }
@@ -980,9 +1076,9 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     }
                 }
                 // Only get the parts of the snapshot that we're allowed to see
-                return m.snapshotProvider(provider, this::authorizeService,
+                return m.snapshotProvider(provider, ss -> authorizeService(m, ss),
                         includeResources ? this::authorizeResource : x -> false, snapshotOptions);
-            }, this::safeProviderSnapshot);
+            }, ps -> safeProviderSnapshot(withholdUnreadValues(ps)));
     }
 
     @Override
@@ -998,7 +1094,11 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 if(preAuth == UNKNOWN) {
                     SensinactProvider sp = m.getProvider(provider);
                     if(sp != null) {
-                        if(!authorizer.hasServicePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service)) {
+                        // With the service twin, the authorizer reads its resources
+                        final SensinactService ss = m.getService(provider, service);
+                        final boolean allowed = ss != null ? authorizer.hasServicePermission(DESCRIBE, ss)
+                                : authorizer.hasServicePermission(DESCRIBE, sp.getModelPackageUri(), sp.getModelName(), provider, service);
+                        if(!allowed) {
                             throw new NotPermittedException(String.format("The user %s does not have permission to describe service %s in provider %s",
                                     user.getUserId(), String.format("%s", service), String.format("%s", provider)));
                         }
@@ -1013,7 +1113,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 }
                 // Only get the parts of the snapshot that we're allowed to see
                 return m.snapshotService(provider, service, this::authorizeResource);
-        }, Function.identity());
+        }, ss -> withholdUnreadValues(ss.getProvider()).getService(ss.getName()));
     }
 
     @Override
@@ -1044,7 +1144,8 @@ public class SensiNactSessionImpl implements SensiNactSession {
                 }
                 // Only get the parts of the snapshot that we're allowed to see
                 return m.snapshotResource(provider, service, resource);
-        }, Function.identity());
+        }, rs -> withholdUnreadValues(rs.getService().getProvider()).getResource(rs.getService().getName(),
+                rs.getName()));
     }
 
     @Override
@@ -1086,7 +1187,7 @@ public class SensiNactSessionImpl implements SensiNactSession {
                     parentProvider.removeLinkedProvider(childProvider);
                 }
                 // Only get the parts of the snapshot that we're allowed to see
-                return m.snapshotProvider(parent, this::authorizeService,
+                return m.snapshotProvider(parent, ss -> authorizeService(m, ss),
                         x -> false, EnumSet.of(INCLUDE_LINKED_PROVIDER_IDS));
             }, ps -> toProviderDescription(safeProviderSnapshot(ps)));
     }
@@ -1094,6 +1195,61 @@ public class SensiNactSessionImpl implements SensiNactSession {
     @Override
     public ProviderDescription unlinkProviders(String parent, String child) {
         return linkOrUnlinkProviders(parent, child, false);
+    }
+
+    /** Prefix of the package of a model created without package, as in the model manager of the core */
+    private static final String DEFAULT_PACKAGE_BASE = "https://eclipse.org/sensinact/";
+
+    /**
+     * Checks that the user may update each resource that setProvider writes. One refusal refuses the whole update.
+     * <ul>
+     * <li>Each resource is checked like an existing resource set alone: the pre-authorizer, then the authorizer for
+     * UPDATE. The authorizer is not asked hasProviderPermission(UPDATE): about the provider, only the
+     * pre-authorizer is asked, by setProvider.</li>
+     * <li>The authorizer gets the model and model package that the push uses: those of the provider when it exists,
+     * else those of the request, with the provider name as default model and
+     * https://eclipse.org/sensinact/&lt;model&gt; as default package.</li>
+     * </ul>
+     */
+    private void checkResourcesUpdate(String provider, String modelPackageUri, String model, List<GenericDto> dtos) {
+        final List<GenericDto> toAsk = new ArrayList<>();
+        for (GenericDto dto : dtos) {
+            final PreAuth preAuth = preAuthorizer.preAuthResource(UPDATE, provider, dto.service, dto.resource);
+            if (preAuth == DENY) {
+                throw notPermittedToSet(provider, dto);
+            } else if (preAuth != ALLOW) {
+                toAsk.add(dto);
+            }
+        }
+        if (!toAsk.isEmpty()) {
+            checkWithException();
+            for (GenericDto dto : toAsk) {
+                if (!authorizer.hasResourcePermission(UPDATE, modelPackageUri, model, provider, dto.service,
+                        dto.resource)) {
+                    throw notPermittedToSet(provider, dto);
+                }
+            }
+        }
+    }
+
+    private NotPermittedException notPermittedToSet(String provider, GenericDto dto) {
+        return new NotPermittedException(String.format("The user %s does not have permission to set resource %s",
+                user.getUserId(), String.format("%s/%s/%s", provider, dto.service, dto.resource)));
+    }
+
+    /** The model package and the name of the model of an existing provider, null when there is none */
+    private String[] modelOf(String provider) {
+        return safeExecute(new AbstractTwinCommand<String[]>() {
+            @Override
+            protected Promise<String[]> call(SensinactDigitalTwin twin, PromiseFactory pf) {
+                try {
+                    final SensinactProvider sp = twin.getProvider(provider);
+                    return pf.resolved(sp == null ? null : new String[] { sp.getModelPackageUri(), sp.getModelName() });
+                } catch (Throwable t) {
+                    return pf.failed(t);
+                }
+            }
+        });
     }
 
     @Override
@@ -1104,8 +1260,35 @@ public class SensiNactSessionImpl implements SensiNactSession {
         }
 
         // Extract special values
-        final String modelPackageUri = (String) rcValues.remove("@modelPackageUri");
-        final String model = (String) rcValues.remove("@model");
+        String modelPackageUri = (String) rcValues.remove("@modelPackageUri");
+        if (modelPackageUri != null && modelPackageUri.isBlank()) {
+            // The model lookups of the core read a blank package as the default one (the provider lookup does not)
+            modelPackageUri = null;
+        }
+        String model = (String) rcValues.remove("@model");
+        if (model != null && model.isBlank()) {
+            // A blank model is an absent one, as a blank package
+            model = null;
+        }
+        // The model of an existing provider is its own: what is checked is what is written. A request naming
+        // another one is refused, but only once the resources are checked, so that the refusal does not tell a user
+        // without rights that the provider exists
+        final String[] existing = modelOf(provider);
+        boolean otherModel = false;
+        if (existing != null) {
+            otherModel = (modelPackageUri != null && !modelPackageUri.equals(existing[0]))
+                    || (model != null && !model.equals(existing[1]));
+            modelPackageUri = existing[0];
+            model = existing[1];
+        } else if (model == null) {
+            // Same default as SetValueCommand, so that the authorizer sees the model that is written
+            model = provider;
+        }
+        if (existing == null && modelPackageUri == null) {
+            // Same default as the model manager (EMFUtil.constructPackageUri in core.impl, not exported here): the
+            // prefix is duplicated, so it must follow that method (which has a TODO about sanitizing the name)
+            modelPackageUri = DEFAULT_PACKAGE_BASE + model;
+        }
         final String svcModel = (String) rcValues.remove("@serviceModel");
         Instant timestamp = Instant.now();
 
@@ -1144,6 +1327,12 @@ public class SensiNactSessionImpl implements SensiNactSession {
             }
 
             bulk.dtos.add(dto);
+        }
+        checkResourcesUpdate(provider, modelPackageUri, model, bulk.dtos);
+        // Nothing to write creates nothing: the refusal would only tell that the provider exists
+        if (otherModel && !bulk.dtos.isEmpty()) {
+            throw new IllegalArgumentException(String.format(
+                    "Provider %s already exists with another model than the requested one", provider));
         }
         try {
             push.pushUpdate(bulk).getValue();

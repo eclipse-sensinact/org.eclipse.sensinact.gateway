@@ -245,6 +245,14 @@ public class FactoryParserHandler implements IDeviceMappingHandler, IPlaceHolder
     }
 
     @Override
+    public void reportRequestFailure(final DeviceMappingConfigurationDTO configuration, final String format,
+            final Object... args) {
+        ensureOptions(configuration);
+        getReporter(configuration).report(ErrorReporter.Type.REQUEST, configuration.mappingOptions, null, format,
+                args);
+    }
+
+    @Override
     public void handle(final DeviceMappingConfigurationDTO configuration, final Map<String, String> context,
             final byte[] payload) throws DeviceFactoryException {
 

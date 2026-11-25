@@ -306,6 +306,60 @@ public class WebSocketTest {
             }
         }
 
+        @Test
+        void testSubscriptionWithoutUri() throws Exception {
+            final GenericDto dto = makeDto("wsTestProviderSubNoUri", "svc", "data", 42, Integer.class);
+            push.pushUpdate(dto).getValue();
+
+            final WSHandler handler = new WSHandler();
+            final CountDownLatch barrier = new CountDownLatch(1);
+            final AtomicReference<Session> sessionRef = new AtomicReference<>();
+            handler.onConnect = s -> {
+                sessionRef.set(s);
+                barrier.countDown();
+            };
+            final BlockingQueue<AbstractResultDTO> resultsHolder = new BlockingArrayQueue<>();
+            handler.onMessage = (s, m) -> {
+                try {
+                    resultsHolder.add(mapper.readValue(m, AbstractResultDTO.class));
+                } catch (JacksonException e) {
+                    fail("Error parsing WS response", e);
+                }
+            };
+
+            try (final WSClient client = new WSClient()) {
+                client.ws.connect(handler, wsUri).get();
+                barrier.await(2, TimeUnit.SECONDS);
+
+                // The uri is optional: it must subscribe to every resource
+                final QuerySubscribeDTO querySub = new QuerySubscribeDTO();
+                querySub.requestId = String.valueOf(new Random().nextInt());
+                sendDTO(sessionRef.get(), querySub);
+
+                AbstractResultDTO rawResult = resultsHolder.poll(1, TimeUnit.SECONDS);
+                assertNotNull(rawResult, "No result to subscribe");
+                assertEquals(200, rawResult.statusCode, "Subscription failed: " + rawResult);
+                final ResultSubscribeDTO subscribeResult = (ResultSubscribeDTO) rawResult;
+                assertNotNull(subscribeResult.subscriptionId, "No subscription ID");
+
+                dto.value = -12;
+                push.pushUpdate(dto).getValue();
+
+                // The subscription is global: skip notifications of other providers
+                final Instant timeout = Instant.now().plus(3, ChronoUnit.SECONDS);
+                boolean found = false;
+                while (!found && Instant.now().isBefore(timeout)) {
+                    rawResult = resultsHolder.poll(500, TimeUnit.MILLISECONDS);
+                    if (rawResult instanceof ResultResourceNotificationDTO notif
+                            && dto.provider.equals(notif.notification.provider)) {
+                        assertEquals(subscribeResult.subscriptionId, notif.subscriptionId);
+                        found = true;
+                    }
+                }
+                assertTrue(found, "No notification");
+            }
+        }
+
         private static final String SUBSCRIBE_PROVIDER_1 = "wsTestProviderSubFilter1";
         private static final String SUBSCRIBE_PROVIDER_2 = "wsTestProviderSubFilter2";
 

@@ -84,6 +84,8 @@ The Websocket interface provides a connection URL at `ws/sensinact/` relative to
 
 ### SUBSCRIBE queries
 
+  If no target `uri` is set, a SUBSCRIBE query targets all resources visible to the session, as if `uri` was `/`. Use `filter` to restrict the notifications.
+
   A SUBSCRIBE query can optionally define a `filter` property and a `filterLanguage` property which will be used to restrict the data returned in subsequent notifications.
 
   The response will be of `type` `SUBSCRIPTION_RESPONSE` including a `subscriptionId` property that identifies the subscription. After this response subsequent responses of type `SUBSCRIPTION_NOTIFICATION` will include the `subscriptionId` and `notification`

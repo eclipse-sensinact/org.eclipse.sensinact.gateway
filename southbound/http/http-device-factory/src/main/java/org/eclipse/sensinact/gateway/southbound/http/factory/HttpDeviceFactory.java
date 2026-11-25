@@ -91,10 +91,18 @@ public class HttpDeviceFactory {
                 .configure(EnumFeature.WRITE_ENUMS_USING_TO_STRING, false)
                 .build();
 
-        final HttpDeviceFactoryConfigurationTaskDTO[] oneShotTasks = loadTasks(mapper,
-                HttpDeviceFactoryConfigurationTaskDTO.class, configuration.tasks_oneshot());
-        final HttpDeviceFactoryConfigurationPeriodicDTO[] periodicTasks = loadTasks(mapper,
-                HttpDeviceFactoryConfigurationPeriodicDTO.class, configuration.tasks_periodic());
+        final HttpDeviceFactoryConfigurationTaskDTO[] oneShotTasks;
+        final HttpDeviceFactoryConfigurationPeriodicDTO[] periodicTasks;
+        try {
+            oneShotTasks = loadTasks(mapper, HttpDeviceFactoryConfigurationTaskDTO.class,
+                    configuration.tasks_oneshot());
+            periodicTasks = loadTasks(mapper, HttpDeviceFactoryConfigurationPeriodicDTO.class,
+                    configuration.tasks_periodic());
+        } catch (final Exception e) {
+            // Otherwise only the component framework reports it, and no task runs
+            logger.error("Invalid HTTP task configuration: {}", e.getMessage());
+            throw e;
+        }
 
         // Refuse an invalid mapping before running any task
         validateMappings(oneShotTasks);
@@ -127,6 +135,24 @@ public class HttpDeviceFactory {
         final Map<String, String> withSource = new HashMap<>(context);
         withSource.put(IDeviceMappingHandler.CONTEXT_SOURCE, "HTTP " + url);
         return withSource;
+    }
+
+    /**
+     * Reports the failure of a request: like the errors of the payload, it
+     * follows <code>log.errors</code> and <code>log.errors.interval</code> of the
+     * mapping of the task
+     *
+     * @param task   Task whose request failed
+     * @param format Message format
+     * @param args   Message arguments, the last one can be an exception
+     */
+    private void reportRequestFailure(final ParsedHttpTask task, final String format, final Object... args) {
+        if (task.mapping != null) {
+            mappingHandler.reportRequestFailure(task.mapping, format, args);
+        } else {
+            // Without mapping, there are no options to apply
+            logger.error(format, args);
+        }
     }
 
     /**
@@ -223,6 +249,10 @@ public class HttpDeviceFactory {
             // Prepare request
             final Request request = client.newRequest(task.url);
             request.method(task.method);
+            if (task.timeout > 0) {
+                // The client only applies it to the connection
+                request.timeout(task.timeout, TimeUnit.SECONDS);
+            }
             request.headers((headers) -> {
                 for (final KeyValue<String, String> header : task.getHeaders()) {
                     headers.add(header.key(), header.value());
@@ -251,7 +281,7 @@ public class HttpDeviceFactory {
 
                 @Override
                 public void onFailure(final Response response, final Throwable failure) {
-                    logger.error("Error accessing {}: {} ({})", task.url, failure.getMessage(),
+                    reportRequestFailure(task, "Error accessing {}: {} ({})", task.url, failure.getMessage(),
                             failure.getClass().getName(), failure);
                 }
 
@@ -267,7 +297,7 @@ public class HttpDeviceFactory {
                             logger.debug("Error parsing input from {}: {}", task.url, e.getMessage(), e);
                         }
                     } else {
-                        logger.error("HTTP error {} accessing {}", status, task.url);
+                        reportRequestFailure(task, "HTTP error {} accessing {}", status, task.url);
                     }
                 }
 
@@ -278,7 +308,7 @@ public class HttpDeviceFactory {
                 }
             });
         } catch (Exception ex) {
-            logger.error("Error querying {}", task.url, ex);
+            reportRequestFailure(task, "Error querying {}", task.url, ex);
         }
     }
 

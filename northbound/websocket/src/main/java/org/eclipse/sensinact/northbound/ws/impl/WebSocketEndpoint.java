@@ -513,7 +513,7 @@ public class WebSocketEndpoint {
             throws StatusException {
         List<String> topics;
         final Predicate<ResourceNotification> eventPredicate;
-        if (path.targetsSpecificResource()) {
+        if (path != null && path.targetsSpecificResource()) {
             // TODO replace this with single level wildcard
             topics = List.of("*");
             eventPredicate = n -> query.uri.provider.equals(n.provider()) && query.uri.service.equals(n.service())

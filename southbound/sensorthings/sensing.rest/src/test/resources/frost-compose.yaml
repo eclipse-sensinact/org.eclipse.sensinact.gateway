@@ -23,6 +23,11 @@ services:
 
   database:
     image: postgis/postgis:16-3.4-alpine
+    # Explicit value: rootless Podman 6 refuses the "exec" of the healthcheck in a
+    # container created without one. 100 is the floor that systemd sets for user
+    # sessions (OOMScoreAdjust=100 in user@.service), which an unprivileged process
+    # cannot go below. Rootful Docker accepts any value.
+    oom_score_adj: 100
     environment:
       - POSTGRES_DB=sensorthings
       - POSTGRES_USER=sensorthings

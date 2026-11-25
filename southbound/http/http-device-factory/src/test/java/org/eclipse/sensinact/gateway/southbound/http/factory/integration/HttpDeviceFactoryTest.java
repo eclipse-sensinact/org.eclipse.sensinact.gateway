@@ -85,6 +85,12 @@ import jakarta.servlet.http.HttpServletResponse;
 })
 public class HttpDeviceFactoryTest {
 
+    /**
+     * Logger of the errors of the device factory, which reports the failures of
+     * the requests as well
+     */
+    private static final String DEVICE_FACTORY_LOGGER = "org.eclipse.sensinact.gateway.southbound.device.factory.impl.FactoryParserHandler";
+
     static QueuedThreadPool threadPool;
     static Server server;
     static RequestHandler handler;
@@ -254,6 +260,29 @@ public class HttpDeviceFactoryTest {
             assertEquals("[{\"A\":1}]", requestBodyList.get(0));
             // Only 1 call should have been made
             assertEquals(1, handler.nbVisitedPaths());
+            assertEquals(1, handler.nbVisits("/data"));
+        } finally {
+            config.delete();
+            queues.clear();
+        }
+    }
+
+    @Test
+    void testTaskTimeout() throws Exception {
+        // Register listener
+        setupProvidersHandling("timeout-provider");
+
+        final String mappingConfig = "{\"parser\": \"json\", \"mapping\": {\"@provider\": \"id\", \"data/value\": \"v\"}}";
+        handler.setData("/data", "{\"id\": \"timeout-provider\", \"v\": 1}");
+        // The server answers after the 1 second timeout of the task
+        handler.setPause("/data", 3000);
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            config.update(new Hashtable<>(Map.of("tasks.oneshot", "[{\"url\": \"http://localhost:" + httpPort
+                    + "/data\", \"timeout\": 1, \"mapping\": " + mappingConfig + "}]")));
+
+            // The request was sent, but its late response is not handled
+            assertNull(queues.get(0).poll(5, TimeUnit.SECONDS));
             assertEquals(1, handler.nbVisits("/data"));
         } finally {
             config.delete();
@@ -643,8 +672,8 @@ public class HttpDeviceFactoryTest {
     @Test
     void testError() throws Exception {
 
-        // Listen to logs
-        final Logger logger = (Logger) LoggerFactory.getLogger(HttpDeviceFactory.class);
+        // Listen to logs: the request failures are reported by the device factory
+        final Logger logger = (Logger) LoggerFactory.getLogger(DEVICE_FACTORY_LOGGER);
 
         final BlockingQueue<String> queue = new ArrayBlockingQueue<String>(128);
         final AppenderBase<ILoggingEvent> logSpy = new AppenderBase<>() {
@@ -721,6 +750,96 @@ public class HttpDeviceFactoryTest {
         } finally {
             logger.detachAppender(logSpy);
             logSpy.stop();
+            config.delete();
+        }
+    }
+
+    /**
+     * A task that cannot be read is logged, as a mapping that is refused is
+     */
+    @Test
+    void testUnreadableTaskLogged() throws Exception {
+        final Logger logger = (Logger) LoggerFactory.getLogger(HttpDeviceFactory.class);
+        final BlockingQueue<String> queue = new ArrayBlockingQueue<String>(128);
+        final AppenderBase<ILoggingEvent> logSpy = new AppenderBase<>() {
+            @Override
+            protected void append(ILoggingEvent eventObject) {
+                if (eventObject.getLevel() == Level.ERROR) {
+                    queue.offer(eventObject.getFormattedMessage());
+                }
+            }
+        };
+        logSpy.start();
+        logger.addAppender(logSpy);
+
+        Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            // The mapping is a string, not an object
+            final Map<String, Object> httpMapping = Map.of("url", "http://localhost:" + httpPort + "/static",
+                    "period", 1, "mapping", "broken");
+            config.update(new Hashtable<>(Map.of("tasks.periodic", mapper.writeValueAsString(List.of(httpMapping)))));
+
+            final String message = queue.poll(5, TimeUnit.SECONDS);
+            assertNotNull(message, "An unreadable task was not logged");
+            assertTrue(message.startsWith("Invalid HTTP task configuration"), message);
+        } finally {
+            logger.detachAppender(logSpy);
+            logSpy.stop();
+            config.delete();
+        }
+    }
+
+    /**
+     * The failures of the requests follow log.errors and log.errors.interval,
+     * like the errors of the payload
+     */
+    @Test
+    void testRequestFailuresFollowTheErrorOptions() throws Exception {
+        final BlockingQueue<String> quiet = new ArrayBlockingQueue<>(64);
+        final BlockingQueue<String> verbose = new ArrayBlockingQueue<>(64);
+        final Logger logger = (Logger) LoggerFactory.getLogger(DEVICE_FACTORY_LOGGER);
+        final AppenderBase<ILoggingEvent> spy = new AppenderBase<>() {
+            @Override
+            protected void append(final ILoggingEvent event) {
+                if (event.getLevel() == Level.ERROR) {
+                    final String message = event.getFormattedMessage();
+                    if (message.contains("/quiet")) {
+                        quiet.offer(message);
+                    } else if (message.contains("/verbose")) {
+                        verbose.offer(message);
+                    }
+                }
+            }
+        };
+        spy.start();
+        logger.addAppender(spy);
+
+        final Configuration config = configAdmin.createFactoryConfiguration("sensinact.http.device.factory", "?");
+        try {
+            // Two periodic tasks that fail with a 404: the first without log.errors, the second with it
+            final DeviceMappingConfigurationDTO quietMapping = new DeviceMappingConfigurationDTO();
+            quietMapping.mapping = Map.of("@provider", "provider");
+            final DeviceMappingConfigurationDTO verboseMapping = new DeviceMappingConfigurationDTO();
+            verboseMapping.mapping = Map.of("@provider", "provider");
+            verboseMapping.mappingOptions.logErrors = true;
+            final List<Map<String, Object>> tasks = List.of(
+                    Map.of("url", "http://localhost:" + httpPort + "/quiet", "period", 1, "mapping", quietMapping),
+                    Map.of("url", "http://localhost:" + httpPort + "/verbose", "period", 1, "mapping",
+                            verboseMapping));
+            config.update(new Hashtable<>(Map.of("tasks.periodic", mapper.writeValueAsString(tasks))));
+
+            // Wait for several polls of the task that logs every error
+            final long end = System.currentTimeMillis() + 10_000;
+            while (verbose.size() < 4 && System.currentTimeMillis() < end) {
+                Thread.sleep(100);
+            }
+            assertTrue(verbose.size() >= 4, "Every failed request must be logged: " + verbose);
+
+            // The other one logged its first failure only: the interval is 5 minutes
+            assertEquals(1, quiet.size(), "One failure per interval: " + quiet);
+        } finally {
+            logger.detachAppender(spy);
+            spy.stop();
             config.delete();
         }
     }
