@@ -14,7 +14,9 @@ package org.eclipse.sensinact.gateway.southbound.mqtt.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -39,6 +42,9 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 import io.moquette.broker.Server;
 import io.moquette.broker.config.IConfig;
 import io.moquette.broker.config.MemoryConfig;
@@ -163,5 +169,36 @@ public class MqttAuthTest {
 
         // Ensure we still didn't get other messages
         assertEquals(0, messages.size());
+    }
+
+    @Test
+    void testRefusedCredentialsLogNameTheHandler() throws Exception {
+        final List<String> messages = new CopyOnWriteArrayList<>();
+        final AppenderBase<ILoggingEvent> appender = new AppenderBase<>() {
+            @Override
+            protected void append(final ILoggingEvent event) {
+                messages.add(event.getFormattedMessage());
+            }
+        };
+        appender.start();
+        final ch.qos.logback.classic.Logger handlerLogger = (ch.qos.logback.classic.Logger) LoggerFactory
+                .getLogger(MqttClientHandler.class);
+        final Level previousLevel = handlerLogger.getLevel();
+        handlerLogger.setLevel(Level.ERROR);
+        handlerLogger.addAppender(appender);
+        try {
+            assertThrows(MqttSecurityException.class,
+                    () -> setupHandler("id-refused", USER, PASSWORD + "toto", "sensinact/mqtt/test2/+"));
+
+            final String source = "MQTT handler 'id-refused' (tcp://127.0.0.1:2183): ";
+            assertTrue(messages.stream().anyMatch(m -> m.startsWith(source) && m.contains("failed to connect")),
+                    messages::toString);
+            // The credentials must never be logged
+            assertFalse(messages.stream().anyMatch(m -> m.contains(PASSWORD)), messages::toString);
+        } finally {
+            handlerLogger.detachAppender(appender);
+            handlerLogger.setLevel(previousLevel);
+            appender.stop();
+        }
     }
 }
