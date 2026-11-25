@@ -80,12 +80,20 @@ public class HttpDeviceFactory {
     private ScheduledThreadPoolExecutor scheduledExecutor;
 
     /**
+     * Name of the factory configuration, to attribute the failures of the requests
+     * to their source
+     */
+    private String configName;
+
+    /**
      * Component activated
      *
      * @throws Exception Error starting HTTP client
      */
     @Activate
-    void activate(final HttpDeviceFactoryConfiguration configuration) throws Exception {
+    void activate(final HttpDeviceFactoryConfiguration configuration, final Map<String, Object> properties)
+            throws Exception {
+        configName = configurationName(properties);
         final ObjectMapper mapper = JsonMapper.builder()
                 .configure(EnumFeature.READ_ENUMS_USING_TO_STRING, false)
                 .configure(EnumFeature.WRITE_ENUMS_USING_TO_STRING, false)
@@ -124,6 +132,23 @@ public class HttpDeviceFactory {
     }
 
     /**
+     * Gets the name of a factory configuration: the part of its PID after the
+     * <code>~</code> separator, or the whole PID if there is none
+     *
+     * @param properties Component properties
+     * @return The name, or <code>unknown</code> if there is no PID
+     */
+    static String configurationName(final Map<String, Object> properties) {
+        final Object pid = properties == null ? null : properties.get("service.pid");
+        if (pid == null) {
+            return "unknown";
+        }
+        final String str = pid.toString();
+        final int idx = str.indexOf('~');
+        return idx >= 0 && idx < str.length() - 1 ? str.substring(idx + 1) : str;
+    }
+
+    /**
      * Adds the description of the source to the context of a payload, so that
      * the device factory names it in its logs
      *
@@ -147,11 +172,17 @@ public class HttpDeviceFactory {
      * @param args   Message arguments, the last one can be an exception
      */
     private void reportRequestFailure(final ParsedHttpTask task, final String format, final Object... args) {
+        // Name the configuration, so that a failure can be attributed to its source
+        final String namedFormat = "HTTP configuration '{}': " + format;
+        final Object[] namedArgs = new Object[args.length + 1];
+        namedArgs[0] = configName;
+        System.arraycopy(args, 0, namedArgs, 1, args.length);
+
         if (task.mapping != null) {
-            mappingHandler.reportRequestFailure(task.mapping, format, args);
+            mappingHandler.reportRequestFailure(task.mapping, namedFormat, namedArgs);
         } else {
             // Without mapping, there are no options to apply
-            logger.error(format, args);
+            logger.error(namedFormat, namedArgs);
         }
     }
 

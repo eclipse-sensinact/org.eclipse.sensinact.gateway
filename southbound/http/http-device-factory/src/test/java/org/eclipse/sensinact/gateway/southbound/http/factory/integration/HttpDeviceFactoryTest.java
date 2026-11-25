@@ -702,6 +702,10 @@ public class HttpDeviceFactoryTest {
             String errorMessage = queue.poll(1, TimeUnit.SECONDS);
             assertNotNull(errorMessage);
             assertTrue(errorMessage.contains("404"));
+            // The message names the factory configuration and the URL
+            final String configName = config.getPid().substring(config.getPid().indexOf('~') + 1);
+            assertTrue(errorMessage.startsWith("HTTP configuration '" + configName + "': "), errorMessage);
+            assertTrue(errorMessage.contains("/non-existent"), errorMessage);
 
             // Second try: handling of connectivity error (failure)
             httpMapping = Map.of("url", "https://localhost:" + httpPort + "/static", "mapping", mappingConf);
@@ -709,6 +713,7 @@ public class HttpDeviceFactoryTest {
             errorMessage = queue.poll(1, TimeUnit.SECONDS);
             assertNotNull(errorMessage);
             assertTrue(errorMessage.contains("SSLHandshakeException"));
+            assertTrue(errorMessage.startsWith("HTTP configuration '" + configName + "': "), errorMessage);
         } finally {
             logger.detachAppender(logSpy);
             logSpy.stop();
