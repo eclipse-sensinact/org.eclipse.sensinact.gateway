@@ -170,7 +170,10 @@ public class MqttClientHandler implements MqttCallback {
                 logger.warn("{}: client {} started, but currently unconnected", source, clientId);
                 return;
             } else {
-                // We fail to start due to the misconfiguration
+                // We fail to start due to the misconfiguration: name the handler, as SCR
+                // only reports that the activate method failed
+                logger.error("{}: client {} failed to connect to the broker, the handler is not started: {}{}",
+                        source, clientId, e.getMessage(), e.getCause() == null ? "" : " (" + e.getCause() + ")");
                 throw e;
             }
         }
