@@ -45,4 +45,12 @@
   <eClassifiers xsi:type="ecore:EClass" name="FooBar">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="test" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GhostService" instanceClassName="org.eclipse.sensinact.test.NoSuchGeneratedClass"
+      eSuperTypes="https://eclipse.org/sensinact/core/provider/1.0#//Service">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="declared" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="WrapperService" instanceClassName="java.lang.Runnable"
+      eSuperTypes="https://eclipse.org/sensinact/core/provider/1.0#//Service">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="declared" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
 </ecore:EPackage>
