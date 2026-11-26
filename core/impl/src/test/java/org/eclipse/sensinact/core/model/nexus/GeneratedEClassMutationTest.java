@@ -14,6 +14,7 @@ package org.eclipse.sensinact.core.model.nexus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,10 +27,13 @@ import java.util.Map;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.URIMappingRegistryImpl;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.xmi.XMLResource;
 import org.eclipse.sensinact.core.command.impl.ActionHandler;
 import org.eclipse.sensinact.core.emf.util.EMFTestUtil;
@@ -204,5 +208,50 @@ public class GeneratedEClassMutationTest {
         assertNotNull(testAdmin.getEStructuralFeature("viewport"));
         assertEquals(sharedBefore, ProviderPackage.Literals.ADMIN.getEAllStructuralFeatures().size(),
                 "the feature landed on the shared Admin instead of the sub type");
+    }
+
+    /**
+     * An Ecore model may name an instance class that has no Java on the class path.
+     * {@code getInstanceClassName()} is then set and {@link EClass#getInstanceClass()}
+     * is {@code null}, the EPackage factory builds a dynamic {@code EObject}, and the
+     * recursion the guard exists for cannot happen. Keying the guard on the name
+     * refused this model.
+     */
+    @Test
+    void createResource_onAnEClassWhoseInstanceClassIsAbsent_isAllowed() {
+        EClass ghost = (EClass) ePackage.getEClassifier("GhostService");
+        assertNotNull(ghost.getInstanceClassName(), "the test model no longer names an instance class");
+        assertNull(ghost.getInstanceClass(), "the named class is on the class path, the test proves nothing");
+
+        assertNotNull(
+                nexus.createResource(ghost, "added", String.class, Instant.now(), null, Map.of(), false, 0, false, 0,
+                        1));
+
+        EStructuralFeature added = ghost.getEStructuralFeature("added");
+        assertNotNull(added);
+
+        // The stated cause, pinned: an instance resolves the run time feature
+        // dynamically instead of recursing through the generated switches.
+        EObject instance = EcoreUtil.create(ghost);
+        assertEquals(ghost, instance.eClass());
+        instance.eSet(added, "a value");
+        assertTrue(instance.eIsSet(added));
+        assertEquals("a value", instance.eGet(added));
+    }
+
+    /**
+     * An instance class that resolves to something which is not an {@code EObject}
+     * describes a wrapped Java type, not generated model code. Its instances are
+     * dynamic in the same way, so the feature is allowed.
+     */
+    @Test
+    void createResource_onAnEClassWrappingANonEObjectType_isAllowed() {
+        EClass wrapper = (EClass) ePackage.getEClassifier("WrapperService");
+        assertEquals(Runnable.class, wrapper.getInstanceClass());
+
+        assertNotNull(nexus.createResource(wrapper, "added", String.class, Instant.now(), null, Map.of(), false, 0,
+                false, 0, 1));
+
+        assertNotNull(wrapper.getEStructuralFeature("added"));
     }
 }

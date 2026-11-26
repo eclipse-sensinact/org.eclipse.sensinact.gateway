@@ -47,6 +47,7 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.ENamedElement;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EParameter;
@@ -823,13 +824,22 @@ public class ModelNexus {
      * way to add resources to a service the core declares: the instances of a sub type
      * created at run time are not answered by the generated switches. See
      * {@code SensinactEMFProvider.getOrCreateService(String, EClass)}.
+     * <p>
+     * The test is the <em>resolved</em> instance class, not the
+     * {@code instanceClassName} string. An Ecore model may name an instance class that
+     * is not on the class path - {@link EClass#getInstanceClass()} is then {@code null},
+     * the EPackage factory builds a dynamic {@code EObject}, and a feature added at run
+     * time is resolved dynamically, so there is nothing to refuse. An instance class
+     * that resolves to something which is not an {@link EObject} describes a wrapped
+     * Java type rather than generated model code, and is dynamic in the same way.
      *
      * @param eClass the EClass a feature would be added to
      * @throws IllegalArgumentException if {@code eClass} has a generated
      *                                  implementation
      */
     private void assertEClassIsExtendable(EClass eClass) {
-        if (eClass.getInstanceClassName() != null) {
+        Class<?> instanceClass = eClass.getInstanceClass();
+        if (instanceClass != null && EObject.class.isAssignableFrom(instanceClass)) {
             throw new IllegalArgumentException("The EClass " + eClass.getName() + " of package "
                     + eClass.getEPackage().getNsURI() + " has a generated implementation and cannot be given features"
                     + " at run time. Declare them in its Ecore model, or use a sub type of it for the service of one"
