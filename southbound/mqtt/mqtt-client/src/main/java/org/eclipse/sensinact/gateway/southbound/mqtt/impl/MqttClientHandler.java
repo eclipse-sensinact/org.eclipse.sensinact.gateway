@@ -236,7 +236,16 @@ public class MqttClientHandler implements MqttCallback {
 
         // Setup TLS, for the server and/or the client authentication
         if (SSLUtils.hasTlsSettings(config)) {
-            options.setSocketFactory(SSLUtils.setupSSLSocketFactory(config));
+            try {
+                options.setSocketFactory(SSLUtils.setupSSLSocketFactory(config));
+            } catch (Exception e) {
+                // Fails before the connection: name the handler, as SCR only reports
+                // that the activate method failed. Only the message is logged, never
+                // the passwords or the content of the stores
+                logger.error("{}: the TLS configuration cannot be loaded, the handler is not started: {}{}", source,
+                        e.getMessage(), e.getCause() == null ? "" : " (" + e.getCause() + ")");
+                throw e;
+            }
         }
 
         return options;

@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.FileNotFoundException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -195,6 +196,52 @@ public class MqttAuthTest {
                     messages::toString);
             // The credentials must never be logged
             assertFalse(messages.stream().anyMatch(m -> m.contains(PASSWORD)), messages::toString);
+        } finally {
+            handlerLogger.detachAppender(appender);
+            handlerLogger.setLevel(previousLevel);
+            appender.stop();
+        }
+    }
+
+    @Test
+    void testMissingTrustStoreLogsTheHandler() throws Exception {
+        final String trustStorePassword = "trust-store-secret";
+        final String missingPath = "/does/not/exist/truststore.p12";
+        final List<ILoggingEvent> events = new CopyOnWriteArrayList<>();
+        final AppenderBase<ILoggingEvent> appender = new AppenderBase<>() {
+            @Override
+            protected void append(final ILoggingEvent event) {
+                events.add(event);
+            }
+        };
+        appender.start();
+        final ch.qos.logback.classic.Logger handlerLogger = (ch.qos.logback.classic.Logger) LoggerFactory
+                .getLogger(MqttClientHandler.class);
+        final Level previousLevel = handlerLogger.getLevel();
+        handlerLogger.setLevel(Level.ERROR);
+        handlerLogger.addAppender(appender);
+        try {
+            final MqttClientConfiguration config = Mockito.mock(MqttClientConfiguration.class);
+            Mockito.when(config.id()).thenReturn("id-no-truststore");
+            Mockito.when(config.host()).thenReturn("127.0.0.1");
+            Mockito.when(config.port()).thenReturn(2183);
+            Mockito.when(config.topics()).thenReturn(new String[] { "sensinact/mqtt/test2/+" });
+            Mockito.when(config.auth_truststore_path()).thenReturn(missingPath);
+            Mockito.when(config._auth_truststore_password()).thenReturn(trustStorePassword);
+
+            // Activation must still fail
+            assertThrows(FileNotFoundException.class, () -> new MqttClientHandler().activate(config));
+
+            final List<String> messages = events.stream().map(ILoggingEvent::getFormattedMessage).toList();
+            // Logged once, naming the handler, the broker and the file
+            assertEquals(1, messages.size(), messages::toString);
+            final String message = messages.get(0);
+            assertTrue(message.startsWith("MQTT handler 'id-no-truststore' (ssl://127.0.0.1:2183): "), message);
+            assertTrue(message.contains("the TLS configuration cannot be loaded"), message);
+            assertTrue(message.contains(missingPath), message);
+            assertEquals(Level.ERROR, events.get(0).getLevel());
+            // The password must never be logged
+            assertFalse(message.contains(trustStorePassword), message);
         } finally {
             handlerLogger.detachAppender(appender);
             handlerLogger.setLevel(previousLevel);
