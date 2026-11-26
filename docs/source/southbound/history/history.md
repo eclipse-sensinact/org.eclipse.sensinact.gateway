@@ -88,6 +88,58 @@ Third parties can plug their own logic by registering a `HistoryIngestFilter` se
 (package `org.eclipse.sensinact.gateway.southbound.history.storage`): `targets()` scopes it
 to specific providers and `shouldStore(record, lastStored)` takes the storage decision.
 
+## Recording step
+
+Each record accepted by the filters is handed to the **recording step** of its backend. By
+default, this step writes the record to the storage at once, one value at a time. A bundle
+can replace it, for example to write in batches or to keep values while the database is
+unavailable, by registering a `HistoryRecordingStepFactory` service (package
+`org.eclipse.sensinact.gateway.southbound.history.storage`):
+
+* `sensinact.history.provider.name` (optional): the history provider names the factory
+  serves; without it, it serves every history provider
+* `service.ranking`: when several factories serve a history provider, the highest ranking
+  wins
+
+```java
+@Component(property = "sensinact.history.provider.name=timescale-history")
+public class BatchingStepFactory implements HistoryRecordingStepFactory {
+
+    @Override
+    public HistoryRecordingStep create(HistoryRecordingContext context) {
+        return new BatchingStep(context.storage());
+    }
+}
+```
+
+`create` receives the provider name and the storage of the history provider through its
+context. It is called while the engine holds its lock, so it must return quickly, must not
+wait for another service, must not register or unregister services and must not call the
+history. It returns `null` to decline a history provider, which is then served by the next
+factory. When a history provider is re-registered, the new step is created before the
+previous one is closed, so a step that keeps a resource per provider name, such as a file,
+must allow for two steps of the same name for a short time.
+
+The step receives the records one by one through `record(HistoricalRecord)`, on the event
+handler thread and in the order of delivery:
+
+* `record` must return quickly, never block, and keep the order of the records of one
+  resource. A step whose buffer is full drops the record and counts it.
+* A record counts as stored when `record` returns normally: it becomes the last stored
+  value used by the change conditions of the filters, even if the step writes it later.
+* A `RuntimeException` thrown by `record` is logged, and the last stored value is left
+  unchanged.
+* `close()` is called when the backend stops or when the step is replaced, before the
+  storage is released. No record is handed to the step during or after `close`, so this is
+  where a step writes what it still holds. The records that follow a replacement go to the
+  new step at once, so they may be written before the records the previous step still
+  holds.
+
+Factories can be added, changed and removed at runtime: the step of the affected history
+providers is replaced without restarting them. When no factory serves a history provider, or
+when its factories fail to create a step, the default step is used. The design is described
+in the [recording step ADR](./history-recording-step-adr.md).
+
 ## Housekeeping
 
 Stored data can be pruned periodically. Each configuration with the factory PID

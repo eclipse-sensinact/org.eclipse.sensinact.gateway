@@ -18,7 +18,10 @@
  * the history-core engine wires both to the typed event bus and exposes each
  * backend as a
  * {@link org.eclipse.sensinact.gateway.southbound.history.provider.HistoryProvider}.
+ * A
+ * {@link org.eclipse.sensinact.gateway.southbound.history.storage.HistoryRecordingStepFactory}
+ * can replace the step that records the accepted updates.
  */
 @org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.0.0")
+@org.osgi.annotation.versioning.Version("1.1.0")
 package org.eclipse.sensinact.gateway.southbound.history.storage;

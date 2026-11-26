@@ -11,4 +11,5 @@ is provided with the distribution.
 history
 timescale
 history-storage-adr
+history-recording-step-adr
 ```
