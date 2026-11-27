@@ -60,6 +60,11 @@ public @interface MqttClientConfiguration {
     int client_reconnect_delay() default 500;
 
     /**
+     * Delay before trying to reconnect (in milliseconds)
+     */
+    int client_reconnect_max_delay() default 256_000;
+
+    /**
      * MQTT connection timeout
      */
     int client_connection_timeout() default MqttConnectOptions.CONNECTION_TIMEOUT_DEFAULT;
