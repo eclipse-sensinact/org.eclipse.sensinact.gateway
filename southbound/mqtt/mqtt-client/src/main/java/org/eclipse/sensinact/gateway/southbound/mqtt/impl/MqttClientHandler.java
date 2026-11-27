@@ -71,6 +71,17 @@ public class MqttClientHandler implements MqttCallback {
     private int reconnectDelayMs;
 
     /**
+     * Max reconnection delay in milliseconds
+     */
+    private int reconnectMaxDelayMs;
+
+    /**
+     * Number of consecutive connect failures, used to adjust the reconnect delay.
+     * This is 0 if the connection is currently established.
+     */
+    private int nbConsecutiveConnectFailures;
+
+    /**
      * Reconnection task
      */
     private Timer reconnectTimer;
@@ -138,6 +149,11 @@ public class MqttClientHandler implements MqttCallback {
         } else if (reconnectDelayMs > Duration.ofHours(1).toMillis()) {
             reconnectDelayMs = (int) Duration.ofHours(1).toMillis();
         }
+        reconnectMaxDelayMs = config.client_reconnect_max_delay();
+        if (reconnectMaxDelayMs < reconnectDelayMs) {
+            reconnectMaxDelayMs = reconnectDelayMs;
+        }
+        nbConsecutiveConnectFailures = 0;
         final String brokerUri = makeBrokerUri(config);
         clientId = makeClientId(config);
         topics = config.topics();
@@ -164,6 +180,7 @@ public class MqttClientHandler implements MqttCallback {
         client.setManualAcks(true);
         try {
             client.connect(connectOptions);
+            nbConsecutiveConnectFailures = 0;
         } catch (MqttException e) {
             if (e.getCause() instanceof ConnectException) {
                 connectionLost(e);
@@ -302,8 +319,13 @@ public class MqttClientHandler implements MqttCallback {
      */
     @Override
     public void connectionLost(final Throwable cause) {
-        logger.warn("{}: Connection to the broker lost: {}. Waiting before reconnecting.", source,
-                cause.getMessage());
+        long delayMs = reconnectDelayMs;
+        for (int i = 0; i<nbConsecutiveConnectFailures; i++) {
+            delayMs = Math.min(reconnectMaxDelayMs, delayMs*2);
+        }
+        nbConsecutiveConnectFailures += 1;
+        logger.warn("{}: Connection to the broker lost: {}. {} tries so far, wait {}ms before reconnecting.", source,
+                cause.getMessage(), nbConsecutiveConnectFailures, delayMs);
 
         if (reconnectTimer != null) {
             reconnectTimer.cancel();
@@ -320,20 +342,14 @@ public class MqttClientHandler implements MqttCallback {
                         return;
                     }
                     client.connect(connectOptions);
+                    nbConsecutiveConnectFailures = 0;
                 } catch (MqttException e) {
-                    if (e.getCause() instanceof ConnectException) {
-                        logger.error("{}: Error trying to reconnect to the broker: {}", source, e.getMessage(), e);
-                        connectionLost(e);
-                    } else {
-                        logger.error(
-                                "{}: Fatal error trying to reconnect to the broker: {}. No further reconnection will be attempted",
-                                source, e.getMessage(), e);
-                    }
-                    return;
+                    logger.error("{}: Error trying to reconnect to the broker: {}", source, e.getMessage(), e);
+                    connectionLost(e);
                 }
                 subscribe();
             }
-        }, reconnectDelayMs);
+        }, delayMs);
     }
 
     @Override

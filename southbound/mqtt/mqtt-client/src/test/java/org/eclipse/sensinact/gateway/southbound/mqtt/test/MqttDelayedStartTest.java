@@ -75,7 +75,8 @@ public class MqttDelayedStartTest {
         Mockito.when(mock.host()).thenReturn("127.0.0.1");
         Mockito.when(mock.port()).thenReturn(2183);
         Mockito.when(mock.topics()).thenReturn(new String[] { "sensinact/mqtt/test1/+" });
-        Mockito.when(mock.client_reconnect_delay()).thenReturn(1000);
+        Mockito.when(mock.client_reconnect_delay()).thenReturn(100);
+        Mockito.when(mock.client_reconnect_max_delay()).thenReturn(500);
         return mock;
     }
 
@@ -97,7 +98,7 @@ public class MqttDelayedStartTest {
         try {
             MqttClient c = client;
             client = null;
-            if (c != null) {
+            if (c != null && c.isConnected()) {
                 c.disconnect();
                 c.close();
             }
@@ -123,6 +124,7 @@ public class MqttDelayedStartTest {
 
         // Test valid message for listener
         topic = "sensinact/mqtt/test1/foo";
+        receiveQueue.clear();
 
         IMqttMessage msg = null;
         // Try a few times waiting for a reconnect
@@ -138,11 +140,11 @@ public class MqttDelayedStartTest {
 
     @Test
     void testConnectionLogsNameTheHandlerAndTheBroker() throws Exception {
-        final List<String> messages = new CopyOnWriteArrayList<>();
+        final List<String> logs = new CopyOnWriteArrayList<>();
         final AppenderBase<ILoggingEvent> appender = new AppenderBase<>() {
             @Override
             protected void append(final ILoggingEvent event) {
-                messages.add(event.getFormattedMessage());
+                logs.add(event.getFormattedMessage());
             }
         };
         appender.start();
@@ -155,17 +157,67 @@ public class MqttDelayedStartTest {
             handler.activate(getConfig());
 
             final String source = "MQTT handler 'id1' (tcp://127.0.0.1:2183): ";
-            assertTrue(messages.stream().anyMatch(m -> m.startsWith(source + "Connection to the broker lost: ")),
-                    messages::toString);
-            assertTrue(messages.stream().anyMatch(m -> m.startsWith(source) && m.contains("currently unconnected")),
-                    messages::toString);
+            assertTrue(logs.stream().anyMatch(m -> m.startsWith(source + "Connection to the broker lost: ")),
+                    logs::toString);
+            assertTrue(logs.stream().anyMatch(m -> m.startsWith(source) && m.contains("currently unconnected")),
+                    logs::toString);
             // The reconnection delay of the configuration is 1 s
-            for (int i = 0; i < 30 && messages.stream()
+            for (int i = 0; i < 30 && logs.stream()
                     .noneMatch(m -> m.startsWith(source + "Error trying to reconnect to the broker: ")); i++) {
                 Thread.sleep(100);
             }
-            assertTrue(messages.stream().anyMatch(m -> m.startsWith(source + "Error trying to reconnect to the broker: ")),
-                    messages::toString);
+            assertTrue(logs.stream().anyMatch(m -> m.startsWith(source + "Error trying to reconnect to the broker: ")),
+                    logs::toString);
+        } finally {
+            logger.detachAppender(appender);
+            logger.setLevel(previousLevel);
+            appender.stop();
+        }
+    }
+
+    @Test
+    void testReconnect() throws Exception {
+        final BlockingQueue<IMqttMessage> messages = new ArrayBlockingQueue<>(32);
+        final IMqttMessageListener listener = (handler, topic, msg) -> messages.add(msg);
+
+        handler.addListener(listener, Map.of(IMqttMessageListener.MQTT_TOPICS_FILTERS,
+                new String[] { "sensinact/mqtt/test1/foo", "sensinact/mqtt/test1/bar" }));
+
+        final List<String> logs = new CopyOnWriteArrayList<>();
+        final AppenderBase<ILoggingEvent> appender = new AppenderBase<>() {
+            @Override
+            protected void append(final ILoggingEvent event) {
+                logs.add(event.getFormattedMessage());
+            }
+        };
+        appender.start();
+        final Logger logger = (Logger) LoggerFactory.getLogger(MqttClientHandler.class);
+        final Level previousLevel = logger.getLevel();
+        logger.setLevel(Level.WARN);
+        logger.addAppender(appender);
+        try {
+            handler.activate(getConfig());
+            Thread.sleep(50);  // wait for connect failures at startup
+            assertTrue(logs.stream().anyMatch(m -> m.contains("1 tries so far, wait 100ms before reconnecting")),
+                    logs::toString);
+            startServerAndLocalClient();
+            doTest(messages);  // check connection OK
+            logs.clear();
+            server.stopServer();
+            Thread.sleep(1500);  // wait for connect failures
+            // check the exponential delay capped at 500ms.
+            assertTrue(logs.stream().anyMatch(m -> m.contains("1 tries so far, wait 100ms before reconnecting")),
+                    logs::toString);
+            assertTrue(logs.stream().anyMatch(m -> m.contains("2 tries so far, wait 200ms before reconnecting")),
+                    logs::toString);
+            assertTrue(logs.stream().anyMatch(m -> m.contains("3 tries so far, wait 400ms before reconnecting")),
+                    logs::toString);
+            assertTrue(logs.stream().anyMatch(m -> m.contains("4 tries so far, wait 500ms before reconnecting")),
+                    logs::toString);
+            assertTrue(logs.stream().anyMatch(m -> m.contains("5 tries so far, wait 500ms before reconnecting")),
+                    logs::toString);
+            startServerAndLocalClient();
+            doTest(messages);  // check connection OK
         } finally {
             logger.detachAppender(appender);
             logger.setLevel(previousLevel);
